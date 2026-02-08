@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Datapad – Developer Power Tools</title>
-  <meta name="description" content="Datapad builds professional developer tools like JSON Studio to help you ship faster and work smarter." />
+  <meta
+    name="description"
+    content="Datapad builds professional developer tools like JSON Studio to help you ship faster and work smarter."
+  />
 
   <!-- Open Graph -->
   <meta property="og:title" content="Datapad – Developer Power Tools" />
@@ -13,8 +16,9 @@
   <meta property="og:type" content="website" />
 
   <link rel="icon" href="/favicon.ico" />
-  <link rel="stylesheet" href="./styles/globals.css" />
+  <link rel="stylesheet" href="/styles/globals.css" />
 </head>
+
 <body>
   <!-- Header -->
   <header>
@@ -35,7 +39,7 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero -->
   <section class="hero">
     <div class="container">
       <div class="status-badge">
@@ -44,13 +48,12 @@
       </div>
       <h2>Build Faster with <span class="highlight">Datapad</span></h2>
       <p>
-        Professional developer tools designed for speed, efficiency, and precision. 
-        From JSON manipulation to data transformation, we've got you covered.
+        Professional developer tools designed for speed, efficiency, and precision.
       </p>
     </div>
   </section>
 
-  <!-- Product Section -->
+  <!-- Products -->
   <section class="products-section" id="products">
     <div class="container">
       <div class="section-header">
@@ -59,7 +62,6 @@
       </div>
 
       <div class="products-grid">
-        <!-- Product 1: JSON Studio (LIVE) -->
         <div class="product-card">
           <div class="product-header">
             <div class="product-icon">{ }</div>
@@ -67,20 +69,20 @@
           </div>
           <h4 class="product-title">JSON Studio</h4>
           <p class="product-description">
-            Smart JSON toolkit with format, minify, auto-fix, diff, and extraction capabilities. 
-            Built for developers who work with JSON daily.
+            Smart JSON toolkit with format, minify, auto-fix, diff, and extraction.
           </p>
           <ul class="product-features">
             <li>Format & Beautify JSON instantly</li>
             <li>Auto-fix common syntax errors</li>
             <li>Compare & diff two JSON objects</li>
             <li>Extract data using paths</li>
-            <li>Convert JSON to CSV seamlessly</li>
+            <li>Convert JSON to CSV</li>
           </ul>
-          <a href="https://datapad-rosy.vercel.app/" class="product-btn">Launch JSON Studio →</a>
+          <a href="https://datapad-rosy.vercel.app/" class="product-btn">
+            Launch JSON Studio →
+          </a>
         </div>
 
-        <!-- Product 2: Coming Soon #1 -->
         <div class="product-card coming-soon">
           <div class="product-header">
             <div class="product-icon">⚡</div>
@@ -88,20 +90,18 @@
           </div>
           <h4 class="product-title">API Tester Pro</h4>
           <p class="product-description">
-            Advanced API testing and debugging suite with real-time response analysis, 
-            automated test generation, and performance monitoring.
+            Advanced API testing and debugging suite.
           </p>
           <ul class="product-features">
-            <li>REST & GraphQL support</li>
-            <li>Automated test generation</li>
-            <li>Response time analytics</li>
-            <li>Mock server capabilities</li>
-            <li>Collection management</li>
+            <li>REST & GraphQL</li>
+            <li>Automated tests</li>
+            <li>Performance analytics</li>
+            <li>Mock servers</li>
+            <li>Collections</li>
           </ul>
           <button class="product-btn disabled">Notify Me</button>
         </div>
 
-        <!-- Product 3: Coming Soon #2 -->
         <div class="product-card coming-soon">
           <div class="product-header">
             <div class="product-icon">🔐</div>
@@ -109,86 +109,158 @@
           </div>
           <h4 class="product-title">SecureKey Vault</h4>
           <p class="product-description">
-            Encrypted credential management for developers and teams. Store API keys, 
-            tokens, and secrets with military-grade encryption.
+            Encrypted credential management for developers.
           </p>
           <ul class="product-features">
             <li>AES-256 encryption</li>
-            <li>Team collaboration</li>
-            <li>Environment management</li>
-            <li>Access control & audit logs</li>
-            <li>CLI integration</li>
+            <li>Team access control</li>
+            <li>Environment separation</li>
+            <li>Audit logs</li>
+            <li>CLI support</li>
           </ul>
           <button class="product-btn disabled">Notify Me</button>
         </div>
       </div>
     </div>
   </section>
- 
-  <!-- About + Contact Section -->
-<section class="about-contact" id="about">
-  <div class="container">
-    <div class="about-grid">
 
-      <!-- Left: About -->
-      <div class="about-block">
-        <h3>About Datapad</h3>
-        <p class="about-subtitle">Built by developers, for developers</p>
+  <!-- About + Contact -->
+  <section class="about-contact" id="contact">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-block">
+          <h3>About Datapad</h3>
+          <p class="about-subtitle">Built by developers, for developers</p>
+          <p>
+            Datapad is a growing suite of browser-based developer tools focused on speed,
+            privacy, and zero friction.
+          </p>
+          <p>No sign-ups. No tracking. Everything runs locally.</p>
+        </div>
 
-        <p>
-          Datapad is a growing suite of browser-based developer tools designed to
-          solve real-world problems with speed, clarity, and privacy in mind.
-        </p>
-
-        <p>
-          All Datapad products run entirely in your browser — no sign-ups,
-          no tracking, and no data ever leaves your machine.
-        </p>
-      </div>
-
-      <!-- Right: Contact -->
-      <div class="contact-block" id="contact">
-        <h3>Contact</h3>
-        <p class="about-subtitle">We’d love to hear from you</p>
-
-        <p>
-          Have feedback, feature requests, or partnership ideas?
-        </p>
-
-        <p>
-          Email us at
-          <a href="mailto:datapad8@gmail.com">datapad8@gmail.com</a>
-        </p>
-        <a
-            href="https://forms.gle/pZFitCFt6pfQNKEFA"
-            class="product-btn inverted"
-            >
+        <div class="contact-block">
+          <h3>Contact</h3>
+          <p class="about-subtitle">We’d love to hear from you</p>
+          <p>Email us at <a href="mailto:datapad8@gmail.com">datapad8@gmail.com</a></p>
+          <button class="product-btn inverted" id="open-feedback">
             Share Feedback →
-        </a>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
- <!-- Footer -->
+  <!-- Footer -->
   <footer>
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">DATAPAD</div>
         <p class="footer-text">
-          Building professional-grade developer tools that help you ship faster, 
-          debug smarter, and work more efficiently.
+          Building professional-grade developer tools that help you ship faster.
         </p>
-
-        <!-- <div class="footer-links">
-            <a href="#products">Products</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-        </div> -->
-
         <p class="copyright">© 2026 Datapad. All rights reserved.</p>
       </div>
     </div>
   </footer>
+
+  <!-- Feedback Modal -->
+  <div
+    class="modal-overlay"
+    id="feedback-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="feedback-title"
+    aria-describedby="feedback-status"
+    aria-hidden="true"
+  >
+    <div class="modal-container">
+      <h2 id="feedback-title" class="sr-only">Feedback Form</h2>
+
+      <div
+        class="modal-loader"
+        id="feedback-loader"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="feedback-status">Loading feedback form…</p>
+      </div>
+
+      <button
+        class="modal-close"
+        id="close-feedback"
+        aria-label="Close feedback form"
+      >
+        ✕
+      </button>
+
+      <iframe
+        id="feedback-iframe"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const openBtn = document.getElementById('open-feedback');
+    const modal = document.getElementById('feedback-modal');
+    const closeBtn = document.getElementById('close-feedback');
+    const iframe = document.getElementById('feedback-iframe');
+    const loader = document.getElementById('feedback-loader');
+
+    const FORM_URL = 'https://forms.gle/pZFitCFt6pfQNKEFA';
+    let iframeInitialized = false;
+    let lastFocusedElement = null;
+
+    function preloadForm() {
+      if (iframeInitialized) return;
+      iframe.src = FORM_URL;
+      iframeInitialized = true;
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(preloadForm, { timeout: 4000 });
+    } else {
+      setTimeout(preloadForm, 3000);
+    }
+
+    openBtn.addEventListener('mouseenter', preloadForm);
+    openBtn.addEventListener('focus', preloadForm);
+    openBtn.addEventListener('touchstart', preloadForm, { passive: true });
+
+    openBtn.addEventListener('click', () => {
+      lastFocusedElement = document.activeElement;
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      loader.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      preloadForm();
+      closeBtn.focus();
+    });
+
+    iframe.addEventListener('load', () => {
+      loader.style.display = 'none';
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (lastFocusedElement) lastFocusedElement.focus();
+    }
+  </script>
 </body>
 </html>

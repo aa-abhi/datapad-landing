@@ -554,3 +554,90 @@
       color: var(--primary);
       box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
     }
+
+
+    /* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal Container */
+.modal-container {
+  position: relative;
+  width: 75vw;
+  height: 75vh;
+  background: #000;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+}
+
+/* Iframe */
+.modal-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Close Button */
+.modal-close {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--bg-black);
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .modal-container {
+    width: 95vw;
+    height: 85vh;
+  }
+}
+
+
+/* Modal Loader */
+.modal-loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 255, 136, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
