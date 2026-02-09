@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/json-studio",
-      "destination": "https://datapad-rosy.vercel.app"
+      "destination": "https://datapad-rosy.vercel.app/json-studio/"
     },
     {
       "source": "/json-studio/:path*",
-      "destination": "https://datapad-rosy.vercel.app/:path*"
+      "destination": "https://datapad-rosy.vercel.app/json-studio//:path*"
     }
   ]
 }
