@@ -3,37 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Datapad – Developer Power Tools</title>
-  <meta
-    name="description"
-    content="Datapad builds professional developer tools like JSON Studio to help you ship faster and work smarter."
-  />
-
-  <!-- Open Graph -->
+  <meta name="description" content="Datapad builds professional developer tools like JSON Studio to help you ship faster and work smarter." />
   <meta property="og:title" content="Datapad – Developer Power Tools" />
   <meta property="og:description" content="Professional-grade tools for modern developers." />
   <meta property="og:type" content="website" />
-
   <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/styles/globals.css" />
 </head>
-
 <body>
+
+  <!-- Cursor Glow -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- Noise Overlay -->
+  <div class="noise-overlay"></div>
+
   <!-- Header -->
   <header>
     <div class="container">
       <div class="header-content">
-        <div class="logo">
-          <div class="logo-icon">DP</div>
+        <a href="/" class="logo" aria-label="Datapad Home">
+          <div class="logo-icon">
+            <span class="logo-bracket">{</span>
+            <span class="logo-dot"></span>
+            <span class="logo-bracket">}</span>
+          </div>
           <div class="logo-text">
             <h1>Datapad</h1>
-            <p>Developer Power Tools</p>
+            <p>Power Tools</p>
           </div>
-        </div>
+        </a>
         <nav class="nav-links">
-          <a href="#products">Products</a>
-          <a href="#contact">About & Contact Us</a>
+          <a href="#products" class="nav-link">
+            <span class="nav-index">01</span>
+            <span>Products</span>
+          </a>
+          <a href="#contact" class="nav-link">
+            <span class="nav-index">02</span>
+            <span>Contact</span>
+          </a>
+          <div class="nav-status">
+            <span class="status-dot"></span>
+            <span>Systems Online</span>
+          </div>
         </nav>
       </div>
     </div>
@@ -42,14 +55,47 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        All Systems Operational
+      <div class="hero-grid">
+        <div class="hero-left">
+          <div class="hero-label">Developer Infrastructure</div>
+          <h2 class="hero-title">
+            <span class="hero-line line-1">Build</span>
+            <span class="hero-line line-2">Faster<span class="hero-accent">.</span></span>
+          </h2>
+          <p class="hero-sub">
+            Professional developer tools designed for speed, efficiency, and precision. Zero friction. Zero tracking. Everything local.
+          </p>
+          <div class="hero-actions">
+            <a href="#products" class="btn-primary">
+              <span>Explore Tools</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </a>
+            <div class="hero-stat">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Client-side</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-cube-wrap">
+            <div class="hero-cube">
+              <div class="cube-face front"><span>{ }</span></div>
+              <div class="cube-face back"><span>⚡</span></div>
+              <div class="cube-face right"><span>🔐</span></div>
+              <div class="cube-face left"><span>▸▸</span></div>
+              <div class="cube-face top"><span>DP</span></div>
+              <div class="cube-face bottom"><span>✦</span></div>
+            </div>
+          </div>
+          <div class="orbit-ring ring-1"></div>
+          <div class="orbit-ring ring-2"></div>
+          <div class="orbit-ring ring-3"></div>
+        </div>
       </div>
-      <h2>Build Faster with <span class="highlight">Datapad</span></h2>
-      <p>
-        Professional developer tools designed for speed, efficiency, and precision.
-      </p>
+    </div>
+    <div class="hero-scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
     </div>
   </section>
 
@@ -57,68 +103,98 @@
   <section class="products-section" id="products">
     <div class="container">
       <div class="section-header">
-        <h3>Our Products</h3>
-        <p>Enterprise-grade tools built for modern developers</p>
+        <div class="section-index">01</div>
+        <h3>Products</h3>
+        <div class="section-line"></div>
       </div>
 
       <div class="products-grid">
-        <div class="product-card">
-          <div class="product-header">
-            <div class="product-icon">{ }</div>
-            <span class="product-badge">Live Now</span>
+        <!-- JSON Studio -->
+        <div class="product-card card-live" data-tilt>
+          <div class="card-depth-layer"></div>
+          <div class="card-glow"></div>
+          <div class="card-content">
+            <div class="card-top">
+              <div class="card-icon">
+                <span class="icon-symbol">{ }</span>
+                <div class="icon-ring"></div>
+              </div>
+              <span class="card-badge badge-live">
+                <span class="badge-dot"></span>
+                Live
+              </span>
+            </div>
+            <h4 class="card-title">JSON Studio</h4>
+            <p class="card-desc">Smart JSON toolkit with format, minify, auto-fix, diff, and extraction.</p>
+            <ul class="card-features">
+              <li><span class="feat-marker"></span>Format & Beautify JSON instantly</li>
+              <li><span class="feat-marker"></span>Auto-fix common syntax errors</li>
+              <li><span class="feat-marker"></span>Compare & diff two JSON objects</li>
+              <li><span class="feat-marker"></span>Extract data using paths</li>
+              <li><span class="feat-marker"></span>Convert JSON to CSV</li>
+            </ul>
+            <a href="/json-studio" class="card-action">
+              <span>Launch Studio</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </a>
           </div>
-          <h4 class="product-title">JSON Studio</h4>
-          <p class="product-description">
-            Smart JSON toolkit with format, minify, auto-fix, diff, and extraction.
-          </p>
-          <ul class="product-features">
-            <li>Format & Beautify JSON instantly</li>
-            <li>Auto-fix common syntax errors</li>
-            <li>Compare & diff two JSON objects</li>
-            <li>Extract data using paths</li>
-            <li>Convert JSON to CSV</li>
-          </ul>
-          <a href="/json-studio" class="product-btn">
-            Launch JSON Studio →
-          </a>
         </div>
 
-        <div class="product-card coming-soon">
-          <div class="product-header">
-            <div class="product-icon">⚡</div>
-            <span class="product-badge badge-coming">Coming Soon</span>
+        <!-- A/B Test Calculator -->
+        <div class="product-card card-live" data-tilt>
+          <div class="card-depth-layer"></div>
+          <div class="card-glow"></div>
+          <div class="card-content">
+            <div class="card-top">
+              <div class="card-icon">
+                <span class="icon-symbol">📊</span>
+                <div class="icon-ring"></div>
+              </div>
+              <span class="card-badge badge-live">
+                <span class="badge-dot"></span>
+                Live
+              </span>
+            </div>
+            <h4 class="card-title">A/B Test Calculator</h4>
+            <p class="card-desc">The world's most advanced statistical significance calculator for A/B tests.</p>
+            <ul class="card-features">
+              <li><span class="feat-marker"></span>P-value, power & confidence intervals</li>
+              <li><span class="feat-marker"></span>Monte Carlo simulation engine</li>
+              <li><span class="feat-marker"></span>Multi-variant testing (A/B/C/D)</li>
+              <li><span class="feat-marker"></span>Power analysis & MDE calculator</li>
+              <li><span class="feat-marker"></span>Export full analysis to Excel</li>
+            </ul>
+            <a href="/ab-test-calculator" class="card-action">
+              <span>Launch Calculator</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </a>
           </div>
-          <h4 class="product-title">API Tester Pro</h4>
-          <p class="product-description">
-            Advanced API testing and debugging suite.
-          </p>
-          <ul class="product-features">
-            <li>REST & GraphQL</li>
-            <li>Automated tests</li>
-            <li>Performance analytics</li>
-            <li>Mock servers</li>
-            <li>Collections</li>
-          </ul>
-          <button class="product-btn disabled">Notify Me</button>
         </div>
 
-        <div class="product-card coming-soon">
-          <div class="product-header">
-            <div class="product-icon">🔐</div>
-            <span class="product-badge badge-coming">Coming Soon</span>
+        <!-- SecureKey Vault -->
+        <div class="product-card card-soon" data-tilt>
+          <div class="card-depth-layer"></div>
+          <div class="card-content">
+            <div class="card-top">
+              <div class="card-icon icon-muted">
+                <span class="icon-symbol">🔐</span>
+                <div class="icon-ring"></div>
+              </div>
+              <span class="card-badge badge-soon">Coming Soon</span>
+            </div>
+            <h4 class="card-title">SecureKey Vault</h4>
+            <p class="card-desc">Encrypted credential management for developers.</p>
+            <ul class="card-features">
+              <li><span class="feat-marker"></span>AES-256 encryption</li>
+              <li><span class="feat-marker"></span>Team access control</li>
+              <li><span class="feat-marker"></span>Environment separation</li>
+              <li><span class="feat-marker"></span>Audit logs</li>
+              <li><span class="feat-marker"></span>CLI support</li>
+            </ul>
+            <button class="card-action action-disabled" disabled>
+              <span>Notify Me</span>
+            </button>
           </div>
-          <h4 class="product-title">SecureKey Vault</h4>
-          <p class="product-description">
-            Encrypted credential management for developers.
-          </p>
-          <ul class="product-features">
-            <li>AES-256 encryption</li>
-            <li>Team access control</li>
-            <li>Environment separation</li>
-            <li>Audit logs</li>
-            <li>CLI support</li>
-          </ul>
-          <button class="product-btn disabled">Notify Me</button>
         </div>
       </div>
     </div>
@@ -127,23 +203,46 @@
   <!-- About + Contact -->
   <section class="about-contact" id="contact">
     <div class="container">
+      <div class="section-header">
+        <div class="section-index">02</div>
+        <h3>About & Contact</h3>
+        <div class="section-line"></div>
+      </div>
       <div class="about-grid">
         <div class="about-block">
-          <h3>About Datapad</h3>
-          <p class="about-subtitle">Built by developers, for developers</p>
+          <div class="block-label">Who We Are</div>
+          <h4>Built by developers,<br/>for developers</h4>
           <p>
             Datapad is a growing suite of browser-based developer tools focused on speed,
             privacy, and zero friction.
           </p>
-          <p>No sign-ups. No tracking. Everything runs locally.</p>
+          <p class="about-highlight">No sign-ups. No tracking. Everything runs locally.</p>
+          <div class="about-values">
+            <div class="value-item">
+              <span class="value-num">01</span>
+              <span>Speed</span>
+            </div>
+            <div class="value-item">
+              <span class="value-num">02</span>
+              <span>Privacy</span>
+            </div>
+            <div class="value-item">
+              <span class="value-num">03</span>
+              <span>Zero Friction</span>
+            </div>
+          </div>
         </div>
-
         <div class="contact-block">
-          <h3>Contact</h3>
-          <p class="about-subtitle">We’d love to hear from you</p>
-          <p>Email us at <a href="mailto:datapad8@gmail.com">datapad8@gmail.com</a></p>
-          <button class="product-btn inverted" id="open-feedback">
-            Share Feedback →
+          <div class="block-label">Get in Touch</div>
+          <h4>We'd love to<br/>hear from you</h4>
+          <p>Have feedback, ideas, or just want to say hi?</p>
+          <a href="mailto:datapad8@gmail.com" class="contact-email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <span>datapad8@gmail.com</span>
+          </a>
+          <button class="btn-primary btn-feedback" id="open-feedback">
+            <span>Share Feedback</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
           </button>
         </div>
       </div>
@@ -154,85 +253,84 @@
   <footer>
     <div class="container">
       <div class="footer-content">
-        <div class="footer-logo">DATAPAD</div>
-        <p class="footer-text">
-          Building professional-grade developer tools that help you ship faster.
-        </p>
-        <p class="copyright">© 2026 Datapad. All rights reserved.</p>
+        <div class="footer-top">
+          <div class="footer-logo">DATAPAD</div>
+          <div class="footer-tagline">Building professional-grade developer tools that help you ship faster.</div>
+        </div>
+        <div class="footer-bottom">
+          <p class="copyright">&copy; 2026 Datapad. All rights reserved.</p>
+        </div>
       </div>
     </div>
   </footer>
 
   <!-- Feedback Modal -->
-  <div
-    class="modal-overlay"
-    id="feedback-modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="feedback-title"
-    aria-describedby="feedback-status"
-    aria-hidden="true"
-  >
+  <div class="modal-overlay" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title" aria-hidden="true">
     <div class="modal-container">
       <h2 id="feedback-title" class="sr-only">Feedback Form</h2>
-
-      <div
-        class="modal-loader"
-        id="feedback-loader"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <div class="spinner" aria-hidden="true"></div>
+      <div class="modal-loader" id="feedback-loader" role="status" aria-live="polite">
+        <div class="spinner"></div>
         <p id="feedback-status">Loading feedback form…</p>
       </div>
-
-      <button
-        class="modal-close"
-        id="close-feedback"
-        aria-label="Close feedback form"
-      >
-        ✕
+      <button class="modal-close" id="close-feedback" aria-label="Close feedback form">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-
-      <iframe
-        id="feedback-iframe"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-      ></iframe>
+      <iframe id="feedback-iframe" loading="lazy" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 
-  <!-- Script -->
   <script>
+    /* ── Cursor Glow ── */
+    const glow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0;
+    document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+    (function animateGlow() {
+      glowX += (mouseX - glowX) * 0.12;
+      glowY += (mouseY - glowY) * 0.12;
+      glow.style.transform = `translate(${glowX - 200}px, ${glowY - 200}px)`;
+      requestAnimationFrame(animateGlow);
+    })();
+
+    /* ── Scroll Reveal ── */
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.product-card, .about-block, .contact-block, .section-header').forEach(el => observer.observe(el));
+
+    /* ── Card Tilt ── */
+    document.querySelectorAll('[data-tilt]').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateZ(10px)`;
+        const gl = card.querySelector('.card-glow');
+        if (gl) gl.style.background = `radial-gradient(circle at ${(x+0.5)*100}% ${(y+0.5)*100}%, rgba(0,255,136,0.12), transparent 60%)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(800px) rotateY(0) rotateX(0) translateZ(0)';
+      });
+    });
+
+    /* ── Feedback Modal ── */
     const openBtn = document.getElementById('open-feedback');
     const modal = document.getElementById('feedback-modal');
     const closeBtn = document.getElementById('close-feedback');
     const iframe = document.getElementById('feedback-iframe');
     const loader = document.getElementById('feedback-loader');
-
     const FORM_URL = 'https://forms.gle/pZFitCFt6pfQNKEFA';
-    let iframeInitialized = false;
-    let lastFocusedElement = null;
+    let iframeInit = false, lastFocus = null;
 
-    function preloadForm() {
-      if (iframeInitialized) return;
-      iframe.src = FORM_URL;
-      iframeInitialized = true;
-    }
-
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(preloadForm, { timeout: 4000 });
-    } else {
-      setTimeout(preloadForm, 3000);
-    }
+    function preloadForm() { if (iframeInit) return; iframe.src = FORM_URL; iframeInit = true; }
+    if ('requestIdleCallback' in window) requestIdleCallback(preloadForm, { timeout: 4000 });
+    else setTimeout(preloadForm, 3000);
 
     openBtn.addEventListener('mouseenter', preloadForm);
     openBtn.addEventListener('focus', preloadForm);
     openBtn.addEventListener('touchstart', preloadForm, { passive: true });
 
     openBtn.addEventListener('click', () => {
-      lastFocusedElement = document.activeElement;
+      lastFocus = document.activeElement;
       modal.style.display = 'flex';
       modal.setAttribute('aria-hidden', 'false');
       loader.style.display = 'flex';
@@ -241,26 +339,25 @@
       closeBtn.focus();
     });
 
-    iframe.addEventListener('load', () => {
-      loader.style.display = 'none';
-    });
-
+    iframe.addEventListener('load', () => { loader.style.display = 'none'; });
     closeBtn.addEventListener('click', closeModal);
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     function closeModal() {
       modal.style.display = 'none';
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      if (lastFocusedElement) lastFocusedElement.focus();
+      if (lastFocus) lastFocus.focus();
     }
+
+    /* ── Smooth Scroll ── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
   </script>
 </body>
 </html>
