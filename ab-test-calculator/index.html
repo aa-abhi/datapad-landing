@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A/B Test Calculator – Datapad</title>
+  <meta name="description" content="The world's most advanced A/B test significance calculator. P-value, confidence intervals, power analysis, Monte Carlo simulation, multi-variant support, and Excel export — all in-browser."/>
+  <meta property="og:title" content="A/B Test Calculator – Datapad"/>
+  <meta property="og:description" content="Advanced A/B test significance calculator with power analysis, simulation, and Excel export."/>
+  <meta property="og:type" content="website"/>
+  <link rel="icon" href="/favicon.ico"/>
+  <link rel="canonical" href="https://datapad.in/ab-test-calculator"/>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --pri: #00ff88;
+      --pri-rgb: 0,255,136;
+      --acc: #00d4ff;
+      --acc-rgb: 0,212,255;
+      --red: #ff4466;
+      --warn: #ffaa00;
+      --bg0: #050508;
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --t0: #ffffff;
+      --t1: #c8c8d4;
+      --t2: #6e6e82;
+      --brd: rgba(255,255,255,0.06);
+      --r: 14px;
+      --rs: 10px;
+      --font: 'Outfit', sans-serif;
+      --mono: 'Fira Code', monospace;
+      --ease: cubic-bezier(0.16,1,0.3,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg0);
+      color: var(--t0);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Noise ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      pointer-events:none; z-index:9998; opacity:0.02;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat; background-size:128px 128px;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--brd);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(5,5,8,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display:flex; align-items:center; gap:14px; }
+    .header-left a { text-decoration:none; color:inherit; display:flex; align-items:center; gap:14px; }
+    .logo-box {
+      width:40px; height:40px; background:var(--bg2); border:1px solid rgba(var(--pri-rgb),0.2);
+      border-radius:var(--rs); display:flex; align-items:center; justify-content:center;
+      font-size:14px; color:var(--pri); font-weight:800; font-family:var(--mono);
+    }
+    .header-title { font-size:18px; font-weight:800; letter-spacing:-0.3px; }
+    .header-sub { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:2px; }
+    .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding:8px 16px; border-radius:8px; font-size:12px; font-weight:600;
+      cursor:pointer; font-family:var(--font); transition:all 0.25s var(--ease);
+      display:inline-flex; align-items:center; gap:6px; border:none;
+    }
+    .btn-ghost {
+      background:rgba(var(--pri-rgb),0.06); border:1px solid rgba(var(--pri-rgb),0.15);
+      color:var(--pri);
+    }
+    .btn-ghost:hover { background:rgba(var(--pri-rgb),0.12); border-color:rgba(var(--pri-rgb),0.3); }
+    .btn-primary {
+      background:var(--pri); color:var(--bg0); font-weight:700; border:2px solid var(--pri);
+    }
+    .btn-primary:hover {
+      background:transparent; color:var(--pri);
+      box-shadow:0 0 24px rgba(var(--pri-rgb),0.25);
+    }
+    .btn-primary:disabled { opacity:0.35; cursor:not-allowed; }
+    .btn-primary:disabled:hover { background:var(--pri); color:var(--bg0); box-shadow:none; }
+    .btn-back {
+      background:transparent; border:1px solid var(--brd); color:var(--t2);
+      padding:8px 14px;
+    }
+    .btn-back:hover { border-color:rgba(var(--pri-rgb),0.2); color:var(--t1); }
+
+    /* ── Layout ── */
+    .app-body {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      min-height: calc(100vh - 60px);
+    }
+
+    .sidebar {
+      border-right:1px solid var(--brd);
+      padding:24px;
+      overflow-y:auto;
+      background:var(--bg1);
+    }
+
+    .main-panel {
+      padding:24px;
+      overflow-y:auto;
+    }
+
+    /* ── Section Labels ── */
+    .sec-label {
+      font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:2.5px;
+      margin-bottom:14px; font-weight:600;
+    }
+
+    /* ── Input Styling ── */
+    .input-group { margin-bottom:16px; }
+    .input-label { font-size:12px; color:#888; margin-bottom:5px; display:block; font-weight:500; }
+    .input-field {
+      width:100%; padding:10px 12px; background:var(--bg2); border:1px solid var(--brd);
+      border-radius:8px; color:var(--t0); font-size:14px; font-family:var(--mono);
+      outline:none; transition:border-color 0.2s;
+    }
+    .input-field:focus { border-color:rgba(var(--pri-rgb),0.35); }
+    .input-field::placeholder { color:#444; }
+
+    /* ── Toggle Buttons ── */
+    .toggle-row { display:flex; gap:4px; }
+    .toggle-btn {
+      flex:1; padding:9px 8px; border-radius:8px; font-size:12px; font-weight:600;
+      cursor:pointer; font-family:var(--font); transition:all 0.2s;
+      border:1px solid var(--brd); background:var(--bg2); color:var(--t2);
+      text-align:center;
+    }
+    .toggle-btn.active {
+      border-color:rgba(var(--pri-rgb),0.3); background:rgba(var(--pri-rgb),0.08);
+      color:var(--pri);
+    }
+    .toggle-btn:hover:not(.active) { border-color:rgba(255,255,255,0.1); color:var(--t1); }
+
+    /* ── Range ── */
+    input[type=range] { width:100%; accent-color:var(--pri); cursor:pointer; }
+
+    /* ── Variant Box ── */
+    .variant-box {
+      background:var(--bg0); border:1px solid var(--brd); border-radius:12px;
+      padding:16px; margin-bottom:12px; border-left:3px solid var(--t2);
+      transition:border-color 0.2s;
+    }
+    .variant-box.active { border-left-color:var(--pri); }
+    .variant-box .var-name { font-size:13px; font-weight:700; margin-bottom:10px; }
+    .variant-box .var-inputs { display:grid; gap:8px; }
+    .variant-box .var-inputs.cols-2 { grid-template-columns:1fr 1fr; }
+    .variant-box .var-inputs.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+
+    /* ── Divider ── */
+    .divider { height:1px; background:var(--brd); margin:20px 0; }
+
+    /* ── Card ── */
+    .card {
+      background:var(--bg1); border:1px solid var(--brd); border-radius:var(--r);
+      padding:24px; margin-bottom:16px;
+    }
+
+    /* ── Tab Bar ── */
+    .tab-bar {
+      display:flex; gap:4px; margin-bottom:24px;
+      background:var(--bg1); border-radius:var(--rs); padding:4px;
+      border:1px solid var(--brd);
+    }
+    .tab-btn {
+      flex:1; padding:10px 16px; border-radius:8px; border:none;
+      background:transparent; color:var(--t2); font-size:13px; font-weight:600;
+      cursor:pointer; font-family:var(--font); transition:all 0.2s; text-align:center;
+    }
+    .tab-btn.active { background:rgba(var(--pri-rgb),0.1); color:var(--pri); }
+    .tab-btn:hover:not(.active) { color:var(--t1); }
+
+    /* ── Metrics ── */
+    .metrics-grid { display:grid; gap:12px; }
+    .metrics-grid.g2 { grid-template-columns:1fr 1fr; }
+    .metrics-grid.g3 { grid-template-columns:1fr 1fr 1fr; }
+    .metrics-grid.g4 { grid-template-columns:repeat(4,1fr); }
+
+    .metric-card {
+      background:var(--bg1); border:1px solid var(--brd); border-radius:var(--rs);
+      padding:14px;
+    }
+    .metric-label {
+      font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px;
+      margin-bottom:5px; font-weight:600;
+    }
+    .metric-val {
+      font-size:20px; font-weight:800; font-family:var(--mono);
+    }
+
+    /* ── Verdict Badge ── */
+    .verdict {
+      display:inline-flex; align-items:center; gap:6px; padding:6px 14px;
+      border-radius:100px; font-size:13px; font-weight:700;
+    }
+
+    /* ── Gauge ── */
+    .gauge-row { display:flex; justify-content:space-around; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
+    .gauge { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .gauge-label { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px; }
+
+    /* ── Table ── */
+    .data-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .data-table th {
+      padding:10px 12px; text-align:left; color:var(--t2); font-weight:600;
+      font-size:11px; text-transform:uppercase; letter-spacing:1px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .data-table th:not(:first-child) { text-align:right; }
+    .data-table td {
+      padding:10px 12px; font-family:var(--mono); border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .data-table td:not(:first-child) { text-align:right; }
+
+    /* ── Tip Box ── */
+    .tip-box {
+      margin-top:16px; padding:12px 14px;
+      background:rgba(var(--acc-rgb),0.04); border:1px solid rgba(var(--acc-rgb),0.1);
+      border-radius:var(--rs); font-size:11px; color:var(--t2); line-height:1.7;
+    }
+    .tip-box strong { color:var(--acc); font-weight:700; }
+
+    /* ── Empty State ── */
+    .empty-state { text-align:center; padding:60px 20px; }
+    .empty-state .icon { font-size:48px; margin-bottom:12px; }
+    .empty-state .title { font-size:18px; font-weight:700; margin-bottom:8px; }
+    .empty-state .desc { font-size:14px; color:var(--t2); }
+
+    /* ── Guide Modal ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.85);
+      backdrop-filter:blur(8px); z-index:1000;
+      display:none; align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:var(--bg1); border:1px solid rgba(var(--pri-rgb),0.15);
+      border-radius:16px; padding:40px; max-width:640px; width:90vw;
+      max-height:80vh; overflow-y:auto; color:var(--t1); font-size:14px; line-height:1.9;
+    }
+    .modal-box h2 { font-size:22px; font-weight:800; color:var(--t0); margin-bottom:24px; }
+    .modal-box h3 { color:var(--pri); font-weight:700; font-size:15px; margin:20px 0 6px; }
+    .modal-box p { margin-bottom:8px; }
+    .modal-box strong { color:var(--t0); }
+    .modal-close {
+      float:right; background:none; border:none; color:var(--t2); font-size:20px; cursor:pointer;
+    }
+
+    /* ── Footer ── */
+    .app-footer {
+      border-top:1px solid var(--brd);
+      padding:20px 24px;
+      text-align:center;
+      font-size:11px;
+      color:var(--t2);
+    }
+    .app-footer a { color:var(--pri); text-decoration:none; font-weight:600; }
+    .app-footer a:hover { text-decoration:underline; }
+
+    /* ── Responsive ── */
+    @media (max-width:900px) {
+      .app-body { grid-template-columns:1fr; }
+      .sidebar { border-right:none; border-bottom:1px solid var(--brd); }
+      .metrics-grid.g4 { grid-template-columns:1fr 1fr; }
+      .tab-bar { flex-wrap:wrap; }
+    }
+    @media (max-width:500px) {
+      .app-header { padding:12px 16px; }
+      .sidebar, .main-panel { padding:16px; }
+      .metrics-grid.g4, .metrics-grid.g3 { grid-template-columns:1fr; }
+      .header-title { font-size:15px; }
+      .gauge-row { gap:10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="app-header">
+  <div class="header-left">
+    <a href="/">
+      <div class="logo-box">DP</div>
+      <div>
+        <div class="header-title">A/B Test Calculator</div>
+        <div class="header-sub">by Datapad</div>
+      </div>
+    </a>
+  </div>
+  <div class="header-right">
+    <a href="/" class="btn btn-back">← Home</a>
+    <button class="btn btn-ghost" onclick="toggleGuide()">? Guide</button>
+    <button class="btn btn-primary" id="exportBtn" disabled onclick="exportExcel()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export Excel
+    </button>
+  </div>
+</div>
+
+<!-- ═══ BODY ═══ -->
+<div class="app-body">
+
+  <!-- ─── SIDEBAR ─── -->
+  <div class="sidebar">
+    <div class="sec-label">Configuration</div>
+
+    <!-- Test Type -->
+    <div class="input-group">
+      <label class="input-label">Test Type</label>
+      <div class="toggle-row">
+        <button class="toggle-btn active" data-mode="conversion" onclick="setMode('conversion',this)">Conversion</button>
+        <button class="toggle-btn" data-mode="revenue" onclick="setMode('revenue',this)">Revenue</button>
+      </div>
+    </div>
+
+    <!-- Variants -->
+    <div class="input-group">
+      <label class="input-label">Number of Variants</label>
+      <div class="toggle-row">
+        <button class="toggle-btn active" onclick="setVariants(2,this)">A/B</button>
+        <button class="toggle-btn" onclick="setVariants(3,this)">A/B/C</button>
+        <button class="toggle-btn" onclick="setVariants(4,this)">A/B/C/D</button>
+      </div>
+    </div>
+
+    <!-- Confidence -->
+    <div class="input-group">
+      <label class="input-label">Confidence Level: <span id="confLabel">95</span>%</label>
+      <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)"/>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:4px;">
+        <span>80%</span><span>90%</span><span>95%</span><span>99%</span>
+      </div>
+    </div>
+
+    <!-- Hypothesis -->
+    <div class="input-group">
+      <label class="input-label">Hypothesis</label>
+      <div class="toggle-row">
+        <button class="toggle-btn active" onclick="setHypothesis('two',this)">Two-sided</button>
+        <button class="toggle-btn" onclick="setHypothesis('one',this)">One-sided</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-label">Input Data</div>
+
+    <!-- Variant Inputs (generated by JS) -->
+    <div id="variantInputs"></div>
+
+    <div class="tip-box">
+      <strong>Tip:</strong> Pre-filled with sample data. Replace with your own numbers to see real-time results.
+    </div>
+  </div>
+
+  <!-- ─── MAIN ─── -->
+  <div class="main-panel">
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setTab('results',this)">Results</button>
+      <button class="tab-btn" onclick="setTab('power',this)">Power Analysis</button>
+      <button class="tab-btn" onclick="setTab('simulation',this)">Simulation</button>
+      <button class="tab-btn" onclick="setTab('insights',this)">Insights</button>
+    </div>
+
+    <div id="tabContent"></div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="app-footer">
+  <a href="/">Datapad</a> · A/B Test Calculator · &copy; 2026 All rights reserved.
+</div>
+
+<!-- ═══ GUIDE MODAL ═══ -->
+<div class="modal-overlay" id="guideModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="toggleGuide()">✕</button>
+    <h2>How to Use This Calculator</h2>
+
+    <h3>1. Enter Your Data</h3>
+    <p>Input the number of <strong>visitors</strong> (sample size) and <strong>conversions</strong> (successes) for your control group and at least one variant. For revenue tests, also add total revenue.</p>
+
+    <h3>2. Configure Settings</h3>
+    <p><strong>Confidence Level:</strong> How sure you need to be. 95% is the industry standard — higher confidence = harder to reach significance.</p>
+    <p><strong>Hypothesis:</strong> Two-sided tests whether the variant is better OR worse. One-sided only tests if it's better.</p>
+    <p><strong>Variants:</strong> Support A/B, A/B/C, or A/B/C/D multivariate testing.</p>
+
+    <h3>3. Read Your Results</h3>
+    <p><strong>P-Value:</strong> Probability this result occurred by chance. Below your alpha (0.05) = statistically significant.</p>
+    <p><strong>Statistical Power:</strong> Probability of detecting a real effect if one exists. Aim for ≥80%.</p>
+    <p><strong>MDE:</strong> Minimum Detectable Effect — the smallest change your test can reliably detect at 80% power.</p>
+    <p><strong>Confidence Interval:</strong> The range where the true conversion rate most likely falls.</p>
+    <p><strong>Relative Lift:</strong> Percentage change in conversion rate from control to variant.</p>
+    <p><strong>Absolute Difference:</strong> Raw difference in conversion rates between variant and control.</p>
+
+    <h3>4. Advanced Tabs</h3>
+    <p><strong>Power Analysis:</strong> See required sample sizes for various effect sizes, plus a visual power curve.</p>
+    <p><strong>Monte Carlo Simulation:</strong> Runs 5,000 randomized trials to estimate the probability of winning, losing, or inconclusive outcomes — plus a full lift distribution.</p>
+    <p><strong>Insights:</strong> Auto-generated plain-English recommendations based on your data, with projected business impact.</p>
+
+    <h3>5. Export</h3>
+    <p>Click <strong>"Export Excel"</strong> to download a multi-sheet .xlsx report with Summary, Insights, Simulation results, and Power Analysis tables.</p>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+// ── State ──
+let S = {
+  mode: 'conversion',
+  numVariants: 2,
+  confidence: 95,
+  hypothesis: 'two',
+  activeTab: 'results',
+  simResult: null,
+  variants: [
+    { name:'Control (A)', visitors:10000, conversions:450, revenue:22500 },
+    { name:'Variant B', visitors:10000, conversions:520, revenue:28600 },
+    { name:'Variant C', visitors:'', conversions:'', revenue:'' },
+    { name:'Variant D', visitors:'', conversions:'', revenue:'' },
+  ]
+};
+
+// ── Stats Functions ──
+function normalCDF(x){const a1=.254829592,a2=-.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=.3275911;const s=x<0?-1:1;x=Math.abs(x)/Math.SQRT2;const t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return .5*(1+s*y);}
+function normalPPF(p){if(p<=0)return-Infinity;if(p>=1)return Infinity;if(p<.5)return-normalPPF(1-p);const t=Math.sqrt(-2*Math.log(1-p));return t-(2.515517+.802853*t+.010328*t*t)/(1+1.432788*t+.189269*t*t+.001308*t*t*t);}
+function calcPValue(n1,c1,n2,c2){if(!n1||!n2)return 1;const p1=c1/n1,p2=c2/n2,pp=(c1+c2)/(n1+n2);const se=Math.sqrt(pp*(1-pp)*(1/n1+1/n2));if(se===0)return 1;const z=Math.abs(p1-p2)/se;return S.hypothesis==='one'?1-normalCDF(z):2*(1-normalCDF(z));}
+function calcCI(n,c,conf){const p=c/n,z=normalPPF(1-(1-conf/100)/2),se=Math.sqrt(p*(1-p)/n);return[Math.max(0,p-z*se),Math.min(1,p+z*se)];}
+function calcPower(n1,p1,n2,p2,alpha){alpha=alpha||((1-S.confidence/100));const se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2);if(se===0)return 0;const z=normalPPF(1-alpha/2),eff=Math.abs(p2-p1)/se;return normalCDF(eff-z)+normalCDF(-eff-z);}
+function calcMDE(n1,n2,br,alpha,pw){alpha=alpha||(1-S.confidence/100);pw=pw||.8;const za=normalPPF(1-alpha/2),zb=normalPPF(pw);const se1=Math.sqrt(br*(1-br)/n1),se2=Math.sqrt(br*(1-br)/n2);return(za+zb)*Math.sqrt(se1*se1+se2*se2);}
+function calcSampleSize(br,mde,alpha,pw){alpha=alpha||(1-S.confidence/100);pw=pw||.8;const za=normalPPF(1-alpha/2),zb=normalPPF(pw);const p1=br,p2=br+mde;return Math.ceil(Math.pow(za*Math.sqrt(2*p1*(1-p1))+zb*Math.sqrt(p1*(1-p1)+p2*(1-p2)),2)/Math.pow(p2-p1,2));}
+
+function runSimulation(n1,c1,n2,c2,numSims){
+  numSims=numSims||5000;
+  const p1=c1/n1,p2=c2/n2;
+  let wins=0,losses=0,inc=0;const lifts=[];
+  const batchN=Math.min(n1,500),batchN2=Math.min(n2,500);
+  for(let i=0;i<numSims;i++){
+    let s1=0,s2=0;
+    for(let j=0;j<batchN;j++) if(Math.random()<p1)s1++;
+    for(let j=0;j<batchN2;j++) if(Math.random()<p2)s2++;
+    s1=Math.round(s1*n1/batchN); s2=Math.round(s2*n2/batchN2);
+    const sp1=s1/n1,sp2=s2/n2;
+    lifts.push(sp1===0?0:(sp2-sp1)/sp1);
+    const pv=calcPValue(n1,s1,n2,s2);
+    if(pv<(1-S.confidence/100)){if(sp2>sp1)wins++;else losses++;}else inc++;
+  }
+  lifts.sort((a,b)=>a-b);
+  const pctl=p=>lifts[Math.floor(numSims*p)]*100;
+  return{winRate:wins/numSims*100,lossRate:losses/numSims*100,incRate:inc/numSims*100,
+    p5:pctl(.05),p25:pctl(.25),p50:pctl(.5),p75:pctl(.75),p95:pctl(.95)};
+}
+
+// ── Format ──
+const fmt=(n,d)=>isNaN(n)||!isFinite(n)?'—':n.toFixed(d===undefined?2:d);
+const fmtP=(n,d)=>isNaN(n)||!isFinite(n)?'—':(n*100).toFixed(d===undefined?2:d)+'%';
+const fmtR=(n,d)=>isNaN(n)||!isFinite(n)?'—':n.toFixed(d===undefined?2:d)+'%';
+
+// ── Controls ──
+function setMode(m,el){S.mode=m;activateToggle(el);buildInputs();compute();}
+function setVariants(n,el){S.numVariants=n;activateToggle(el);buildInputs();compute();}
+function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;compute();}
+function setHypothesis(h,el){S.hypothesis=h;activateToggle(el);compute();}
+function setTab(t,el){S.activeTab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
+function activateToggle(el){if(!el)return;el.parentNode.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function toggleGuide(){document.getElementById('guideModal').classList.toggle('open');}
+
+// ── Build Inputs ──
+function buildInputs(){
+  const c=document.getElementById('variantInputs');
+  let h='';
+  for(let i=0;i<S.numVariants;i++){
+    const v=S.variants[i];
+    const isCtrl=i===0;
+    const cols=S.mode==='revenue'?'cols-3':'cols-2';
+    h+=`<div class="variant-box ${isCtrl?'':'active'}">
+      <div class="var-name" style="color:${isCtrl?'var(--t1)':'var(--pri)'}">${v.name}</div>
+      <div class="var-inputs ${cols}">
+        <div>
+          <label class="input-label" style="font-size:10px">Visitors</label>
+          <input class="input-field" type="number" value="${v.visitors}" placeholder="10000" data-idx="${i}" data-field="visitors" oninput="onInput(this)"/>
+        </div>
+        <div>
+          <label class="input-label" style="font-size:10px">Conversions</label>
+          <input class="input-field" type="number" value="${v.conversions}" placeholder="450" data-idx="${i}" data-field="conversions" oninput="onInput(this)"/>
+        </div>
+        ${S.mode==='revenue'?`<div>
+          <label class="input-label" style="font-size:10px">Revenue ($)</label>
+          <input class="input-field" type="number" value="${v.revenue}" placeholder="22500" data-idx="${i}" data-field="revenue" oninput="onInput(this)"/>
+        </div>`:''}
+      </div>
+    </div>`;
+  }
+  c.innerHTML=h;
+}
+
+function onInput(el){
+  const i=+el.dataset.idx, f=el.dataset.field;
+  S.variants[i][f]=el.value===''?'':Number(el.value);
+  compute();
+}
+
+// ── Compute Results ──
+let R=null;
+function compute(){
+  const ctrl=S.variants[0];
+  if(!ctrl.visitors||!ctrl.conversions){R=null;render();return;}
+  const br=ctrl.conversions/ctrl.visitors;
+  const vr=[];
+  for(let i=1;i<S.numVariants;i++){
+    const v=S.variants[i];
+    if(!v.visitors||!v.conversions)continue;
+    const rate=v.conversions/v.visitors;
+    const lift=(rate-br)/br;
+    const pv=calcPValue(ctrl.visitors,ctrl.conversions,v.visitors,v.conversions);
+    const ci=calcCI(v.visitors,v.conversions,S.confidence);
+    const ciC=calcCI(ctrl.visitors,ctrl.conversions,S.confidence);
+    const pw=calcPower(ctrl.visitors,br,v.visitors,rate)*100;
+    const mde=calcMDE(ctrl.visitors,v.visitors,br);
+    const se=Math.sqrt(br*(1-br)/ctrl.visitors+rate*(1-rate)/v.visitors);
+    const ad=rate-br;
+    const sig=pv<(1-S.confidence/100);
+    const ss=calcSampleSize(br,Math.abs(ad)||.01);
+    let rvc=0,rvv=0,rl=0;
+    if(S.mode==='revenue'&&ctrl.revenue&&v.revenue){rvc=ctrl.revenue/ctrl.visitors;rvv=v.revenue/v.visitors;rl=(rvv-rvc)/rvc;}
+    vr.push({name:v.name,idx:i,visitors:v.visitors,conversions:v.conversions,rate,lift,pv,ci,ciC,pw,mde,se,ad,sig,ss,rvc,rvv,rl});
+  }
+  R={br,vr,ctrl};
+  document.getElementById('exportBtn').disabled=!R||vr.length===0;
+  render();
+}
+
+// ── Verdict ──
+function verdict(v){
+  if(!v)return{t:'Enter data',c:'var(--t2)',bg:'rgba(110,110,130,0.08)'};
+  if(v.sig&&v.lift>0)return{t:'🏆 Winner',c:'var(--pri)',bg:'rgba(0,255,136,0.08)'};
+  if(v.sig&&v.lift<0)return{t:'📉 Loser',c:'var(--red)',bg:'rgba(255,68,102,0.08)'};
+  if(v.pw<80)return{t:'⏳ Need More Data',c:'var(--warn)',bg:'rgba(255,170,0,0.08)'};
+  return{t:'🔄 No Difference',c:'var(--acc)',bg:'rgba(0,212,255,0.08)'};
+}
+
+// ── SVG Generators ──
+function gaugeHTML(value,label,color,size){
+  size=size||90;const r=size/2-8;const circ=Math.PI*r;const prog=Math.min(Math.max(value/100,0),1);const off=circ*(1-prog);
+  return`<div class="gauge">
+    <svg width="${size}" height="${size/2+10}">
+      <path d="M 8 ${size/2} A ${r} ${r} 0 0 1 ${size-8} ${size/2}" fill="none" stroke="var(--bg3)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 8 ${size/2} A ${r} ${r} 0 0 1 ${size-8} ${size/2}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round"
+        stroke-dasharray="${circ}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset 0.8s var(--ease)"/>
+      <text x="${size/2}" y="${size/2-4}" text-anchor="middle" fill="${color}" font-size="16" font-weight="800" font-family="var(--font)">${fmtR(value,1)}</text>
+    </svg>
+    <span class="gauge-label">${label}</span>
+  </div>`;
+}
+
+function distSVG(p1,p2,se,w,h){
+  if(!se||se===0)return'';
+  w=w||300;h=h||90;const diff=p2-p1;const pts=80;const range=4*se;const step=2*range/pts;
+  let path='';
+  for(let i=0;i<=pts;i++){const x=-range+i*step;const y=Math.exp(-.5*Math.pow(x/se,2))/(se*Math.sqrt(2*Math.PI));const px=((x+range)/(2*range))*w;const py=h-8-(y*se*Math.sqrt(2*Math.PI))*(h-16);path+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1);}
+  const diffX=((diff+range)/(2*range))*w;const zeroX=((0+range)/(2*range))*w;
+  return`<svg width="${w}" height="${h}" style="display:block;margin:0 auto">
+    <defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--pri)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--pri)" stop-opacity="0.02"/></linearGradient></defs>
+    <path d="${path}L${w},${h-8}L0,${h-8}Z" fill="url(#dg)"/>
+    <path d="${path}" fill="none" stroke="var(--pri)" stroke-width="2" opacity="0.8"/>
+    <line x1="${zeroX}" y1="8" x2="${zeroX}" y2="${h-8}" stroke="#444" stroke-width="1" stroke-dasharray="3,3"/>
+    <line x1="${diffX}" y1="8" x2="${diffX}" y2="${h-8}" stroke="${diff>0?'var(--pri)':'var(--red)'}" stroke-width="2"/>
+    <text x="${zeroX}" y="${h}" text-anchor="middle" fill="#555" font-size="9" font-family="var(--mono)">0</text>
+    <text x="${diffX}" y="8" text-anchor="middle" fill="${diff>0?'var(--pri)':'var(--red)'}" font-size="9" font-family="var(--mono)">Δ</text>
+  </svg>`;
+}
+
+function powerCurveSVG(br,n1,n2,w,h){
+  w=w||560;h=h||150;const pts=50;const maxMDE=br*.5;const step=maxMDE/pts;
+  let path='';
+  for(let i=0;i<=pts;i++){const mde=i*step;const p2=br+mde;const pw=calcPower(n1,br,n2,p2)*100;const px=(i/pts)*w;const py=h-10-(pw/100)*(h-20);path+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1);}
+  const y80=h-10-(80/100)*(h-20);
+  return`<svg width="${w}" height="${h}" style="display:block;margin:0 auto;max-width:100%">
+    <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--acc)" stop-opacity="0.18"/><stop offset="100%" stop-color="var(--acc)" stop-opacity="0.01"/></linearGradient></defs>
+    <path d="${path}L${w},${h-10}L0,${h-10}Z" fill="url(#pg)"/>
+    <path d="${path}" fill="none" stroke="var(--acc)" stroke-width="2" opacity="0.85"/>
+    <line x1="0" y1="${y80}" x2="${w}" y2="${y80}" stroke="var(--acc)" stroke-width="1" stroke-dasharray="4,4" opacity="0.35"/>
+    <text x="${w-4}" y="${y80-4}" text-anchor="end" fill="var(--acc)" font-size="9" font-family="var(--mono)" opacity="0.5">80% power</text>
+    <text x="${w/2}" y="${h}" text-anchor="middle" fill="#444" font-size="9" font-family="var(--mono)">MDE →</text>
+  </svg>`;
+}
+
+// ── Render ──
+function render(){
+  const el=document.getElementById('tabContent');
+  if(!R||R.vr.length===0){
+    el.innerHTML=`<div class="empty-state"><div class="icon">📊</div><div class="title">Enter Your Test Data</div><div class="desc">Fill in visitors and conversions on the left to see results.</div></div>`;
+    return;
+  }
+
+  if(S.activeTab==='results') renderResults(el);
+  else if(S.activeTab==='power') renderPower(el);
+  else if(S.activeTab==='simulation') renderSimulation(el);
+  else if(S.activeTab==='insights') renderInsights(el);
+}
+
+function renderResults(el){
+  let h='';
+  R.vr.forEach(v=>{
+    const vd=verdict(v);
+    const liftColor=v.lift>=0?'var(--pri)':'var(--red)';
+    const pvColor=v.sig?'var(--pri)':'var(--red)';
+    const pwColor=v.pw>=80?'var(--acc)':'var(--warn)';
+    h+=`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:20px;font-weight:800">${v.name}</span>
+          <span style="font-size:12px;color:var(--t2)">vs Control</span>
+        </div>
+        <span class="verdict" style="background:${vd.bg};color:${vd.c};border:1px solid ${vd.c}22">${vd.t}</span>
+      </div>
+
+      <div class="gauge-row">
+        ${gaugeHTML((1-v.pv)*100,'Confidence',v.sig?'var(--pri)':'var(--red)')}
+        ${gaugeHTML(v.pw,'Power',v.pw>=80?'var(--acc)':'var(--warn)')}
+        <div class="gauge">
+          <div style="font-size:32px;font-weight:900;color:${liftColor};letter-spacing:-1px;font-family:var(--font)">${v.lift>=0?'+':''}${fmtR(v.lift*100)}</div>
+          <span class="gauge-label">Relative Lift</span>
+        </div>
+      </div>
+
+      <div class="metrics-grid g4">
+        <div class="metric-card"><div class="metric-label">P-Value</div><div class="metric-val" style="color:${pvColor}">${fmt(v.pv,4)}</div></div>
+        <div class="metric-card"><div class="metric-label">Conv. Rate</div><div class="metric-val">${fmtP(v.rate)}</div></div>
+        <div class="metric-card"><div class="metric-label">Abs. Diff</div><div class="metric-val" style="color:${liftColor}">${fmtP(v.ad)}</div></div>
+        <div class="metric-card"><div class="metric-label">MDE</div><div class="metric-val">${fmtP(v.mde)}</div></div>
+      </div>
+
+      <div class="metrics-grid g2" style="margin-top:14px">
+        <div class="metric-card">
+          <div class="metric-label">${S.confidence}% Confidence Interval</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <span style="font-family:var(--mono);font-size:13px;color:var(--acc)">${fmtP(v.ci[0])}</span>
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="height:100%;background:linear-gradient(90deg,rgba(var(--acc-rgb),0.4),rgba(var(--pri-rgb),0.4));border-radius:3px;width:90%"></div>
+            </div>
+            <span style="font-family:var(--mono);font-size:13px;color:var(--pri)">${fmtP(v.ci[1])}</span>
+          </div>
+          <div style="font-size:10px;color:#444;margin-top:6px;text-align:center">Control: ${fmtP(v.ciC[0])} – ${fmtP(v.ciC[1])}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Distribution of Difference</div>
+          <div style="margin-top:6px">${distSVG(R.br,v.rate,v.se)}</div>
+        </div>
+      </div>
+
+      ${S.mode==='revenue'?`<div class="metrics-grid g3" style="margin-top:14px">
+        <div class="metric-card"><div class="metric-label">Rev/Visitor (Ctrl)</div><div class="metric-val">$${fmt(v.rvc)}</div></div>
+        <div class="metric-card"><div class="metric-label">Rev/Visitor (Var)</div><div class="metric-val">$${fmt(v.rvv)}</div></div>
+        <div class="metric-card"><div class="metric-label">Revenue Lift</div><div class="metric-val" style="color:${v.rl>=0?'var(--pri)':'var(--red)'}">${v.rl>=0?'+':''}${fmtR(v.rl*100)}</div></div>
+      </div>`:''}
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function renderPower(el){
+  const v0=R.vr[0];
+  let rows='';
+  [0.5,1,1.5,2,2.5,3,4,5,7,10].forEach(mde=>{
+    const n=calcSampleSize(R.br,mde/100);
+    const pw=calcPower(n,R.br,n,R.br+mde/100)*100;
+    rows+=`<tr><td>${mde}%</td><td>${n.toLocaleString()}</td><td>${(n*S.numVariants).toLocaleString()}</td><td style="color:${pw>=80?'var(--pri)':'var(--warn)'}">${fmtR(pw,1)}</td></tr>`;
+  });
+  el.innerHTML=`
+    <div class="card">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px">Power Curve</div>
+      ${powerCurveSVG(R.br,R.ctrl.visitors,v0?.visitors||10000)}
+      <div style="margin-top:10px;font-size:11px;color:#444;text-align:center">Statistical power vs. minimum detectable effect at current sample size</div>
+    </div>
+    <div class="card">
+      <div style="font-size:16px;font-weight:800;margin-bottom:16px">Sample Size Table</div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>MDE</th><th>Sample / Variant</th><th>Total Sample</th><th>Power</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="background:rgba(var(--acc-rgb),0.03);border-color:rgba(var(--acc-rgb),0.1)">
+      <div style="font-size:14px;color:var(--t1);line-height:1.9">
+        With <strong style="color:var(--t0)">${R.ctrl.visitors.toLocaleString()}</strong> visitors per variant and a baseline rate of <strong style="color:var(--pri)">${fmtP(R.br)}</strong>, your MDE is <strong style="color:var(--acc)">${fmtP(v0?.mde)}</strong>. You can reliably detect changes of this size or larger with 80% power at ${S.confidence}% confidence.
+      </div>
+    </div>`;
+}
+
+function renderSimulation(el){
+  const sim=S.simResult;
+  el.innerHTML=`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:16px;font-weight:800">Monte Carlo Simulation</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">5,000 randomized trials for probabilistic outcome estimation</div>
+        </div>
+        <button class="btn btn-primary" id="simBtn" onclick="runSim()">Run Simulation</button>
+      </div>
+      ${sim?`
+        <div class="metrics-grid g3">
+          <div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:28px;color:var(--pri)">${fmtR(sim.winRate,1)}</div><div class="metric-label">Win Rate</div></div>
+          <div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:28px;color:var(--red)">${fmtR(sim.lossRate,1)}</div><div class="metric-label">Loss Rate</div></div>
+          <div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:28px;color:var(--warn)">${fmtR(sim.incRate,1)}</div><div class="metric-label">Inconclusive</div></div>
+        </div>
+        <div class="card" style="margin-top:14px;margin-bottom:0">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px">Lift Distribution (Percentiles)</div>
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            ${[{l:'P5',v:sim.p5},{l:'P25',v:sim.p25},{l:'Median',v:sim.p50},{l:'P75',v:sim.p75},{l:'P95',v:sim.p95}].map(p=>`
+              <div style="text-align:center;flex:1;min-width:60px">
+                <div style="font-size:16px;font-weight:800;font-family:var(--mono);color:${p.v>=0?'var(--pri)':'var(--red)'}">${p.v>=0?'+':''}${fmtR(p.v,1)}</div>
+                <div style="font-size:10px;color:var(--t2);margin-top:2px">${p.l}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      `:`<div class="empty-state" style="padding:40px"><div class="icon">🎲</div><div class="title">Run a Simulation</div><div class="desc">Click the button above to run 5,000 randomized trials</div></div>`}
+    </div>`;
+}
+
+function runSim(){
+  if(!R||R.vr.length===0)return;
+  const btn=document.getElementById('simBtn');
+  btn.textContent='Running…';btn.disabled=true;
+  setTimeout(()=>{
+    const v=R.vr[0];
+    S.simResult=runSimulation(R.ctrl.visitors,R.ctrl.conversions,v.visitors,v.conversions);
+    btn.textContent='Run Simulation';btn.disabled=false;
+    render();
+  },50);
+}
+
+function renderInsights(el){
+  let h='';
+  R.vr.forEach(v=>{
+    const vd=verdict(v);
+    const winner=v.sig&&v.lift>0;
+    const loser=v.sig&&v.lift<0;
+    const lowPw=v.pw<80;
+    let advice='';
+    if(winner){
+      const projImpact=Math.round(100000*v.lift).toLocaleString();
+      advice=`<p><strong style="color:var(--pri)">✅ Recommendation: Deploy this variant.</strong></p>
+        <p>${v.name} shows a statistically significant improvement of <strong>${fmtR(v.lift*100)}</strong> over the control (p = ${fmt(v.pv,4)}). With ${fmtR(v.pw)} statistical power, this result is reliable. The ${S.confidence}% CI for conversion rate is [${fmtP(v.ci[0])} – ${fmtP(v.ci[1])}].</p>
+        <p style="margin-top:8px;color:var(--t2)">Projected impact: If baseline generates 100K conversions/year, this lift adds ~${projImpact} additional conversions annually.</p>`;
+    } else if(loser){
+      advice=`<p><strong style="color:var(--red)">❌ Recommendation: Do NOT deploy.</strong></p>
+        <p>${v.name} performs significantly worse than control with a ${fmtR(v.lift*100)} decline (p = ${fmt(v.pv,4)}). Revert to control.</p>`;
+    } else if(!v.sig&&lowPw){
+      const periods=Math.ceil(v.ss/(R.ctrl.visitors||1));
+      advice=`<p><strong style="color:var(--warn)">⏳ Recommendation: Continue the test.</strong></p>
+        <p>Not significant (p = ${fmt(v.pv,4)}) with only ${fmtR(v.pw)} power (below 80%). Need ~<strong>${v.ss.toLocaleString()}</strong> visitors/variant to detect this effect reliably.</p>
+        <p style="margin-top:8px;color:var(--t2)">At current traffic, this requires ~${periods} more collection periods of equal duration.</p>`;
+    } else {
+      advice=`<p><strong style="color:var(--acc)">🔄 Recommendation: No action needed.</strong></p>
+        <p>With adequate power (${fmtR(v.pw)}), no significant difference detected. The true effect is likely smaller than MDE of ${fmtP(v.mde)}. Consider if this small an effect matters before running a larger test.</p>`;
+    }
+    h+=`<div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="font-size:18px;font-weight:800">${v.name}</span>
+        <span class="verdict" style="background:${vd.bg};color:${vd.c};border:1px solid ${vd.c}22">${vd.t}</span>
+      </div>
+      <div style="font-size:14px;color:var(--t1);line-height:2">${advice}</div>
+    </div>`;
+  });
+  h+=`<div class="card" style="background:rgba(var(--acc-rgb),0.03);border-color:rgba(var(--acc-rgb),0.1)">
+    <div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">📐 Methodology</div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.9">
+      Uses a two-proportion Z-test (frequentist) with pooled standard error. P-values via normal approximation. Power via non-central normal distribution. CIs use the Wald method. Monte Carlo runs 5,000 binomial-sampled trials. All computation is client-side — no data leaves your browser.
+    </div>
+  </div>`;
+  el.innerHTML=h;
+}
+
+// ── Excel Export ──
+function exportExcel(){
+  if(!R)return;
+  const wb=XLSX.utils.book_new();
+
+  // Summary
+  const sum=[
+    ['A/B Test Analysis Report — Datapad'],
+    ['Generated',new Date().toLocaleString()],
+    ['Confidence',S.confidence+'%'],['Hypothesis',S.hypothesis==='two'?'Two-sided':'One-sided'],['Mode',S.mode],
+    [],
+    ['Metric','Control',...R.vr.map(v=>v.name)],
+    ['Visitors',R.ctrl.visitors,...R.vr.map(v=>v.visitors)],
+    ['Conversions',R.ctrl.conversions,...R.vr.map(v=>v.conversions)],
+    ['Conversion Rate',fmtP(R.br),...R.vr.map(v=>fmtP(v.rate))],
+    ['Relative Lift','—',...R.vr.map(v=>fmtR(v.lift*100))],
+    ['Absolute Diff','—',...R.vr.map(v=>fmtP(v.ad))],
+    ['P-Value','—',...R.vr.map(v=>fmt(v.pv,6))],
+    ['Significant?','—',...R.vr.map(v=>v.sig?'YES ✓':'NO')],
+    ['Statistical Power','—',...R.vr.map(v=>fmtR(v.pw))],
+    ['MDE','—',...R.vr.map(v=>fmtP(v.mde))],
+    ['CI Lower',fmtP(R.vr[0]?.ciC?.[0]),...R.vr.map(v=>fmtP(v.ci[0]))],
+    ['CI Upper',fmtP(R.vr[0]?.ciC?.[1]),...R.vr.map(v=>fmtP(v.ci[1]))],
+    ['Sample Needed','—',...R.vr.map(v=>v.ss.toLocaleString())],
+  ];
+  if(S.mode==='revenue'){
+    sum.push(['Rev/Visitor (Ctrl)','$'+fmt(R.vr[0]?.rvc)]);
+    sum.push(['Rev/Visitor (Var)','—',...R.vr.map(v=>'$'+fmt(v.rvv))]);
+    sum.push(['Revenue Lift','—',...R.vr.map(v=>fmtR(v.rl*100))]);
+  }
+  const ws1=XLSX.utils.aoa_to_sheet(sum);
+  ws1['!cols']=[{wch:22},{wch:16},{wch:16},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+
+  // Insights
+  const ins=[['Insights & Recommendations'],[]];
+  R.vr.forEach(v=>{
+    const w=v.sig&&v.lift>0;
+    ins.push([v.name+' Analysis']);
+    ins.push(['Status',v.sig?'Statistically Significant':'Not Significant']);
+    ins.push(['Recommendation',w?`${v.name} shows ${fmtR(v.lift*100)} lift (p=${fmt(v.pv,4)}). Deploy.`:v.pw<80?`Need more data. Power=${fmtR(v.pw)}. Need ~${v.ss.toLocaleString()} visitors/variant.`:`No significant difference. MDE=${fmtP(v.mde)}.`]);
+    ins.push([]);
+  });
+  const ws2=XLSX.utils.aoa_to_sheet(ins);
+  ws2['!cols']=[{wch:22},{wch:80}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Insights');
+
+  // Simulation
+  if(S.simResult){
+    const sd=[['Monte Carlo Simulation (5,000 runs)'],[],['Metric','Value'],
+      ['Win Rate',fmtR(S.simResult.winRate)],['Loss Rate',fmtR(S.simResult.lossRate)],['Inconclusive',fmtR(S.simResult.incRate)],
+      [],['Lift Distribution'],['P5',fmtR(S.simResult.p5)],['P25',fmtR(S.simResult.p25)],['Median',fmtR(S.simResult.p50)],['P75',fmtR(S.simResult.p75)],['P95',fmtR(S.simResult.p95)]];
+    const ws3=XLSX.utils.aoa_to_sheet(sd);
+    ws3['!cols']=[{wch:22},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Simulation');
+  }
+
+  // Power Analysis
+  const pa=[['MDE (%)','Sample / Variant','Total Sample']];
+  [0.5,1,1.5,2,2.5,3,4,5,7,10].forEach(m=>{
+    const n=calcSampleSize(R.br,m/100);
+    pa.push([m+'%',n,n*S.numVariants]);
+  });
+  const ws4=XLSX.utils.aoa_to_sheet(pa);
+  ws4['!cols']=[{wch:14},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws4,'Power Analysis');
+
+  XLSX.writeFile(wb,`AB_Test_Analysis_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ── Close guide on escape ──
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('guideModal').classList.remove('open');});
+document.getElementById('guideModal').addEventListener('click',e=>{if(e.target===document.getElementById('guideModal'))toggleGuide();});
+
+// ── Init ──
+buildInputs();
+compute();
+</script>
+</body>
+</html>

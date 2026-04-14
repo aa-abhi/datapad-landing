@@ -4,7 +4,7 @@
   <!-- Datapad Homepage -->
   <url>
     <loc>https://datapad.in/</loc>
-    <lastmod>2026-02-09</lastmod>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -13,6 +13,14 @@
   <url>
     <loc>https://datapad.in/json-studio</loc>
     <lastmod>2026-02-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- A/B Test Calculator -->
+  <url>
+    <loc>https://datapad.in/ab-test-calculator</loc>
+    <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
