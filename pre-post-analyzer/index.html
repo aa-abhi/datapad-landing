@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pre/Post Impact Analyzer – Datapad</title>
+  <meta name="description" content="Advanced pre/post impact analysis tool. Compare conversion rates, revenue, and key metrics before and after a change with statistical rigor."/>
+  <meta property="og:title" content="Pre/Post Impact Analyzer – Datapad"/>
+  <meta property="og:description" content="Measure pre/post impact with statistical tests, visualizations, and Excel export."/>
+  <meta property="og:type" content="website"/>
+  <link rel="icon" href="/favicon.ico"/>
+  <link rel="canonical" href="https://datapad.in/pre-post-analyzer"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --pri:#00ff88; --pri-rgb:0,255,136;
+      --acc:#00d4ff; --acc-rgb:0,212,255;
+      --red:#ff4466; --warn:#ffaa00;
+      --pre-color:#a78bfa; --pre-rgb:167,139,250;
+      --post-color:#00ff88; --post-rgb:0,255,136;
+      --bg0:#050508; --bg1:#0a0a0f; --bg2:#111118; --bg3:#1a1a24;
+      --t0:#fff; --t1:#c8c8d4; --t2:#6e6e82;
+      --brd:rgba(255,255,255,0.06);
+      --r:14px; --rs:10px;
+      --font:'Outfit',sans-serif; --mono:'Fira Code',monospace;
+      --ease:cubic-bezier(0.16,1,0.3,1);
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font); background:var(--bg0); color:var(--t0); line-height:1.6; overflow-x:hidden; -webkit-font-smoothing:antialiased; min-height:100vh; }
+    body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:0.02; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:128px; }
+
+    /* Header */
+    .app-header { padding:14px 24px; border-bottom:1px solid var(--brd); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:rgba(5,5,8,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); position:sticky; top:0; z-index:100; }
+    .header-left { display:flex; align-items:center; gap:14px; }
+    .header-left a { text-decoration:none; color:inherit; display:flex; align-items:center; gap:14px; }
+    .logo-box { width:40px; height:40px; background:var(--bg2); border:1px solid rgba(var(--pri-rgb),0.2); border-radius:var(--rs); display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--pri); font-weight:800; font-family:var(--mono); }
+    .header-title { font-size:18px; font-weight:800; letter-spacing:-0.3px; }
+    .header-sub { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:2px; }
+    .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+    /* Buttons */
+    .btn { padding:8px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.25s var(--ease); display:inline-flex; align-items:center; gap:6px; border:none; }
+    .btn-ghost { background:rgba(var(--pri-rgb),0.06); border:1px solid rgba(var(--pri-rgb),0.15); color:var(--pri); }
+    .btn-ghost:hover { background:rgba(var(--pri-rgb),0.12); border-color:rgba(var(--pri-rgb),0.3); }
+    .btn-primary { background:var(--pri); color:var(--bg0); font-weight:700; border:2px solid var(--pri); }
+    .btn-primary:hover { background:transparent; color:var(--pri); box-shadow:0 0 24px rgba(var(--pri-rgb),0.25); }
+    .btn-primary:disabled { opacity:0.35; cursor:not-allowed; }
+    .btn-primary:disabled:hover { background:var(--pri); color:var(--bg0); box-shadow:none; }
+    .btn-back { background:transparent; border:1px solid var(--brd); color:var(--t2); padding:8px 14px; }
+    .btn-back:hover { border-color:rgba(var(--pri-rgb),0.2); color:var(--t1); }
+
+    /* Layout */
+    .app-body { display:grid; grid-template-columns:420px 1fr; min-height:calc(100vh - 56px); }
+    .sidebar { border-right:1px solid var(--brd); padding:24px; overflow-y:auto; background:var(--bg1); }
+    .main-panel { padding:24px; overflow-y:auto; }
+
+    /* Common */
+    .sec-label { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:2.5px; margin-bottom:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
+    .input-group { margin-bottom:16px; }
+    .input-label { font-size:12px; color:#888; margin-bottom:5px; display:flex; align-items:center; gap:6px; font-weight:500; }
+    .input-field { width:100%; padding:10px 12px; background:var(--bg2); border:1px solid var(--brd); border-radius:8px; color:var(--t0); font-size:14px; font-family:var(--mono); outline:none; transition:border-color 0.2s; }
+    .input-field:focus { border-color:rgba(var(--pri-rgb),0.35); }
+    .input-field::placeholder { color:#444; }
+    .toggle-row { display:flex; gap:4px; }
+    .toggle-btn { flex:1; padding:9px 8px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.2s; border:1px solid var(--brd); background:var(--bg2); color:var(--t2); text-align:center; }
+    .toggle-btn.active { border-color:rgba(var(--pri-rgb),0.3); background:rgba(var(--pri-rgb),0.08); color:var(--pri); }
+    .toggle-btn:hover:not(.active) { border-color:rgba(255,255,255,0.1); color:var(--t1); }
+    input[type=range] { width:100%; accent-color:var(--pri); cursor:pointer; }
+    .divider { height:1px; background:var(--brd); margin:20px 0; }
+    .card { background:var(--bg1); border:1px solid var(--brd); border-radius:var(--r); padding:24px; margin-bottom:16px; }
+
+    /* Tab Bar */
+    .tab-bar { display:flex; gap:4px; margin-bottom:24px; background:var(--bg1); border-radius:var(--rs); padding:4px; border:1px solid var(--brd); }
+    .tab-btn { flex:1; padding:10px 16px; border-radius:8px; border:none; background:transparent; color:var(--t2); font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.2s; text-align:center; }
+    .tab-btn.active { background:rgba(var(--pri-rgb),0.1); color:var(--pri); }
+    .tab-btn:hover:not(.active) { color:var(--t1); }
+
+    /* Metrics */
+    .mg { display:grid; gap:12px; }
+    .mg2 { grid-template-columns:1fr 1fr; }
+    .mg3 { grid-template-columns:1fr 1fr 1fr; }
+    .mg4 { grid-template-columns:repeat(4,1fr); }
+    .mc { background:var(--bg1); border:1px solid var(--brd); border-radius:var(--rs); padding:14px; }
+    .ml { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; font-weight:600; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+    .mv { font-size:20px; font-weight:800; font-family:var(--mono); }
+    .verdict { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:100px; font-size:13px; font-weight:700; }
+    .gauge-row { display:flex; justify-content:space-around; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
+    .gauge { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .gauge-label { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:4px; }
+    .data-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .data-table th { padding:10px 12px; text-align:left; color:var(--t2); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .data-table th:not(:first-child) { text-align:right; }
+    .data-table td { padding:10px 12px; font-family:var(--mono); border-bottom:1px solid rgba(255,255,255,0.03); }
+    .data-table td:not(:first-child) { text-align:right; }
+
+    /* Tooltip */
+    .info-btn { width:16px; height:16px; border-radius:50%; background:rgba(var(--acc-rgb),0.1); border:1px solid rgba(var(--acc-rgb),0.2); color:var(--acc); font-size:9px; font-weight:800; cursor:help; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font); transition:all 0.2s; flex-shrink:0; position:relative; font-style:normal; }
+    .info-btn:hover { background:rgba(var(--acc-rgb),0.2); border-color:rgba(var(--acc-rgb),0.4); transform:scale(1.1); z-index:60; }
+    .info-tip { position:fixed; width:290px; padding:14px 16px; background:var(--bg3); border:1px solid rgba(var(--acc-rgb),0.25); border-radius:var(--rs); font-size:12px; font-weight:400; color:var(--t1); line-height:1.7; z-index:9999; pointer-events:none; opacity:0; visibility:hidden; box-shadow:0 16px 48px rgba(0,0,0,0.7); text-transform:none; letter-spacing:0; font-family:var(--font); }
+    .info-tip .tip-title { color:var(--acc); display:block; margin-bottom:4px; font-weight:700; font-size:12px; }
+    .info-tip .tip-range { margin-top:6px; padding:6px 8px; background:rgba(var(--acc-rgb),0.06); border-radius:6px; font-family:var(--mono); font-size:11px; color:var(--pri); }
+    .info-tip .tip-bad { color:var(--red); }
+
+    /* Period box */
+    .period-box { background:var(--bg0); border:1px solid var(--brd); border-radius:12px; padding:20px; margin-bottom:16px; }
+    .period-box.pre-box { border-left:3px solid var(--pre-color); }
+    .period-box.post-box { border-left:3px solid var(--post-color); }
+    .period-header { font-size:14px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .period-dot { width:8px; height:8px; border-radius:50%; }
+    .field-grid { display:grid; gap:10px; }
+    .field-grid.fg2 { grid-template-columns:1fr 1fr; }
+    .field-grid.fg3 { grid-template-columns:1fr 1fr 1fr; }
+    .field-item label { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:block; font-weight:600; }
+    .field-item input { width:100%; padding:9px 10px; background:var(--bg2); border:1px solid var(--brd); border-radius:8px; color:var(--t0); font-size:13px; font-family:var(--mono); outline:none; transition:border-color 0.2s; }
+    .field-item input:focus { border-color:rgba(var(--pri-rgb),0.35); }
+    .field-item input::placeholder { color:#444; }
+
+    /* Caution */
+    .caution-banner { padding:12px 16px; background:rgba(255,170,0,0.06); border:1px solid rgba(255,170,0,0.15); border-radius:var(--rs); margin-bottom:16px; font-size:12px; color:var(--warn); line-height:1.7; }
+    .caution-banner strong { color:var(--warn); }
+    .warn-box { margin-top:10px; padding:10px 12px; background:rgba(255,170,0,0.06); border:1px solid rgba(255,170,0,0.15); border-radius:8px; font-size:11px; color:var(--warn); line-height:1.7; }
+    .tip-box { margin-top:16px; padding:12px 14px; background:rgba(var(--acc-rgb),0.04); border:1px solid rgba(var(--acc-rgb),0.1); border-radius:var(--rs); font-size:11px; color:var(--t2); line-height:1.7; }
+    .tip-box em { color:var(--acc); font-style:normal; font-weight:700; }
+    .empty-state { text-align:center; padding:60px 20px; }
+    .empty-icon { font-size:48px; margin-bottom:12px; }
+    .empty-title { font-size:18px; font-weight:700; margin-bottom:8px; }
+    .empty-desc { font-size:14px; color:var(--t2); }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:1000; display:none; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--bg1); border:1px solid rgba(var(--pri-rgb),0.15); border-radius:16px; padding:40px; max-width:660px; width:90vw; max-height:80vh; overflow-y:auto; color:var(--t1); font-size:14px; line-height:1.9; }
+    .modal-box h2 { font-size:22px; font-weight:800; color:var(--t0); margin-bottom:24px; }
+    .modal-box h3 { color:var(--pri); font-weight:700; font-size:15px; margin:20px 0 6px; }
+    .modal-box p { margin-bottom:8px; }
+    .modal-box strong { color:var(--t0); }
+    .modal-close { float:right; background:none; border:none; color:var(--t2); font-size:20px; cursor:pointer; }
+
+    /* Footer */
+    .app-footer { border-top:1px solid var(--brd); padding:20px 24px; text-align:center; font-size:11px; color:var(--t2); }
+    .app-footer a { color:var(--pri); text-decoration:none; font-weight:600; }
+    .app-footer a:hover { text-decoration:underline; }
+
+    /* Responsive */
+    @media (max-width:900px) { .app-body { grid-template-columns:1fr; } .sidebar { border-right:none; border-bottom:1px solid var(--brd); } .mg4 { grid-template-columns:1fr 1fr; } .tab-bar { flex-wrap:wrap; } .field-grid.fg3 { grid-template-columns:1fr 1fr; } }
+    @media (max-width:500px) { .app-header { padding:12px 16px; } .sidebar,.main-panel { padding:16px; } .mg4,.mg3 { grid-template-columns:1fr; } .header-title { font-size:15px; } .field-grid.fg2,.field-grid.fg3 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="info-tip" id="globalTip"></div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-left">
+    <a href="/"><div class="logo-box">DP</div><div><div class="header-title">Pre/Post Impact Analyzer</div><div class="header-sub">by Datapad</div></div></a>
+  </div>
+  <div class="header-right">
+    <a href="/" class="btn btn-back">&larr; Home</a>
+    <button class="btn btn-ghost" onclick="toggleGuide()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg> Guide</button>
+    <button class="btn btn-primary" id="exportBtn" disabled onclick="doExport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Export Excel</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="app-body">
+  <div class="sidebar">
+    <div class="sec-label">Configuration</div>
+
+    <div class="input-group">
+      <label class="input-label">Test Type <span class="info-btn" data-tip="<span class='tip-title'>Test Type</span><strong>Conversion:</strong> Compare conversion rates (visitors &rarr; conversions). Uses two-proportion Z-test.<br><strong>Revenue:</strong> Also compare revenue metrics (total revenue, rev/visitor, rev/conversion).">i</span></label>
+      <div class="toggle-row">
+        <button class="toggle-btn active" onclick="setMode('conversion',this)">Conversion</button>
+        <button class="toggle-btn" onclick="setMode('revenue',this)">Revenue</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Confidence: <span id="confLabel">95</span>% <span class="info-btn" data-tip="<span class='tip-title'>Confidence Level</span>How certain you need to be. &alpha; = 1 &minus; confidence.<div class='tip-range'>&check; Standard: 95% &nbsp; &check; Conservative: 99%</div>">i</span></label>
+      <input type="range" min="80" max="99" step="1" value="95" oninput="setConf(this.value)"/>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:4px"><span>80%</span><span>90%</span><span>95%</span><span>99%</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PRE PERIOD -->
+    <div class="sec-label"><span class="period-dot" style="background:var(--pre-color)"></span> Pre-Period (Before Change)</div>
+    <div class="period-box pre-box">
+      <div class="field-grid fg2" id="preFields"></div>
+    </div>
+
+    <!-- POST PERIOD -->
+    <div class="sec-label" style="margin-top:8px"><span class="period-dot" style="background:var(--post-color)"></span> Post-Period (After Change)</div>
+    <div class="period-box post-box">
+      <div class="field-grid fg2" id="postFields"></div>
+    </div>
+
+    <div id="warnBox"></div>
+
+    <div class="tip-box">
+      <em>Tip:</em> Pre-filled with sample data. Replace with your numbers. All computation runs locally &mdash; no data leaves your browser.
+    </div>
+    <div class="tip-box" style="margin-top:8px;background:rgba(255,170,0,0.04);border-color:rgba(255,170,0,0.1)">
+      <em style="color:var(--warn)">&nbsp;Caution:</em> Pre/post analysis shows whether a change occurred but cannot prove your intervention caused it. For causal inference, use <a href="/ab-test-calculator" style="color:var(--pri)">A/B testing</a>.
+    </div>
+  </div>
+
+  <div class="main-panel">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setTab('results',this)">Results</button>
+      <button class="tab-btn" onclick="setTab('comparison',this)">Comparison</button>
+      <button class="tab-btn" onclick="setTab('insights',this)">Insights</button>
+    </div>
+    <div id="tabContent"></div>
+  </div>
+</div>
+
+<div class="app-footer"><a href="/">Datapad</a> &middot; Pre/Post Impact Analyzer &middot; &copy; 2026</div>
+
+<!-- GUIDE -->
+<div class="modal-overlay" id="guideModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="toggleGuide()">&times;</button>
+    <h2>How to Use the Pre/Post Analyzer</h2>
+    <h3>1. Enter Summary Data</h3>
+    <p>Input <strong>visitors</strong> and <strong>conversions</strong> for the pre-period (before your change) and post-period (after). For revenue analysis, toggle to "Revenue" and add total revenue.</p>
+    <h3>2. Read Results</h3>
+    <p>The calculator auto-computes conversion rates, statistical significance (Z-test), confidence intervals, effect size, and lift. All metrics have <span style="display:inline-flex;width:16px;height:16px;border-radius:50%;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);color:#00d4ff;font-size:9px;font-weight:800;align-items:center;justify-content:center">i</span> info buttons explaining what they mean.</p>
+    <h3>3. Revenue Mode</h3>
+    <p>When enabled, also compares revenue per visitor, revenue per conversion, and total revenue change.</p>
+    <h3>4. Export</h3>
+    <p>Download a multi-sheet Excel report with all metrics and insights.</p>
+    <h3>Key Difference from A/B Test</h3>
+    <p>A/B tests use randomized concurrent groups. Pre/post compares sequential time periods. Pre/post <strong>cannot prove causation</strong> because external factors (seasonality, market changes) may explain the difference.</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// TOOLTIP SYSTEM
+// ═══════════════════════════════════════
+(function(){
+  var tip = document.getElementById('globalTip');
+  var cur = null;
+  document.addEventListener('mouseover', function(e){
+    var btn = e.target.closest('.info-btn');
+    if (!btn || !btn.dataset.tip) return;
+    cur = btn;
+    tip.innerHTML = btn.dataset.tip;
+    tip.style.top = '-9999px';
+    tip.style.left = '-9999px';
+    tip.style.visibility = 'hidden';
+    tip.style.opacity = '0';
+    tip.style.display = 'block';
+    var tipH = tip.offsetHeight;
+    var tipW = 290;
+    var rect = btn.getBoundingClientRect();
+    var top = rect.top - tipH - 8;
+    var left = rect.left + rect.width/2 - tipW/2;
+    if (top < 8) top = rect.bottom + 8;
+    if (left < 8) left = 8;
+    if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+    tip.style.top = top + 'px';
+    tip.style.left = left + 'px';
+    tip.style.visibility = 'visible';
+    tip.style.opacity = '1';
+  });
+  document.addEventListener('mouseout', function(e){
+    if (e.target.closest('.info-btn') === cur) {
+      tip.style.visibility = 'hidden';
+      tip.style.opacity = '0';
+      cur = null;
+    }
+  });
+})();
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+var S = {
+  mode: 'conversion',
+  confidence: 95,
+  activeTab: 'results',
+  pre: { visitors: 15000, conversions: 450, revenue: 2250000 },
+  post: { visitors: 14800, conversions: 520, revenue: 2860000 }
+};
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function normalCDF(x) {
+  var a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  var sign=x<0?-1:1; x=Math.abs(x)/Math.SQRT2;
+  var t=1/(1+p*x);
+  return 0.5*(1+sign*(1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x)));
+}
+
+function normalPPF(p) {
+  if(p<=0)return-Infinity; if(p>=1)return Infinity; if(p<0.5)return-normalPPF(1-p);
+  var t=Math.sqrt(-2*Math.log(1-p));
+  return t-(2.515517+0.802853*t+0.010328*t*t)/(1+1.432788*t+0.189269*t*t+0.001308*t*t*t);
+}
+
+// Two-proportion Z-test
+function propZTest(n1, c1, n2, c2) {
+  if (!n1 || !n2 || n1 <= 0 || n2 <= 0) return null;
+  var p1 = c1 / n1, p2 = c2 / n2;
+  var pooled = (c1 + c2) / (n1 + n2);
+  var se = Math.sqrt(pooled * (1 - pooled) * (1/n1 + 1/n2));
+  if (se === 0) return { z: 0, pValue: 1, p1: p1, p2: p2, diff: p2 - p1, se: 0 };
+  var z = (p2 - p1) / se;
+  var pValue = 2 * (1 - normalCDF(Math.abs(z)));
+  return { z: z, pValue: pValue, p1: p1, p2: p2, diff: p2 - p1, se: se };
+}
+
+// Wilson confidence interval for a proportion
+function wilsonCI(n, c, conf) {
+  if (!n || n <= 0) return [0, 0];
+  var p = c / n;
+  var z = normalPPF(1 - (1 - conf/100) / 2);
+  var denom = 1 + (z*z)/n;
+  var center = (p + (z*z)/(2*n)) / denom;
+  var margin = (z * Math.sqrt((p*(1-p)/n) + (z*z)/(4*n*n))) / denom;
+  return [Math.max(0, center - margin), Math.min(1, center + margin)];
+}
+
+// CI for difference of two proportions (Wald-based on pooled SE)
+function diffCI(diff, se, conf) {
+  if (se === 0) return [diff, diff];
+  var z = normalPPF(1 - (1 - conf/100) / 2);
+  return [diff - z * se, diff + z * se];
+}
+
+// Cohen's h (effect size for proportions)
+function cohenH(p1, p2) {
+  return 2 * Math.asin(Math.sqrt(p2)) - 2 * Math.asin(Math.sqrt(p1));
+}
+
+function effectLabel(h) {
+  h = Math.abs(h);
+  if (h < 0.2) return 'Negligible';
+  if (h < 0.5) return 'Small';
+  if (h < 0.8) return 'Medium';
+  return 'Large';
+}
+
+// ═══════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════
+function fmt(n, d) { d = d == null ? 2 : d; return isNaN(n)||!isFinite(n) ? '\u2014' : n.toFixed(d); }
+function fmtPct(n, d) { d = d == null ? 2 : d; return isNaN(n)||!isFinite(n) ? '\u2014' : (n*100).toFixed(d)+'%'; }
+function fmtRaw(n, d) { d = d == null ? 2 : d; return isNaN(n)||!isFinite(n) ? '\u2014' : n.toFixed(d)+'%'; }
+function fmtCur(n) { return isNaN(n)||!isFinite(n) ? '\u2014' : '\u20B9' + Math.round(n).toLocaleString('en-IN'); }
+function fmtNum(n) { return isNaN(n)||!isFinite(n) ? '\u2014' : Math.round(n).toLocaleString('en-IN'); }
+
+// ═══════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════
+function act(el) {
+  if (!el) return;
+  var sibs = el.parentNode.querySelectorAll('.toggle-btn,.tab-btn');
+  for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('active');
+  el.classList.add('active');
+}
+
+function setMode(m, el) { S.mode = m; act(el); buildInputs(); compute(); }
+function setConf(v) { S.confidence = +v; document.getElementById('confLabel').textContent = v; compute(); }
+function setTab(t, el) { S.activeTab = t; act(el); render(); }
+function toggleGuide() { document.getElementById('guideModal').classList.toggle('open'); }
+
+function onField(period, field, val) {
+  S[period][field] = val === '' ? '' : Math.max(0, Number(val));
+  compute();
+}
+
+// ═══════════════════════════════════════
+// BUILD INPUTS
+// ═══════════════════════════════════════
+function buildInputs() {
+  var isRev = S.mode === 'revenue';
+  var gridClass = isRev ? 'fg3' : 'fg2';
+
+  ['pre', 'post'].forEach(function(period) {
+    var el = document.getElementById(period + 'Fields');
+    var d = S[period];
+    var h = '';
+    h += '<div class="field-item"><label>Visitors / Leads</label><input type="number" min="0" value="' + (d.visitors === '' ? '' : d.visitors) + '" placeholder="e.g. 15000" oninput="onField(\'' + period + '\',\'visitors\',this.value)"/></div>';
+    h += '<div class="field-item"><label>Conversions / Sales</label><input type="number" min="0" value="' + (d.conversions === '' ? '' : d.conversions) + '" placeholder="e.g. 450" oninput="onField(\'' + period + '\',\'conversions\',this.value)"/></div>';
+    if (isRev) {
+      h += '<div class="field-item"><label>Total Revenue (\u20B9)</label><input type="number" min="0" value="' + (d.revenue === '' ? '' : d.revenue) + '" placeholder="e.g. 2250000" oninput="onField(\'' + period + '\',\'revenue\',this.value)"/></div>';
+    }
+    el.className = 'field-grid ' + gridClass;
+    el.innerHTML = h;
+  });
+}
+
+// ═══════════════════════════════════════
+// COMPUTE
+// ═══════════════════════════════════════
+var R = null;
+
+function compute() {
+  var pre = S.pre, post = S.post;
+  var warns = [];
+
+  if (pre.visitors && pre.conversions > pre.visitors) warns.push('\u26A0 Pre: conversions exceed visitors.');
+  if (post.visitors && post.conversions > post.visitors) warns.push('\u26A0 Post: conversions exceed visitors.');
+  document.getElementById('warnBox').innerHTML = warns.length ? '<div class="warn-box">' + warns.join('<br>') + '</div>' : '';
+
+  if (!pre.visitors || !pre.conversions || !post.visitors || !post.conversions) {
+    R = null; render(); return;
+  }
+
+  var alpha = 1 - S.confidence / 100;
+
+  // Conversion analysis (Z-test)
+  var zTest = propZTest(pre.visitors, pre.conversions, post.visitors, post.conversions);
+  if (!zTest) { R = null; render(); return; }
+
+  var preRate = zTest.p1;
+  var postRate = zTest.p2;
+  var lift = preRate === 0 ? 0 : (postRate - preRate) / preRate;
+  var isSignificant = zTest.pValue < alpha;
+  var ci = diffCI(zTest.diff, zTest.se, S.confidence);
+  var ciPre = wilsonCI(pre.visitors, pre.conversions, S.confidence);
+  var ciPost = wilsonCI(post.visitors, post.conversions, S.confidence);
+  var h = cohenH(preRate, postRate);
+  var hLabel = effectLabel(h);
+
+  R = {
+    zTest: zTest, preRate: preRate, postRate: postRate, lift: lift,
+    isSignificant: isSignificant, ci: ci, ciPre: ciPre, ciPost: ciPost,
+    cohenH: h, hLabel: hLabel, alpha: alpha,
+    pre: pre, post: post
+  };
+
+  // Revenue metrics
+  if (S.mode === 'revenue' && pre.revenue && post.revenue) {
+    R.revPerVisitorPre = pre.revenue / pre.visitors;
+    R.revPerVisitorPost = post.revenue / post.visitors;
+    R.revPerConvPre = pre.revenue / pre.conversions;
+    R.revPerConvPost = post.revenue / post.conversions;
+    R.revPerVisitorLift = R.revPerVisitorPre === 0 ? 0 : (R.revPerVisitorPost - R.revPerVisitorPre) / R.revPerVisitorPre;
+    R.revPerConvLift = R.revPerConvPre === 0 ? 0 : (R.revPerConvPost - R.revPerConvPre) / R.revPerConvPre;
+    R.revTotalLift = pre.revenue === 0 ? 0 : (post.revenue - pre.revenue) / pre.revenue;
+    R.hasRevenue = true;
+  } else {
+    R.hasRevenue = false;
+  }
+
+  document.getElementById('exportBtn').disabled = false;
+  render();
+}
+
+// ═══════════════════════════════════════
+// VERDICT
+// ═══════════════════════════════════════
+function getVerdict() {
+  if (!R) return { text: 'Enter data', color: 'var(--t2)', bg: 'rgba(110,110,130,0.08)' };
+  if (R.isSignificant && R.lift > 0) return { text: '\uD83D\uDCC8 Significant Increase', color: 'var(--pri)', bg: 'rgba(0,255,136,0.08)' };
+  if (R.isSignificant && R.lift < 0) return { text: '\uD83D\uDCC9 Significant Decrease', color: 'var(--red)', bg: 'rgba(255,68,102,0.08)' };
+  return { text: '\uD83D\uDD04 No Significant Change', color: 'var(--acc)', bg: 'rgba(0,212,255,0.08)' };
+}
+
+// ═══════════════════════════════════════
+// SVG
+// ═══════════════════════════════════════
+function gaugeHTML(value, label, color, tipData, size) {
+  size = size || 90; var r = size/2-8; var circ = Math.PI*r;
+  var prog = Math.min(Math.max(value/100,0),1); var off = circ*(1-prog);
+  var tipAttr = tipData ? ' data-tip="' + tipData.replace(/"/g,'&quot;') + '"' : '';
+  return '<div class="gauge"><svg width="'+size+'" height="'+(size/2+10)+'"><path d="M 8 '+size/2+' A '+r+' '+r+' 0 0 1 '+(size-8)+' '+size/2+'" fill="none" stroke="var(--bg3)" stroke-width="6" stroke-linecap="round"/><path d="M 8 '+size/2+' A '+r+' '+r+' 0 0 1 '+(size-8)+' '+size/2+'" fill="none" stroke="'+color+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'" style="transition:stroke-dashoffset .8s var(--ease)"/><text x="'+size/2+'" y="'+(size/2-4)+'" text-anchor="middle" fill="'+color+'" font-size="16" font-weight="800" font-family="var(--font)">'+fmtRaw(value,1)+'</text></svg><span class="gauge-label">'+label+(tipData?' <span class="info-btn"'+tipAttr+'>i</span>':'')+'</span></div>';
+}
+
+function barCompare(prePct, postPct, w, h) {
+  w = w || 400; h = h || 100;
+  var maxPct = Math.max(prePct, postPct, 0.001);
+  var barH = 28;
+  var gap = 16;
+  var preW = (prePct / maxPct) * (w - 120);
+  var postW = (postPct / maxPct) * (w - 120);
+
+  var svg = '<svg width="'+w+'" height="'+h+'" style="display:block;max-width:100%">';
+  // Pre bar
+  var y1 = (h - barH*2 - gap) / 2;
+  svg += '<text x="0" y="'+(y1+barH/2+4)+'" fill="var(--pre-color)" font-size="11" font-weight="600" font-family="var(--font)">PRE</text>';
+  svg += '<rect x="40" y="'+y1+'" width="'+preW+'" height="'+barH+'" rx="6" fill="rgba(var(--pre-rgb),0.25)" stroke="var(--pre-color)" stroke-width="1"/>';
+  svg += '<text x="'+(45+preW)+'" y="'+(y1+barH/2+5)+'" fill="var(--pre-color)" font-size="13" font-weight="800" font-family="var(--mono)">'+fmtPct(prePct/100)+'</text>';
+  // Post bar
+  var y2 = y1 + barH + gap;
+  svg += '<text x="0" y="'+(y2+barH/2+4)+'" fill="var(--post-color)" font-size="11" font-weight="600" font-family="var(--font)">POST</text>';
+  svg += '<rect x="40" y="'+y2+'" width="'+postW+'" height="'+barH+'" rx="6" fill="rgba(var(--post-rgb),0.25)" stroke="var(--post-color)" stroke-width="1"/>';
+  svg += '<text x="'+(45+postW)+'" y="'+(y2+barH/2+5)+'" fill="var(--post-color)" font-size="13" font-weight="800" font-family="var(--mono)">'+fmtPct(postPct/100)+'</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  var el = document.getElementById('tabContent');
+  if (!R) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">\uD83D\uDCCA</div><div class="empty-title">Enter Your Data</div><div class="empty-desc">Fill in visitors and conversions for both periods to see results.</div></div>';
+    return;
+  }
+  if (S.activeTab === 'results') renderResults(el);
+  else if (S.activeTab === 'comparison') renderComparison(el);
+  else renderInsights(el);
+}
+
+function renderResults(el) {
+  var vd = getVerdict();
+  var lc = R.lift >= 0 ? 'var(--pri)' : 'var(--red)';
+  var pc = R.isSignificant ? 'var(--pri)' : 'var(--red)';
+
+  var h = '';
+
+  // Verdict card
+  h += '<div class="card">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">';
+  h += '<div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px;font-weight:800">Conversion Rate Analysis</span><span style="font-size:12px;color:var(--t2)">Two-proportion Z-test</span></div>';
+  h += '<span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div>';
+
+  // Gauges
+  h += '<div class="gauge-row">';
+  h += gaugeHTML((1-R.zTest.pValue)*100, 'Certainty (1\u2212p)', R.isSignificant ? 'var(--pri)' : 'var(--red)',
+    "<span class='tip-title'>Certainty (1 \u2212 p-value)</span>Strength of evidence against no difference. NOT the probability the change is real.<div class='tip-range'>\u2713 Above "+S.confidence+"% = significant</div>");
+  h += '<div class="gauge"><div style="font-size:32px;font-weight:900;color:'+lc+';letter-spacing:-1px">'+(R.lift>=0?'+':'')+fmtRaw(R.lift*100,1)+'</div>';
+  h += '<span class="gauge-label">Relative Lift <span class="info-btn" data-tip="<span class=\'tip-title\'>Relative Lift</span>(Post Rate \u2212 Pre Rate) / Pre Rate &times; 100">i</span></span></div>';
+  h += gaugeHTML(Math.min(Math.abs(R.cohenH)*62.5,100), 'Effect: '+R.hLabel, Math.abs(R.cohenH)>=0.5?'var(--acc)':'var(--warn)',
+    "<span class='tip-title'>Effect Size (Cohen&apos;s h)</span>Standardized measure for comparing proportions. Independent of sample size.<div class='tip-range'>Negligible: &lt;0.2 | Small: 0.2\u20130.5 | Medium: 0.5\u20130.8 | Large: &gt;0.8</div>");
+  h += '</div>';
+
+  // Metric cards
+  h += '<div class="mg mg4">';
+  h += '<div class="mc"><div class="ml">P-Value <span class="info-btn" data-tip="<span class=\'tip-title\'>P-Value</span>Probability of seeing this difference by chance. Two-sided Z-test.<div class=\'tip-range\'>\u2713 &lt; '+fmt(R.alpha,2)+' = significant</div>">i</span></div><div class="mv" style="color:'+pc+'">'+fmt(R.zTest.pValue,4)+'</div></div>';
+  h += '<div class="mc"><div class="ml">Z-Score <span class="info-btn" data-tip="<span class=\'tip-title\'>Z-Statistic</span>Number of standard errors the difference is from zero. |Z| &gt; 1.96 is significant at 95%.">i</span></div><div class="mv">'+fmt(R.zTest.z,3)+'</div></div>';
+  h += '<div class="mc"><div class="ml">Abs. Diff <span class="info-btn" data-tip="<span class=\'tip-title\'>Absolute Difference</span>Post Rate \u2212 Pre Rate in percentage points.">i</span></div><div class="mv" style="color:'+lc+'">'+(R.zTest.diff>=0?'+':'')+fmtPct(R.zTest.diff)+'</div></div>';
+  h += '<div class="mc"><div class="ml">Cohen&apos;s h <span class="info-btn" data-tip="<span class=\'tip-title\'>Cohen&apos;s h</span>Effect size for proportions using arcsine transformation. More appropriate than Cohen&apos;s d for rates.<div class=\'tip-range\'>0.2=Small | 0.5=Medium | 0.8=Large</div>">i</span></div><div class="mv" style="color:'+(Math.abs(R.cohenH)>=0.5?'var(--acc)':'var(--t1)')+'">'+fmt(R.cohenH,3)+' <span style="font-size:11px;color:var(--t2)">('+R.hLabel+')</span></div></div>';
+  h += '</div>';
+
+  // CI
+  h += '<div class="mc" style="margin-top:14px"><div class="ml">'+S.confidence+'% CI for Rate Difference <span class="info-btn" data-tip="<span class=\'tip-title\'>Confidence Interval</span>Range where the true difference in conversion rates likely falls. If this interval excludes 0, the change is significant.<div class=\'tip-range\'>Excludes 0 \u2192 significant</div>">i</span></div>';
+  h += '<div style="display:flex;align-items:center;gap:10px;margin-top:10px">';
+  h += '<span style="font-family:var(--mono);font-size:14px;color:'+(R.ci[0]>=0?'var(--pri)':'var(--red)')+'">'+(R.ci[0]>=0?'+':'')+fmtPct(R.ci[0])+'</span>';
+  h += '<div style="flex:1;height:8px;background:var(--bg3);border-radius:4px;position:relative;overflow:hidden">';
+  var zeroPos = R.ci[0] >= 0 ? -5 : R.ci[1] <= 0 ? 105 : Math.abs(R.ci[0])/(R.ci[1]-R.ci[0])*100;
+  h += '<div style="position:absolute;height:100%;background:linear-gradient(90deg,'+(R.ci[0]>=0?'rgba(var(--pri-rgb),0.4)':'rgba(255,68,102,0.3)')+','+(R.ci[1]>=0?'rgba(var(--pri-rgb),0.4)':'rgba(255,68,102,0.3)')+');border-radius:4px;left:5%;width:90%"></div>';
+  if (zeroPos > 0 && zeroPos < 100) h += '<div style="position:absolute;left:'+zeroPos+'%;width:2px;height:100%;background:var(--t2);border-radius:1px"></div>';
+  h += '</div>';
+  h += '<span style="font-family:var(--mono);font-size:14px;color:'+(R.ci[1]>=0?'var(--pri)':'var(--red)')+'">'+(R.ci[1]>=0?'+':'')+fmtPct(R.ci[1])+'</span></div>';
+  h += '<div style="font-size:10px;color:#444;margin-top:6px;text-align:center">'+(R.ci[0]>0||R.ci[1]<0?'Interval excludes 0 \u2192 significant change':'Interval includes 0 \u2192 not significant')+'</div></div>';
+
+  // Visual bar
+  h += '<div class="mc" style="margin-top:14px"><div class="ml">Conversion Rate Comparison</div>';
+  h += '<div style="margin-top:10px">'+barCompare(R.preRate*100, R.postRate*100)+'</div></div>';
+
+  h += '</div>';
+
+  // Revenue section
+  if (R.hasRevenue) {
+    h += '<div class="card">';
+    h += '<div style="font-size:18px;font-weight:800;margin-bottom:16px">Revenue Impact</div>';
+    h += '<div class="mg mg3">';
+    h += '<div class="mc"><div class="ml">Rev / Visitor <span class="info-btn" data-tip="<span class=\'tip-title\'>Revenue per Visitor</span>Total Revenue &divide; Visitors. Shows monetization efficiency.">i</span></div>';
+    h += '<div style="font-size:12px;color:var(--pre-color);margin-bottom:2px">Pre: '+fmtCur(R.revPerVisitorPre)+'</div>';
+    h += '<div style="font-size:12px;color:var(--post-color);margin-bottom:4px">Post: '+fmtCur(R.revPerVisitorPost)+'</div>';
+    h += '<div class="mv" style="color:'+(R.revPerVisitorLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)+'</div></div>';
+    h += '<div class="mc"><div class="ml">Rev / Conversion <span class="info-btn" data-tip="<span class=\'tip-title\'>Revenue per Conversion</span>Total Revenue &divide; Conversions. Average order value or deal size.">i</span></div>';
+    h += '<div style="font-size:12px;color:var(--pre-color);margin-bottom:2px">Pre: '+fmtCur(R.revPerConvPre)+'</div>';
+    h += '<div style="font-size:12px;color:var(--post-color);margin-bottom:4px">Post: '+fmtCur(R.revPerConvPost)+'</div>';
+    h += '<div class="mv" style="color:'+(R.revPerConvLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)+'</div></div>';
+    h += '<div class="mc"><div class="ml">Total Revenue <span class="info-btn" data-tip="<span class=\'tip-title\'>Total Revenue Change</span>Percentage change in total revenue between periods.">i</span></div>';
+    h += '<div style="font-size:12px;color:var(--pre-color);margin-bottom:2px">Pre: '+fmtCur(R.pre.revenue)+'</div>';
+    h += '<div style="font-size:12px;color:var(--post-color);margin-bottom:4px">Post: '+fmtCur(R.post.revenue)+'</div>';
+    h += '<div class="mv" style="color:'+(R.revTotalLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revTotalLift>=0?'+':'')+fmtRaw(R.revTotalLift*100,1)+'</div></div>';
+    h += '</div></div>';
+  }
+
+  el.innerHTML = h;
+}
+
+function renderComparison(el) {
+  var h = '<div class="card">';
+  h += '<div style="font-size:18px;font-weight:800;margin-bottom:16px">Side-by-Side Comparison</div>';
+  h += '<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Metric</th><th>Pre-Period</th><th>Post-Period</th><th>Change</th></tr></thead><tbody>';
+
+  // Core metrics
+  var rows = [
+    ['Visitors', fmtNum(R.pre.visitors), fmtNum(R.post.visitors), fmtRaw((R.post.visitors-R.pre.visitors)/R.pre.visitors*100,1)],
+    ['Conversions', fmtNum(R.pre.conversions), fmtNum(R.post.conversions), fmtRaw((R.post.conversions-R.pre.conversions)/R.pre.conversions*100,1)],
+    ['Conversion Rate', fmtPct(R.preRate), fmtPct(R.postRate), (R.lift>=0?'+':'')+fmtRaw(R.lift*100,1)],
+    ['Conv. Rate CI (Wilson)', fmtPct(R.ciPre[0])+' \u2013 '+fmtPct(R.ciPre[1]), fmtPct(R.ciPost[0])+' \u2013 '+fmtPct(R.ciPost[1]), '\u2014'],
+  ];
+
+  if (R.hasRevenue) {
+    rows.push(['Total Revenue', fmtCur(R.pre.revenue), fmtCur(R.post.revenue), (R.revTotalLift>=0?'+':'')+fmtRaw(R.revTotalLift*100,1)]);
+    rows.push(['Rev / Visitor', fmtCur(R.revPerVisitorPre), fmtCur(R.revPerVisitorPost), (R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)]);
+    rows.push(['Rev / Conversion', fmtCur(R.revPerConvPre), fmtCur(R.revPerConvPost), (R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)]);
+  }
+
+  rows.forEach(function(row) {
+    var changeColor = 'var(--t1)';
+    if (row[3] && row[3] !== '\u2014') {
+      var numVal = parseFloat(row[3]);
+      if (!isNaN(numVal)) changeColor = numVal >= 0 ? 'var(--pri)' : 'var(--red)';
+    }
+    h += '<tr><td>'+row[0]+'</td><td style="color:var(--pre-color)">'+row[1]+'</td><td style="color:var(--post-color)">'+row[2]+'</td><td style="color:'+changeColor+'">'+row[3]+'</td></tr>';
+  });
+
+  h += '</tbody></table></div></div>';
+
+  // Statistical summary
+  h += '<div class="card">';
+  h += '<div style="font-size:18px;font-weight:800;margin-bottom:16px">Statistical Summary</div>';
+  h += '<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
+  h += '<tr><td>Test Method</td><td>Two-proportion Z-test</td></tr>';
+  h += '<tr><td>Z-Score</td><td>'+fmt(R.zTest.z,4)+'</td></tr>';
+  h += '<tr><td>P-Value</td><td style="color:'+(R.isSignificant?'var(--pri)':'var(--red)')+'">'+fmt(R.zTest.pValue,6)+'</td></tr>';
+  h += '<tr><td>Significant at '+S.confidence+'%?</td><td style="color:'+(R.isSignificant?'var(--pri)':'var(--red)')+'">'+(R.isSignificant?'YES':'NO')+'</td></tr>';
+  h += '<tr><td>Cohen&apos;s h (effect size)</td><td>'+fmt(R.cohenH,4)+' ('+R.hLabel+')</td></tr>';
+  h += '<tr><td>'+S.confidence+'% CI for Difference</td><td>'+(R.ci[0]>=0?'+':'')+fmtPct(R.ci[0])+' to '+(R.ci[1]>=0?'+':'')+fmtPct(R.ci[1])+'</td></tr>';
+  h += '<tr><td>CI Method (Rates)</td><td>Wilson</td></tr>';
+  h += '</tbody></table></div></div>';
+
+  el.innerHTML = h;
+}
+
+function renderInsights(el) {
+  var vd = getVerdict();
+
+  var h = '<div class="card">';
+  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap"><span style="font-size:18px;font-weight:800">Analysis Summary</span>';
+  h += '<span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div>';
+  h += '<div style="font-size:14px;color:var(--t1);line-height:2">';
+
+  if (R.isSignificant && R.lift > 0) {
+    h += '<p><strong style="color:var(--pri)">\u2705 The post-period shows a statistically significant increase in conversion rate.</strong></p>';
+    h += '<p>Conversion rate changed from <strong>'+fmtPct(R.preRate)+'</strong> to <strong>'+fmtPct(R.postRate)+'</strong>, a <strong style="color:var(--pri)">+'+ fmtRaw(R.lift*100,1)+'</strong> relative lift. With p = '+fmt(R.zTest.pValue,4)+' and Cohen&apos;s h = '+fmt(R.cohenH,2)+' ('+R.hLabel+' effect), this is unlikely due to random variation.</p>';
+    h += '<p>The '+S.confidence+'% CI for the difference is ['+(R.ci[0]>=0?'+':'')+fmtPct(R.ci[0])+', '+(R.ci[1]>=0?'+':'')+fmtPct(R.ci[1])+'].</p>';
+  } else if (R.isSignificant && R.lift < 0) {
+    h += '<p><strong style="color:var(--red)">\u274C The post-period shows a statistically significant decrease in conversion rate.</strong></p>';
+    h += '<p>Conversion rate dropped from <strong>'+fmtPct(R.preRate)+'</strong> to <strong>'+fmtPct(R.postRate)+'</strong> ('+fmtRaw(R.lift*100,1)+' change). P-value = '+fmt(R.zTest.pValue,4)+', Cohen&apos;s h = '+fmt(R.cohenH,2)+' ('+R.hLabel+').</p>';
+  } else {
+    h += '<p><strong style="color:var(--acc)">\uD83D\uDD04 No statistically significant change detected.</strong></p>';
+    h += '<p>Pre rate: '+fmtPct(R.preRate)+', Post rate: '+fmtPct(R.postRate)+' (p = '+fmt(R.zTest.pValue,4)+'). The observed difference is within normal variation. Consider collecting more data or accepting the effect is too small to detect.</p>';
+  }
+
+  if (R.hasRevenue) {
+    h += '<div style="margin-top:16px;padding:14px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--brd)">';
+    h += '<div style="font-size:13px;font-weight:700;margin-bottom:8px">\uD83D\uDCB0 Revenue Impact</div>';
+    h += '<p>Revenue per visitor changed from '+fmtCur(R.revPerVisitorPre)+' to '+fmtCur(R.revPerVisitorPost)+' (<strong style="color:'+(R.revPerVisitorLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)+'</strong>).</p>';
+    h += '<p>Average deal size (rev/conversion) went from '+fmtCur(R.revPerConvPre)+' to '+fmtCur(R.revPerConvPost)+' ('+(R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)+').</p>';
+    h += '<p>Total revenue: '+fmtCur(R.pre.revenue)+' \u2192 '+fmtCur(R.post.revenue)+' (<strong style="color:'+(R.revTotalLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revTotalLift>=0?'+':'')+fmtRaw(R.revTotalLift*100,1)+'</strong>).</p>';
+    h += '</div>';
+  }
+
+  h += '</div></div>';
+
+  // Caution
+  h += '<div class="card" style="background:rgba(255,170,0,0.03);border-color:rgba(255,170,0,0.1)">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--warn);margin-bottom:8px">\u26A0 Important Caveats</div>';
+  h += '<div style="font-size:12px;color:var(--t2);line-height:1.9">';
+  h += 'Pre/post analysis compares sequential time periods. Unlike A/B tests, there is <strong>no randomized control group</strong>, so external factors (seasonality, marketing campaigns, market conditions, competitor actions) may fully or partially explain the observed changes. This tool provides <strong>directional evidence, not causal proof</strong>.</div></div>';
+
+  // Methodology
+  h += '<div class="card" style="background:rgba(var(--acc-rgb),0.03);border-color:rgba(var(--acc-rgb),0.1)">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">\uD83D\uDCD0 Methodology</div>';
+  h += '<div style="font-size:12px;color:var(--t2);line-height:1.9">';
+  h += '<strong>Test:</strong> Two-proportion Z-test (compares conversion rates directly).<br>';
+  h += '<strong>Effect size:</strong> Cohen&apos;s h (arcsine transformation, designed for proportions).<br>';
+  h += '<strong>CIs:</strong> Wilson interval for individual rates, Wald-based CI for rate difference.<br>';
+  h += '<strong>Revenue:</strong> Descriptive comparison (rev/visitor, rev/conversion, total).<br>';
+  h += '<strong>Privacy:</strong> 100% client-side. No data transmitted.</div></div>';
+
+  el.innerHTML = h;
+}
+
+// ═══════════════════════════════════════
+// EXCEL EXPORT
+// ═══════════════════════════════════════
+function doExport() {
+  if (!R) return;
+  var wb = XLSX.utils.book_new();
+
+  var sum = [
+    ['Pre/Post Impact Analysis \u2014 Datapad'],
+    ['Generated', new Date().toLocaleString()],
+    ['Confidence', S.confidence + '%'],
+    ['Mode', S.mode],
+    ['Test', 'Two-proportion Z-test'],
+    [],
+    ['Metric', 'Pre-Period', 'Post-Period', 'Change'],
+    ['Visitors', R.pre.visitors, R.post.visitors, fmtRaw((R.post.visitors-R.pre.visitors)/R.pre.visitors*100,1)],
+    ['Conversions', R.pre.conversions, R.post.conversions, fmtRaw((R.post.conversions-R.pre.conversions)/R.pre.conversions*100,1)],
+    ['Conversion Rate', fmtPct(R.preRate), fmtPct(R.postRate), (R.lift>=0?'+':'')+fmtRaw(R.lift*100,1)],
+    [],
+    ['Z-Score', fmt(R.zTest.z, 4)],
+    ['P-Value', fmt(R.zTest.pValue, 6)],
+    ['Significant?', R.isSignificant ? 'YES' : 'NO'],
+    ['Cohen&apos;s h', fmt(R.cohenH, 4) + ' (' + R.hLabel + ')'],
+    ['CI Lower', (R.ci[0]>=0?'+':'')+fmtPct(R.ci[0])],
+    ['CI Upper', (R.ci[1]>=0?'+':'')+fmtPct(R.ci[1])],
+    ['Pre Rate CI (Wilson)', fmtPct(R.ciPre[0]) + ' \u2013 ' + fmtPct(R.ciPre[1])],
+    ['Post Rate CI (Wilson)', fmtPct(R.ciPost[0]) + ' \u2013 ' + fmtPct(R.ciPost[1])],
+  ];
+
+  if (R.hasRevenue) {
+    sum.push([]);
+    sum.push(['Revenue Metrics']);
+    sum.push(['Total Revenue (Pre)', R.pre.revenue]);
+    sum.push(['Total Revenue (Post)', R.post.revenue]);
+    sum.push(['Revenue Change', (R.revTotalLift>=0?'+':'')+fmtRaw(R.revTotalLift*100,1)]);
+    sum.push(['Rev/Visitor (Pre)', fmt(R.revPerVisitorPre)]);
+    sum.push(['Rev/Visitor (Post)', fmt(R.revPerVisitorPost)]);
+    sum.push(['Rev/Visitor Change', (R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)]);
+    sum.push(['Rev/Conversion (Pre)', fmt(R.revPerConvPre)]);
+    sum.push(['Rev/Conversion (Post)', fmt(R.revPerConvPost)]);
+    sum.push(['Rev/Conv Change', (R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)]);
+  }
+
+  var ws1 = XLSX.utils.aoa_to_sheet(sum);
+  ws1['!cols'] = [{wch:24},{wch:18},{wch:18},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+
+  // Insights
+  var vd = getVerdict();
+  var ins = [['Insights'], [],
+    ['Status', vd.text.replace(/[^\w\s]/g,'').trim()],
+    ['Recommendation',
+      R.isSignificant
+        ? 'Significant change detected (' + (R.lift>=0?'+':'') + fmtRaw(R.lift*100,1) + '). However, pre/post analysis cannot prove causation.'
+        : 'No significant change. Consider more data or accepting the effect is very small.'
+    ],
+    [],
+    ['Note', 'Pre/post compares sequential periods. External factors may explain the change. Use A/B testing for causal inference.']
+  ];
+  var ws2 = XLSX.utils.aoa_to_sheet(ins);
+  ws2['!cols'] = [{wch:22},{wch:80}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Insights');
+
+  XLSX.writeFile(wb, 'PrePost_Analysis_' + new Date().toISOString().slice(0,10) + '.xlsx');
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') document.getElementById('guideModal').classList.remove('open'); });
+document.getElementById('guideModal').addEventListener('click', function(e) { if (e.target === document.getElementById('guideModal')) toggleGuide(); });
+
+buildInputs();
+compute();
+</script>
+</body>
+</html>
