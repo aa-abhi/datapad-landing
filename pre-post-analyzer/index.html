@@ -231,7 +231,7 @@
     <h3>2. Read Results</h3>
     <p>The calculator auto-computes conversion rates, statistical significance (Z-test), confidence intervals, effect size, and lift. All metrics have <span style="display:inline-flex;width:16px;height:16px;border-radius:50%;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);color:#00d4ff;font-size:9px;font-weight:800;align-items:center;justify-content:center">i</span> info buttons explaining what they mean.</p>
     <h3>3. Revenue Mode</h3>
-    <p>When enabled, also compares revenue per visitor, revenue per conversion, and total revenue change.</p>
+    <p>When enabled, also compares revenue per visitor, revenue per sales, and total revenue change.</p>
     <h3>4. Export</h3>
     <p>Download a multi-sheet Excel report with all metrics and insights.</p>
     <h3>Key Difference from A/B Test</h3>
@@ -388,8 +388,8 @@ function buildInputs() {
     var el = document.getElementById(period + 'Fields');
     var d = S[period];
     var h = '';
-    h += '<div class="field-item"><label>Visitors / Leads</label><input type="number" min="0" value="' + (d.visitors === '' ? '' : d.visitors) + '" placeholder="e.g. 15000" oninput="onField(\'' + period + '\',\'visitors\',this.value)"/></div>';
-    h += '<div class="field-item"><label>Conversions / Sales</label><input type="number" min="0" value="' + (d.conversions === '' ? '' : d.conversions) + '" placeholder="e.g. 450" oninput="onField(\'' + period + '\',\'conversions\',this.value)"/></div>';
+    h += '<div class="field-item"><label>Leads/Quotes</label><input type="number" min="0" value="' + (d.visitors === '' ? '' : d.visitors) + '" placeholder="e.g. 15000" oninput="onField(\'' + period + '\',\'visitors\',this.value)"/></div>';
+    h += '<div class="field-item"><label>Sales</label><input type="number" min="0" value="' + (d.conversions === '' ? '' : d.conversions) + '" placeholder="e.g. 450" oninput="onField(\'' + period + '\',\'conversions\',this.value)"/></div>';
     if (isRev) {
       h += '<div class="field-item"><label>Total Revenue (\u20B9)</label><input type="number" min="0" value="' + (d.revenue === '' ? '' : d.revenue) + '" placeholder="e.g. 2250000" oninput="onField(\'' + period + '\',\'revenue\',this.value)"/></div>';
     }
@@ -411,7 +411,10 @@ function compute() {
   if (post.visitors && post.conversions > post.visitors) warns.push('\u26A0 Post: conversions exceed visitors.');
   document.getElementById('warnBox').innerHTML = warns.length ? '<div class="warn-box">' + warns.join('<br>') + '</div>' : '';
 
-  if (!pre.visitors || !pre.conversions || !post.visitors || !post.conversions) {
+  if (
+    pre.visitors === '' || pre.conversions === '' ||
+    post.visitors === '' || post.conversions === ''
+  ) {
     R = null; render(); return;
   }
 
@@ -423,7 +426,7 @@ function compute() {
 
   var preRate = zTest.p1;
   var postRate = zTest.p2;
-  var lift = preRate === 0 ? 0 : (postRate - preRate) / preRate;
+  var lift = preRate === 0 ? (postRate > 0 ? Infinity : 0) : (postRate - preRate) / preRate;
   var isSignificant = zTest.pValue < alpha;
   var ci = diffCI(zTest.diff, zTest.se, S.confidence);
   var ciPre = wilsonCI(pre.visitors, pre.conversions, S.confidence);
@@ -505,7 +508,7 @@ function barCompare(prePct, postPct, w, h) {
 function render() {
   var el = document.getElementById('tabContent');
   if (!R) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">\uD83D\uDCCA</div><div class="empty-title">Enter Your Data</div><div class="empty-desc">Fill in visitors and conversions for both periods to see results.</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Enter Your Data</div><div class="empty-desc">Fill in visitors and conversions for both periods to see results.</div></div>';
     return;
   }
   if (S.activeTab === 'results') renderResults(el);
@@ -571,7 +574,7 @@ function renderResults(el) {
     h += '<div style="font-size:12px;color:var(--pre-color);margin-bottom:2px">Pre: '+fmtCur(R.revPerVisitorPre)+'</div>';
     h += '<div style="font-size:12px;color:var(--post-color);margin-bottom:4px">Post: '+fmtCur(R.revPerVisitorPost)+'</div>';
     h += '<div class="mv" style="color:'+(R.revPerVisitorLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)+'</div></div>';
-    h += '<div class="mc"><div class="ml">Rev / Conversion <span class="info-btn" data-tip="<span class=\'tip-title\'>Revenue per Conversion</span>Total Revenue &divide; Conversions. Average order value or deal size.">i</span></div>';
+    h += '<div class="mc"><div class="ml">Rev / Sales <span class="info-btn" data-tip="<span class=\'tip-title\'>ATS(Revenue per Sales)</span>Total Revenue &divide; Conversions. Average order value or deal size.">i</span></div>';
     h += '<div style="font-size:12px;color:var(--pre-color);margin-bottom:2px">Pre: '+fmtCur(R.revPerConvPre)+'</div>';
     h += '<div style="font-size:12px;color:var(--post-color);margin-bottom:4px">Post: '+fmtCur(R.revPerConvPost)+'</div>';
     h += '<div class="mv" style="color:'+(R.revPerConvLift>=0?'var(--pri)':'var(--red)')+'">'+(R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)+'</div></div>';
@@ -601,7 +604,7 @@ function renderComparison(el) {
   if (R.hasRevenue) {
     rows.push(['Total Revenue', fmtCur(R.pre.revenue), fmtCur(R.post.revenue), (R.revTotalLift>=0?'+':'')+fmtRaw(R.revTotalLift*100,1)]);
     rows.push(['Rev / Visitor', fmtCur(R.revPerVisitorPre), fmtCur(R.revPerVisitorPost), (R.revPerVisitorLift>=0?'+':'')+fmtRaw(R.revPerVisitorLift*100,1)]);
-    rows.push(['Rev / Conversion', fmtCur(R.revPerConvPre), fmtCur(R.revPerConvPost), (R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)]);
+    rows.push(['Rev / Sales', fmtCur(R.revPerConvPre), fmtCur(R.revPerConvPost), (R.revPerConvLift>=0?'+':'')+fmtRaw(R.revPerConvLift*100,1)]);
   }
 
   rows.forEach(function(row) {
