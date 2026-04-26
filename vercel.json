@@ -1,5 +1,15 @@
 {
+  "outputDirectory": "landing/dist",
+  "buildCommand": "cd landing && npm install && npm run build && cd ../ab-test-calculator && npm install && npm run build",
   "rewrites": [
+    {
+      "source": "/ab-test-calculator/:path*",
+      "destination": "/ab-test-calculator/dist/:path*"
+    },
+    {
+      "source": "/ab-test-calculator",
+      "destination": "/ab-test-calculator/dist/index.html"
+    },
     {
       "source": "/json-studio",
       "destination": "https://datapad-rosy.vercel.app/json-studio/"
@@ -7,22 +17,6 @@
     {
       "source": "/json-studio/:path*",
       "destination": "https://datapad-rosy.vercel.app/json-studio/:path*"
-    },
-    {
-      "source": "/ab-test-calculator",
-      "destination": "https://datapad-ab-test.vercel.app/"
-    },
-    {
-      "source": "/ab-test-calculator/:path*",
-      "destination": "https://datapad-ab-test.vercel.app/:path*"
-    },
-    {
-      "source": "/pre-post-analyzer",
-      "destination": "https://datapad-pp.vercel.app/"
-    },
-    {
-      "source": "/pre-post-analyzer/:path*",
-      "destination": "https://datapad-pp.vercel.app/:path*"
     }
   ]
 }
