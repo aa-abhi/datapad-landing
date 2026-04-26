@@ -92,7 +92,7 @@ const TOOLS = [
     id: 'json',
     name: 'JSON Studio',
     desc: 'Smart JSON toolkit with format, minify, auto-fix, diff, and extraction.',
-    href: 'https://datapad-rosy.vercel.app/json-studio/',
+    href: '/json-studio',
     label: 'Launch Studio',
     features: [
       'Format & beautify JSON instantly',
