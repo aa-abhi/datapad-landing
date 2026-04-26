@@ -10,11 +10,11 @@
     },
     {
       "source": "/ab-test-calculator",
-      "destination": "https://datapad-ab.vercel.app/"
+      "destination": "https://datapad-ab-test.vercel.app/"
     },
     {
       "source": "/ab-test-calculator/:path*",
-      "destination": "https://datapad-ab.vercel.app/:path*"
+      "destination": "https://datapad-ab-test.vercel.app/:path*"
     },
     {
       "source": "/pre-post-analyzer",
