@@ -1,14 +1,13 @@
 {
   "outputDirectory": "landing/dist",
-  "buildCommand": "cd landing && npm install && npm run build && cd ../ab-test-calculator && npm install && npm run build",
   "rewrites": [
-    {
-      "source": "/ab-test-calculator/:path*",
-      "destination": "/ab-test-calculator/dist/:path*"
-    },
     {
       "source": "/ab-test-calculator",
       "destination": "/ab-test-calculator/dist/index.html"
+    },
+    {
+      "source": "/ab-test-calculator/:path*",
+      "destination": "/ab-test-calculator/dist/:path*"
     },
     {
       "source": "/json-studio",
