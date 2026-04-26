@@ -6,7 +6,23 @@
     },
     {
       "source": "/json-studio/:path*",
-      "destination": "https://datapad-rosy.vercel.app/json-studio//:path*"
+      "destination": "https://datapad-rosy.vercel.app/json-studio/:path*"
+    },
+    {
+      "source": "/ab-test-calculator",
+      "destination": "https://datapad-ab.vercel.app/"
+    },
+    {
+      "source": "/ab-test-calculator/:path*",
+      "destination": "https://datapad-ab.vercel.app/:path*"
+    },
+    {
+      "source": "/pre-post-analyzer",
+      "destination": "https://datapad-pp.vercel.app/"
+    },
+    {
+      "source": "/pre-post-analyzer/:path*",
+      "destination": "https://datapad-pp.vercel.app/:path*"
     }
   ]
 }
