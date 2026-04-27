@@ -1,14 +1,5 @@
 {
-  "outputDirectory": "landing/dist",
   "rewrites": [
-    {
-      "source": "/ab-test-calculator",
-      "destination": "/ab-test-calculator/dist/index.html"
-    },
-    {
-      "source": "/ab-test-calculator/:path*",
-      "destination": "/ab-test-calculator/dist/:path*"
-    },
     {
       "source": "/json-studio",
       "destination": "https://datapad-rosy.vercel.app/json-studio/"

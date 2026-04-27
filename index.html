@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebSite">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Datapad – Free Statistical & Developer Tools | A/B Testing, Pre/Post Analysis, JSON Studio</title>
+  <meta name="description" content="Datapad offers free, browser-based developer and analytics tools. A/B test calculator with p-value & power analysis, Pre/Post impact analyzer, and JSON Studio. 100% client-side - no sign-up, no data tracking."/>
+  <meta name="keywords" content="A/B test calculator, statistical significance calculator, pre post analysis, JSON formatter, conversion rate optimization, p-value calculator, developer tools, free analytics tools"/>
+  <meta name="author" content="Datapad"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <link rel="canonical" href="https://datapad.in/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://datapad.in/"/>
+  <meta property="og:site_name" content="Datapad"/>
+  <meta property="og:title" content="Datapad – Free Statistical & Developer Tools"/>
+  <meta property="og:description" content="Free browser-based tools for developers and analysts: A/B test calculator, pre/post impact analysis, JSON Studio. No sign-up. 100% client-side."/>
+  <meta property="og:image" content="https://datapad.in/public/og-home.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:locale" content="en_IN"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site" content="@datapad_in"/>
+  <meta name="twitter:title" content="Datapad – Free Statistical & Developer Tools"/>
+  <meta name="twitter:description" content="Free browser-based A/B test calculator, pre/post analyzer, JSON Studio. No sign-up. All computation runs locally."/>
+  <meta name="twitter:image" content="https://datapad.in/public/og-home.png"/>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {"@type":"WebSite","@id":"https://datapad.in/#website","url":"https://datapad.in/","name":"Datapad","description":"Free browser-based developer and analytics tools including A/B test calculator, pre/post impact analyzer, and JSON Studio.","inLanguage":"en-IN","publisher":{"@id":"https://datapad.in/#organization"}},
+      {"@type":"Organization","@id":"https://datapad.in/#organization","name":"Datapad","url":"https://datapad.in/","email":"abhishekpslko@gmail.com","description":"Datapad builds free, privacy-first developer tools that run entirely in the browser.","foundingDate":"2025","sameAs":[]},
+      {"@type":"ItemList","name":"Datapad Tools","description":"Free statistical and developer tools by Datapad","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SoftwareApplication","name":"A/B Test Calculator","url":"https://datapad.in/ab-test-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Statistical significance calculator for A/B tests with p-value, confidence intervals, power analysis, Monte Carlo simulation, and multi-variant support."}},{"@type":"ListItem","position":2,"item":{"@type":"SoftwareApplication","name":"Pre/Post Impact Analyzer","url":"https://datapad.in/pre-post-analyzer","applicationCategory":"BusinessApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Measure impact of changes before and after with Z-tests, Cohen's h effect size, and revenue analysis."}},{"@type":"ListItem","position":3,"item":{"@type":"SoftwareApplication","name":"JSON Studio","url":"https://datapad.in/json-studio","applicationCategory":"DeveloperApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Smart JSON toolkit with format, minify, auto-fix, diff, and CSV export."}}]},
+      {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Datapad free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. All Datapad tools are completely free with no sign-up required."}},{"@type":"Question","name":"Does Datapad store or transmit my data?","acceptedAnswer":{"@type":"Answer","text":"No. All computation runs entirely in your browser. Your data never leaves your device."}},{"@type":"Question","name":"How do I calculate statistical significance for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"Use Datapad's A/B Test Calculator. Enter visitors and conversions for your control and variant groups, set your confidence level, and the tool computes p-value, lift, power, confidence intervals (Wilson method), and Bonferroni-corrected results for multi-variant tests."}},{"@type":"Question","name":"What is the difference between A/B testing and pre/post analysis?","acceptedAnswer":{"@type":"Answer","text":"A/B testing uses concurrent randomized groups and can establish causation. Pre/post analysis compares sequential time periods and can only show correlation - external factors may explain observed changes. Use A/B testing when you need causal proof."}}]}
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --pri: #00ff88;
+      --pri-rgb: 0,255,136;
+      --acc: #00d4ff;
+      --acc-rgb: 0,212,255;
+      --bg0: #050508;
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --t0: #ffffff;
+      --t1: #c8c8d4;
+      --t2: #6e6e82;
+      --brd: rgba(255,255,255,0.06);
+      --font: 'Syne', sans-serif;
+      --body-font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--body-font);
+      background: var(--bg0);
+      color: var(--t0);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px;
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(var(--pri-rgb), 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+      will-change: transform;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 0 32px;
+      border-bottom: 1px solid var(--brd);
+      background: rgba(5, 5, 8, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-inner {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .enhanced-logo {
+      width: 50px; height: 50px;
+      object-fit: contain;
+      background: transparent;
+      filter: contrast(1.2) brightness(1.1) saturate(1.2);
+      image-rendering: -webkit-optimize-contrast;
+    }
+    .logo:hover .enhanced-logo { filter: contrast(1.3) brightness(1.15) saturate(1.3); }
+
+    .logo-name {
+      font-family: var(--font);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    nav { display: flex; align-items: center; gap: 6px; }
+
+    .nav-link {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--t2);
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: var(--body-font);
+    }
+    .nav-link:hover { color: var(--t1); background: rgba(255,255,255,0.04); }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(var(--pri-rgb),0.15);
+      background: rgba(var(--pri-rgb),0.04);
+      font-size: 11px;
+      color: var(--t2);
+      font-family: var(--body-font);
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--pri);
+      box-shadow: 0 0 8px rgba(var(--pri-rgb),0.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(var(--pri-rgb),0.7); }
+      50% { opacity: 0.6; box-shadow: 0 0 4px rgba(var(--pri-rgb),0.3); }
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-bg { position: absolute; inset: 0; z-index: 0; }
+
+    .hero-grid-lines {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-glow-1 {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(var(--pri-rgb),0.08) 0%, transparent 70%);
+      top: -100px; left: -100px;
+    }
+
+    .hero-glow-2 {
+      position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(var(--acc-rgb),0.06) 0%, transparent 70%);
+      bottom: -50px; right: 0;
+    }
+
+    .hero-inner { position: relative; z-index: 1; padding: 80px 0; }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px;
+      background: rgba(var(--pri-rgb),0.06);
+      border: 1px solid rgba(var(--pri-rgb),0.15);
+      border-radius: 100px;
+      font-size: 11px; font-weight: 500; color: var(--pri);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 28px; font-family: var(--mono);
+    }
+
+    .hero-title {
+      font-family: var(--font);
+      font-size: clamp(40px, 5.5vw, 72px);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -2px; margin-bottom: 30px;
+    }
+    .hero-title .line { display: block; }
+    .hero-title .accent { color: var(--pri); }
+
+    .hero-desc {
+      font-size: 17px; color: var(--t1);
+      line-height: 1.75; max-width: 480px; margin-bottom: 40px;
+    }
+
+    .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; background: var(--pri); color: var(--bg0);
+      border-radius: 10px; font-size: 14px; font-weight: 700;
+      text-decoration: none; font-family: var(--font);
+      transition: all 0.25s var(--ease); border: 2px solid var(--pri);
+    }
+    .btn-primary:hover { background: transparent; color: var(--pri); box-shadow: 0 0 32px rgba(var(--pri-rgb),0.2); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; background: transparent; color: var(--t1);
+      border-radius: 10px; font-size: 14px; font-weight: 500;
+      text-decoration: none; font-family: var(--body-font);
+      border: 1px solid var(--brd); transition: all 0.25s var(--ease);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--t0); background: rgba(255,255,255,0.03); }
+
+    /* ── Hero Text Animation ── */
+    .reveal-line {
+      display: block;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeSlideUp 0.7s var(--ease) forwards;
+    }
+
+    /* stagger timing */
+    .reveal-line:nth-child(1) { animation-delay: 0.2s; }
+    .reveal-line:nth-child(2) { animation-delay: 0.6s; }
+    .reveal-line:nth-child(3) { animation-delay: 1s; }
+
+    /* final line punch */
+    .reveal-line.accent {
+      animation: fadeSlideUp 0.7s var(--ease) forwards,
+                glowPop 1.2s ease-out 1.2s forwards;
+    }
+
+    /* base animation */
+    @keyframes fadeSlideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* premium effect for last line */
+    @keyframes glowPop {
+      0% {
+        text-shadow: 0 0 0 rgba(0,255,136,0);
+        transform: scale(1);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(0,255,136,0.6);
+        transform: scale(1.03);
+      }
+      100% {
+        text-shadow: 0 0 10px rgba(0,255,136,0.3);
+        transform: scale(1);
+      }
+    }
+    /* ── Trust Bar ── */
+    .trust-bar {
+      border-top: 1px solid var(--brd); border-bottom: 1px solid var(--brd);
+      padding: 16px 24px; background: rgba(255,255,255,0.015); overflow: hidden;
+    }
+    .trust-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--t2); font-weight: 600; white-space: nowrap;
+    }
+    .trust-item svg { color: var(--pri); flex-shrink: 0; }
+
+    /* ── Products ── */
+    .products-section { padding: 100px 0; }
+
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 11px; color: var(--t2);
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;
+    }
+    .section-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--t2); }
+
+    .section-title {
+      font-family: var(--font); font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800; letter-spacing: -1.5px; margin-bottom: 12px; line-height: 1.1;
+    }
+
+    .section-desc { font-size: 16px; color: var(--t2); max-width: 520px; margin-bottom: 56px; line-height: 1.7; }
+
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .product-card {
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid var(--brd);
+      background: var(--bg1);
+      padding: 28px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease),
+                  box-shadow 0.4s var(--ease), border-color 0.3s;
+    }
+
+    .product-card.revealed { opacity: 1; transform: translateY(0); }
+
+    .product-card.revealed:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--pri-rgb),0.08);
+      border-color: rgba(var(--pri-rgb),0.12);
+    }
+
+    .card-shimmer {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(var(--pri-rgb),0.03) 100%);
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .product-card:hover .card-shimmer { opacity: 1; }
+
+    .card-corner {
+      position: absolute; top: 0; right: 0; width: 120px; height: 120px;
+      background: radial-gradient(circle at top right, rgba(var(--pri-rgb),0.06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+
+    .card-icon-wrap {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(var(--pri-rgb),0.08); border: 1px solid rgba(var(--pri-rgb),0.15);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+
+    .card-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 100px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      background: rgba(var(--pri-rgb),0.08); border: 1px solid rgba(var(--pri-rgb),0.2); color: var(--pri);
+    }
+
+    .badge-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--pri); animation: pulse 2s infinite;
+    }
+
+    .card-name { font-family: var(--font); font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .card-desc { font-size: 13px; color: var(--t2); line-height: 1.65; margin-bottom: 20px; }
+
+    .card-features { list-style: none; margin-bottom: 24px; flex: 1; }
+    .card-features li {
+      font-size: 12px; color: var(--t1); padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-features li:last-child { border-bottom: none; }
+
+    .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--pri); flex-shrink: 0; opacity: 0.7; }
+
+    .card-action {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 16px;
+      background: rgba(var(--pri-rgb),0.06); border: 1px solid rgba(var(--pri-rgb),0.15);
+      border-radius: 10px; color: var(--pri);
+      text-decoration: none; font-size: 13px; font-weight: 600; font-family: var(--font);
+      transition: all 0.25s var(--ease);
+    }
+    .card-action:hover { background: rgba(var(--pri-rgb),0.12); border-color: rgba(var(--pri-rgb),0.3); box-shadow: 0 0 20px rgba(var(--pri-rgb),0.1); }
+
+    /* ── FAQ ── */
+    .faq-section { padding: 90px 0 110px; border-top: 1px solid var(--brd); }
+
+    .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 48px; align-items: start; }
+
+    .faq-item {
+      background: var(--bg1); border: 1px solid var(--brd);
+      border-radius: 14px; overflow: hidden; transition: all 0.25s var(--ease);
+    }
+    .faq-item:hover { border-color: rgba(var(--pri-rgb), 0.2); background: rgba(255,255,255,0.015); }
+    .faq-item.open { border-color: rgba(var(--pri-rgb), 0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+
+    .faq-q {
+      width: 100%; padding: 20px 22px; background: none; border: none;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; text-align: left; color: var(--t0);
+      font-size: 14px; font-weight: 600; font-family: var(--body-font);
+      gap: 12px; transition: background 0.2s;
+    }
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+
+    .faq-chevron {
+      width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--brd);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: transform 0.3s var(--ease), border-color 0.2s; color: var(--t2);
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); border-color: rgba(var(--pri-rgb), 0.4); color: var(--pri); }
+
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s var(--ease), opacity 0.2s;
+      font-size: 13px; color: var(--t2); line-height: 1.75; opacity: 0;
+    }
+    .faq-item.open .faq-a { max-height: 500px; opacity: 1; }
+    .faq-a-inner { padding: 0 22px 20px; }
+
+    /* ── About + Contact ── */
+    .about-section { padding: 80px 0 100px; border-top: 1px solid var(--brd); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 56px; }
+
+    .about-block, .contact-block {
+      background: var(--bg1); border: 1px solid var(--brd); border-radius: 20px; padding: 36px;
+    }
+
+    .block-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--t2); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+    .block-title { font-family: var(--font); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 14px; line-height: 1.3; }
+    .block-body { font-size: 14px; color: var(--t2); line-height: 1.75; margin-bottom: 24px; }
+
+    .values-row { display: flex; gap: 12px; }
+    .value-chip {
+      flex: 1; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--brd);
+      border-radius: 8px; text-align: center; font-size: 11px; font-weight: 600; color: var(--t1);
+    }
+    .value-chip-num { display: block; font-family: var(--mono); font-size: 9px; color: var(--t2); margin-bottom: 3px; }
+
+    .contact-email {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 16px; background: var(--bg2); border: 1px solid var(--brd);
+      border-radius: 10px; color: var(--t1); text-decoration: none;
+      font-size: 13px; font-family: var(--mono); transition: all 0.2s; margin-bottom: 12px;
+    }
+    .contact-email:hover { border-color: rgba(var(--pri-rgb),0.2); color: var(--t0); }
+
+    .btn-feedback {
+      width: 100%; padding: 12px; background: transparent;
+      border: 1px solid rgba(var(--pri-rgb),0.2); border-radius: 10px;
+      color: var(--pri); font-size: 13px; font-weight: 600; 
+      font-family: var(--font); display: flex; align-items: center;
+      justify-content: center; gap: 8px; transition: all 0.25s var(--ease);
+      cursor: pointer;
+    }
+    .btn-feedback:hover { 
+      background: rgba(var(--pri-rgb),0.08); 
+      border-color: rgba(var(--pri-rgb),0.3); 
+      /* transform: translateX(3px) translateY(-3px);
+      transition: transform 0.2s ease; */
+    }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--brd); padding: 32px; background: rgba(255,255,255,0.005); }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .footer-copy { font-size: 12px; color: var(--t2); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 12px; color: var(--t2); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--pri); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px); z-index: 999;
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg1); border: 1px solid rgba(var(--pri-rgb),0.12);
+      border-radius: 20px; padding: 40px; max-width: 640px; width: 100%;
+      max-height: 80vh; overflow-y: auto; position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;
+      background: var(--bg2); border: 1px solid var(--brd); border-radius: 8px;
+      color: var(--t2); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
+    }
+    .modal-close:hover { border-color: rgba(var(--pri-rgb),0.2); color: var(--t1); }
+    .modal-loader { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; }
+    .spinner { width: 32px; height: 32px; border: 2px solid var(--brd); border-top-color: var(--pri); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #feedback-iframe { width: 100%; height: 600px; border: none; border-radius: 12px; }
+
+    /* ── Scroll Reveal ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+    .reveal.revealed { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) { .products-grid { grid-template-columns: 1fr 1fr; } }
+
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      .hero-inner { padding: 60px 0; }
+      .products-grid { grid-template-columns: 1fr; }
+      .faq-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
+      nav .nav-link { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 0 16px; }
+      .hero-title { font-size: 36px; }
+      .hero-desc { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <!-- ═══ HEADER ═══ -->
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo" aria-label="Datapad Home">
+        <img src="/logo.png" alt="Datapad Logo" class="enhanced-logo"/>
+        <span class="logo-name">Datapad</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#products" class="nav-link">Tools</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="#contact" class="nav-link">Contact</a>
+        <div class="nav-status" role="status" aria-label="All systems online">
+          <span class="status-dot"></span>
+          <span>All systems online</span>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-grid-lines"></div>
+      <div class="hero-glow-1"></div>
+      <div class="hero-glow-2"></div>
+    </div>
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-eyebrow" aria-hidden="true">
+          <span class="status-dot"></span>
+          Developer Power Tools
+        </div>
+        <h1 class="hero-title" id="hero-heading">
+          <span class="line reveal-line">Analyse.</span>
+          <span class="line reveal-line">Validate.</span>
+          <span class="line reveal-line accent">Ship faster.</span>
+        </h1>
+        <p class="hero-desc">
+          Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities - all running locally, zero tracking.
+        </p>
+        <div class="hero-cta">
+          <a href="#products" class="btn-primary">
+            Explore Tools
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+          <a href="/ab-test-calculator" class="btn-ghost">Try A/B Calculator</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TRUST BAR ═══ -->
+  <div class="trust-bar" role="complementary" aria-label="Key features">
+    <div class="trust-inner">
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        No data leaves your browser
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM1 10h22"/></svg>
+        No sign-up required
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Instant results
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Completely free, forever
+      </div>
+      <div class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Works offline
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PRODUCTS ═══ -->
+  <section class="products-section" id="products" aria-labelledby="products-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-tag">01 / Products</div>
+        <h2 class="section-title" id="products-heading">Tools built for precision</h2>
+        <p class="section-desc">Professional-grade calculators and analyzers that respect your time, privacy, and intelligence.</p>
+      </div>
+      <div class="products-grid" role="list">
+
+        <article class="product-card" role="listitem" aria-labelledby="abt-name">
+          <div class="card-shimmer" aria-hidden="true"></div>
+          <div class="card-corner" aria-hidden="true"></div>
+          <div class="card-top-row">
+            <div class="card-icon-wrap" aria-hidden="true">{ }</div>
+            <span class="card-badge"><span class="badge-live-dot" aria-hidden="true"></span>Live</span>
+          </div>
+          <h3 class="card-name" id="abt-name">A/B Test Calculator</h3>
+          <p class="card-desc">Statistical significance calculator with p-value, power analysis, and multi-variant support.</p>
+          <ul class="card-features" aria-label="Features">
+            <li><span class="feat-dot" aria-hidden="true"></span>Two-proportion Z-test with Wilson CIs</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Monte Carlo simulation (5,000 trials)</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Multi-variant A/B/C/D + Bonferroni</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Power analysis & MDE calculator</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>SRM detection + Excel export</li>
+          </ul>
+          <a href="/ab-test-calculator" class="card-action" aria-label="Launch A/B Test Calculator">
+            Launch Calculator
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </article>
+
+        <article class="product-card" role="listitem" aria-labelledby="pp-name">
+          <div class="card-shimmer" aria-hidden="true"></div>
+          <div class="card-corner" aria-hidden="true"></div>
+          <div class="card-top-row">
+            <div class="card-icon-wrap" aria-hidden="true">{ }</div>
+            <span class="card-badge"><span class="badge-live-dot" aria-hidden="true"></span>Live</span>
+          </div>
+          <h3 class="card-name" id="pp-name">Pre/Post Analyzer</h3>
+          <p class="card-desc">Measure the statistical impact of changes between sequential time periods.</p>
+          <ul class="card-features" aria-label="Features">
+            <li><span class="feat-dot" aria-hidden="true"></span>Two-proportion Z-test (Welch-corrected)</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Cohen's h effect size classification</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Wilson confidence intervals for rates</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Revenue per visitor & per conversion</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Side-by-side comparison + Excel export</li>
+          </ul>
+          <a href="/pre-post-analyzer" class="card-action" aria-label="Launch Pre/Post Analyzer">
+            Launch Analyzer
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </article>
+
+        <article class="product-card" role="listitem" aria-labelledby="json-name">
+          <div class="card-shimmer" aria-hidden="true"></div>
+          <div class="card-corner" aria-hidden="true"></div>
+          <div class="card-top-row">
+            <div class="card-icon-wrap" aria-hidden="true">{ }</div>
+            <span class="card-badge"><span class="badge-live-dot" aria-hidden="true"></span>Live</span>
+          </div>
+          <h3 class="card-name" id="json-name">JSON Studio</h3>
+          <p class="card-desc">Smart JSON toolkit with format, minify, auto-fix, diff, and extraction.</p>
+          <ul class="card-features" aria-label="Features">
+            <li><span class="feat-dot" aria-hidden="true"></span>Format & beautify JSON instantly</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Auto-fix common syntax errors</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Compare & diff two JSON objects</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Extract data using paths</li>
+            <li><span class="feat-dot" aria-hidden="true"></span>Convert JSON to CSV</li>
+          </ul>
+          <a href="https://datapad-rosy.vercel.app/json-studio/" class="card-action" aria-label="Launch JSON Studio">
+            Launch Studio
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section class="faq-section" id="faq" aria-labelledby="faq-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-tag">02 / FAQ</div>
+        <h2 class="section-title" id="faq-heading">Common questions</h2>
+        <p class="section-desc">Everything you need to know about Datapad tools.</p>
+      </div>
+      <div class="faq-grid" role="list">
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">Is Datapad free to use?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">Yes. All Datapad tools are completely free with no sign-up, no paywall, and no premium tier. Every feature is available to every user.</div></div>
+        </div>
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">Does Datapad store or transmit my data?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">No. All statistical computation runs entirely in your browser using JavaScript. Your data never leaves your device, and there are no analytics or telemetry calls on tool inputs.</div></div>
+        </div>
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">How is statistical significance calculated?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">We use a two-proportion Z-test with pooled standard error. Confidence intervals use the Wilson method (more accurate than Wald for extreme rates or small samples). For multiple variants, Bonferroni correction is applied automatically.</div></div>
+        </div>
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What is the difference between A/B testing and pre/post analysis?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">A/B tests use concurrent randomized groups and can establish causation. Pre/post analysis compares sequential time periods - it can show a change occurred but cannot prove your intervention caused it, as external factors (seasonality, marketing) may be responsible.</div></div>
+        </div>
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What sample size do I need for an A/B test?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">It depends on your baseline conversion rate and the minimum effect size you want to detect. Use the Power Analysis tab in the A/B Test Calculator - it generates a full sample size table for MDEs from 0.5% to 10%, with required visitors per variant at 80% power.</div></div>
+        </div>
+
+        <div class="faq-item reveal" role="listitem">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What is a Sample Ratio Mismatch (SRM)?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
+          <div class="faq-a" role="region"><div class="faq-a-inner">An SRM occurs when the observed traffic split between variants deviates significantly from the expected ratio. It indicates a problem with randomization and can invalidate test results. The A/B Test Calculator automatically runs a chi-square SRM check on your data.</div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ABOUT + CONTACT ═══ -->
+  <section class="about-section" id="contact" aria-labelledby="about-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-tag">03 / About</div>
+        <h2 class="section-title" id="about-heading">Built for people who ship</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-block reveal">
+          <div class="block-eyebrow">Who we are</div>
+          <h3 class="block-title">Browser-first. Privacy-first. Always free.</h3>
+          <p class="block-body">Datapad is a growing suite of developer and analytics tools that run entirely in the browser. No cloud, no accounts, no hidden fees - just tools that work.</p>
+          <div class="values-row">
+            <div class="value-chip"><span class="value-chip-num">01</span>Speed</div>
+            <div class="value-chip"><span class="value-chip-num">02</span>Privacy</div>
+            <div class="value-chip"><span class="value-chip-num">03</span>Precision</div>
+          </div>
+        </div>
+        <div class="contact-block reveal">
+          <div class="block-eyebrow">Get in touch</div>
+          <h3 class="block-title">We'd love to hear from you.</h3>
+          <p class="block-body">Have feedback, a bug to report, or a tool idea? Reach out - we read everything.</p>
+          <a href="mailto:abhishekpslko@gmail.com" class="contact-email" aria-label="Email abhishekpslko@gmail.com">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            abhishekpslko@gmail.com
+          </a>
+          <a 
+            href="https://forms.gle/pZFitCFt6pfQNKEFA" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="btn-feedback"
+          >
+            Share Feedback
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M7 17L17 7M17 7H7M17 7v10"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2026 Datapad. All rights reserved.</p>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="/ab-test-calculator">A/B Calculator</a>
+        <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
+        <a href="https://datapad-rosy.vercel.app/json-studio/">JSON Studio</a>
+        <a href="mailto:abhishekpslko@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ═══ FEEDBACK MODAL ═══ -->
+  <div class="modal-overlay" id="feedback-modal" role="dialog" aria-modal="true" aria-label="Feedback form" aria-hidden="true">
+    <div class="modal-box">
+      <button class="modal-close" id="close-feedback" aria-label="Close feedback form">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="modal-loader" id="feedback-loader">
+        <div class="spinner"></div>
+        <p style="font-size:13px;color:var(--t2)">Loading form…</p>
+      </div>
+      <iframe id="feedback-iframe" loading="lazy" referrerpolicy="no-referrer" title="Feedback form" style="display:none"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // ── Cursor Glow ──
+    const glow = document.getElementById('cursorGlow');
+    let mx = 0, my = 0, gx = 0, gy = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function anim() {
+      gx += (mx - gx) * 0.1;
+      gy += (my - gy) * 0.1;
+      glow.style.transform = `translate(${gx - 200}px, ${gy - 200}px)`;
+      requestAnimationFrame(anim);
+    })();
+
+    // ── Scroll Reveal ──
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal, .product-card').forEach(el => obs.observe(el));
+
+    // ── Product card stagger ──
+    document.querySelectorAll('.product-card').forEach((card, i) => {
+      card.style.transitionDelay = (i * 0.1) + 's';
+    });
+
+    // ── FAQ ──
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // ── Feedback Modal ──
+    const openBtn = document.getElementById('open-feedback');
+    const modal = document.getElementById('feedback-modal');
+    const closeBtn = document.getElementById('close-feedback');
+    const iframe = document.getElementById('feedback-iframe');
+    const loader = document.getElementById('feedback-loader');
+    const FORM_URL = 'https://forms.gle/pZFitCFt6pfQNKEFA';
+    let iframeInit = false, lastFocus = null;
+
+    function preloadForm() {
+      if (iframeInit) return;
+      iframe.src = FORM_URL;
+      iframeInit = true;
+    }
+
+    if ('requestIdleCallback' in window) requestIdleCallback(preloadForm, { timeout: 4000 });
+    else setTimeout(preloadForm, 3000);
+
+    openBtn.addEventListener('mouseenter', preloadForm);
+
+    openBtn.addEventListener('click', () => {
+      lastFocus = document.activeElement;
+      modal.style.display = 'flex';
+      modal.removeAttribute('aria-hidden');
+      document.body.style.overflow = 'hidden';
+      preloadForm();
+      closeBtn.focus();
+    });
+
+    iframe.addEventListener('load', () => {
+      loader.style.display = 'none';
+      iframe.style.display = 'block';
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (lastFocus) lastFocus.focus();
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ── Smooth scroll ──
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      });
+    });
+  </script>
+</body>
+</html>

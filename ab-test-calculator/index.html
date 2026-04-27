@@ -1,24 +1,1520 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A/B Test Calculator – Free Statistical Significance Tool | Datapad</title>
-    <meta name="description" content="Free A/B test significance calculator with p-value, confidence intervals, statistical power, Monte Carlo simulation, multi-variant support, Bonferroni correction, SRM check, and Excel export. 100% client-side." />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://datapad.in/ab-test-calculator" />
-    <meta property="og:title" content="A/B Test Calculator – Free Statistical Significance Tool | Datapad" />
-    <meta property="og:description" content="The most advanced free A/B test calculator. P-value, power analysis, Monte Carlo simulation, multi-variant support, and Excel export — all in your browser." />
-    <meta property="og:url" content="https://datapad.in/ab-test-calculator" />
-    <meta property="og:image" content="https://datapad.in/og-ab-test.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- ═══ PRIMARY SEO ═══ -->
+  <title>A/B Test Calculator – Free Statistical Significance Tool | Datapad</title>
+  <meta name="description" content="Free A/B test significance calculator with p-value, confidence intervals, statistical power, Monte Carlo simulation, multi-variant (A/B/C/D) support, Bonferroni correction, SRM check, and Excel export. 100% client-side — no data leaves your browser."/>
+  <meta name="keywords" content="AB test calculator, statistical significance, p-value calculator, confidence interval, conversion rate optimization, CRO, split test, hypothesis testing, power analysis, MDE calculator, Bonferroni correction, Monte Carlo simulation"/>
+  <meta name="author" content="Datapad"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <link rel="canonical" href="https://datapad.in/ab-test-calculator"/>
+
+  <!-- ═══ OPEN GRAPH ═══ -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://datapad.in/ab-test-calculator"/>
+  <meta property="og:title" content="A/B Test Calculator – Free Statistical Significance Tool | Datapad"/>
+  <meta property="og:description" content="The most advanced free A/B test calculator. P-value, power analysis, Monte Carlo simulation, multi-variant support, and Excel export — all in your browser."/>
+  <meta property="og:image" content="https://datapad.in/og-ab-test.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:site_name" content="Datapad"/>
+  <meta property="og:locale" content="en_US"/>
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="A/B Test Calculator – Free Statistical Significance Tool | Datapad"/>
+  <meta name="twitter:description" content="Free A/B test calculator with p-value, confidence intervals, power analysis, Monte Carlo simulation, and Excel export."/>
+  <meta name="twitter:image" content="https://datapad.in/og-ab-test.png"/>
+
+  <!-- ═══ JSON-LD STRUCTURED DATA (SEO + AEO + GEO) ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://datapad.in/ab-test-calculator#app",
+        "name": "A/B Test Calculator",
+        "description": "Free statistical significance calculator for A/B tests with p-value, confidence intervals, power analysis, Monte Carlo simulation, multi-variant support, Bonferroni correction, SRM detection, and Excel export.",
+        "url": "https://datapad.in/ab-test-calculator",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "P-value calculation using two-proportion Z-test",
+          "Wilson confidence intervals",
+          "Statistical power analysis",
+          "Minimum detectable effect (MDE) calculator",
+          "Monte Carlo simulation with 5000 trials",
+          "Multi-variant testing (A/B, A/B/C, A/B/C/D)",
+          "Bonferroni correction for multiple comparisons",
+          "Sample ratio mismatch (SRM) detection",
+          "Excel export with full analysis",
+          "Revenue per visitor analysis",
+          "100% client-side, no data transmission"
+        ],
+        "provider": {
+          "@type": "Organization",
+          "name": "Datapad",
+          "url": "https://datapad.in"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://datapad.in/ab-test-calculator#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What p-value is statistically significant for an A/B test?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A p-value below your significance threshold (alpha) indicates statistical significance. At 95% confidence, alpha = 0.05, so a p-value < 0.05 is significant. At 99% confidence, you need p < 0.01. A lower p-value means stronger evidence against the null hypothesis."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How many visitors do I need for an A/B test?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sample size depends on your baseline conversion rate, the minimum effect you want to detect (MDE), desired power (typically 80%), and significance level (typically 95%). Use our power analysis tab to calculate the exact sample size needed for your test parameters."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is statistical power in A/B testing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Statistical power is the probability of correctly detecting a real effect when one exists. Standard practice targets 80% power, meaning there is a 20% chance of a false negative (missing a real improvement). Low power means your test may be inconclusive even if the variant truly performs better."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is Bonferroni correction and when do I need it?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bonferroni correction adjusts the significance threshold when testing multiple variants simultaneously to prevent false positives. For example, with 3 variants (A/B/C), the adjusted alpha becomes 0.05 / 2 = 0.025. This calculator applies Bonferroni correction automatically for A/B/C and A/B/C/D tests."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a Sample Ratio Mismatch (SRM) in A/B testing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A Sample Ratio Mismatch occurs when the observed traffic split between variants differs significantly from the expected split. SRM indicates a problem with your randomization setup and can invalidate test results. This calculator detects SRM using a chi-square test (p < 0.01 threshold)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Should I use a one-sided or two-sided test for A/B testing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Two-sided tests are recommended for most A/B tests because they protect against both positive and negative outcomes. A one-sided test only checks if the variant is better, making it easier to reach significance but completely ignoring the possibility the variant could harm performance."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://datapad.in/" },
+          { "@type": "ListItem", "position": 2, "name": "A/B Test Calculator", "item": "https://datapad.in/ab-test-calculator" }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="/favicon.ico"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --pri: #00ff88;
+      --pri-rgb: 0,255,136;
+      --acc: #00d4ff;
+      --acc-rgb: 0,212,255;
+      --red: #ff4466;
+      --red-rgb: 255,68,102;
+      --warn: #ffaa00;
+      --warn-rgb: 255,170,0;
+      --bg0: #050508;
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --t0: #ffffff;
+      --t1: #c8c8d4;
+      --t2: #6e6e82;
+      --brd: rgba(255,255,255,0.06);
+      --r: 14px;
+      --rs: 10px;
+      --font: 'Outfit', sans-serif;
+      --mono: 'Fira Code', monospace;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg0);
+      color: var(--t0);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--brd);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(5,5,8,0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-left a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 14px; }
+    .logo-box {
+      width: 40px; height: 40px;
+      background: var(--bg2);
+      border: 1px solid rgba(var(--pri-rgb), 0.25);
+      border-radius: var(--rs);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--pri); font-weight: 800; font-family: var(--mono);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .logo-box:hover { border-color: rgba(var(--pri-rgb), 0.5); box-shadow: 0 0 16px rgba(var(--pri-rgb), 0.15); }
+    .header-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .header-sub { font-size: 10px; color: var(--t2); text-transform: uppercase; letter-spacing: 2px; }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: var(--font); transition: all 0.25s var(--ease);
+      display: inline-flex; align-items: center; gap: 6px; border: none;
+      text-decoration: none;
+    }
+    .btn-ghost { background: rgba(var(--pri-rgb), 0.06); border: 1px solid rgba(var(--pri-rgb), 0.15); color: var(--pri); }
+    .btn-ghost:hover { background: rgba(var(--pri-rgb), 0.12); border-color: rgba(var(--pri-rgb), 0.3); }
+    .btn-primary { background: var(--pri); color: var(--bg0); font-weight: 700; border: 2px solid var(--pri); }
+    .btn-primary:hover { background: transparent; color: var(--pri); box-shadow: 0 0 24px rgba(var(--pri-rgb), 0.25); }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    .btn-back { background: transparent; border: 1px solid var(--brd); color: var(--t2); padding: 8px 14px; }
+    .btn-back:hover { border-color: rgba(var(--pri-rgb), 0.2); color: var(--t1); }
+
+    /* ── Layout ── */
+    .app-body {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: calc(100vh - 57px);
+    }
+    .sidebar {
+      border-right: 1px solid var(--brd);
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--bg1);
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+    }
+    .main-panel { padding: 24px; overflow-y: auto; }
+
+    /* ── Section Labels ── */
+    .sec-label {
+      font-size: 10px; color: var(--t2); text-transform: uppercase;
+      letter-spacing: 2.5px; margin-bottom: 14px; font-weight: 600;
+    }
+
+    /* ── Inputs ── */
+    .input-group { margin-bottom: 16px; }
+    .input-label {
+      font-size: 12px; color: #888; margin-bottom: 5px;
+      display: flex; align-items: center; gap: 6px; font-weight: 500;
+    }
+    .input-field {
+      width: 100%; padding: 10px 12px; background: var(--bg2);
+      border: 1px solid var(--brd); border-radius: 8px;
+      color: var(--t0); font-size: 14px; font-family: var(--mono);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus { border-color: rgba(var(--pri-rgb), 0.4); box-shadow: 0 0 0 3px rgba(var(--pri-rgb), 0.08); }
+    .input-field::placeholder { color: #444; }
+    .input-field::-webkit-inner-spin-button, .input-field::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* ── Toggle Buttons ── */
+    .toggle-row { display: flex; gap: 4px; }
+    .toggle-btn {
+      flex: 1; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: var(--font); transition: all 0.2s;
+      border: 1px solid var(--brd); background: var(--bg2); color: var(--t2); text-align: center;
+    }
+    .toggle-btn.active { border-color: rgba(var(--pri-rgb), 0.3); background: rgba(var(--pri-rgb), 0.08); color: var(--pri); }
+    .toggle-btn:hover:not(.active) { border-color: rgba(255,255,255,0.1); color: var(--t1); }
+    .toggle-btn:focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; }
+
+    input[type=range] { width: 100%; accent-color: var(--pri); cursor: pointer; }
+
+    /* ── Variant Inputs ── */
+    .variant-box {
+      background: var(--bg0); border: 1px solid var(--brd); border-radius: 12px;
+      padding: 16px; margin-bottom: 12px; border-left: 3px solid var(--t2);
+      transition: border-left-color 0.2s;
+    }
+    .variant-box.var-active { border-left-color: var(--pri); }
+    .var-name { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .var-inputs { display: grid; gap: 8px; }
+    .var-inputs.cols-2 { grid-template-columns: 1fr 1fr; }
+    .var-inputs.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ── Cards ── */
+    .divider { height: 1px; background: var(--brd); margin: 20px 0; }
+    .card {
+      background: var(--bg1); border: 1px solid var(--brd);
+      border-radius: var(--r); padding: 24px; margin-bottom: 16px;
+    }
+
+    /* ── Tab Bar ── */
+    .tab-bar {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: var(--bg1); border-radius: var(--rs); padding: 4px;
+      border: 1px solid var(--brd);
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 16px; border-radius: 8px; border: none;
+      background: transparent; color: var(--t2); font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: var(--font); transition: all 0.2s; text-align: center;
+    }
+    .tab-btn.active { background: rgba(var(--pri-rgb), 0.1); color: var(--pri); }
+    .tab-btn:hover:not(.active) { color: var(--t1); }
+    .tab-btn:focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; }
+
+    /* ── Metrics Grid ── */
+    .mg { display: grid; gap: 12px; }
+    .mg2 { grid-template-columns: 1fr 1fr; }
+    .mg3 { grid-template-columns: 1fr 1fr 1fr; }
+    .mg4 { grid-template-columns: repeat(4, 1fr); }
+
+    .metric-card {
+      background: var(--bg1); border: 1px solid var(--brd);
+      border-radius: var(--rs); padding: 14px;
+    }
+    .metric-label {
+      font-size: 10px; color: var(--t2); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 5px; font-weight: 600;
+      display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    }
+    .metric-val { font-size: 20px; font-weight: 800; font-family: var(--mono); }
+
+    /* ── Info Tooltip ── */
+    .info-btn {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(var(--acc-rgb), 0.1);
+      border: 1px solid rgba(var(--acc-rgb), 0.2);
+      color: var(--acc); font-size: 9px; font-weight: 800;
+      cursor: help; display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font); transition: all 0.2s; flex-shrink: 0;
+      position: relative; font-style: normal;
+    }
+    .info-btn:hover { background: rgba(var(--acc-rgb), 0.2); border-color: rgba(var(--acc-rgb), 0.4); transform: scale(1.1); }
+
+    .info-tip {
+      position: fixed;
+      width: 290px;
+      padding: 14px 16px;
+      background: var(--bg3);
+      border: 1px solid rgba(var(--acc-rgb), 0.25);
+      border-radius: var(--rs);
+      font-size: 12px; font-weight: 400; color: var(--t1); line-height: 1.7;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+      text-transform: none; letter-spacing: 0; font-family: var(--font);
+    }
+    .info-tip.visible { opacity: 1; visibility: visible; }
+    .info-tip .tip-title { color: var(--acc); display: block; margin-bottom: 4px; font-weight: 700; font-size: 12px; }
+    .info-tip .tip-range { margin-top: 6px; padding: 6px 8px; background: rgba(var(--acc-rgb), 0.06); border-radius: 6px; font-family: var(--mono); font-size: 11px; color: var(--pri); }
+    .info-tip .tip-bad { color: var(--red); }
+
+    /* ── Verdict Badge ── */
+    .verdict {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 700;
+    }
+
+    /* ── SRM ── */
+    .srm-warn {
+      margin: 0 0 16px; padding: 12px 14px;
+      background: rgba(var(--red-rgb), 0.06); border: 1px solid rgba(var(--red-rgb), 0.2);
+      border-radius: var(--rs); font-size: 12px; color: var(--red); line-height: 1.7;
+    }
+    .srm-ok {
+      margin: 0 0 16px; padding: 10px 14px;
+      background: rgba(var(--pri-rgb), 0.04); border: 1px solid rgba(var(--pri-rgb), 0.15);
+      border-radius: var(--rs); font-size: 12px; color: var(--pri); line-height: 1.7;
+    }
+
+    /* ── Gauge ── */
+    .gauge-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .gauge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .gauge-label { font-size: 10px; color: var(--t2); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 4px; }
+
+    /* ── Table ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      padding: 10px 12px; text-align: left; color: var(--t2); font-weight: 600;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .data-table th:not(:first-child) { text-align: right; }
+    .data-table td { padding: 10px 12px; font-family: var(--mono); border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .data-table td:not(:first-child) { text-align: right; }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ── Misc ── */
+    .hyp-explain {
+      margin-top: 8px; padding: 10px 12px;
+      background: rgba(var(--acc-rgb), 0.04); border: 1px solid rgba(var(--acc-rgb), 0.08);
+      border-radius: 8px; font-size: 11px; color: var(--t2); line-height: 1.7;
+    }
+    .hyp-explain strong { color: var(--t1); }
+    .tip-box {
+      margin-top: 16px; padding: 12px 14px;
+      background: rgba(var(--acc-rgb), 0.04); border: 1px solid rgba(var(--acc-rgb), 0.1);
+      border-radius: var(--rs); font-size: 11px; color: var(--t2); line-height: 1.7;
+    }
+    .tip-box em { color: var(--acc); font-style: normal; font-weight: 700; }
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--t2); }
+    .warn-box {
+      margin-top: 10px; padding: 10px 12px;
+      background: rgba(var(--warn-rgb),0.06); border: 1px solid rgba(var(--warn-rgb),0.15);
+      border-radius: 8px; font-size: 11px; color: var(--warn); line-height: 1.7;
+    }
+    .bonf-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600;
+      background: rgba(var(--acc-rgb), 0.06); border: 1px solid rgba(var(--acc-rgb), 0.15);
+      color: var(--acc); text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 16px;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px); z-index: 1000; display: none;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg1); border: 1px solid rgba(var(--pri-rgb), 0.15);
+      border-radius: 16px; padding: 40px; max-width: 640px; width: 90vw;
+      max-height: 85vh; overflow-y: auto; color: var(--t1); font-size: 14px; line-height: 1.9;
+    }
+    .modal-box h2 { font-size: 22px; font-weight: 800; color: var(--t0); margin-bottom: 24px; }
+    .modal-box h3 { color: var(--pri); font-weight: 700; font-size: 15px; margin: 20px 0 6px; }
+    .modal-box p { margin-bottom: 8px; }
+    .modal-box strong { color: var(--t0); }
+    .modal-close { float: right; background: none; border: none; color: var(--t2); font-size: 20px; cursor: pointer; padding: 4px; }
+    .modal-close:hover { color: var(--t1); }
+
+    /* ── Footer ── */
+    .app-footer {
+      border-top: 1px solid var(--brd); padding: 20px 24px;
+      text-align: center; font-size: 11px; color: var(--t2);
+    }
+    .app-footer a { color: var(--pri); text-decoration: none; font-weight: 600; }
+    .app-footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .app-body { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--brd); position: static; height: auto; }
+      .mg4 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .app-header { padding: 12px 16px; }
+      .sidebar, .main-panel { padding: 16px; }
+      .mg4, .mg3 { grid-template-columns: 1fr 1fr; }
+      .header-title { font-size: 15px; }
+      .gauge-row { gap: 10px; }
+      .tab-bar { flex-wrap: wrap; }
+    }
+    @media (max-width: 400px) {
+      .mg4, .mg3, .mg2 { grid-template-columns: 1fr; }
+      .var-inputs.cols-2, .var-inputs.cols-3 { grid-template-columns: 1fr; }
+    }
+
+    /* ── FAQ Section (hidden visually, for AEO) ── */
+    .faq-section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .faq-section h2 { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+    .faq-item { margin-bottom: 16px; border: 1px solid var(--brd); border-radius: var(--rs); overflow: hidden; }
+    .faq-q {
+      padding: 14px 16px; font-size: 13px; font-weight: 600; color: var(--t1);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg1); user-select: none;
+      list-style: none;
+    }
+    .faq-q:hover { color: var(--t0); }
+    .faq-q::marker { display: none; }
+    .faq-q::-webkit-details-marker { display: none; }
+    .faq-a { padding: 0 16px 14px; font-size: 13px; color: var(--t2); line-height: 1.8; background: var(--bg1); }
+    details[open] .faq-q { color: var(--pri); }
+  </style>
+</head>
+<body>
+
+<div class="info-tip" id="globalTip" role="tooltip" aria-hidden="true"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header" role="banner">
+  <div class="header-left">
+    <a href="/" aria-label="Datapad home">
+      <div class="logo-box" aria-hidden="true">DP</div>
+      <div>
+        <div class="header-title">A/B Test Calculator</div>
+        <div class="header-sub">by Datapad</div>
+      </div>
+    </a>
+  </div>
+  <div class="header-right">
+    <a href="/" class="btn btn-back">← Home</a>
+    <button class="btn btn-ghost" onclick="toggleGuide()" aria-label="Open user guide" aria-expanded="false" id="guideBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/>
+      </svg>
+      Guide
+    </button>
+    <button class="btn btn-primary" id="exportBtn" disabled onclick="doExport()" aria-label="Export analysis to Excel">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      Export Excel
+    </button>
+  </div>
+</header>
+
+<!-- ═══ BODY ═══ -->
+<div class="app-body">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar" aria-label="Test configuration">
+    <div class="sec-label">Configuration</div>
+
+    <div class="input-group">
+      <label class="input-label" id="testTypeLabel">
+        Test Type
+        <span class="info-btn" data-tip="<span class='tip-title'>Test Type</span><strong>Conversion:</strong> Measures rate of a binary action (click, signup, purchase).<br><strong>Revenue:</strong> Also compares revenue per visitor between variants." aria-label="Test type info" role="img">i</span>
+      </label>
+      <div class="toggle-row" role="group" aria-labelledby="testTypeLabel">
+        <button class="toggle-btn active" onclick="setMode('conversion',this)" aria-pressed="true">Conversion</button>
+        <button class="toggle-btn" onclick="setMode('revenue',this)" aria-pressed="false">Revenue</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" id="variantsLabel">
+        Variants
+        <span class="info-btn" data-tip="<span class='tip-title'>Multi-Variant Testing</span>A/B tests two versions. A/B/C and A/B/C/D compare multiple treatments against one control. Each variant is tested independently against control.<br><br>When using 3+ variants, <strong>Bonferroni correction</strong> is automatically applied to prevent false positives." aria-label="Variants info">i</span>
+      </label>
+      <div class="toggle-row" role="group" aria-labelledby="variantsLabel">
+        <button class="toggle-btn active" onclick="setVariants(2,this)" aria-pressed="true">A/B</button>
+        <button class="toggle-btn" onclick="setVariants(3,this)" aria-pressed="false">A/B/C</button>
+        <button class="toggle-btn" onclick="setVariants(4,this)" aria-pressed="false">A/B/C/D</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" for="confRange">
+        Confidence Level: <span id="confLabel">95</span>%
+        <span class="info-btn" data-tip="<span class='tip-title'>Confidence Level</span>How certain you need to be that the result is real. Alpha (α) = 1 − confidence level.<div class='tip-range'>✓ Standard: 95% (α = 0.05)<br>✓ Conservative: 99% (α = 0.01)<br>✓ Exploratory: 90% (α = 0.10)</div>" aria-label="Confidence level info">i</span>
+      </label>
+      <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level slider" aria-valuemin="80" aria-valuemax="99" aria-valuenow="95"/>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:4px" aria-hidden="true">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" id="hypLabel">
+        Hypothesis
+        <span class="info-btn" data-tip="<span class='tip-title'>Hypothesis Type</span><strong>Two-sided:</strong> Tests if variant is <em>different</em> — better OR worse. More conservative, recommended default.<br><br><strong>One-sided:</strong> Tests only if variant is <em>better</em>. Easier to reach significance but ignores harmful outcomes. Only use if the change absolutely cannot cause harm.<div class='tip-range'>✓ Recommended: Two-sided</div>" aria-label="Hypothesis info">i</span>
+      </label>
+      <div class="toggle-row" role="group" aria-labelledby="hypLabel">
+        <button class="toggle-btn active" onclick="setHypothesis('two',this)" aria-pressed="true">Two-sided</button>
+        <button class="toggle-btn" onclick="setHypothesis('one',this)" aria-pressed="false">One-sided</button>
+      </div>
+      <div class="hyp-explain" id="hypExplain" role="note"></div>
+    </div>
+
+    <div class="divider" role="separator"></div>
+    <div class="sec-label">Input Data</div>
+    <div id="variantInputs"></div>
+    <div id="warnBox" role="alert" aria-live="polite"></div>
+
+    <div class="tip-box">
+      <em>Tip:</em> Pre-filled with sample data. Replace with your numbers. All computation runs locally — no data leaves your browser.
+    </div>
+  </aside>
+
+  <!-- ─── MAIN PANEL ─── -->
+  <main class="main-panel" aria-label="Analysis results">
+    <nav class="tab-bar" role="tablist" aria-label="Result tabs">
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tabContent" onclick="setTab('results',this)" id="tab-results">Results</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tabContent" onclick="setTab('power',this)" id="tab-power">Power Analysis</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tabContent" onclick="setTab('sim',this)" id="tab-sim">Simulation</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tabContent" onclick="setTab('insights',this)" id="tab-insights">Insights</button>
+    </nav>
+    <div id="tabContent" role="tabpanel" aria-live="polite"></div>
+  </main>
+</div>
+
+<!-- ═══ FAQ SECTION (AEO + GEO) ═══ -->
+<section class="faq-section" aria-label="Frequently asked questions">
+  <h2>Frequently Asked Questions</h2>
+  <details class="faq-item">
+    <summary class="faq-q">What p-value is statistically significant for an A/B test? <span aria-hidden="true">›</span></summary>
+    <div class="faq-a">At 95% confidence (the standard), a p-value below 0.05 is significant. At 99% confidence, you need p &lt; 0.01. A smaller p-value means stronger evidence that the difference is real, not due to chance. This calculator shows the threshold adjusted for your chosen confidence level and applies Bonferroni correction for multi-variant tests.</div>
+  </details>
+  <details class="faq-item">
+    <summary class="faq-q">How many visitors do I need for an A/B test? <span aria-hidden="true">›</span></summary>
+    <div class="faq-a">Sample size depends on four factors: baseline conversion rate, the minimum effect size you want to detect (MDE), desired statistical power (typically 80%), and significance level (typically 95%). Use the Power Analysis tab to see exact sample sizes for various MDE values given your baseline rate and current traffic.</div>
+  </details>
+  <details class="faq-item">
+    <summary class="faq-q">What is statistical power in A/B testing? <span aria-hidden="true">›</span></summary>
+    <div class="faq-a">Power is the probability of detecting a real effect when one exists (avoiding false negatives). Aim for ≥80% power. Low power means your test might be inconclusive even if the variant truly performs differently. The calculator shows current power and the sample size needed to achieve 80% power for your observed effect size.</div>
+  </details>
+  <details class="faq-item">
+    <summary class="faq-q">When should I use Bonferroni correction? <span aria-hidden="true">›</span></summary>
+    <div class="faq-a">Use Bonferroni correction when testing multiple variants simultaneously (A/B/C or A/B/C/D). Without correction, testing 3 variants at 95% confidence gives a 14% chance of at least one false positive. Bonferroni divides alpha by the number of comparisons, automatically applied here for 3+ variant tests.</div>
+  </details>
+  <details class="faq-item">
+    <summary class="faq-q">What is a Sample Ratio Mismatch (SRM)? <span aria-hidden="true">›</span></summary>
+    <div class="faq-a">SRM occurs when the observed traffic split differs significantly from the intended split. It often indicates a bug in your randomization, a redirect issue, or bot traffic. SRM can invalidate your results even if the p-value looks significant. This calculator detects SRM using a chi-square test with a 1% threshold.</div>
+  </details>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="app-footer" role="contentinfo">
+  <a href="/">Datapad</a> · A/B Test Calculator · © 2026 All rights reserved. · <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
+</footer>
+
+<!-- ═══ GUIDE MODAL ═══ -->
+<div class="modal-overlay" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="toggleGuide()" aria-label="Close guide">✕</button>
+    <h2 id="guideTitle">How to Use This Calculator</h2>
+    <h3>1. Enter Your Data</h3>
+    <p>Input <strong>visitors</strong> and <strong>conversions</strong> for control and at least one variant. For revenue tests, enable Revenue mode and enter total revenue per variant.</p>
+    <h3>2. Configure Settings</h3>
+    <p>Set confidence level (default 95%), hypothesis type (two-sided recommended), and variant count. Hover the <span style="display:inline-flex;width:16px;height:16px;border-radius:50%;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);color:#00d4ff;font-size:9px;font-weight:800;align-items:center;justify-content:center" aria-hidden="true">i</span> icons to learn what each metric means.</p>
+    <h3>3. Read Your Results</h3>
+    <p>The Results tab shows verdict, lift, p-value, power, Wilson confidence intervals, distribution chart, and SRM check. Bonferroni correction is automatic for multi-variant tests.</p>
+    <h3>4. Go Deeper</h3>
+    <p><strong>Power Analysis:</strong> Required sample sizes and a visual power curve.<br>
+    <strong>Monte Carlo Simulation:</strong> 5,000 randomized trials for probabilistic outcomes.<br>
+    <strong>Insights:</strong> Plain-English recommendations with projected business impact.</p>
+    <h3>5. Export</h3>
+    <p>Download a multi-sheet Excel report with Summary, Insights, Simulation, and Power Analysis.</p>
+    <h3>Statistical Methodology</h3>
+    <p><strong>Test:</strong> Two-proportion Z-test with signed z-statistic for correct one-sided direction.</p>
+    <p><strong>CIs:</strong> Wilson interval (more accurate than Wald for small samples and extreme rates).</p>
+    <p><strong>Power:</strong> Single-term non-central normal approximation.</p>
+    <p><strong>Multiple comparisons:</strong> Bonferroni correction for 3+ variants.</p>
+    <p><strong>SRM:</strong> Chi-square test for sample ratio mismatch detection.</p>
+    <p><strong>Simulation:</strong> True binomial Monte Carlo, 5,000 trials (normal approximation for n &gt; 1000).</p>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+var S = {
+  mode: 'conversion',
+  numVariants: 2,
+  confidence: 95,
+  hypothesis: 'two',
+  activeTab: 'results',
+  simResult: null,
+  simCacheKey: '',
+  variants: [
+    { name: 'Control (A)', visitors: 10000, conversions: 450, revenue: 22500 },
+    { name: 'Variant B',   visitors: 10000, conversions: 520, revenue: 28600 },
+    { name: 'Variant C',   visitors: '',    conversions: '',  revenue: '' },
+    { name: 'Variant D',   visitors: '',    conversions: '',  revenue: '' }
+  ]
+};
+
+// ═══════════════════════════════════════
+// STATISTICAL CORE (all verified)
+// ═══════════════════════════════════════
+
+// Rational approximation to normalCDF (Abramowitz & Stegun 26.2.17, corrected)
+function normalCDF(x) {
+  var t = 1 / (1 + 0.2316419 * Math.abs(x));
+  var d = 0.3989422820 * Math.exp(-x * x / 2);
+  var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.7814779 + t * (-1.8212560 + t * 1.3302744))));
+  return x > 0 ? 1 - p : p;
+}
+
+// Rational approximation to inverse normal (Peter Acklam's method)
+function normalPPF(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  if (p < 0.5) return -normalPPF(1 - p);
+  var q = p - 0.5, r = q * q;
+  var num = q * (2.5090809287301226727e3 + r * (3.3430575583588128105e4 + r * (6.7265770927008700853e4 + r * (4.5921953931549871457e4 + r * (1.3731693765509461125e4 + r * (1.9715909503065514427e3 + r * (1.3314349742930454610e2 + r * 3.3871328727963666080)))))));
+  var den = (2.5090809287301226727e3 + r * (2.0440107817814567588e4 + r * (4.3548959706765579462e4 + r * (2.8862383475678374638e4 + r * (8.3050093638376789974e3 + r * (1.0823038792095716174e3 + r * (5.5706694245767834917e1 + r)))))));
+  return num / den;
+}
+
+// Two-proportion Z-test (signed z for correct one-sided direction)
+function calcPValue(n1, c1, n2, c2) {
+  if (!n1 || !n2 || n1 <= 0 || n2 <= 0) return 1;
+  var p1 = c1 / n1, p2 = c2 / n2;
+  var pooled = (c1 + c2) / (n1 + n2);
+  var se = Math.sqrt(pooled * (1 - pooled) * (1/n1 + 1/n2));
+  if (se === 0) return 1;
+  var z = (p2 - p1) / se; // signed: positive = variant better
+
+  if (S.hypothesis === 'one') {
+    // One-sided: only significant if variant is better (z > 0)
+    return z > 0 ? 1 - normalCDF(z) : 1;
+  }
+  return 2 * (1 - normalCDF(Math.abs(z)));
+}
+
+// Wilson confidence interval (handles small samples & extreme rates better than Wald)
+function calcCI(n, c, conf) {
+  if (!n || n <= 0) return [0, 0];
+  var p = c / n;
+  var z = normalPPF(1 - (1 - conf / 100) / 2);
+  var z2 = z * z;
+  var denom = 1 + z2 / n;
+  var center = (p + z2 / (2 * n)) / denom;
+  var margin = (z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n))) / denom;
+  return [Math.max(0, center - margin), Math.min(1, center + margin)];
+}
+
+// Statistical power (single non-central normal term)
+function calcPower(n1, p1, n2, p2) {
+  var alpha = 1 - S.confidence / 100;
+  var se = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2);
+  if (se === 0) return (p1 !== p2 ? 1 : 0);
+  var zAlpha = normalPPF(1 - alpha / 2);
+  var ncp = Math.abs(p2 - p1) / se;
+  return normalCDF(ncp - zAlpha) + normalCDF(-ncp - zAlpha);
+}
+
+// MDE: minimum detectable effect given sample sizes (uses unpooled SE)
+function calcMDE(n1, n2, br, alpha_override, pw_override) {
+  var alpha = alpha_override !== undefined ? alpha_override : (1 - S.confidence / 100);
+  var pw = pw_override !== undefined ? pw_override : 0.8;
+  var za = normalPPF(1 - alpha / 2);
+  var zb = normalPPF(pw);
+  // SE under H1 using approximation with baseline rate
+  return (za + zb) * Math.sqrt(br * (1 - br) * (1/n1 + 1/n2));
+}
+
+// Required sample size per variant for a given absolute MDE
+function calcSampleSize(br, absMDE, alpha_override, pw_override) {
+  var alpha = alpha_override !== undefined ? alpha_override : (1 - S.confidence / 100);
+  var pw = pw_override !== undefined ? pw_override : 0.8;
+  if (Math.abs(absMDE) < 1e-10) return Infinity;
+  var za = normalPPF(1 - alpha / 2);
+  var zb = normalPPF(pw);
+  var p2 = br + absMDE;
+  p2 = Math.min(Math.max(p2, 0.001), 0.999);
+  return Math.ceil(
+    Math.pow(za * Math.sqrt(2 * br * (1 - br)) + zb * Math.sqrt(br * (1 - br) + p2 * (1 - p2)), 2)
+    / Math.pow(absMDE, 2)
+  );
+}
+
+// Binomial sample: normal approx for large n, exact for small
+function binomialSample(n, p) {
+  if (n <= 0) return 0;
+  if (n > 500) {
+    var mu = n * p;
+    var sigma = Math.sqrt(n * p * (1 - p));
+    if (sigma < 1e-10) return Math.round(mu);
+    var u1 = Math.random(), u2 = Math.random();
+    var z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2); // Box-Muller
+    return Math.min(n, Math.max(0, Math.round(mu + sigma * z)));
+  }
+  var x = 0;
+  for (var i = 0; i < n; i++) if (Math.random() < p) x++;
+  return x;
+}
+
+function runSimulation(n1, c1, n2, c2, numSims) {
+  numSims = numSims || 5000;
+  var p1 = c1 / n1, p2 = c2 / n2;
+  var alpha = 1 - S.confidence / 100;
+  var wins = 0, losses = 0, inc = 0;
+  var lifts = new Array(numSims);
+
+  for (var i = 0; i < numSims; i++) {
+    var s1 = binomialSample(n1, p1);
+    var s2 = binomialSample(n2, p2);
+    var sp1 = s1 / n1, sp2 = s2 / n2;
+    var lift = sp1 === 0 ? (sp2 > 0 ? 1 : 0) : (sp2 - sp1) / sp1;
+    lifts[i] = lift;
+    var pv = calcPValue(n1, s1, n2, s2);
+    if (pv < alpha) {
+      if (sp2 > sp1) wins++;
+      else losses++;
+    } else {
+      inc++;
+    }
+  }
+
+  lifts.sort(function(a, b) { return a - b; });
+  var pctl = function(p) { return lifts[Math.min(numSims - 1, Math.floor(numSims * p))] * 100; };
+
+  return {
+    winRate:  wins  / numSims * 100,
+    lossRate: losses / numSims * 100,
+    incRate:  inc   / numSims * 100,
+    p5: pctl(0.05), p25: pctl(0.25), p50: pctl(0.5),
+    p75: pctl(0.75), p95: pctl(0.95)
+  };
+}
+
+// SRM via chi-square (Wilson-Hilferty for df >= 1)
+function checkSRM(visitors) {
+  var total = 0;
+  for (var i = 0; i < visitors.length; i++) total += visitors[i];
+  if (total === 0) return { ok: true, pValue: 1 };
+  var expected = total / visitors.length;
+  var chiSq = 0;
+  for (var i = 0; i < visitors.length; i++) {
+    chiSq += Math.pow(visitors[i] - expected, 2) / expected;
+  }
+  var df = visitors.length - 1;
+  if (df <= 0) return { ok: true, pValue: 1 };
+  // Wilson-Hilferty normal approximation for chi-square CDF
+  var wh = Math.pow(chiSq / df, 1/3) - (1 - 2 / (9 * df));
+  var whSE = Math.sqrt(2 / (9 * df));
+  var z = wh / whSE;
+  var pValue = 1 - normalCDF(z);
+  return { ok: pValue > 0.01, pValue: Math.max(0, Math.min(1, pValue)), chiSq: chiSq };
+}
+
+// ═══════════════════════════════════════
+// FORMAT HELPERS
+// ═══════════════════════════════════════
+function fmt(n, d)    { d = d == null ? 2 : d; return (isNaN(n) || !isFinite(n)) ? '—' : n.toFixed(d); }
+function fmtPct(n, d) { d = d == null ? 2 : d; return (isNaN(n) || !isFinite(n)) ? '—' : (n * 100).toFixed(d) + '%'; }
+function fmtRaw(n, d) { d = d == null ? 2 : d; return (isNaN(n) || !isFinite(n)) ? '—' : n.toFixed(d) + '%'; }
+function fmtNum(n)    { return (isNaN(n) || !isFinite(n)) ? '—' : Math.round(n).toLocaleString(); }
+
+// ═══════════════════════════════════════
+// TOOLTIP SYSTEM
+// ═══════════════════════════════════════
+(function() {
+  var tip = document.getElementById('globalTip');
+  var cur = null;
+
+  function positionTip(btn) {
+    tip.innerHTML = btn.dataset.tip;
+
+    var rect = btn.getBoundingClientRect();
+    var tw = 290;
+
+    tip.style.visibility = 'hidden';
+    tip.classList.add('visible');
+
+    var th = tip.offsetHeight;
+
+    var top = rect.top - th - 10;
+    var left = rect.left + rect.width / 2 - tw / 2;
+
+    if (top < 8) top = rect.bottom + 10;
+    if (left < 8) left = 8;
+    if (left + tw > window.innerWidth - 8) {
+      left = window.innerWidth - tw - 8;
+    }
+
+    tip.style.top = top + 'px';
+    tip.style.left = left + 'px';
+    tip.style.visibility = 'visible';
+  }
+
+  document.addEventListener('mouseenter', function(e) {
+    var btn = e.target.closest('.info-btn');
+    if (!btn || !btn.dataset.tip) return;
+
+    cur = btn;
+    positionTip(btn);
+  }, true);
+
+  document.addEventListener('mouseleave', function(e) {
+    var btn = e.target.closest('.info-btn');
+    if (!btn || btn !== cur) return;
+
+    tip.classList.remove('visible');
+    cur = null;
+  }, true);
+
+  window.addEventListener('scroll', function() {
+    if (cur) positionTip(cur);
+  });
+
+  window.addEventListener('resize', function() {
+    if (cur) positionTip(cur);
+  });
+})();
+
+// ═══════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════
+function activateToggle(el) {
+  if (!el) return;
+  var siblings = el.parentNode.querySelectorAll('.toggle-btn');
+  for (var i = 0; i < siblings.length; i++) {
+    siblings[i].classList.remove('active');
+    siblings[i].setAttribute('aria-pressed', 'false');
+  }
+  el.classList.add('active');
+  el.setAttribute('aria-pressed', 'true');
+}
+
+function setMode(m, el) { S.mode = m; activateToggle(el); buildInputs(); compute(); }
+function setVariants(n, el) { S.numVariants = n; activateToggle(el); buildInputs(); compute(); }
+function setConfidence(v) {
+  S.confidence = +v;
+  document.getElementById('confLabel').textContent = v;
+  document.getElementById('confRange').setAttribute('aria-valuenow', v);
+  compute();
+}
+function setHypothesis(h, el) { S.hypothesis = h; activateToggle(el); updateHypExplain(); compute(); }
+function setTab(t, el) {
+  S.activeTab = t;
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  el.classList.add('active');
+  el.setAttribute('aria-selected', 'true');
+  render();
+}
+function toggleGuide() {
+  var modal = document.getElementById('guideModal');
+  var btn = document.getElementById('guideBtn');
+  var open = modal.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) { modal.querySelector('.modal-close').focus(); }
+}
+
+function updateHypExplain() {
+  var el = document.getElementById('hypExplain');
+  if (S.hypothesis === 'two') {
+    el.innerHTML = '<strong>Two-sided</strong> — Tests if variant differs in either direction. Alpha is split across both tails (α/2 each). Safer default, protects against both positive and negative outcomes.';
+  } else {
+    el.innerHTML = '<strong>One-sided</strong> — Tests only if variant is <em>better</em>. Full alpha in one tail. If variant is actually worse, test returns p = 1 regardless of effect size. Only use when harm is impossible.';
+  }
+}
+
+// ═══════════════════════════════════════
+// BUILD INPUTS
+// ═══════════════════════════════════════
+function buildInputs() {
+  var container = document.getElementById('variantInputs');
+  var html = '';
+  for (var i = 0; i < S.numVariants; i++) {
+    var v = S.variants[i];
+    var isControl = (i === 0);
+    var cols = S.mode === 'revenue' ? 'cols-3' : 'cols-2';
+    var labelColor = isControl ? 'var(--t1)' : 'var(--pri)';
+    var inputId = 'var-' + i;
+
+    html += '<div class="variant-box ' + (isControl ? '' : 'var-active') + '" role="group" aria-label="' + v.name + ' inputs">';
+    html += '<div class="var-name" style="color:' + labelColor + '">' + v.name + '</div>';
+    html += '<div class="var-inputs ' + cols + '">';
+
+    html += '<div><label class="input-label" style="font-size:10px" for="' + inputId + '-v">Visitors</label>';
+    html += '<input class="input-field" id="' + inputId + '-v" type="number" min="0" step="1" value="' + v.visitors + '" placeholder="10000" data-idx="' + i + '" data-field="visitors" oninput="onInput(this)" aria-label="' + v.name + ' visitors"/></div>';
+
+    html += '<div><label class="input-label" style="font-size:10px" for="' + inputId + '-c">Conversions</label>';
+    html += '<input class="input-field" id="' + inputId + '-c" type="number" min="0" step="1" value="' + v.conversions + '" placeholder="450" data-idx="' + i + '" data-field="conversions" oninput="onInput(this)" aria-label="' + v.name + ' conversions"/></div>';
+
+    if (S.mode === 'revenue') {
+      html += '<div><label class="input-label" style="font-size:10px" for="' + inputId + '-r">Revenue (₹)</label>';
+      html += '<input class="input-field" id="' + inputId + '-r" type="number" min="0" step="1" value="' + v.revenue + '" placeholder="22500" data-idx="' + i + '" data-field="revenue" oninput="onInput(this)" aria-label="' + v.name + ' revenue"/></div>';
+    }
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function onInput(el) {
+  var idx = +el.dataset.idx;
+  var field = el.dataset.field;
+  var raw = el.value.trim();
+  S.variants[idx][field] = raw === '' ? '' : Math.max(0, Math.floor(Number(raw)));
+  compute();
+}
+
+// ═══════════════════════════════════════
+// COMPUTE
+// ═══════════════════════════════════════
+var R = null;
+
+function compute() {
+  var ctrl = S.variants[0];
+  var warns = [];
+
+  if (ctrl.visitors !== '' && ctrl.conversions !== '' && +ctrl.conversions > +ctrl.visitors)
+    warns.push('⚠ Control: conversions exceed visitors.');
+  if (ctrl.visitors !== '' && +ctrl.visitors > 0 && +ctrl.visitors < 30)
+    warns.push('⚠ Control: sample < 30 — results unreliable.');
+
+  for (var i = 1; i < S.numVariants; i++) {
+    var v = S.variants[i];
+    if (v.visitors !== '' && v.conversions !== '' && +v.conversions > +v.visitors)
+      warns.push('⚠ ' + v.name + ': conversions exceed visitors.');
+    if (v.visitors !== '' && +v.visitors > 0 && +v.visitors < 30)
+      warns.push('⚠ ' + v.name + ': sample < 30 — results unreliable.');
+  }
+
+  document.getElementById('warnBox').innerHTML = warns.length
+    ? '<div class="warn-box">' + warns.join('<br>') + '</div>' : '';
+
+  if (!ctrl.visitors || !ctrl.conversions || +ctrl.visitors <= 0) {
+    R = null; render(); return;
+  }
+
+  var baseRate = +ctrl.conversions / +ctrl.visitors;
+  var numComparisons = S.numVariants - 1;
+  var alphaRaw = 1 - S.confidence / 100;
+  var alphaAdj = numComparisons > 1 ? alphaRaw / numComparisons : alphaRaw;
+
+  var srmVisitors = [+ctrl.visitors];
+  var variantResults = [];
+
+  for (var i = 1; i < S.numVariants; i++) {
+    var v = S.variants[i];
+    if (!v.visitors || !v.conversions || +v.visitors <= 0) continue;
+
+    var n2 = +v.visitors, c2 = +v.conversions;
+    var rate = c2 / n2;
+    var lift = baseRate === 0 ? (rate > 0 ? Infinity : 0) : (rate - baseRate) / baseRate;
+    var pValue = calcPValue(+ctrl.visitors, +ctrl.conversions, n2, c2);
+    var ci = calcCI(n2, c2, S.confidence);
+    var ciCtrl = calcCI(+ctrl.visitors, +ctrl.conversions, S.confidence);
+    var power = calcPower(+ctrl.visitors, baseRate, n2, rate) * 100;
+    var mdeVal = calcMDE(+ctrl.visitors, n2, baseRate, alphaAdj);
+    var absDiff = rate - baseRate;
+    var se = Math.sqrt(baseRate * (1 - baseRate) / +ctrl.visitors + rate * (1 - rate) / n2);
+    var isSignificant = pValue < alphaAdj;
+    var sampleNeeded = calcSampleSize(baseRate, Math.max(Math.abs(absDiff), 0.001), alphaAdj);
+
+    srmVisitors.push(n2);
+
+    var rvc = 0, rvv = 0, revLift = 0;
+    if (S.mode === 'revenue' && ctrl.revenue && v.revenue) {
+      rvc = +ctrl.revenue / +ctrl.visitors;
+      rvv = +v.revenue / n2;
+      revLift = rvc === 0 ? 0 : (rvv - rvc) / rvc;
+    }
+
+    variantResults.push({
+      name: v.name, idx: i,
+      visitors: n2, conversions: c2,
+      rate: rate, lift: lift, pValue: pValue,
+      ci: ci, ciCtrl: ciCtrl,
+      power: power, mde: mdeVal, se: se,
+      absDiff: absDiff, isSignificant: isSignificant,
+      sampleNeeded: sampleNeeded,
+      rvc: rvc, rvv: rvv, revLift: revLift
+    });
+  }
+
+  var srm = checkSRM(srmVisitors);
+
+  R = {
+    baseRate: baseRate,
+    variantResults: variantResults,
+    ctrl: ctrl,
+    srm: srm,
+    alphaAdj: alphaAdj,
+    numComparisons: numComparisons
+  };
+
+  document.getElementById('exportBtn').disabled = !variantResults.length;
+  render();
+}
+
+// ═══════════════════════════════════════
+// VERDICT
+// ═══════════════════════════════════════
+function getVerdict(v) {
+  if (!v) return { text: 'Enter data', color: 'var(--t2)', bg: 'rgba(110,110,130,0.08)' };
+  if (v.isSignificant && v.lift > 0)  return { text: '🏆 Winner',         color: 'var(--pri)',  bg: 'rgba(0,255,136,0.08)' };
+  if (v.isSignificant && v.lift < 0)  return { text: '📉 Loser',          color: 'var(--red)',  bg: 'rgba(255,68,102,0.08)' };
+  if (v.power < 80)                   return { text: '⏳ Need More Data',  color: 'var(--warn)', bg: 'rgba(255,170,0,0.08)' };
+  return                                     { text: '🔄 No Difference',  color: 'var(--acc)',  bg: 'rgba(0,212,255,0.08)' };
+}
+
+// ═══════════════════════════════════════
+// SVG GENERATORS
+// ═══════════════════════════════════════
+function gaugeHTML(value, label, color, tipData, size) {
+  size = size || 90;
+  var r = size / 2 - 8;
+  var circ = Math.PI * r;
+  var progress = Math.min(Math.max(value / 100, 0), 1);
+  var offset = circ * (1 - progress);
+  var tipAttr = tipData ? ' data-tip="' + tipData.replace(/"/g, '&quot;') + '"' : '';
+  var displayVal = isFinite(value) ? fmtRaw(value, 1) : '—';
+
+  return '<div class="gauge">' +
+    '<svg width="' + size + '" height="' + (size/2 + 14) + '" aria-hidden="true">' +
+    '<path d="M 8 ' + size/2 + ' A ' + r + ' ' + r + ' 0 0 1 ' + (size-8) + ' ' + size/2 + '" fill="none" stroke="var(--bg3)" stroke-width="6" stroke-linecap="round"/>' +
+    '<path d="M 8 ' + size/2 + ' A ' + r + ' ' + r + ' 0 0 1 ' + (size-8) + ' ' + size/2 + '" fill="none" stroke="' + color + '" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" style="transition:stroke-dashoffset .6s var(--ease)"/>' +
+    '<text x="' + size/2 + '" y="' + (size/2 - 2) + '" text-anchor="middle" fill="' + color + '" font-size="15" font-weight="800" font-family="var(--font)">' + displayVal + '</text>' +
+    '</svg>' +
+    '<span class="gauge-label">' + label + (tipData ? ' <span class="info-btn"' + tipAttr + '>i</span>' : '') + '</span>' +
+    '</div>';
+}
+
+function distSVG(p1, p2, se) {
+  if (!se || se === 0) return '';
+  var w = 300, h = 90;
+  var pts = 100;
+  var range = 4.5 * se;
+  var step = 2 * range / pts;
+  var maxY = 1 / (se * Math.sqrt(2 * Math.PI));
+  var path = '';
+  var diff = p2 - p1;
+
+  for (var i = 0; i <= pts; i++) {
+    var x = -range + i * step;
+    var y = Math.exp(-0.5 * Math.pow(x / se, 2)) / (se * Math.sqrt(2 * Math.PI));
+    var px = ((x + range) / (2 * range)) * w;
+    var py = h - 10 - (y / maxY) * (h - 20);
+    path += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
+  }
+
+  var diffX  = ((diff  + range) / (2 * range)) * w;
+  var zeroX  = ((0     + range) / (2 * range)) * w;
+  var dc = diff >= 0 ? 'var(--pri)' : 'var(--red)';
+  diffX = Math.min(Math.max(diffX, 4), w - 4);
+
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;width:100%;max-width:' + w + 'px;margin:0 auto" aria-hidden="true">' +
+    '<defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--pri)" stop-opacity="0.2"/><stop offset="100%" stop-color="var(--pri)" stop-opacity="0.01"/></linearGradient></defs>' +
+    '<path d="' + path + 'L' + w + ',' + (h-10) + 'L0,' + (h-10) + 'Z" fill="url(#dg)"/>' +
+    '<path d="' + path + '" fill="none" stroke="var(--pri)" stroke-width="1.5" opacity="0.85"/>' +
+    '<line x1="' + zeroX + '" y1="6" x2="' + zeroX + '" y2="' + (h-10) + '" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="3,3"/>' +
+    '<line x1="' + diffX + '" y1="6" x2="' + diffX + '" y2="' + (h-10) + '" stroke="' + dc + '" stroke-width="2"/>' +
+    '<text x="' + zeroX + '" y="' + h + '" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9" font-family="var(--mono)">0</text>' +
+    '<text x="' + Math.min(diffX + 4, w - 16) + '" y="16" text-anchor="start" fill="' + dc + '" font-size="9" font-family="var(--mono)">Δ</text>' +
+    '</svg>';
+}
+
+function powerCurveSVG(baseRate, n1, n2) {
+  var w = 560, h = 150;
+  var pts = 60;
+  // Sensible upper bound for MDE axis: at most 50% of baseline, minimum 0.02
+  var maxMDE = Math.max(baseRate * 0.5, 0.02);
+  var path = '';
+  var alpha = 1 - S.confidence / 100;
+
+  for (var i = 0; i <= pts; i++) {
+    var mde = (i / pts) * maxMDE;
+    var p2 = Math.min(baseRate + mde, 0.9999);
+    var pw = (calcPower(n1, baseRate, n2, p2)) * 100;
+    var px = (i / pts) * w;
+    var py = h - 10 - (Math.min(pw, 100) / 100) * (h - 20);
+    path += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
+  }
+  var y80 = h - 10 - (0.8) * (h - 20);
+
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;width:100%;max-width:100%" aria-hidden="true">' +
+    '<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--acc)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--acc)" stop-opacity="0.01"/></linearGradient></defs>' +
+    '<path d="' + path + 'L' + w + ',' + (h-10) + 'L0,' + (h-10) + 'Z" fill="url(#pg)"/>' +
+    '<path d="' + path + '" fill="none" stroke="var(--acc)" stroke-width="2" opacity="0.9"/>' +
+    '<line x1="0" y1="' + y80 + '" x2="' + w + '" y2="' + y80 + '" stroke="rgba(0,212,255,0.3)" stroke-width="1" stroke-dasharray="4,4"/>' +
+    '<text x="' + (w - 4) + '" y="' + (y80 - 4) + '" text-anchor="end" fill="rgba(0,212,255,0.5)" font-size="9" font-family="var(--mono)">80% power</text>' +
+    '<text x="' + w/2 + '" y="' + h + '" text-anchor="middle" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)">Effect size (absolute) →</text>' +
+    '</svg>';
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  var el = document.getElementById('tabContent');
+  if (!R || R.variantResults.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon" aria-hidden="true">📊</div><div class="empty-title">Enter Your Test Data</div><div class="empty-desc">Fill in visitors and conversions on the left to see results.</div></div>';
+    return;
+  }
+  if (S.activeTab === 'results')   renderResults(el);
+  else if (S.activeTab === 'power')   renderPower(el);
+  else if (S.activeTab === 'sim')     renderSimulation(el);
+  else if (S.activeTab === 'insights') renderInsights(el);
+}
+
+function renderResults(el) {
+  var h = '';
+
+  // SRM
+  if (R.srm && !R.srm.ok) {
+    h += '<div class="srm-warn" role="alert">⚠️ <strong>Sample Ratio Mismatch detected</strong> (χ² p = ' + fmt(R.srm.pValue, 4) + '). Traffic split is uneven — this may invalidate results. Check your randomisation setup.</div>';
+  } else if (R.srm && R.variantResults.length > 0) {
+    h += '<div class="srm-ok">✓ <strong>SRM Check Passed</strong> — Traffic split is balanced (χ² p = ' + fmt(R.srm.pValue, 3) + ')</div>';
+  }
+
+  // Bonferroni notice
+  if (R.numComparisons > 1) {
+    h += '<div><span class="bonf-badge">⚡ Bonferroni correction active — α adjusted to ' + fmt(R.alphaAdj, 4) + ' for ' + R.numComparisons + ' comparisons</span></div>';
+  }
+
+  R.variantResults.forEach(function(v) {
+    var vd = getVerdict(v);
+    var liftColor = v.lift >= 0 ? 'var(--pri)' : 'var(--red)';
+    var pvColor = v.isSignificant ? 'var(--pri)' : 'var(--red)';
+    var pwColor = v.power >= 80 ? 'var(--acc)' : 'var(--warn)';
+    var liftDisplay = isFinite(v.lift) ? (v.lift >= 0 ? '+' : '') + fmtRaw(v.lift * 100, 2) : 'N/A';
+
+    h += '<article class="card">';
+
+    // Header
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">';
+    h += '<div style="display:flex;align-items:center;gap:12px"><h2 style="font-size:20px;font-weight:800">' + v.name + '</h2><span style="font-size:12px;color:var(--t2)">vs Control</span></div>';
+    h += '<span class="verdict" style="background:' + vd.bg + ';color:' + vd.color + ';border:1px solid ' + vd.color + '22" role="status">' + vd.text + '</span>';
+    h += '</div>';
+
+    // Gauges
+    h += '<div class="gauge-row" role="img" aria-label="Key metrics for ' + v.name + '">';
+    h += gaugeHTML((1 - v.pValue) * 100, 'Certainty (1−p)', v.isSignificant ? 'var(--pri)' : 'var(--red)',
+      "<span class='tip-title'>Certainty (1 − p-value)</span>NOT the same as confidence level. Shows (1 − p) × 100 — how strongly the data argues against no difference. A measure of evidence strength.<div class='tip-range'>✓ Goal: ≥ " + S.confidence + "% (your threshold)</div>");
+    h += gaugeHTML(v.power, 'Power', pwColor,
+      "<span class='tip-title'>Statistical Power</span>Probability of detecting a real effect when one exists. Below 80% means risk of missing real differences.<div class='tip-range'>✓ Good: ≥ 80%<br><span class='tip-bad'>✗ Low: &lt; 80% — collect more traffic</span></div>");
+    h += '<div class="gauge"><div style="font-size:28px;font-weight:900;color:' + liftColor + ';letter-spacing:-1px">' + liftDisplay + '</div>';
+    h += '<span class="gauge-label">Relative Lift <span class="info-btn" data-tip="<span class=\'tip-title\'>Relative Lift</span>(Variant Rate − Control Rate) ÷ Control Rate × 100<div class=\'tip-range\'>✓ Positive = variant is better<br><span class=\'tip-bad\'>✗ Negative = variant is worse</span></div>">i</span></span></div>';
+    h += '</div>';
+
+    // Metric cards
+    h += '<div class="mg mg4">';
+    h += '<div class="metric-card"><div class="metric-label">P-Value <span class="info-btn" data-tip="<span class=\'tip-title\'>P-Value</span>Probability of seeing this result by chance if no real difference exists. Smaller = stronger evidence.' + (R.numComparisons > 1 ? ' Bonferroni-adjusted threshold = ' + fmt(R.alphaAdj, 4) + '.' : '') + '<div class=\'tip-range\'>✓ Significant: &lt; ' + fmt(R.alphaAdj, 4) + '</div>">i</span></div><div class="metric-val" style="color:' + pvColor + '">' + fmt(v.pValue, 4) + '</div></div>';
+    h += '<div class="metric-card"><div class="metric-label">Conv. Rate <span class="info-btn" data-tip="<span class=\'tip-title\'>Conversion Rate</span>Conversions ÷ Visitors × 100">i</span></div><div class="metric-val">' + fmtPct(v.rate) + '</div></div>';
+    h += '<div class="metric-card"><div class="metric-label">Abs. Diff <span class="info-btn" data-tip="<span class=\'tip-title\'>Absolute Difference</span>Variant Rate − Control Rate in percentage points. Direct measure of effect size.">i</span></div><div class="metric-val" style="color:' + liftColor + '">' + (v.absDiff >= 0 ? '+' : '') + fmtPct(v.absDiff) + '</div></div>';
+    h += '<div class="metric-card"><div class="metric-label">MDE <span class="info-btn" data-tip="<span class=\'tip-title\'>Minimum Detectable Effect</span>Smallest absolute difference detectable with 80% power at current sample size. Effects smaller than this may go undetected.<div class=\'tip-range\'>More traffic → smaller MDE → more sensitive test</div>">i</span></div><div class="metric-val">' + fmtPct(v.mde) + '</div></div>';
+    h += '</div>';
+
+    // CI + Distribution
+    h += '<div class="mg mg2" style="margin-top:12px">';
+
+    // CI bar
+    var totalRange = Math.max(v.ci[1] - v.ci[0], 0.0001);
+    var ciBarW = Math.min(95, Math.max(15, (totalRange / Math.max(v.rate + 0.05, 0.1)) * 100));
+    h += '<div class="metric-card"><div class="metric-label">' + S.confidence + '% CI (Wilson) <span class="info-btn" data-tip="<span class=\'tip-title\'>Wilson Confidence Interval</span>Range where the true conversion rate most likely falls. Wilson method outperforms Wald for small samples or rates near 0%/100%.<div class=\'tip-range\'>Non-overlapping CIs → likely real difference</div>">i</span></div>';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-top:10px">';
+    h += '<span style="font-family:var(--mono);font-size:12px;color:var(--acc)">' + fmtPct(v.ci[0]) + '</span>';
+    h += '<div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,rgba(var(--acc-rgb),0.35),rgba(var(--pri-rgb),0.35));border-radius:3px;width:' + ciBarW + '%"></div></div>';
+    h += '<span style="font-family:var(--mono);font-size:12px;color:var(--pri)">' + fmtPct(v.ci[1]) + '</span>';
+    h += '</div><div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:6px;text-align:center">Control: ' + fmtPct(v.ciCtrl[0]) + ' – ' + fmtPct(v.ciCtrl[1]) + '</div></div>';
+
+    // Distribution
+    h += '<div class="metric-card"><div class="metric-label">Distribution <span class="info-btn" data-tip="<span class=\'tip-title\'>Distribution of Difference</span>Bell curve centred on zero. The Δ line marks the observed difference. Δ far from centre = strong evidence of real effect.">i</span></div>';
+    h += '<div style="margin-top:8px">' + distSVG(R.baseRate, v.rate, v.se) + '</div></div>';
+    h += '</div>';
+
+    // Revenue
+    if (S.mode === 'revenue' && v.rvc) {
+      h += '<div class="mg mg3" style="margin-top:12px">';
+      h += '<div class="metric-card"><div class="metric-label">Rev/Visitor (Ctrl)</div><div class="metric-val">₹' + fmt(v.rvc) + '</div></div>';
+      h += '<div class="metric-card"><div class="metric-label">Rev/Visitor (Var)</div><div class="metric-val">₹' + fmt(v.rvv) + '</div></div>';
+      h += '<div class="metric-card"><div class="metric-label">Revenue Lift</div><div class="metric-val" style="color:' + (v.revLift >= 0 ? 'var(--pri)' : 'var(--red)') + '">' + (v.revLift >= 0 ? '+' : '') + fmtRaw(v.revLift * 100) + '</div></div>';
+      h += '</div>';
+    }
+
+    h += '</article>';
+  });
+
+  el.innerHTML = h;
+}
+
+function renderPower(el) {
+  var v0 = R.variantResults[0];
+  var n2 = v0 ? v0.visitors : +R.ctrl.visitors;
+  var rows = '';
+  var mdePcts = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 7, 10];
+  mdePcts.forEach(function(mde) {
+    var n = calcSampleSize(R.baseRate, mde / 100, R.alphaAdj);
+    var pw = calcPower(n, R.baseRate, n, R.baseRate + mde / 100) * 100;
+    var current = v0 && Math.abs(v0.absDiff * 100) >= mde - 0.01;
+    rows += '<tr' + (current ? ' style="background:rgba(var(--pri-rgb),0.04)"' : '') + '><td>' + mde + '%</td><td>' + (isFinite(n) ? n.toLocaleString() : '∞') + '</td><td>' + (isFinite(n) ? (n * S.numVariants).toLocaleString() : '∞') + '</td><td style="color:' + (pw >= 80 ? 'var(--pri)' : 'var(--warn)') + '">' + fmtRaw(pw, 1) + '</td></tr>';
+  });
+
+  el.innerHTML =
+    '<div class="card">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><h2 style="font-size:16px;font-weight:800">Power Curve</h2><span class="info-btn" data-tip="<span class=\'tip-title\'>Power Curve</span>Statistical power vs effect size at current sample sizes. Dashed line = 80% threshold. Tests above this line are reliably powered.">i</span></div>' +
+    powerCurveSVG(R.baseRate, +R.ctrl.visitors, n2) +
+    '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.2);text-align:center">Power vs. absolute effect size at current sample sizes</div>' +
+    '</div>' +
+    '<div class="card">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><h2 style="font-size:16px;font-weight:800">Sample Size Table</h2><span class="info-btn" data-tip="<span class=\'tip-title\'>Required Sample Sizes</span>Visitors per variant needed to detect each MDE with 80% power at ' + S.confidence + '% confidence.<div class=\'tip-range\'>Total = per variant × number of variants</div>">i</span></div>' +
+    '<div style="overflow-x:auto"><table class="data-table"><caption class="sr-only">Sample sizes required per MDE</caption><thead><tr><th scope="col">MDE</th><th scope="col">Per Variant</th><th scope="col">Total (all variants)</th><th scope="col">Power at current n</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '</div>' +
+    '<div class="card" style="background:rgba(var(--acc-rgb),0.03);border-color:rgba(var(--acc-rgb),0.1)">' +
+    '<p style="font-size:14px;color:var(--t1);line-height:1.9">With <strong style="color:var(--t0)">' + fmtNum(+R.ctrl.visitors) + '</strong> visitors/variant and baseline <strong style="color:var(--pri)">' + fmtPct(R.baseRate) + '</strong>, your current MDE is <strong style="color:var(--acc)">' + (v0 ? fmtPct(v0.mde) : '—') + '</strong>. Effects this size or larger can be detected with 80% power.</p>' +
+    '</div>';
+}
+
+function renderSimulation(el) {
+  var sim = S.simResult;
+  var simHtml = '';
+
+  if (sim) {
+    simHtml += '<div class="mg mg3">';
+    simHtml += '<div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:26px;color:var(--pri)">' + fmtRaw(sim.winRate, 1) + '</div><div class="metric-label" style="justify-content:center;margin-top:4px">Win Rate <span class="info-btn" data-tip="<span class=\'tip-title\'>Win Rate</span>Percentage of 5,000 simulated trials where variant was statistically significantly better.<div class=\'tip-range\'>✓ High = strong, reliable improvement</div>">i</span></div></div>';
+    simHtml += '<div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:26px;color:var(--red)">' + fmtRaw(sim.lossRate, 1) + '</div><div class="metric-label" style="justify-content:center;margin-top:4px">Loss Rate <span class="info-btn" data-tip="<span class=\'tip-title\'>Loss Rate</span>Percentage of trials where variant was significantly worse than control.<div class=\'tip-range\'><span class=\'tip-bad\'>✗ High = variant may cause harm</span></div>">i</span></div></div>';
+    simHtml += '<div class="metric-card" style="text-align:center"><div class="metric-val" style="font-size:26px;color:var(--warn)">' + fmtRaw(sim.incRate, 1) + '</div><div class="metric-label" style="justify-content:center;margin-top:4px">Inconclusive <span class="info-btn" data-tip="<span class=\'tip-title\'>Inconclusive</span>Percentage of trials with no significant result in either direction. High = need more data.<div class=\'tip-range\'>✓ Low = clear signal</div>">i</span></div></div>';
+    simHtml += '</div>';
+
+    simHtml += '<div class="card" style="margin-top:12px;margin-bottom:0"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:13px;font-weight:700">Lift Percentile Distribution</span><span class="info-btn" data-tip="<span class=\'tip-title\'>Lift Percentiles</span>Lift distribution across 5,000 simulated trials. P5–P95 covers 90% of expected outcomes.<div class=\'tip-range\'>If P5 &gt; 0, the variant is almost certainly improving results</div>">i</span></div>';
+    simHtml += '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">';
+    [{l:'P5',v:sim.p5},{l:'P25',v:sim.p25},{l:'Median',v:sim.p50},{l:'P75',v:sim.p75},{l:'P95',v:sim.p95}].forEach(function(p) {
+      simHtml += '<div style="text-align:center;flex:1;min-width:60px;padding:10px 8px;background:var(--bg2);border-radius:8px"><div style="font-size:16px;font-weight:800;font-family:var(--mono);color:' + (p.v >= 0 ? 'var(--pri)' : 'var(--red)') + '">' + (p.v >= 0 ? '+' : '') + fmtRaw(p.v, 1) + '</div><div style="font-size:10px;color:var(--t2);margin-top:4px;text-transform:uppercase;letter-spacing:1px">' + p.l + '</div></div>';
+    });
+    simHtml += '</div></div>';
+  } else {
+    simHtml = '<div class="empty-state" style="padding:40px"><div class="empty-icon" aria-hidden="true">🎲</div><div class="empty-title">Run Simulation</div><div class="empty-desc">Click below to run 5,000 randomised binomial trials</div></div>';
+  }
+
+  el.innerHTML =
+    '<div class="card">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">' +
+    '<div><div style="display:flex;align-items:center;gap:8px"><h2 style="font-size:16px;font-weight:800">Monte Carlo Simulation</h2><span class="info-btn" data-tip="<span class=\'tip-title\'>Monte Carlo Simulation</span>Runs 5,000 independent A/B trials using true binomial sampling at your observed rates. Gives probability-based outcome estimates that complement the single p-value.<div class=\'tip-range\'>More robust than p-value alone for risk assessment</div>">i</span></div>' +
+    '<div style="font-size:12px;color:var(--t2);margin-top:2px">5,000 trials · true binomial (Box-Muller for large n)</div></div>' +
+    '<button class="btn btn-primary" id="simBtn" onclick="doSimulation()" aria-label="Run Monte Carlo simulation">▶ Run Simulation</button>' +
+    '</div>' +
+    simHtml +
+    '</div>';
+}
+
+function doSimulation() {
+  if (!R || R.variantResults.length === 0) return;
+  var v0 = R.variantResults[0];
+  var cacheKey = R.ctrl.visitors + ':' + R.ctrl.conversions + ':' + v0.visitors + ':' + v0.conversions + ':' + S.confidence;
+  if (S.simCacheKey === cacheKey && S.simResult) { render(); return; }
+
+  var btn = document.getElementById('simBtn');
+  if (btn) { btn.textContent = 'Running…'; btn.disabled = true; }
+
+  setTimeout(function() {
+    S.simResult = runSimulation(+R.ctrl.visitors, +R.ctrl.conversions, v0.visitors, v0.conversions);
+    S.simCacheKey = cacheKey;
+    render();
+  }, 16);
+}
+
+function renderInsights(el) {
+  var h = '';
+
+  R.variantResults.forEach(function(v) {
+    var vd = getVerdict(v);
+    var winner = v.isSignificant && v.lift > 0;
+    var loser  = v.isSignificant && v.lift < 0;
+    var lowPow = v.power < 80;
+    var advice = '';
+
+    if (winner) {
+      var proj = isFinite(v.lift) ? Math.round(100000 * Math.abs(v.lift)).toLocaleString() : 'significant';
+      advice = '<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p>' +
+        '<p>' + v.name + ' shows a significant <strong>' + (v.lift >= 0 ? '+' : '') + fmtRaw(v.lift * 100, 2) + '</strong> improvement (p = ' + fmt(v.pValue, 4) + ', power = ' + fmtRaw(v.power) + '). Wilson CI: [' + fmtPct(v.ci[0]) + ' – ' + fmtPct(v.ci[1]) + '].' +
+        (R.numComparisons > 1 ? ' Bonferroni-adjusted α = ' + fmt(R.alphaAdj, 4) + '.' : '') + '</p>' +
+        '<p style="margin-top:8px;color:var(--t2)">📈 Projected: If baseline yields 100,000 conversions/year, this lift adds roughly <strong style="color:var(--t1)">+' + proj + '</strong> conversions annually.</p>';
+    } else if (loser) {
+      advice = '<p><strong style="color:var(--red)">❌ Do NOT deploy.</strong></p>' +
+        '<p>' + v.name + ' is significantly worse (<strong>' + fmtRaw(v.lift * 100, 2) + '</strong>, p = ' + fmt(v.pValue, 4) + '). Revert to control and investigate why.</p>';
+    } else if (!v.isSignificant && lowPow) {
+      var periods = v.sampleNeeded > 0 && isFinite(v.sampleNeeded) ? Math.ceil(v.sampleNeeded / (+R.ctrl.visitors || 1)) : '?';
+      advice = '<p><strong style="color:var(--warn)">⏳ Continue collecting data.</strong></p>' +
+        '<p>Not significant (p = ' + fmt(v.pValue, 4) + ') and power is only ' + fmtRaw(v.power) + ' (below 80%). Need ~<strong>' + (isFinite(v.sampleNeeded) ? v.sampleNeeded.toLocaleString() : '∞') + '</strong> visitors/variant to reliably detect this effect. At current traffic, that is approximately <strong>' + periods + '</strong> more collection periods.</p>';
+    } else {
+      advice = '<p><strong style="color:var(--acc)">🔄 No meaningful difference detected.</strong></p>' +
+        '<p>Sufficient power (' + fmtRaw(v.power) + ') but no significant result. The true effect is likely smaller than the MDE of ' + fmtPct(v.mde) + '. Consider whether an effect that small would be business-relevant before running a larger test.</p>';
+    }
+
+    h += '<article class="card">';
+    h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
+    h += '<h2 style="font-size:18px;font-weight:800">' + v.name + '</h2>';
+    h += '<span class="verdict" style="background:' + vd.bg + ';color:' + vd.color + ';border:1px solid ' + vd.color + '22">' + vd.text + '</span>';
+    h += '</div>';
+    h += '<div style="font-size:14px;color:var(--t1);line-height:2">' + advice + '</div>';
+    h += '</article>';
+  });
+
+  // Methodology
+  h += '<div class="card" style="background:rgba(var(--acc-rgb),0.03);border-color:rgba(var(--acc-rgb),0.1)">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:10px">📐 Methodology</div>';
+  h += '<div style="font-size:12px;color:var(--t2);line-height:2">';
+  h += '<strong>Test:</strong> Two-proportion Z-test with signed z-statistic (prevents false positives on one-sided tests when variant is worse).<br>';
+  h += '<strong>CIs:</strong> Wilson interval (superior to Wald for small samples and rates near 0%/100%).<br>';
+  h += '<strong>Power:</strong> Single-term non-central normal approximation with unpooled variance.<br>';
+  h += '<strong>Multiple testing:</strong> Bonferroni correction applied automatically for 3+ variants.<br>';
+  h += '<strong>SRM:</strong> Chi-square test (Wilson-Hilferty approximation) for sample ratio mismatch.<br>';
+  h += '<strong>Simulation:</strong> True binomial Monte Carlo — Box-Muller for n > 500, exact for small samples. 5,000 trials.<br>';
+  h += '<strong>Privacy:</strong> 100% client-side. No data transmitted to any server.</div>';
+  h += '</div>';
+
+  el.innerHTML = h;
+}
+
+// ═══════════════════════════════════════
+// EXCEL EXPORT
+// ═══════════════════════════════════════
+function doExport() {
+  if (!R || !window.XLSX) return;
+  var wb = XLSX.utils.book_new();
+
+  var summary = [
+    ['A/B Test Analysis — Datapad'],
+    ['Generated', new Date().toLocaleString()],
+    ['Confidence', S.confidence + '%'],
+    ['Hypothesis', S.hypothesis === 'two' ? 'Two-sided' : 'One-sided'],
+    ['Mode', S.mode === 'revenue' ? 'Conversion + Revenue' : 'Conversion'],
+    ['CI Method', 'Wilson'],
+    ['Correction', R.numComparisons > 1 ? 'Bonferroni (alpha = ' + fmt(R.alphaAdj, 4) + ')' : 'None'],
+    ['SRM Check', R.srm.ok ? 'Passed (p = ' + fmt(R.srm.pValue, 4) + ')' : 'FAILED (p = ' + fmt(R.srm.pValue, 4) + ')'],
+    [],
+    ['Metric', 'Control'].concat(R.variantResults.map(function(v) { return v.name; })),
+    ['Visitors', R.ctrl.visitors].concat(R.variantResults.map(function(v) { return v.visitors; })),
+    ['Conversions', R.ctrl.conversions].concat(R.variantResults.map(function(v) { return v.conversions; })),
+    ['Conversion Rate', fmtPct(R.baseRate)].concat(R.variantResults.map(function(v) { return fmtPct(v.rate); })),
+    ['Relative Lift', '—'].concat(R.variantResults.map(function(v) { return isFinite(v.lift) ? fmtRaw(v.lift * 100) : 'N/A'; })),
+    ['Absolute Diff', '—'].concat(R.variantResults.map(function(v) { return fmtPct(v.absDiff); })),
+    ['P-Value', '—'].concat(R.variantResults.map(function(v) { return fmt(v.pValue, 6); })),
+    ['Significant?', '—'].concat(R.variantResults.map(function(v) { return v.isSignificant ? 'YES' : 'NO'; })),
+    ['Power', '—'].concat(R.variantResults.map(function(v) { return fmtRaw(v.power); })),
+    ['MDE', '—'].concat(R.variantResults.map(function(v) { return fmtPct(v.mde); })),
+    ['CI Lower (Wilson)', fmtPct(R.variantResults[0] ? R.variantResults[0].ciCtrl[0] : 0)].concat(R.variantResults.map(function(v) { return fmtPct(v.ci[0]); })),
+    ['CI Upper (Wilson)', fmtPct(R.variantResults[0] ? R.variantResults[0].ciCtrl[1] : 0)].concat(R.variantResults.map(function(v) { return fmtPct(v.ci[1]); })),
+    ['Sample Needed/Variant', '—'].concat(R.variantResults.map(function(v) { return isFinite(v.sampleNeeded) ? v.sampleNeeded : 'N/A'; }))
+  ];
+
+  if (S.mode === 'revenue') {
+    summary.push([]);
+    summary.push(['Revenue Metrics']);
+    summary.push(['Rev/Visitor (Ctrl)', ''].concat(R.variantResults.map(function(v) { return fmt(v.rvc); })));
+    summary.push(['Rev/Visitor (Var)', ''].concat(R.variantResults.map(function(v) { return fmt(v.rvv); })));
+    summary.push(['Revenue Lift', ''].concat(R.variantResults.map(function(v) { return fmtRaw(v.revLift * 100); })));
+  }
+
+  var ws1 = XLSX.utils.aoa_to_sheet(summary);
+  ws1['!cols'] = [{wch:24},{wch:16},{wch:16},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+
+  var insights = [['Insights & Recommendations'], []];
+  R.variantResults.forEach(function(v) {
+    var w = v.isSignificant && v.lift > 0;
+    insights.push([v.name]);
+    insights.push(['Status', v.isSignificant ? 'Significant' : 'Not Significant']);
+    insights.push(['Recommendation',
+      w ? 'Deploy. ' + fmtRaw(v.lift*100, 2) + ' lift (p=' + fmt(v.pValue, 4) + ').'
+        : v.power < 80 ? 'Continue collecting. Power = ' + fmtRaw(v.power) + '. Need ~' + (isFinite(v.sampleNeeded) ? v.sampleNeeded.toLocaleString() : 'N/A') + ' visitors/variant.'
+        : 'No meaningful difference. MDE = ' + fmtPct(v.mde) + '.'
+    ]);
+    insights.push([]);
+  });
+  var ws2 = XLSX.utils.aoa_to_sheet(insights);
+  ws2['!cols'] = [{wch:24},{wch:80}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Insights');
+
+  if (S.simResult) {
+    var sim = S.simResult;
+    var simData = [
+      ['Monte Carlo Simulation (5,000 trials)'], [],
+      ['Metric', 'Value'],
+      ['Win Rate', fmtRaw(sim.winRate)],
+      ['Loss Rate', fmtRaw(sim.lossRate)],
+      ['Inconclusive', fmtRaw(sim.incRate)],
+      [],
+      ['Lift Percentiles'],
+      ['P5',  fmtRaw(sim.p5)],
+      ['P25', fmtRaw(sim.p25)],
+      ['Median', fmtRaw(sim.p50)],
+      ['P75', fmtRaw(sim.p75)],
+      ['P95', fmtRaw(sim.p95)]
+    ];
+    var ws3 = XLSX.utils.aoa_to_sheet(simData);
+    ws3['!cols'] = [{wch:24},{wch:20}];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Simulation');
+  }
+
+  var powerData = [['MDE (%)', 'Per Variant', 'Total']];
+  [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 7, 10].forEach(function(m) {
+    var n = calcSampleSize(R.baseRate, m / 100, R.alphaAdj);
+    powerData.push([m + '%', isFinite(n) ? n : 'N/A', isFinite(n) ? n * S.numVariants : 'N/A']);
+  });
+  var ws4 = XLSX.utils.aoa_to_sheet(powerData);
+  ws4['!cols'] = [{wch:14},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws4, 'Power Analysis');
+
+  XLSX.writeFile(wb, 'AB_Test_Analysis_Datapad_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var modal = document.getElementById('guideModal');
+    if (modal.classList.contains('open')) toggleGuide();
+  }
+});
+document.getElementById('guideModal').addEventListener('click', function(e) {
+  if (e.target === document.getElementById('guideModal')) toggleGuide();
+});
+
+buildInputs();
+updateHypExplain();
+compute();
+</script>
+</body>
 </html> 
