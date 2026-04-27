@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Datapad — Font Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Geist:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+    :root {
+      --pri: #00ff88;
+      --acc: #00d4ff;
+      --red: #ff4466;
+      --warn: #ffaa00;
+      --bg0: #050508;
+      --bg1: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --t0: #ffffff;
+      --t1: #c8c8d4;
+      --t2: #6e6e82;
+      --brd: rgba(255,255,255,0.07);
+      --mono: 'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg0);
+      color: var(--t0);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Sticky header ── */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,5,8,0.96);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--brd);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .top-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--t2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .top-nav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .top-nav a {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--t2);
+      border: 1px solid var(--brd);
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .top-nav a:hover { color: var(--t0); border-color: rgba(255,255,255,0.15); }
+    .top-nav a.active { color: var(--pri); border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.06); }
+
+    /* ── Font section ── */
+    .font-section {
+      padding: 56px 40px 0;
+      border-bottom: 1px solid var(--brd);
+    }
+    .font-section:last-child { border-bottom: none; }
+
+    .font-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .font-meta-left { flex: 1; min-width: 240px; }
+
+    .font-number {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--t2);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .font-name-big {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--pri);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .font-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.65;
+      max-width: 460px;
+    }
+    .font-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .tag-green  { background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2); color: var(--pri); }
+    .tag-blue   { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); color: var(--acc); }
+    .tag-gray   { background: rgba(255,255,255,0.04); border: 1px solid var(--brd); color: var(--t2); }
+    .tag-orange { background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.2); color: var(--warn); }
+
+    .verdict-badge {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+    .verdict-pick    { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--pri); }
+    .verdict-strong  { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); color: var(--acc); }
+    .verdict-current { background: rgba(255,255,255,0.04); border: 1px solid var(--brd); color: var(--t2); }
+    .verdict-niche   { background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.2); color: var(--warn); }
+
+    /* ── Preview card ── */
+    .preview-card {
+      background: var(--bg1);
+      border: 1px solid var(--brd);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 56px;
+    }
+
+    /* Header strip */
+    .preview-header {
+      background: rgba(5,5,8,0.95);
+      border-bottom: 1px solid var(--brd);
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-header-left { display: flex; align-items: center; gap: 10px; }
+    .logo-dot {
+      width: 28px; height: 28px;
+      background: var(--bg2);
+      border: 1px solid rgba(0,255,136,0.2);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 9px; color: var(--pri); font-weight: 700;
+    }
+    .preview-header-right { display: flex; gap: 6px; }
+
+    /* Two-col layout inside card */
+    .preview-body {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+    .preview-sidebar {
+      border-right: 1px solid var(--brd);
+      padding: 18px;
+      background: rgba(255,255,255,0.01);
+    }
+    .preview-main { padding: 20px; }
+
+    /* Sidebar elements */
+    .sb-row { margin-bottom: 14px; }
+    .sb-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: var(--t2); margin-bottom: 6px; }
+    .sb-toggle { display: flex; gap: 3px; }
+    .sb-btn {
+      flex: 1; padding: 6px 4px;
+      border-radius: 6px; border: 1px solid var(--brd);
+      background: var(--bg2); color: var(--t2);
+      font-size: 11px; font-weight: 700; text-align: center; cursor: default;
+    }
+    .sb-btn.on { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.25); color: var(--pri); }
+    .sb-input {
+      width: 100%; padding: 8px 10px;
+      background: var(--bg2); border: 1px solid var(--brd);
+      border-radius: 7px; color: var(--t0);
+      font-size: 13px; font-family: var(--mono);
+    }
+    .sb-slider { width: 100%; accent-color: var(--pri); }
+    .sb-conf-row { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
+    .sb-conf-val { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--pri); }
+
+    /* Variant box */
+    .vbox {
+      background: var(--bg0); border: 1px solid var(--brd);
+      border-radius: 8px; padding: 10px 11px; margin-bottom: 7px;
+      border-left: 3px solid rgba(255,255,255,0.06);
+    }
+    .vbox.va { border-left-color: var(--pri); }
+    .vbox-name { font-size: 11px; font-weight: 700; color: var(--t1); margin-bottom: 7px; }
+    .vbox.va .vbox-name { color: var(--pri); }
+    .vbox-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .vbox-lbl { font-size: 9px; color: var(--t2); margin-bottom: 3px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+
+    /* Main panel */
+    .tab-row { display: flex; gap: 3px; margin-bottom: 14px; background: var(--bg2); border-radius: 8px; padding: 3px; border: 1px solid var(--brd); }
+    .tab-btn { flex: 1; padding: 7px; border-radius: 6px; border: none; background: transparent; color: var(--t2); font-size: 11px; font-weight: 700; text-align: center; cursor: default; }
+    .tab-btn.on { background: rgba(0,255,136,0.1); color: var(--pri); }
+
+    .srm-pass { padding: 7px 11px; background: rgba(0,255,136,0.04); border: 1px solid rgba(0,255,136,0.15); border-radius: 7px; font-size: 11px; color: var(--pri); margin-bottom: 10px; }
+
+    /* Result card */
+    .res-card { background: var(--bg2); border: 1px solid var(--brd); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    .res-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .res-name { font-size: 15px; font-weight: 800; }
+    .res-vs   { font-size: 11px; color: var(--t2); margin-left: 6px; font-weight: 400; }
+    .res-badge { padding: 4px 11px; border-radius: 100px; font-size: 11px; font-weight: 700; background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2); color: var(--pri); }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; margin-bottom: 10px; }
+    .scard { background: var(--bg1); border: 1px solid var(--brd); border-radius: 8px; padding: 9px 10px; }
+    .scard-lbl { font-size: 8px; color: var(--t2); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+    .scard-val { font-family: var(--mono); font-size: 14px; font-weight: 800; }
+    .scard-sub { font-size: 9px; color: var(--t2); margin-top: 2px; font-family: var(--mono); }
+
+    /* Hero text section */
+    .hero-preview {
+      background: var(--bg2);
+      border: 1px solid var(--brd);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 10px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 100px;
+      font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.15); color: var(--pri);
+      margin-bottom: 14px; font-family: var(--mono);
+    }
+    .hero-h1 { font-size: 36px; font-weight: 800; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 12px; }
+    .hero-h1 .accent { color: var(--pri); }
+    .hero-body { font-size: 14px; color: var(--t1); line-height: 1.75; max-width: 440px; margin-bottom: 16px; }
+    .hero-btns { display: flex; gap: 10px; }
+    .hero-btn-pri { padding: 10px 20px; background: var(--pri); color: var(--bg0); border-radius: 8px; font-size: 13px; font-weight: 700; border: 2px solid var(--pri); cursor: default; }
+    .hero-btn-ghost { padding: 10px 20px; background: transparent; color: var(--t1); border-radius: 8px; font-size: 13px; font-weight: 500; border: 1px solid var(--brd); cursor: default; }
+
+    /* Small body text sample */
+    .body-sample {
+      background: var(--bg2); border: 1px solid var(--brd); border-radius: 10px; padding: 16px;
+    }
+    .body-sample p { font-size: 13px; color: var(--t1); line-height: 1.75; margin-bottom: 8px; }
+    .body-sample p:last-child { margin-bottom: 0; color: var(--t2); }
+    .body-sample strong { color: var(--t0); }
+
+    /* Hdr btn mock */
+    .hbtn-mock {
+      padding: 6px 12px; border-radius: 7px; font-size: 11px; font-weight: 600;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--brd); color: var(--t1); cursor: default;
+    }
+    .hbtn-mock-pri {
+      padding: 6px 12px; border-radius: 7px; font-size: 11px; font-weight: 700;
+      background: var(--pri); color: var(--bg0); border: 1.5px solid var(--pri); cursor: default;
+    }
+
+    /* Divider */
+    .section-divider { height: 1px; background: var(--brd); margin: 0 40px; }
+
+    /* Monospace note */
+    .mono-note {
+      font-family: var(--mono); font-size: 11px; color: var(--t2);
+      padding: 8px 12px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--brd); border-radius: 6px;
+      display: inline-block; margin-top: 8px;
+    }
+
+    /* Footer */
+    .page-footer {
+      padding: 32px 40px;
+      border-top: 1px solid var(--brd);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--t2);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-title">// Datapad Font Comparison — open in Chrome</div>
+  <nav class="top-nav" id="topNav">
+    <a href="#font-01">01 Syne (Current)</a>
+    <a href="#font-02">02 Plus Jakarta</a>
+    <a href="#font-03">03 Outfit</a>
+    <a href="#font-04">04 Manrope</a>
+    <a href="#font-05">05 Geist</a>
+    <a href="#font-06">06 Bricolage</a>
+    <a href="#font-07">07 Space Grotesk</a>
+    <a href="#font-08">08 Raleway</a>
+    <a href="#font-09">09 Inter</a>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════════
+     FONT 01 — SYNE (CURRENT)
+════════════════════════════════════════ -->
+<section class="font-section" id="font-01" style="font-family:'DM Sans',sans-serif">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">01 / 09</div>
+      <div class="font-name-big" style="font-family:'Syne',sans-serif">Syne + DM Sans</div>
+      <div class="font-desc" style="font-family:'DM Sans',sans-serif">
+        Your current font pairing. Syne is a display-first font — very geometric and assertive.
+        Pairs with DM Sans for body. Great hero personality but slightly heavy on dense tool UIs
+        with many labels and small inputs.
+      </div>
+      <div class="font-tags">
+        <span class="tag tag-gray">Current</span>
+        <span class="tag tag-gray">Display-first</span>
+        <span class="tag tag-gray">Geometric</span>
+        <span class="tag tag-gray">Heavy at small sizes</span>
+      </div>
+      <div class="mono-note">font-family: 'Syne', sans-serif + 'DM Sans', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-current">Current Stack</span>
+  </div>
+
+  <div class="preview-card">
+    <div class="preview-header">
+      <div class="preview-header-left">
+        <div class="logo-dot">DP</div>
+        <span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:.3px">Datapad</span>
+        <span style="color:rgba(255,255,255,.12);font-size:16px">/</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span>
+      </div>
+      <div class="preview-header-right">
+        <span class="hbtn-mock" style="font-family:'DM Sans',sans-serif">Guide</span>
+        <span class="hbtn-mock-pri" style="font-family:'DM Sans',sans-serif">Export Excel</span>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row">
+          <div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Test Type</div>
+          <div class="sb-toggle">
+            <div class="sb-btn on" style="font-family:'DM Sans',sans-serif">Conversion</div>
+            <div class="sb-btn" style="font-family:'DM Sans',sans-serif">Revenue</div>
+          </div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Variants</div>
+          <div class="sb-toggle">
+            <div class="sb-btn on" style="font-family:'DM Sans',sans-serif">A/B</div>
+            <div class="sb-btn" style="font-family:'DM Sans',sans-serif">A/B/C</div>
+            <div class="sb-btn" style="font-family:'DM Sans',sans-serif">A/B/C/D</div>
+          </div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-conf-row">
+            <div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Confidence</div>
+            <div class="sb-conf-val">95%</div>
+          </div>
+          <input type="range" class="sb-slider" value="95" min="80" max="99" disabled/>
+        </div>
+        <div class="sb-row">
+          <div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Input Data</div>
+          <div class="vbox">
+            <div class="vbox-name" style="font-family:'Syne',sans-serif">Control (A)</div>
+            <div class="vbox-inputs">
+              <div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div>
+              <div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Conversions</div><div class="sb-input">450</div></div>
+            </div>
+          </div>
+          <div class="vbox va">
+            <div class="vbox-name" style="font-family:'Syne',sans-serif">Variant B</div>
+            <div class="vbox-inputs">
+              <div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div>
+              <div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Conversions</div><div class="sb-input">520</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row">
+          <div class="tab-btn on" style="font-family:'DM Sans',sans-serif">Results</div>
+          <div class="tab-btn" style="font-family:'DM Sans',sans-serif">Power Analysis</div>
+          <div class="tab-btn" style="font-family:'DM Sans',sans-serif">Simulation</div>
+          <div class="tab-btn" style="font-family:'DM Sans',sans-serif">Insights</div>
+        </div>
+        <div class="srm-pass" style="font-family:'DM Sans',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card">
+          <div class="res-top">
+            <div><span class="res-name" style="font-family:'Syne',sans-serif">Variant B</span><span class="res-vs" style="font-family:'DM Sans',sans-serif">vs Control</span></div>
+            <span class="res-badge" style="font-family:'Syne',sans-serif">🏆 Winner</span>
+          </div>
+          <div class="stats-row">
+            <div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div>
+          </div>
+          <div class="hero-preview">
+            <div class="hero-eyebrow">Developer Power Tools</div>
+            <div class="hero-h1" style="font-family:'Syne',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div>
+            <div class="hero-body" style="font-family:'DM Sans',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div>
+            <div class="hero-btns">
+              <span class="hero-btn-pri" style="font-family:'Syne',sans-serif">Explore Tools</span>
+              <span class="hero-btn-ghost" style="font-family:'DM Sans',sans-serif">Try A/B Calculator</span>
+            </div>
+          </div>
+          <div class="body-sample">
+            <p style="font-family:'DM Sans',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p>
+            <p style="font-family:'DM Sans',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FONT 02 — PLUS JAKARTA SANS
+════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-02" style="font-family:'Plus Jakarta Sans',sans-serif">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">02 / 09</div>
+      <div class="font-name-big" style="font-family:'Plus Jakarta Sans',sans-serif">Plus Jakarta Sans</div>
+      <div class="font-desc">Modern, warm, extremely readable at every size from 36px hero down to 9px sidebar labels. Used by premium analytics and SaaS products. Feels polished and approachable simultaneously.</div>
+      <div class="font-tags">
+        <span class="tag tag-green">Top Pick</span>
+        <span class="tag tag-green">Best readability</span>
+        <span class="tag tag-blue">Works at 9px–48px</span>
+        <span class="tag tag-gray">SaaS feel</span>
+      </div>
+      <div class="mono-note">font-family: 'Plus Jakarta Sans', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-pick">⭐ Top Pick</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header">
+      <div class="preview-header-left">
+        <div class="logo-dot">DP</div>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:.3px">Datapad</span>
+        <span style="color:rgba(255,255,255,.12);font-size:16px">/</span>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span>
+      </div>
+      <div class="preview-header-right">
+        <span class="hbtn-mock" style="font-family:'Plus Jakarta Sans',sans-serif">Guide</span>
+        <span class="hbtn-mock-pri" style="font-family:'Plus Jakarta Sans',sans-serif">Export Excel</span>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Plus Jakarta Sans',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Plus Jakarta Sans',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Plus Jakarta Sans',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Plus Jakarta Sans',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Plus Jakarta Sans',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Input Data</div>
+          <div class="vbox"><div class="vbox-name" style="font-family:'Plus Jakarta Sans',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div>
+          <div class="vbox va"><div class="vbox-name" style="font-family:'Plus Jakarta Sans',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div>
+        </div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Plus Jakarta Sans',sans-serif">Results</div><div class="tab-btn" style="font-family:'Plus Jakarta Sans',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Plus Jakarta Sans',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Plus Jakarta Sans',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Plus Jakarta Sans',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card">
+          <div class="res-top"><div><span class="res-name" style="font-family:'Plus Jakarta Sans',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Plus Jakarta Sans',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Plus Jakarta Sans',sans-serif">🏆 Winner</span></div>
+          <div class="stats-row">
+            <div class="scard"><div class="scard-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div>
+            <div class="scard"><div class="scard-lbl" style="font-family:'Plus Jakarta Sans',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div>
+          </div>
+          <div class="hero-preview">
+            <div class="hero-eyebrow">Developer Power Tools</div>
+            <div class="hero-h1" style="font-family:'Plus Jakarta Sans',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div>
+            <div class="hero-body" style="font-family:'Plus Jakarta Sans',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div>
+            <div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Plus Jakarta Sans',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Plus Jakarta Sans',sans-serif">Try A/B Calculator</span></div>
+          </div>
+          <div class="body-sample">
+            <p style="font-family:'Plus Jakarta Sans',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p>
+            <p style="font-family:'Plus Jakarta Sans',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FONTS 03–09: same structure, font swapped -->
+
+<!-- ════ 03 OUTFIT ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-03">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">03 / 09</div>
+      <div class="font-name-big" style="font-family:'Outfit',sans-serif">Outfit</div>
+      <div class="font-desc" style="font-family:'Outfit',sans-serif">Geometric with perfectly circular letter forms. The refined version of Poppins — cleaner, more modern, better at small sizes. Very confident on hero text, friendly in body copy.</div>
+      <div class="font-tags"><span class="tag tag-green">Poppins but better</span><span class="tag tag-blue">Geometric circles</span><span class="tag tag-gray">Confident headers</span></div>
+      <div class="mono-note">font-family: 'Outfit', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-strong">Strong Choice</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header">
+      <div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Outfit',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div>
+      <div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Outfit',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Outfit',sans-serif">Export Excel</span></div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Outfit',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Outfit',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Outfit',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Outfit',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Outfit',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Outfit',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Outfit',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Outfit',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Outfit',sans-serif">Input Data</div>
+          <div class="vbox"><div class="vbox-name" style="font-family:'Outfit',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Outfit',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Outfit',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div>
+          <div class="vbox va"><div class="vbox-name" style="font-family:'Outfit',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Outfit',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Outfit',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div>
+        </div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Outfit',sans-serif">Results</div><div class="tab-btn" style="font-family:'Outfit',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Outfit',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Outfit',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Outfit',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card">
+          <div class="res-top"><div><span class="res-name" style="font-family:'Outfit',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Outfit',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Outfit',sans-serif">🏆 Winner</span></div>
+          <div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Outfit',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Outfit',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Outfit',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Outfit',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Outfit',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div>
+          <div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Outfit',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Outfit',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Outfit',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Outfit',sans-serif">Try A/B Calculator</span></div></div>
+          <div class="body-sample"><p style="font-family:'Outfit',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Outfit',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 04 MANROPE ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-04">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">04 / 09</div>
+      <div class="font-name-big" style="font-family:'Manrope',sans-serif">Manrope</div>
+      <div class="font-desc" style="font-family:'Manrope',sans-serif">Superb technical readability. Wide letterforms, generous x-height. Loved by data-heavy products like Grafana and Supabase. Feels engineering-grade without being cold.</div>
+      <div class="font-tags"><span class="tag tag-green">Data-tool perfect</span><span class="tag tag-blue">Wide x-height</span><span class="tag tag-gray">Engineering feel</span></div>
+      <div class="mono-note">font-family: 'Manrope', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-strong">Strong Choice</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Manrope',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Manrope',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Manrope',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Manrope',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Manrope',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Manrope',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Manrope',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Manrope',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Manrope',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Manrope',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Manrope',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Manrope',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Manrope',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Manrope',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Manrope',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Manrope',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Manrope',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Manrope',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Manrope',sans-serif">Results</div><div class="tab-btn" style="font-family:'Manrope',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Manrope',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Manrope',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Manrope',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Manrope',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Manrope',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Manrope',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Manrope',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Manrope',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Manrope',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Manrope',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Manrope',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Manrope',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Manrope',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Manrope',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Manrope',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'Manrope',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Manrope',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 05 GEIST ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-05">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">05 / 09</div>
+      <div class="font-name-big" style="font-family:'Geist',sans-serif">Geist</div>
+      <div class="font-desc" style="font-family:'Geist',sans-serif">Vercel's own font. Minimal, precise, slightly cold. Excellent for developer tools and CLIs. If Datapad wants to signal "built by engineers for engineers" — this is it.</div>
+      <div class="font-tags"><span class="tag tag-blue">Vercel/developer</span><span class="tag tag-gray">Minimal</span><span class="tag tag-gray">Cold precision</span></div>
+      <div class="mono-note">font-family: 'Geist', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-strong">Dev Tool Vibe</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Geist',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Geist',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Geist',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Geist',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Geist',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Geist',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Geist',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Geist',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Geist',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Geist',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Geist',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Geist',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Geist',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Geist',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Geist',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Geist',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Geist',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Geist',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Geist',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Geist',sans-serif">Results</div><div class="tab-btn" style="font-family:'Geist',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Geist',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Geist',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Geist',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Geist',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Geist',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Geist',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Geist',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Geist',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Geist',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Geist',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Geist',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Geist',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Geist',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Geist',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Geist',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'Geist',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Geist',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 06 BRICOLAGE GROTESQUE ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-06">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">06 / 09</div>
+      <div class="font-name-big" style="font-family:'Bricolage Grotesque',sans-serif">Bricolage Grotesque</div>
+      <div class="font-desc" style="font-family:'DM Sans',sans-serif">High editorial impact on hero text. Unique letterforms make the landing page genuinely memorable. Paired with DM Sans for body — this combo makes Datapad stand out from every other analytics tool.</div>
+      <div class="font-tags"><span class="tag tag-orange">Distinctive</span><span class="tag tag-orange">Editorial hero</span><span class="tag tag-gray">Pair with DM Sans body</span></div>
+      <div class="mono-note">font-family: 'Bricolage Grotesque' (headings) + 'DM Sans' (body)</div>
+    </div>
+    <span class="verdict-badge verdict-niche">Most Memorable</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'DM Sans',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'DM Sans',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'DM Sans',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'DM Sans',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'DM Sans',sans-serif">A/B</div><div class="sb-btn" style="font-family:'DM Sans',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'DM Sans',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'DM Sans',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Bricolage Grotesque',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Bricolage Grotesque',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'DM Sans',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'DM Sans',sans-serif">Results</div><div class="tab-btn" style="font-family:'DM Sans',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'DM Sans',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'DM Sans',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'DM Sans',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Bricolage Grotesque',sans-serif">Variant B</span><span class="res-vs" style="font-family:'DM Sans',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Bricolage Grotesque',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'DM Sans',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Bricolage Grotesque',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'DM Sans',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Bricolage Grotesque',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'DM Sans',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'DM Sans',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'DM Sans',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 07 SPACE GROTESK ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-07">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">07 / 09</div>
+      <div class="font-name-big" style="font-family:'Space Grotesk',sans-serif">Space Grotesk</div>
+      <div class="font-desc" style="font-family:'Space Grotesk',sans-serif">Technical and slightly quirky — unique glyphs on letters like G, R, and a give it character. Very popular in the dev-tools and crypto space. Can feel slightly noisy at 10px label sizes.</div>
+      <div class="font-tags"><span class="tag tag-blue">Dev-tools popular</span><span class="tag tag-gray">Quirky glyphs</span><span class="tag tag-gray">Noisy at small sizes</span></div>
+      <div class="mono-note">font-family: 'Space Grotesk', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-strong">Dev Tool Vibe</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Space Grotesk',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Space Grotesk',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Space Grotesk',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Space Grotesk',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Space Grotesk',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Space Grotesk',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Space Grotesk',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Space Grotesk',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Space Grotesk',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Space Grotesk',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Space Grotesk',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Space Grotesk',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Space Grotesk',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Space Grotesk',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Space Grotesk',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Space Grotesk',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Space Grotesk',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Space Grotesk',sans-serif">Results</div><div class="tab-btn" style="font-family:'Space Grotesk',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Space Grotesk',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Space Grotesk',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Space Grotesk',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Space Grotesk',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Space Grotesk',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Space Grotesk',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Space Grotesk',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Space Grotesk',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Space Grotesk',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Space Grotesk',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Space Grotesk',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Space Grotesk',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Space Grotesk',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Space Grotesk',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Space Grotesk',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'Space Grotesk',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Space Grotesk',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 08 RALEWAY ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-08">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">08 / 09</div>
+      <div class="font-name-big" style="font-family:'Raleway',sans-serif">Raleway</div>
+      <div class="font-desc" style="font-family:'Raleway',sans-serif">Elegant, slightly fashion-forward. Unique W letterform. Beautiful at large display sizes, excellent for marketing pages. Can feel slightly thin at body text weights — bump to 500 for readability.</div>
+      <div class="font-tags"><span class="tag tag-gray">Elegant</span><span class="tag tag-gray">Best at large sizes</span><span class="tag tag-gray">Unique W glyph</span></div>
+      <div class="mono-note">font-family: 'Raleway', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-niche">Landing Page Hero</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Raleway',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Raleway',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Raleway',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Raleway',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Raleway',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Raleway',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Raleway',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Raleway',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Raleway',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Raleway',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Raleway',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Raleway',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Raleway',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Raleway',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Raleway',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Raleway',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Raleway',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Raleway',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Raleway',sans-serif">Results</div><div class="tab-btn" style="font-family:'Raleway',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Raleway',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Raleway',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Raleway',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Raleway',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Raleway',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Raleway',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Raleway',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Raleway',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Raleway',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Raleway',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Raleway',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Raleway',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Raleway',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Raleway',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Raleway',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'Raleway',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Raleway',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 09 INTER ════ -->
+<div class="section-divider"></div>
+<section class="font-section" id="font-09">
+  <div class="font-meta">
+    <div class="font-meta-left">
+      <div class="font-number">09 / 09</div>
+      <div class="font-name-big" style="font-family:'Inter',sans-serif">Inter</div>
+      <div class="font-desc" style="font-family:'Inter',sans-serif">The Figma / Linear / Notion font. Industry standard for SaaS and developer tools. Maximum legibility at every size. Overused but that is because it genuinely works perfectly. Zero risk, zero surprise.</div>
+      <div class="font-tags"><span class="tag tag-gray">Industry standard</span><span class="tag tag-gray">Maximum readability</span><span class="tag tag-gray">Overused but proven</span></div>
+      <div class="mono-note">font-family: 'Inter', sans-serif</div>
+    </div>
+    <span class="verdict-badge verdict-current">Safe Baseline</span>
+  </div>
+  <div class="preview-card">
+    <div class="preview-header"><div class="preview-header-left"><div class="logo-dot">DP</div><span style="font-family:'Inter',sans-serif;font-size:14px;font-weight:800">Datapad</span><span style="color:rgba(255,255,255,.12);font-size:16px">/</span><span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--t1)">A/B Test Calculator</span></div><div class="preview-header-right"><span class="hbtn-mock" style="font-family:'Inter',sans-serif">Guide</span><span class="hbtn-mock-pri" style="font-family:'Inter',sans-serif">Export Excel</span></div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Inter',sans-serif">Test Type</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Inter',sans-serif">Conversion</div><div class="sb-btn" style="font-family:'Inter',sans-serif">Revenue</div></div></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Inter',sans-serif">Variants</div><div class="sb-toggle"><div class="sb-btn on" style="font-family:'Inter',sans-serif">A/B</div><div class="sb-btn" style="font-family:'Inter',sans-serif">A/B/C</div><div class="sb-btn" style="font-family:'Inter',sans-serif">A/B/C/D</div></div></div>
+        <div class="sb-row"><div class="sb-conf-row"><div class="sb-lbl" style="font-family:'Inter',sans-serif">Confidence</div><div class="sb-conf-val">95%</div></div><input type="range" class="sb-slider" value="95" min="80" max="99" disabled/></div>
+        <div class="sb-row"><div class="sb-lbl" style="font-family:'Inter',sans-serif">Input Data</div><div class="vbox"><div class="vbox-name" style="font-family:'Inter',sans-serif">Control (A)</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Inter',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Inter',sans-serif">Conversions</div><div class="sb-input">450</div></div></div></div><div class="vbox va"><div class="vbox-name" style="font-family:'Inter',sans-serif">Variant B</div><div class="vbox-inputs"><div><div class="vbox-lbl" style="font-family:'Inter',sans-serif">Visitors</div><div class="sb-input">10,000</div></div><div><div class="vbox-lbl" style="font-family:'Inter',sans-serif">Conversions</div><div class="sb-input">520</div></div></div></div></div>
+      </div>
+      <div class="preview-main">
+        <div class="tab-row"><div class="tab-btn on" style="font-family:'Inter',sans-serif">Results</div><div class="tab-btn" style="font-family:'Inter',sans-serif">Power Analysis</div><div class="tab-btn" style="font-family:'Inter',sans-serif">Simulation</div><div class="tab-btn" style="font-family:'Inter',sans-serif">Insights</div></div>
+        <div class="srm-pass" style="font-family:'Inter',sans-serif">✓ SRM Check Passed — Traffic split balanced (χ² p = 0.996)</div>
+        <div class="res-card"><div class="res-top"><div><span class="res-name" style="font-family:'Inter',sans-serif">Variant B</span><span class="res-vs" style="font-family:'Inter',sans-serif">vs Control</span></div><span class="res-badge" style="font-family:'Inter',sans-serif">🏆 Winner</span></div><div class="stats-row"><div class="scard"><div class="scard-lbl" style="font-family:'Inter',sans-serif">Rel. Lift</div><div class="scard-val" style="color:var(--pri)">+15.56%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Inter',sans-serif">Certainty</div><div class="scard-val" style="color:var(--pri)">97.9%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Inter',sans-serif">Power</div><div class="scard-val" style="color:var(--acc)">94.8%</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Inter',sans-serif">P-Value</div><div class="scard-val" style="color:var(--pri)">0.0212</div><div class="scard-sub">thresh: 0.05</div></div><div class="scard"><div class="scard-lbl" style="font-family:'Inter',sans-serif">Conv. Rate</div><div class="scard-val">5.20%</div><div class="scard-sub">ctrl: 4.50%</div></div></div><div class="hero-preview"><div class="hero-eyebrow">Developer Power Tools</div><div class="hero-h1" style="font-family:'Inter',sans-serif">Analyse. Validate.<br><span class="accent">Ship faster.</span></div><div class="hero-body" style="font-family:'Inter',sans-serif">Free, browser-based tools for developers and growth teams. Statistical significance calculators, impact analyzers, and developer utilities — all running locally, zero tracking.</div><div class="hero-btns"><span class="hero-btn-pri" style="font-family:'Inter',sans-serif">Explore Tools</span><span class="hero-btn-ghost" style="font-family:'Inter',sans-serif">Try A/B Calculator</span></div></div><div class="body-sample"><p style="font-family:'Inter',sans-serif"><strong>Variant B shows a significant +15.56% improvement</strong> (p = 0.0212, power = 94.8%). Wilson CI: [5.05% – 5.35%].</p><p style="font-family:'Inter',sans-serif">The minimum detectable effect at current sample size is 0.32%. If baseline yields 100,000 conversions/year, this lift adds roughly +15,560 conversions annually.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="page-footer">
+  // Numbers always stay in DM Mono regardless of font choice — it makes p-values and percentages scannable at a glance
+</div>
+
+<script>
+  // Highlight active nav link on scroll
+  var sections = document.querySelectorAll('.font-section');
+  var links = document.querySelectorAll('.top-nav a');
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY + 100;
+    sections.forEach(function(sec, i) {
+      if (sec.offsetTop <= scrollY && sec.offsetTop + sec.offsetHeight > scrollY) {
+        links.forEach(function(l) { l.classList.remove('active'); });
+        if (links[i]) links[i].classList.add('active');
+      }
+    });
+  });
+</script>
+</body>
+</html>

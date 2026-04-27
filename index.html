@@ -36,8 +36,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <style>
@@ -55,10 +54,21 @@
       --t1: #c8c8d4;
       --t2: #6e6e82;
       --brd: rgba(255,255,255,0.06);
-      --font: 'Syne', sans-serif;
-      --body-font: 'DM Sans', sans-serif;
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --body-font: 'Plus Jakarta Sans', sans-serif;
       --mono: 'DM Mono', monospace;
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      body {
+        font-feature-settings: "ss01", "cv01", "cv02";
+      }
+      ::selection {
+        background: rgba(0, 255, 136, 0.25);
+        color: #ffffff;
+      }
+      ::-moz-selection {
+        background: rgba(0, 255, 136, 0.25);
+        color: #ffffff;
+      }
     }
 
     html { scroll-behavior: smooth; }
@@ -721,48 +731,481 @@
   </section>
 
   <!-- ═══ FAQ ═══ -->
-  <section class="faq-section" id="faq" aria-labelledby="faq-heading">
-    <div class="container">
-      <div class="reveal">
+<section class="faq-section" id="faq" aria-labelledby="faq-heading">
+  <div class="container">
+
+    <div class="faq-top reveal">
+      <div class="faq-top-left">
         <div class="section-tag">02 / FAQ</div>
         <h2 class="section-title" id="faq-heading">Common questions</h2>
-        <p class="section-desc">Everything you need to know about Datapad tools.</p>
+        <p class="section-desc">Everything you need to know about Datapad Tools.</p>
       </div>
-      <div class="faq-grid" role="list">
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">Is Datapad free to use?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">Yes. All Datapad tools are completely free with no sign-up, no paywall, and no premium tier. Every feature is available to every user.</div></div>
-        </div>
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">Does Datapad store or transmit my data?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">No. All statistical computation runs entirely in your browser using JavaScript. Your data never leaves your device, and there are no analytics or telemetry calls on tool inputs.</div></div>
-        </div>
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">How is statistical significance calculated?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">We use a two-proportion Z-test with pooled standard error. Confidence intervals use the Wilson method (more accurate than Wald for extreme rates or small samples). For multiple variants, Bonferroni correction is applied automatically.</div></div>
-        </div>
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What is the difference between A/B testing and pre/post analysis?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">A/B tests use concurrent randomized groups and can establish causation. Pre/post analysis compares sequential time periods - it can show a change occurred but cannot prove your intervention caused it, as external factors (seasonality, marketing) may be responsible.</div></div>
-        </div>
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What sample size do I need for an A/B test?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">It depends on your baseline conversion rate and the minimum effect size you want to detect. Use the Power Analysis tab in the A/B Test Calculator - it generates a full sample size table for MDEs from 0.5% to 10%, with required visitors per variant at 80% power.</div></div>
-        </div>
-
-        <div class="faq-item reveal" role="listitem">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">What is a Sample Ratio Mismatch (SRM)?<span class="faq-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button>
-          <div class="faq-a" role="region"><div class="faq-a-inner">An SRM occurs when the observed traffic split between variants deviates significantly from the expected ratio. It indicates a problem with randomization and can invalidate test results. The A/B Test Calculator automatically runs a chi-square SRM check on your data.</div></div>
-        </div>
-
+      <div class="faq-meta">
+        <div class="faq-meta-sep"></div>
       </div>
     </div>
-  </section>
+
+    <div class="faq-grid" id="faqGrid">
+
+      <div class="faq-card reveal" data-cat="pricing" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">01</span>
+            <span class="faq-q-text">Is Datapad free to use?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">Yes. Every Datapad tool is completely free — no sign-up, no paywall, no premium tier. Every feature is available to every user, forever.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">no-signup</span>
+              <span class="faq-chip">always-free</span>
+              <span class="faq-chip">no-limits</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card reveal" data-cat="privacy" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">02</span>
+            <span class="faq-q-text">Does Datapad store or transmit my data?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">No. All computation runs entirely in your browser via JavaScript. Your data never leaves your device — zero analytics or telemetry calls on tool inputs.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">client-side</span>
+              <span class="faq-chip">zero-tracking</span>
+              <span class="faq-chip">offline-capable</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card reveal" data-cat="stats" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">03</span>
+            <span class="faq-q-text">How is statistical significance calculated?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">We use a two-proportion Z-test with pooled standard error. Confidence intervals use the Wilson method — more accurate than Wald for extreme rates or small samples. Bonferroni correction applied automatically for multi-variant tests.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">z-test</span>
+              <span class="faq-chip">wilson-ci</span>
+              <span class="faq-chip">bonferroni</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card reveal" data-cat="testing" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">04</span>
+            <span class="faq-q-text">A/B testing vs pre/post analysis?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">A/B tests use concurrent randomized groups and can establish causation. Pre/post analysis compares sequential periods — it shows a change occurred, but cannot prove your intervention caused it. External factors like seasonality may be responsible.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">causation</span>
+              <span class="faq-chip">correlation</span>
+              <span class="faq-chip">randomization</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card reveal" data-cat="power" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">05</span>
+            <span class="faq-q-text">What sample size do I need?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">It depends on your baseline conversion rate and minimum effect size you want to detect. Use the Power Analysis tab in the A/B Calculator — it generates a full sample size table for MDEs from 0.5% to 10% at 80% power.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">mde</span>
+              <span class="faq-chip">80%-power</span>
+              <span class="faq-chip">sample-size</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-card reveal" data-cat="validation" onclick="faqTog(this)">
+        <div class="faq-card-q">
+          <div class="faq-q-left">
+            <span class="faq-idx">06</span>
+            <span class="faq-q-text">What is a Sample Ratio Mismatch?</span>
+          </div>
+          <div class="faq-toggle">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="faq-body">
+          <div class="faq-body-inner">
+            <p class="faq-answer">An SRM occurs when observed traffic split deviates significantly from the expected ratio, signalling a randomization flaw that can invalidate your results. The A/B Calculator runs a chi-square SRM check automatically.</p>
+            <div class="faq-chips">
+              <span class="faq-chip">srm</span>
+              <span class="faq-chip">chi-square</span>
+              <span class="faq-chip">auto-check</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<style>
+/* ── FAQ Section ── */
+.faq-section {
+  padding: 100px 0 110px;
+  border-top: 1px solid var(--brd);
+}
+
+.faq-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.faq-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.faq-meta-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.faq-meta-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--pri);
+  transition: all 0.3s ease;
+}
+
+.faq-meta-label {
+  font-size: 11px;
+  color: var(--t2);
+}
+
+.faq-meta-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--brd);
+}
+
+/* Filters */
+.faq-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.faq-fb {
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: transparent;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--t2);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  letter-spacing: 0.5px;
+}
+
+.faq-fb:hover {
+  color: var(--t1);
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.02);
+}
+
+.faq-fb.on {
+  color: var(--pri);
+  border-color: rgba(var(--pri-rgb), 0.3);
+  background: rgba(var(--pri-rgb), 0.05);
+}
+
+/* Grid */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Card */
+.faq-card {
+  border: 1px solid var(--brd);
+  border-radius: 14px;
+  background: var(--bg1);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.6s var(--ease),
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.faq-card.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.faq-card:not(.open):hover {
+  border-color: rgba(255,255,255,0.11);
+  background: rgba(255,255,255,0.025);
+  transform: translateY(-2px);
+}
+
+.faq-card.open {
+  border-color: rgba(var(--pri-rgb), 0.22);
+  background: rgba(var(--pri-rgb), 0.02);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(var(--pri-rgb), 0.06);
+  transform: translateY(-2px);
+}
+
+.faq-card.hidden {
+  display: none;
+}
+
+/* Card question row */
+.faq-card-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  gap: 14px;
+  user-select: none;
+}
+
+.faq-q-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.faq-idx {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t2);
+  flex-shrink: 0;
+  letter-spacing: 1px;
+  transition: color 0.25s ease;
+}
+
+.faq-card.open .faq-idx {
+  color: var(--pri);
+}
+
+.faq-q-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.45;
+  flex: 1;
+  min-width: 0;
+  transition: color 0.2s ease;
+}
+
+.faq-card:hover .faq-q-text,
+.faq-card.open .faq-q-text {
+  color: var(--t0);
+}
+
+.faq-toggle {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--brd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t2);
+  transition: all 0.3s var(--ease);
+}
+
+.faq-card.open .faq-toggle {
+  border-color: rgba(var(--pri-rgb), 0.35);
+  background: rgba(var(--pri-rgb), 0.07);
+  color: var(--pri);
+  transform: rotate(180deg);
+}
+
+/* Accordion body */
+.faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease);
+}
+
+.faq-card.open .faq-body {
+  max-height: 260px;
+}
+
+.faq-body-inner {
+  padding: 16px 22px 20px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.faq-answer {
+  font-size: 13px;
+  color: var(--t2);
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+
+.faq-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.faq-chip {
+  padding: 3px 9px;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+
+.faq-card.open .faq-chip {
+  border-color: rgba(var(--pri-rgb), 0.12);
+  color: rgba(var(--pri-rgb), 0.5);
+}
+
+/* Footer */
+.faq-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--brd);
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.faq-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t2);
+}
+
+.faq-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(var(--pri-rgb), 0.18);
+  border-radius: 9px;
+  background: rgba(var(--pri-rgb), 0.05);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  color: var(--pri);
+  text-decoration: none;
+  transition: all 0.2s var(--ease);
+}
+
+.faq-cta:hover {
+  background: rgba(var(--pri-rgb), 0.1);
+  border-color: rgba(var(--pri-rgb), 0.35);
+  box-shadow: 0 0 16px rgba(var(--pri-rgb), 0.08);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .faq-grid { grid-template-columns: 1fr; }
+  .faq-top { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+</style>
+
+
+<script>
+function faqTog(card) {
+  const wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.faq-card.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) card.classList.add('open');
+  faqSync();
+}
+
+function faqFilt(cat, btn) {
+  document.querySelectorAll('.faq-fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.faq-card').forEach(c => {
+    if (cat === 'all' || c.dataset.cat === cat) {
+      c.classList.remove('hidden');
+    } else {
+      c.classList.add('hidden');
+      c.classList.remove('open');
+    }
+  });
+  faqSync();
+}
+
+function faqSync() {
+  const openEl = document.getElementById('openCount');
+  const totalEl = document.getElementById('totalCount');
+  if (openEl) openEl.textContent = document.querySelectorAll('.faq-card.open').length;
+  if (totalEl) totalEl.textContent = document.querySelectorAll('.faq-card:not(.hidden)').length;
+}
+
+faqSync();
+</script>
 
   <!-- ═══ ABOUT + CONTACT ═══ -->
   <section class="about-section" id="contact" aria-labelledby="about-heading">
