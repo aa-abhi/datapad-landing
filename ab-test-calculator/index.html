@@ -18,10 +18,12 @@
   <link rel="icon" type="image/png" href="/logo.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    ::selection{background:rgba(0,255,136,0.18);color:#fff}
+    ::-moz-selection{background:rgba(0,255,136,0.18);color:#fff}
     :root{
       --pri:#00ff88;--pri-rgb:0,255,136;
       --acc:#00d4ff;--acc-rgb:0,212,255;
@@ -30,16 +32,8 @@
       --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
       --t0:#ffffff;--t1:#c8c8d4;--t2:#6e6e82;
       --brd:rgba(255,255,255,0.06);
-      --font:'Plus Jakarta Sans',sans-serif;--body:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+      --font:'Outfit', sans-serif; --body:'Outfit', sans-serif;--mono:'DM Mono',monospace;
       --ease:cubic-bezier(0.16,1,0.3,1);--hh:60px;
-      ::selection {
-        background: rgba(0, 255, 136, 0.25);
-        color: #ffffff;
-      }
-      ::-moz-selection {
-        background: rgba(0, 255, 136, 0.25);
-        color: #ffffff;
-      }
     }
     html{scroll-behavior:smooth}
     body{font-family:var(--body);background:var(--bg0);color:var(--t0);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
@@ -81,7 +75,7 @@
     .ifield::-webkit-inner-spin-button,.ifield::-webkit-outer-spin-button{-webkit-appearance:none}
     .ifield::placeholder{color:rgba(255,255,255,.2)}
     .trow{display:flex;gap:3px}
-    .tbtn{flex:1;padding:7px 4px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .2s;border:1px solid var(--brd);background:var(--bg2);color:var(--t2);text-align:center}
+    .tbtn{flex:1;padding:7px 4px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .18s;border:1px solid var(--brd);background:var(--bg2);color:var(--t2);text-align:center}
     .tbtn.active{border-color:rgba(var(--pri-rgb),.3);background:rgba(var(--pri-rgb),.08);color:var(--pri)}
     .tbtn:hover:not(.active){border-color:rgba(255,255,255,.1);color:var(--t1)}
     .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
@@ -112,11 +106,12 @@
     .main-panel{padding:20px;min-width:0}
     .tab-bar{display:flex;gap:3px;margin-bottom:16px;background:var(--bg1);border-radius:9px;padding:3px;border:1px solid var(--brd)}
     .tab-btn{flex:1;padding:8px 10px;border-radius:7px;border:none;background:transparent;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .2s;text-align:center}
-    .tab-btn.active{background:rgba(var(--pri-rgb),.1);color:var(--pri)}
+    .tab-btn.active{background:rgba(var(--pri-rgb),.1);color:var(--pri);box-shadow:inset 0 -2px 0 var(--pri)}
     .tab-btn:hover:not(.active){color:var(--t1)}
 
     /* ── RESULT CARD ── */
-    .card{background:var(--bg1);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:12px}
+    .card{background:var(--bg1);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:12px;transition:border-color .2s}
+    article.card:hover{border-color:rgba(255,255,255,0.1)}
 
     /* Compact top row: lift + certainty + power in one line */
     .rc-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
@@ -127,7 +122,8 @@
 
     /* Hero stats bar — all key numbers in one compact row */
     .hero-bar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px}
-    .hstat{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 12px}
+    .hstat{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 12px;transition:border-color .15s}
+    .hstat:hover{border-color:rgba(255,255,255,0.1)}
     .hstat-lbl{font-size:9.5px;color:var(--t2);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:3px}
     .hstat-val{font-size:17px;font-weight:800;font-family:var(--mono);line-height:1}
     .hstat-sub{font-size:9px;color:var(--t2);margin-top:3px;font-family:var(--mono)}
@@ -153,8 +149,8 @@
     .rev-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
 
     /* Alert badges */
-    .srm-ok{padding:8px 12px;background:rgba(var(--pri-rgb),.04);border:1px solid rgba(var(--pri-rgb),.15);border-radius:7px;font-size:11px;color:var(--pri);margin-bottom:10px}
-    .srm-err{padding:8px 12px;background:rgba(var(--red-rgb),.06);border:1px solid rgba(var(--red-rgb),.2);border-radius:7px;font-size:11px;color:var(--red);margin-bottom:10px}
+    .srm-ok{padding:8px 12px;background:rgba(var(--pri-rgb),.04);border:1px solid rgba(var(--pri-rgb),.15);border-radius:7px;font-size:11px;color:var(--pri);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .srm-err{padding:10px 14px;background:rgba(var(--red-rgb),.07);border:1px solid rgba(var(--red-rgb),.25);border-radius:7px;font-size:12px;color:var(--red);margin-bottom:10px;line-height:1.5}
     .bonf-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.15);color:var(--acc);font-family:var(--mono);margin-bottom:10px;letter-spacing:.5px}
 
     /* Empty */
@@ -189,10 +185,10 @@
     .ibtn:hover{background:rgba(var(--acc-rgb),.2)}
 
     /* FAQ */
-    .faq-section{padding:40px 24px 0;border-top:1px solid var(--brd)}
-    .faq-hd{font-family:var(--font);font-size:19px;font-weight:800;margin-bottom:4px}
-    .faq-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
-    .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:48px}
+    .faq-section{padding:40px 24px 48px;border-top:1px solid var(--brd)}
+    .faq-hd{font-family:var(--font);font-size:20px;font-weight:800;margin-bottom:4px}
+    .faq-sub{font-size:13px;color:var(--t2);margin-bottom:22px}
+    .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
     .faq-item{background:var(--bg1);border:1px solid var(--brd);border-radius:11px;overflow:hidden;transition:border-color .2s}
     .faq-item:hover{border-color:rgba(var(--pri-rgb),.2)}
     .faq-q{width:100%;padding:14px 16px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--t0);font-size:12px;font-weight:600;font-family:var(--body);gap:10px;text-align:left}
@@ -247,10 +243,6 @@
     }
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -266,7 +258,7 @@
     </a>
     <span class="hdr-sep" aria-hidden="true">/</span>
     <span class="hdr-tool-name">A/B Test Calculator</span>
-    <span class="hdr-badge">Beta</span>
+    <span class="hdr-badge">Free</span>
   </div>
   <div class="hdr-right">
     <div class="dropdown">
@@ -372,7 +364,7 @@
       <a href="/">Home</a>
       <a href="/json-studio">JSON Studio</a>
       <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
-      <a href="mailto:abhishekpslko@gmail.com">Contact</a>
+      <a href="mailto:hello.datapad@gmail.com">Contact</a>
     </nav>
   </div>
 </footer>

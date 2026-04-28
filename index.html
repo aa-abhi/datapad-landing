@@ -28,7 +28,7 @@
     "@context": "https://schema.org",
     "@graph": [
       {"@type":"WebSite","@id":"https://datapad.in/#website","url":"https://datapad.in/","name":"Datapad","description":"Free browser-based developer and analytics tools including A/B test calculator, pre/post impact analyzer, and JSON Studio.","inLanguage":"en-IN","publisher":{"@id":"https://datapad.in/#organization"}},
-      {"@type":"Organization","@id":"https://datapad.in/#organization","name":"Datapad","url":"https://datapad.in/","email":"abhishekpslko@gmail.com","description":"Datapad builds free, privacy-first developer tools that run entirely in the browser.","foundingDate":"2025","sameAs":[]},
+      {"@type":"Organization","@id":"https://datapad.in/#organization","name":"Datapad","url":"https://datapad.in/","email":"hello.datapad@gmail.com","description":"Datapad builds free, privacy-first developer tools that run entirely in the browser.","foundingDate":"2025","sameAs":[]},
       {"@type":"ItemList","name":"Datapad Tools","description":"Free statistical and developer tools by Datapad","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"SoftwareApplication","name":"A/B Test Calculator","url":"https://datapad.in/ab-test-calculator","applicationCategory":"BusinessApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Statistical significance calculator for A/B tests with p-value, confidence intervals, power analysis, Monte Carlo simulation, and multi-variant support."}},{"@type":"ListItem","position":2,"item":{"@type":"SoftwareApplication","name":"Pre/Post Impact Analyzer","url":"https://datapad.in/pre-post-analyzer","applicationCategory":"BusinessApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Measure impact of changes before and after with Z-tests, Cohen's h effect size, and revenue analysis."}},{"@type":"ListItem","position":3,"item":{"@type":"SoftwareApplication","name":"JSON Studio","url":"https://datapad.in/json-studio","applicationCategory":"DeveloperApplication","operatingSystem":"Web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Smart JSON toolkit with format, minify, auto-fix, diff, and CSV export."}}]},
       {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Datapad free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. All Datapad tools are completely free with no sign-up required."}},{"@type":"Question","name":"Does Datapad store or transmit my data?","acceptedAnswer":{"@type":"Answer","text":"No. All computation runs entirely in your browser. Your data never leaves your device."}},{"@type":"Question","name":"How do I calculate statistical significance for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"Use Datapad's A/B Test Calculator. Enter visitors and conversions for your control and variant groups, set your confidence level, and the tool computes p-value, lift, power, confidence intervals (Wilson method), and Bonferroni-corrected results for multi-variant tests."}},{"@type":"Question","name":"What is the difference between A/B testing and pre/post analysis?","acceptedAnswer":{"@type":"Answer","text":"A/B testing uses concurrent randomized groups and can establish causation. Pre/post analysis compares sequential time periods and can only show correlation - external factors may explain observed changes. Use A/B testing when you need causal proof."}}]}
     ]
@@ -36,7 +36,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <style>
@@ -54,8 +55,8 @@
       --t1: #c8c8d4;
       --t2: #6e6e82;
       --brd: rgba(255,255,255,0.06);
-      --font: 'Plus Jakarta Sans', sans-serif;
-      --body-font: 'Plus Jakarta Sans', sans-serif;
+      --font: 'Outfit', sans-serif;
+      --body-font: 'Outfit', sans-serif;
       --mono: 'DM Mono', monospace;
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
       body {
@@ -318,7 +319,7 @@
       }
     }
     /* ── Trust Bar ── */
-    .trust-bar {
+    /* .trust-bar {
       border-top: 1px solid var(--brd); border-bottom: 1px solid var(--brd);
       padding: 16px 24px; background: rgba(255,255,255,0.015); overflow: hidden;
     }
@@ -330,8 +331,115 @@
       display: flex; align-items: center; gap: 8px;
       font-size: 12px; color: var(--t2); font-weight: 600; white-space: nowrap;
     }
-    .trust-item svg { color: var(--pri); flex-shrink: 0; }
+    .trust-item svg { color: var(--pri); flex-shrink: 0; } */
 
+    /* ── USP Bar ── */
+.usp-section {
+  position: relative;
+  border-top: 1px solid var(--brd);
+  border-bottom: 1px solid var(--brd);
+  overflow: hidden;
+}
+
+.usp-scan {
+  position: absolute;
+  top: 0; left: -60%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(var(--pri-rgb),0.03) 50%, transparent);
+  animation: usp-scan 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes usp-scan {
+  0%  { left: -60%; }
+  100% { left: 120%; }
+}
+
+.usp-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.usp-item {
+  position: relative;
+  padding: 28px 20px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  cursor: default;
+  transition: background 0.3s ease;
+  overflow: hidden;
+}
+.usp-item:last-child { border-right: none; }
+
+.usp-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--pri), transparent);
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 0.3s, transform 0.4s ease;
+}
+.usp-item:hover::before { opacity: 1; transform: scaleX(1); }
+.usp-item:hover { background: rgba(var(--pri-rgb),0.03); }
+
+.usp-icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: rgba(var(--pri-rgb),0.07);
+  border: 1px solid rgba(var(--pri-rgb),0.12);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.usp-item:hover .usp-icon-wrap {
+  background: rgba(var(--pri-rgb),0.12);
+  border-color: rgba(var(--pri-rgb),0.3);
+  box-shadow: 0 0 20px rgba(var(--pri-rgb),0.1);
+}
+.usp-icon-wrap svg { transition: transform 0.3s ease; }
+.usp-item:hover .usp-icon-wrap svg { transform: scale(1.15); }
+
+.usp-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+}
+
+.usp-sub {
+  font-size: 10.5px;
+  color: var(--t2);
+  margin-top: -4px;
+  line-height: 1.5;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.usp-item:hover .usp-sub { opacity: 1; }
+
+@media (max-width: 900px) {
+  .usp-inner { grid-template-columns: repeat(3, 1fr); }
+  .usp-item:nth-child(3) { border-right: none; }
+  .usp-item:nth-child(4),
+  .usp-item:nth-child(5) { border-top: 1px solid rgba(255,255,255,0.05); }
+  .usp-item:nth-child(5) { border-right: none; }
+}
+
+@media (max-width: 560px) {
+  .usp-inner { grid-template-columns: 1fr 1fr; padding: 0 16px; }
+  .usp-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .usp-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.05); }
+  .usp-item:last-child { border-bottom: none; }
+}
     /* ── Products ── */
     .products-section { padding: 100px 0; }
 
@@ -624,31 +732,63 @@
     </div>
   </section>
 
-  <!-- ═══ TRUST BAR ═══ -->
-  <div class="trust-bar" role="complementary" aria-label="Key features">
-    <div class="trust-inner">
-      <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        No data leaves your browser
+  <!-- ═══ USP BAR ═══ -->
+<div class="usp-section" role="complementary" aria-label="Key features">
+  <div class="usp-scan" aria-hidden="true"></div>
+  <div class="usp-inner" role="list">
+
+    <div class="usp-item" role="listitem">
+      <div class="usp-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM1 10h22"/></svg>
-        No sign-up required
-      </div>
-      <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Instant results
-      </div>
-      <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        Completely free, forever
-      </div>
-      <div class="trust-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        Works offline
+      <div>
+        <div class="usp-label">No data leaves your browser</div>
+        <div class="usp-sub">100% client-side</div>
       </div>
     </div>
+
+    <div class="usp-item" role="listitem">
+      <div class="usp-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="18" y1="2" x2="22" y2="2"/><line x1="20" y1="0" x2="20" y2="4"/></svg>
+      </div>
+      <div>
+        <div class="usp-label">No sign-up required</div>
+        <div class="usp-sub">Open and use instantly</div>
+      </div>
+    </div>
+
+    <div class="usp-item" role="listitem">
+      <div class="usp-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="usp-label">Instant results</div>
+        <div class="usp-sub">No server round-trips</div>
+      </div>
+    </div>
+
+    <div class="usp-item" role="listitem">
+      <div class="usp-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div>
+        <div class="usp-label">Completely free</div>
+        <div class="usp-sub">No paywall, no premium tier</div>
+      </div>
+    </div>
+
+    <div class="usp-item" role="listitem">
+      <div class="usp-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      </div>
+      <div>
+        <div class="usp-label">Works offline</div>
+        <div class="usp-sub">No internet needed after load</div>
+      </div>
+    </div>
+
   </div>
+</div>
 
   <!-- ═══ PRODUCTS ═══ -->
   <section class="products-section" id="products" aria-labelledby="products-heading">
@@ -656,7 +796,7 @@
       <div class="reveal">
         <div class="section-tag">01 / Products</div>
         <h2 class="section-title" id="products-heading">Tools built for precision</h2>
-        <p class="section-desc">Professional-grade calculators and analyzers that respect your time, privacy, and intelligence.</p>
+        <p class="section-desc">Professional-grade tools and analyzers that respect your time, privacy, and intelligence.</p>
       </div>
       <div class="products-grid" role="list">
 
@@ -1229,12 +1369,12 @@ faqSync();
           <div class="block-eyebrow">Get in touch</div>
           <h3 class="block-title">We'd love to hear from you.</h3>
           <p class="block-body">Have feedback, a bug to report, or a tool idea? Reach out - we read everything.</p>
-          <a href="mailto:abhishekpslko@gmail.com" class="contact-email" aria-label="Email abhishekpslko@gmail.com">
+          <a href="mailto:hello.datapad@gmail.com" class="contact-email" aria-label="Email hello.datapad@gmail.com">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            abhishekpslko@gmail.com
+            hello.datapad@gmail.com
           </a>
           <a 
-            href="https://forms.gle/pZFitCFt6pfQNKEFA" 
+            href="https://forms.gle/YbTWLM3BQbHciHkr7" 
             target="_blank" 
             rel="noopener noreferrer"
             class="btn-feedback"
@@ -1257,7 +1397,7 @@ faqSync();
         <a href="/ab-test-calculator">A/B Calculator</a>
         <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
         <a href="/json-studio">JSON Studio</a>
-        <a href="mailto:abhishekpslko@gmail.com">Contact</a>
+        <a href="mailto:hello.datapad@gmail.com">Contact</a>
       </nav>
     </div>
   </footer>
@@ -1319,7 +1459,7 @@ faqSync();
     const closeBtn = document.getElementById('close-feedback');
     const iframe = document.getElementById('feedback-iframe');
     const loader = document.getElementById('feedback-loader');
-    const FORM_URL = 'https://forms.gle/pZFitCFt6pfQNKEFA';
+    const FORM_URL = 'https://forms.gle/YbTWLM3BQbHciHkr7';
     let iframeInit = false, lastFocus = null;
 
     function preloadForm() {
