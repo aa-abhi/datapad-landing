@@ -22,8 +22,9 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    ::selection{background:rgba(0,255,136,0.18);color:#fff}
-    ::-moz-selection{background:rgba(0,255,136,0.18);color:#fff}
+    ::selection{background:rgba(0,255,136,0.25);color:#fff}
+    ::-moz-selection{background:rgba(0,255,136,0.25);color:#fff}
+
     :root{
       --pri:#00ff88;--pri-rgb:0,255,136;
       --acc:#00d4ff;--acc-rgb:0,212,255;
@@ -32,260 +33,909 @@
       --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
       --t0:#ffffff;--t1:#c8c8d4;--t2:#6e6e82;
       --brd:rgba(255,255,255,0.06);
-      --font:'Outfit', sans-serif; --body:'Outfit', sans-serif;--mono:'DM Mono',monospace;
-      --ease:cubic-bezier(0.16,1,0.3,1);--hh:60px;
+      --font:'Outfit', sans-serif;
+      --body-font:'Outfit', sans-serif;
+      --mono:'DM Mono', monospace;
+      --ease:cubic-bezier(0.16, 1, 0.3, 1);
+      --hh:64px;
     }
-    html{scroll-behavior:smooth}
-    body{font-family:var(--body);background:var(--bg0);color:var(--t0);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
-    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:128px}
 
-    /* ── HEADER ── */
-    .app-header{padding:0 24px;height:var(--hh);border-bottom:1px solid var(--brd);background:rgba(5,5,8,.95);backdrop-filter:blur(24px);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .hdr-left{display:flex;align-items:center;gap:12px}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--body-font);
+      background:var(--bg0);
+      color:var(--t0);
+      line-height:1.6;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      font-feature-settings:"ss01","cv01","cv02";
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
+
+    /* ── Cursor Glow ── */
+    .cursor-glow{
+      position:fixed;width:400px;height:400px;
+      background:radial-gradient(circle, rgba(var(--pri-rgb),0.05) 0%, transparent 70%);
+      border-radius:50%;pointer-events:none;z-index:0;
+      transition:opacity .3s;will-change:transform;
+    }
+
+    /* ── HEADER (matches landing) ── */
+    .app-header{
+      padding:0 32px;height:var(--hh);
+      border-bottom:1px solid var(--brd);
+      background:rgba(5,5,8,.9);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;
+    }
+    .hdr-inner{
+      width:100%;max-width:1600px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .hdr-left{display:flex;align-items:center;gap:14px;min-width:0}
     .hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .hdr-logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit}
-    .hdr-logo img{width:30px;height:30px;object-fit:contain}
-    .hdr-logo-name{font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:0}
+    .hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .hdr-logo img{
+      width:36px;height:36px;object-fit:contain;
+      filter:contrast(1.2) brightness(1.1) saturate(1.2);
+    }
+    .hdr-logo:hover img{filter:contrast(1.3) brightness(1.15) saturate(1.3)}
+    .hdr-logo-name{font-family:var(--font);font-size:18px;font-weight:800;letter-spacing:1px}
     .hdr-sep{color:rgba(255,255,255,.12);font-size:18px;font-weight:200}
-    .hdr-tool-name{font-size:13px;font-weight:600;color:var(--t1)}
-    .hdr-badge{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:rgba(var(--acc-rgb),.08);border:1px solid rgba(var(--acc-rgb),.2);color:var(--acc)}
-    .hbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:none;font-size:12px;font-weight:500;font-family:var(--body);cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
-    .hbtn-ghost{background:rgba(255,255,255,.04);border:1px solid var(--brd);color:var(--t1)}
-    .hbtn-ghost:hover{background:rgba(255,255,255,.08);color:var(--t0)}
-    .hbtn-pri{background:var(--pri);color:var(--bg0);font-weight:700;border:1.5px solid var(--pri)}
-    .hbtn-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 20px rgba(var(--pri-rgb),.2)}
+    .hdr-tool-name{font-size:13px;font-weight:600;color:var(--t1);font-family:var(--body-font)}
+    .hdr-badge{
+      padding:3px 8px;border-radius:100px;
+      font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.2);
+      color:var(--pri);font-family:var(--mono);
+    }
+    .hdr-status{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 12px;border-radius:100px;
+      border:1px solid rgba(var(--pri-rgb),.15);
+      background:rgba(var(--pri-rgb),.04);
+      font-size:11px;color:var(--t2);
+    }
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--pri);box-shadow:0 0 8px rgba(var(--pri-rgb),.7);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--pri-rgb),.7)}
+      50%{opacity:.6;box-shadow:0 0 4px rgba(var(--pri-rgb),.3)}
+    }
+
+    .hbtn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:9px 14px;border-radius:9px;border:none;
+      font-size:12.5px;font-weight:600;font-family:var(--body-font);
+      cursor:pointer;text-decoration:none;transition:all .25s var(--ease);
+      white-space:nowrap;
+    }
+    .hbtn-ghost{
+      background:transparent;
+      border:1px solid var(--brd);color:var(--t1);
+    }
+    .hbtn-ghost:hover{border-color:rgba(255,255,255,.15);color:var(--t0);background:rgba(255,255,255,.03)}
+    .hbtn-pri{
+      background:var(--pri);color:var(--bg0);font-weight:700;
+      border:1.5px solid var(--pri);
+    }
+    .hbtn-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 24px rgba(var(--pri-rgb),.2)}
     .hbtn-pri:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
     .dropdown{position:relative}
-    .dd-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;min-width:190px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:200;opacity:0;visibility:hidden;transform:translateY(-4px);transition:all .18s var(--ease)}
-    .dropdown:hover .dd-menu{opacity:1;visibility:visible;transform:translateY(0)}
-    .dd-item{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;color:var(--t1);text-decoration:none;transition:all .15s}
+    .dd-menu{
+      position:absolute;top:calc(100% + 8px);right:0;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:12px;min-width:200px;overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:200;
+      opacity:0;visibility:hidden;transform:translateY(-4px);
+      transition:all .18s var(--ease);
+    }
+    .dropdown:hover .dd-menu,.dropdown:focus-within .dd-menu{opacity:1;visibility:visible;transform:translateY(0)}
+    .dd-item{
+      display:flex;align-items:center;gap:10px;padding:11px 14px;
+      font-size:13px;color:var(--t1);text-decoration:none;
+      transition:all .15s;font-family:var(--body-font);
+    }
     .dd-item:hover{background:rgba(var(--pri-rgb),.06);color:var(--pri)}
     .dd-div{height:1px;background:var(--brd);margin:4px 0}
 
+    /* ── HERO STRIP ── */
+    .hero-strip{
+      position:relative;
+      padding:28px 32px 22px;
+      border-bottom:1px solid var(--brd);
+      background:linear-gradient(180deg, rgba(var(--pri-rgb),0.025) 0%, transparent 100%);
+      overflow:hidden;
+    }
+    .hero-strip::before{
+      content:'';position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 60% 80% at 30% 50%, black 30%, transparent 100%);
+      pointer-events:none;
+    }
+    .hero-strip::after{
+      content:'';position:absolute;
+      width:300px;height:300px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--pri-rgb),0.06) 0%, transparent 70%);
+      top:-150px;right:-50px;pointer-events:none;
+    }
+    .hero-inner{
+      position:relative;z-index:1;
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+    }
+    .hero-left{flex:1;min-width:260px}
+    .hero-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:4px 11px;border-radius:100px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      font-size:10px;font-weight:600;color:var(--pri);
+      letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);
+      margin-bottom:12px;
+    }
+    .hero-title{
+      font-family:var(--font);
+      font-size:clamp(22px,2.4vw,30px);
+      font-weight:800;letter-spacing:-0.8px;
+      line-height:1.15;margin-bottom:6px;
+    }
+    .hero-title .accent{color:var(--pri)}
+    .hero-desc{
+      font-size:13px;color:var(--t2);
+      max-width:560px;line-height:1.6;
+    }
+    .hero-meta{
+      display:flex;gap:20px;flex-wrap:wrap;
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);letter-spacing:1px;text-transform:uppercase;
+    }
+    .hero-meta-item{display:flex;align-items:center;gap:6px}
+    .hero-meta-item svg{color:var(--pri);flex-shrink:0}
+
     /* ── LAYOUT ── */
-    .app-body{display:grid;grid-template-columns:290px 1fr;min-height:calc(100vh - var(--hh) - 57px)}
+    .app-body{
+      display:grid;grid-template-columns:320px 1fr;
+      max-width:1600px;margin:0 auto;
+      min-height:calc(100vh - var(--hh) - 100px);
+    }
 
     /* ── SIDEBAR ── */
-    .sidebar{border-right:1px solid var(--brd);padding:16px 14px;overflow-y:auto;background:var(--bg1);position:sticky;top:var(--hh);height:calc(100vh - var(--hh));display:flex;flex-direction:column}
-    .sb-label{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:var(--mono);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--brd)}
-    .ig{margin-bottom:12px}
-    .il{font-size:10px;color:var(--t2);margin-bottom:5px;display:flex;align-items:center;gap:5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
-    .ifield{width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:7px;color:var(--t0);font-size:13px;font-family:var(--mono);outline:none;transition:border-color .2s,box-shadow .2s}
-    .ifield:focus{border-color:rgba(var(--pri-rgb),.4);box-shadow:0 0 0 3px rgba(var(--pri-rgb),.06)}
-    .ifield::-webkit-inner-spin-button,.ifield::-webkit-outer-spin-button{-webkit-appearance:none}
-    .ifield::placeholder{color:rgba(255,255,255,.2)}
-    .trow{display:flex;gap:3px}
-    .tbtn{flex:1;padding:7px 4px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .18s;border:1px solid var(--brd);background:var(--bg2);color:var(--t2);text-align:center}
-    .tbtn.active{border-color:rgba(var(--pri-rgb),.3);background:rgba(var(--pri-rgb),.08);color:var(--pri)}
-    .tbtn:hover:not(.active){border-color:rgba(255,255,255,.1);color:var(--t1)}
-    .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-    .conf-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--pri)}
-    input[type=range]{width:100%;accent-color:var(--pri);cursor:pointer}
-    .conf-ticks{display:flex;justify-content:space-between;font-size:9px;color:var(--t2);margin-top:3px;font-family:var(--mono)}
-    .hyp-box{margin-top:7px;padding:8px 10px;background:rgba(var(--acc-rgb),.04);border:1px solid rgba(var(--acc-rgb),.08);border-radius:7px;font-size:11px;color:var(--t2);line-height:1.6}
+    .sidebar{
+      border-right:1px solid var(--brd);
+      padding:24px 20px;overflow-y:auto;
+      background:var(--bg1);
+      position:sticky;top:var(--hh);
+      height:calc(100vh - var(--hh));
+      display:flex;flex-direction:column;
+      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:6px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+
+    .sb-section{margin-bottom:22px}
+    .sb-label{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:2px;
+      font-weight:500;margin-bottom:14px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .sb-label::before{content:'';display:block;width:18px;height:1px;background:var(--t2)}
+
+    .ig{margin-bottom:14px}
+    .il{
+      font-size:11px;color:var(--t1);margin-bottom:7px;
+      display:flex;align-items:center;gap:6px;
+      font-weight:600;letter-spacing:.3px;
+    }
+
+    .ifield{
+      width:100%;padding:10px 12px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;color:var(--t0);
+      font-size:13px;font-family:var(--mono);font-weight:500;
+      outline:none;transition:all .2s;
+    }
+    .ifield:focus{
+      border-color:rgba(var(--pri-rgb),.4);
+      box-shadow:0 0 0 3px rgba(var(--pri-rgb),.06);
+    }
+    .ifield::-webkit-inner-spin-button,
+    .ifield::-webkit-outer-spin-button{-webkit-appearance:none}
+    .ifield::placeholder{color:rgba(255,255,255,.18)}
+
+    /* Toggle pills */
+    .trow{display:flex;gap:4px;background:var(--bg2);padding:3px;border-radius:9px;border:1px solid var(--brd)}
+    .tbtn{
+      flex:1;padding:8px 6px;border-radius:7px;
+      font-size:11.5px;font-weight:600;cursor:pointer;
+      font-family:var(--body-font);transition:all .2s var(--ease);
+      border:none;background:transparent;color:var(--t2);
+      text-align:center;letter-spacing:.2px;
+    }
+    .tbtn.active{
+      background:rgba(var(--pri-rgb),.1);
+      color:var(--pri);
+      box-shadow:0 0 0 1px rgba(var(--pri-rgb),.15);
+    }
+    .tbtn:hover:not(.active){color:var(--t1);background:rgba(255,255,255,.03)}
+
+    /* Confidence slider */
+    .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .conf-val{
+      font-family:var(--mono);font-size:13px;font-weight:600;
+      color:var(--pri);
+      padding:2px 8px;border-radius:6px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.15);
+    }
+    input[type=range]{
+      width:100%;accent-color:var(--pri);cursor:pointer;
+      height:6px;
+    }
+    .conf-ticks{
+      display:flex;justify-content:space-between;
+      font-size:9px;color:var(--t2);margin-top:5px;
+      font-family:var(--mono);letter-spacing:.5px;
+    }
+
+    .hyp-box{
+      margin-top:9px;padding:10px 12px;
+      background:rgba(var(--acc-rgb),.04);
+      border:1px solid rgba(var(--acc-rgb),.1);
+      border-radius:8px;
+      font-size:11.5px;color:var(--t2);line-height:1.6;
+    }
     .hyp-box strong{color:var(--t1)}
 
     /* Variant boxes */
-    .vbox{background:var(--bg0);border:1px solid var(--brd);border-radius:9px;padding:11px 12px;margin-bottom:7px;border-left:3px solid rgba(255,255,255,.06);transition:border-left-color .2s}
+    .vbox{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:11px;padding:14px;margin-bottom:10px;
+      border-left:3px solid rgba(255,255,255,.08);
+      transition:all .2s;
+    }
+    .vbox:hover{border-color:rgba(255,255,255,.1)}
     .vbox.va{border-left-color:var(--pri)}
-    .vbox-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px}
-    .vbox-name-input{flex:1;background:transparent;border:none;outline:none;font-size:12px;font-weight:700;font-family:var(--font);color:inherit;padding:0;cursor:text}
-    .vbox-name-input::placeholder{color:var(--t2);font-weight:400}
-    .vbox-ctrl-lbl{font-size:10px;color:var(--t2);font-weight:600;white-space:nowrap}
-    .vinputs{display:grid;gap:6px}
+    .vbox-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:10px;gap:6px;
+    }
+    .vbox-name-input{
+      flex:1;background:transparent;border:none;outline:none;
+      font-size:13px;font-weight:700;
+      font-family:var(--font);color:inherit;padding:0;cursor:text;
+      letter-spacing:-.2px;
+    }
+    .vbox-name-input::placeholder{color:var(--t2);font-weight:500}
+    .vbox-ctrl-lbl{
+      font-size:9px;color:var(--t2);font-weight:700;
+      letter-spacing:1.2px;text-transform:uppercase;
+      padding:3px 7px;border-radius:5px;
+      background:rgba(255,255,255,.04);
+      font-family:var(--mono);
+    }
+    .vinputs{display:grid;gap:8px}
     .vinputs.c2{grid-template-columns:1fr 1fr}
     .vinputs.c3{grid-template-columns:1fr 1fr 1fr}
-    .vinput-wrap{}
-    .vinput-lbl{font-size:9px;color:var(--t2);margin-bottom:3px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .vinput-lbl{
+      font-size:9px;color:var(--t2);margin-bottom:5px;
+      font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+      font-family:var(--mono);
+    }
 
-    .tip-box{margin-top:auto;padding:9px 11px;background:rgba(var(--acc-rgb),.04);border:1px solid rgba(var(--acc-rgb),.1);border-radius:8px;font-size:10px;color:var(--t2);line-height:1.6}
+    .tip-box{
+      margin-top:auto;padding:12px 14px;
+      background:rgba(var(--acc-rgb),.04);
+      border:1px solid rgba(var(--acc-rgb),.1);
+      border-radius:10px;
+      font-size:11px;color:var(--t2);line-height:1.65;
+    }
     .tip-em{color:var(--acc);font-weight:700}
-    .warn-box{padding:8px 10px;background:rgba(var(--warn-rgb),.06);border:1px solid rgba(var(--warn-rgb),.15);border-radius:7px;font-size:11px;color:var(--warn);line-height:1.6;margin-top:6px}
+    .warn-box{
+      padding:9px 12px;
+      background:rgba(var(--warn-rgb),.06);
+      border:1px solid rgba(var(--warn-rgb),.18);
+      border-radius:8px;
+      font-size:11px;color:var(--warn);line-height:1.65;
+      margin-top:8px;
+    }
 
-    /* ── MAIN ── */
-    .main-panel{padding:20px;min-width:0}
-    .tab-bar{display:flex;gap:3px;margin-bottom:16px;background:var(--bg1);border-radius:9px;padding:3px;border:1px solid var(--brd)}
-    .tab-btn{flex:1;padding:8px 10px;border-radius:7px;border:none;background:transparent;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .2s;text-align:center}
-    .tab-btn.active{background:rgba(var(--pri-rgb),.1);color:var(--pri);box-shadow:inset 0 -2px 0 var(--pri)}
-    .tab-btn:hover:not(.active){color:var(--t1)}
+    /* ── MAIN PANEL ── */
+    .main-panel{padding:24px 32px;min-width:0}
 
-    /* ── RESULT CARD ── */
-    .card{background:var(--bg1);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:12px;transition:border-color .2s}
-    article.card:hover{border-color:rgba(255,255,255,0.1)}
+    /* Tab bar */
+    .tab-bar{
+      display:flex;gap:4px;margin-bottom:20px;
+      background:var(--bg1);border-radius:11px;padding:4px;
+      border:1px solid var(--brd);
+    }
+    .tab-btn{
+      flex:1;padding:10px 12px;border-radius:8px;border:none;
+      background:transparent;color:var(--t2);
+      font-size:12.5px;font-weight:600;cursor:pointer;
+      font-family:var(--body-font);transition:all .25s var(--ease);
+      text-align:center;letter-spacing:.2px;
+      display:flex;align-items:center;justify-content:center;gap:7px;
+    }
+    .tab-btn svg{flex-shrink:0;opacity:.7}
+    .tab-btn.active{
+      background:rgba(var(--pri-rgb),.08);
+      color:var(--pri);
+      box-shadow:inset 0 0 0 1px rgba(var(--pri-rgb),.15);
+    }
+    .tab-btn.active svg{opacity:1}
+    .tab-btn:hover:not(.active){color:var(--t1);background:rgba(255,255,255,.02)}
 
-    /* Compact top row: lift + certainty + power in one line */
-    .rc-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-    .rc-left{display:flex;align-items:center;gap:10px}
-    .rc-name{font-family:var(--font);font-size:16px;font-weight:800}
-    .rc-vs{font-size:11px;color:var(--t2)}
-    .verdict{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;font-size:11px;font-weight:700;font-family:var(--font)}
+    /* ── CARDS ── */
+    .card{
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:14px;padding:20px;margin-bottom:14px;
+      transition:all .25s var(--ease);
+      position:relative;overflow:hidden;
+    }
+    .card::before{
+      content:'';position:absolute;top:0;right:0;
+      width:140px;height:140px;
+      background:radial-gradient(circle at top right, rgba(var(--pri-rgb),0.04), transparent 70%);
+      pointer-events:none;
+    }
+    article.card:hover{border-color:rgba(255,255,255,.1)}
 
-    /* Hero stats bar — all key numbers in one compact row */
-    .hero-bar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px}
-    .hstat{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 12px;transition:border-color .15s}
-    .hstat:hover{border-color:rgba(255,255,255,0.1)}
-    .hstat-lbl{font-size:9.5px;color:var(--t2);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:3px}
-    .hstat-val{font-size:17px;font-weight:800;font-family:var(--mono);line-height:1}
-    .hstat-sub{font-size:9px;color:var(--t2);margin-top:3px;font-family:var(--mono)}
+    /* Verdict header */
+    .rc-topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:18px;flex-wrap:wrap;gap:10px;
+      position:relative;z-index:1;
+    }
+    .rc-left{display:flex;align-items:center;gap:12px}
+    .rc-name{
+      font-family:var(--font);font-size:18px;font-weight:800;
+      letter-spacing:-.4px;
+    }
+    .rc-vs{
+      font-size:11px;color:var(--t2);
+      font-family:var(--mono);letter-spacing:.5px;
+    }
+    .verdict{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 14px;border-radius:100px;
+      font-size:11px;font-weight:700;font-family:var(--font);
+      letter-spacing:.3px;
+    }
 
-    /* Lift stat — special */
-    .hstat.lift-stat{grid-column:span 1}
+    /* Hero stats */
+    .hero-bar{
+      display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;
+      margin-bottom:12px;position:relative;z-index:1;
+    }
+    .hstat{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:10px;padding:13px 14px;
+      transition:all .2s;
+      position:relative;overflow:hidden;
+    }
+    .hstat:hover{
+      border-color:rgba(var(--pri-rgb),.12);
+      background:rgba(var(--pri-rgb),.015);
+    }
+    .hstat-lbl{
+      font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.3px;font-weight:700;
+      margin-bottom:6px;
+      display:flex;align-items:center;gap:4px;
+      font-family:var(--mono);
+    }
+    .hstat-val{
+      font-size:18px;font-weight:800;
+      font-family:var(--mono);line-height:1;
+      letter-spacing:-.3px;
+    }
+    .hstat-sub{
+      font-size:9.5px;color:var(--t2);margin-top:5px;
+      font-family:var(--mono);letter-spacing:.3px;
+    }
 
-    /* Gauge mini — inline semicircle */
     .mini-gauge{display:flex;align-items:center;gap:8px}
     .mini-gauge svg{flex-shrink:0}
 
-    /* Bottom row: CI + Distribution */
-    .detail-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .dcard{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:10px 12px}
-    .dcard-lbl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:3px}
-    .ci-row{display:flex;align-items:center;gap:7px}
-    .ci-val{font-family:var(--mono);font-size:11px;white-space:nowrap}
-    .ci-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
-    .ci-fill{height:100%;background:linear-gradient(90deg,rgba(var(--acc-rgb),.4),rgba(var(--pri-rgb),.4));border-radius:2px}
-    .ci-ctrl{font-size:9px;color:rgba(255,255,255,.18);margin-top:4px;font-family:var(--mono)}
+    /* Detail cards */
+    .detail-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1}
+    .dcard{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:10px;padding:14px;
+    }
+    .dcard-lbl{
+      font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.3px;font-weight:700;
+      margin-bottom:10px;
+      display:flex;align-items:center;gap:4px;
+      font-family:var(--mono);
+    }
+    .ci-row{display:flex;align-items:center;gap:8px}
+    .ci-val{
+      font-family:var(--mono);font-size:11.5px;
+      white-space:nowrap;font-weight:600;
+    }
+    .ci-track{
+      flex:1;height:5px;background:var(--bg3);
+      border-radius:3px;overflow:hidden;
+      position:relative;
+    }
+    .ci-fill{
+      height:100%;
+      background:linear-gradient(90deg,rgba(var(--acc-rgb),.5),rgba(var(--pri-rgb),.5));
+      border-radius:3px;
+    }
+    .ci-ctrl{
+      font-size:9.5px;color:rgba(255,255,255,.22);
+      margin-top:6px;font-family:var(--mono);letter-spacing:.3px;
+    }
 
-    /* Rev row */
-    .rev-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+    /* Revenue row */
+    .rev-row{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+      margin-top:10px;position:relative;z-index:1;
+    }
 
-    /* Alert badges */
-    .srm-ok{padding:8px 12px;background:rgba(var(--pri-rgb),.04);border:1px solid rgba(var(--pri-rgb),.15);border-radius:7px;font-size:11px;color:var(--pri);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-    .srm-err{padding:10px 14px;background:rgba(var(--red-rgb),.07);border:1px solid rgba(var(--red-rgb),.25);border-radius:7px;font-size:12px;color:var(--red);margin-bottom:10px;line-height:1.5}
-    .bonf-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.15);color:var(--acc);font-family:var(--mono);margin-bottom:10px;letter-spacing:.5px}
+    /* Alerts */
+    .srm-ok{
+      padding:10px 14px;
+      background:rgba(var(--pri-rgb),.04);
+      border:1px solid rgba(var(--pri-rgb),.18);
+      border-radius:9px;
+      font-size:11.5px;color:var(--pri);
+      margin-bottom:12px;
+      display:flex;align-items:center;gap:8px;
+      font-weight:500;
+    }
+    .srm-err{
+      padding:12px 16px;
+      background:rgba(var(--red-rgb),.07);
+      border:1px solid rgba(var(--red-rgb),.25);
+      border-radius:9px;
+      font-size:12px;color:var(--red);
+      margin-bottom:12px;line-height:1.55;
+    }
+    .bonf-badge{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:5px 12px;border-radius:7px;
+      font-size:10.5px;font-weight:700;
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.18);
+      color:var(--acc);
+      font-family:var(--mono);
+      margin-bottom:12px;letter-spacing:.5px;
+    }
 
-    /* Empty */
-    .empty{text-align:center;padding:60px 20px}
-    .empty-icon{font-size:40px;margin-bottom:10px}
-    .empty-title{font-family:var(--font);font-size:16px;font-weight:800;margin-bottom:5px}
-    .empty-desc{font-size:13px;color:var(--t2)}
+    /* Empty state */
+    .empty{
+      text-align:center;padding:80px 20px;
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:14px;
+      position:relative;overflow:hidden;
+    }
+    .empty::before{
+      content:'';position:absolute;
+      width:400px;height:400px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--pri-rgb),0.04) 0%, transparent 70%);
+      top:-150px;left:50%;transform:translateX(-50%);
+      pointer-events:none;
+    }
+    .empty-icon{
+      font-size:44px;margin-bottom:14px;
+      position:relative;z-index:1;opacity:.7;
+    }
+    .empty-title{
+      font-family:var(--font);font-size:18px;font-weight:800;
+      margin-bottom:6px;position:relative;z-index:1;
+      letter-spacing:-.3px;
+    }
+    .empty-desc{
+      font-size:13px;color:var(--t2);
+      position:relative;z-index:1;max-width:320px;margin:0 auto;
+    }
 
-    /* Power + tables */
-    .data-table{width:100%;border-collapse:collapse;font-size:12px}
-    .data-table th{padding:8px 12px;text-align:left;color:var(--t2);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.08)}
+    /* Tables */
+    .data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+    .data-table th{
+      padding:10px 14px;text-align:left;
+      color:var(--t2);font-weight:700;font-size:10px;
+      text-transform:uppercase;letter-spacing:1.3px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-family:var(--mono);
+    }
     .data-table th:not(:first-child){text-align:right}
-    .data-table td{padding:8px 12px;font-family:var(--mono);border-bottom:1px solid rgba(255,255,255,.03)}
+    .data-table td{
+      padding:10px 14px;font-family:var(--mono);
+      border-bottom:1px solid rgba(255,255,255,.03);
+      font-weight:500;
+    }
     .data-table td:not(:first-child){text-align:right}
     .data-table tr:hover td{background:rgba(255,255,255,.02)}
 
-    /* Sim */
-    .sim-big{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-    .sim-card{background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center}
-    .sim-val{font-size:26px;font-weight:800;font-family:var(--mono);line-height:1;margin-bottom:4px}
-    .sim-lbl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
-    .pctl-row{display:flex;gap:6px}
-    .pctl-card{flex:1;text-align:center;padding:9px 6px;background:var(--bg2);border-radius:8px;border:1px solid var(--brd)}
-    .pctl-val{font-size:13px;font-weight:800;font-family:var(--mono)}
-    .pctl-lbl{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+    /* Simulation */
+    .sim-big{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+    .sim-card{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:11px;padding:18px;text-align:center;
+      transition:all .2s;
+    }
+    .sim-card:hover{border-color:rgba(255,255,255,.1)}
+    .sim-val{
+      font-size:30px;font-weight:800;font-family:var(--mono);
+      line-height:1;margin-bottom:6px;letter-spacing:-.5px;
+    }
+    .sim-lbl{
+      font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
+      font-family:var(--mono);
+    }
+    .pctl-row{display:flex;gap:7px}
+    .pctl-card{
+      flex:1;text-align:center;padding:11px 7px;
+      background:var(--bg2);border-radius:9px;
+      border:1px solid var(--brd);
+      transition:all .15s;
+    }
+    .pctl-card:hover{border-color:rgba(255,255,255,.08)}
+    .pctl-val{font-size:13.5px;font-weight:800;font-family:var(--mono)}
+    .pctl-lbl{
+      font-size:9px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.2px;
+      margin-top:3px;font-family:var(--mono);
+    }
 
     /* Tooltip */
-    .itip-popup{position:fixed;width:240px;padding:11px 13px;background:var(--bg3);border:1px solid rgba(var(--acc-rgb),.2);border-radius:9px;font-size:11px;color:var(--t1);line-height:1.65;z-index:9999;pointer-events:none;box-shadow:0 16px 48px rgba(0,0,0,.7);font-family:var(--body);display:none}
+    .itip-popup{
+      position:fixed;width:260px;padding:12px 14px;
+      background:var(--bg3);border:1px solid rgba(var(--acc-rgb),.25);
+      border-radius:10px;
+      font-size:11.5px;color:var(--t1);line-height:1.65;
+      z-index:9999;pointer-events:none;
+      box-shadow:0 16px 48px rgba(0,0,0,.7);
+      font-family:var(--body-font);display:none;
+    }
     .itip-popup.vis{display:block}
-    .itip-title{color:var(--acc);display:block;margin-bottom:3px;font-weight:700;font-size:11px}
-    .ibtn{width:14px;height:14px;border-radius:50%;background:rgba(var(--acc-rgb),.1);border:1px solid rgba(var(--acc-rgb),.2);color:var(--acc);font-size:8px;font-weight:800;cursor:help;display:inline-flex;align-items:center;justify-content:center;font-family:var(--body);font-style:normal;transition:all .2s;flex-shrink:0;vertical-align:middle}
+    .itip-title{
+      color:var(--acc);display:block;margin-bottom:4px;
+      font-weight:700;font-size:11px;
+      text-transform:uppercase;letter-spacing:.5px;
+    }
+    .ibtn{
+      width:14px;height:14px;border-radius:50%;
+      background:rgba(var(--acc-rgb),.1);
+      border:1px solid rgba(var(--acc-rgb),.2);
+      color:var(--acc);font-size:8px;font-weight:800;
+      cursor:help;display:inline-flex;align-items:center;justify-content:center;
+      font-family:var(--body-font);font-style:normal;
+      transition:all .2s;flex-shrink:0;vertical-align:middle;
+    }
     .ibtn:hover{background:rgba(var(--acc-rgb),.2)}
 
-    /* FAQ */
-    .faq-section{padding:40px 24px 48px;border-top:1px solid var(--brd)}
-    .faq-hd{font-family:var(--font);font-size:20px;font-weight:800;margin-bottom:4px}
-    .faq-sub{font-size:13px;color:var(--t2);margin-bottom:22px}
-    .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
-    .faq-item{background:var(--bg1);border:1px solid var(--brd);border-radius:11px;overflow:hidden;transition:border-color .2s}
-    .faq-item:hover{border-color:rgba(var(--pri-rgb),.2)}
-    .faq-q{width:100%;padding:14px 16px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;color:var(--t0);font-size:12px;font-weight:600;font-family:var(--body);gap:10px;text-align:left}
-    .faq-q:hover{background:rgba(255,255,255,.02)}
-    .faq-chev{width:18px;height:18px;border-radius:50%;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s var(--ease);color:var(--t2)}
-    .faq-item.open .faq-q{color:var(--pri)}
-    .faq-item.open .faq-chev{transform:rotate(180deg);border-color:rgba(var(--pri-rgb),.4);color:var(--pri)}
-    .faq-a{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s var(--ease),opacity .2s;font-size:12px;color:var(--t2);line-height:1.75}
-    .faq-item.open .faq-a{max-height:300px;opacity:1}
-    .faq-ai{padding:0 16px 14px}
+    /* Card section header */
+    .card-head{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:14px;flex-wrap:wrap;gap:10px;
+      position:relative;z-index:1;
+    }
+    .card-head-title{
+      font-family:var(--font);font-size:15px;font-weight:800;
+      letter-spacing:-.3px;
+    }
+    .card-head-sub{
+      font-size:11px;color:var(--t2);margin-top:2px;
+      font-family:var(--mono);letter-spacing:.3px;
+    }
 
-    /* Footer */
-    .app-footer{border-top:1px solid var(--brd);padding:20px 24px}
-    .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    /* ════════════ FAQ (matches landing) ════════════ */
+    .faq-section{
+      padding:80px 32px;
+      border-top:1px solid var(--brd);
+      max-width:1600px;margin:0 auto;
+    }
+    .faq-top{
+      display:flex;align-items:flex-end;justify-content:space-between;
+      gap:24px;margin-bottom:36px;flex-wrap:wrap;
+    }
+    .section-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+    }
+    .section-tag::before{
+      content:'';display:block;width:24px;height:1px;background:var(--t2);
+    }
+    .section-title{
+      font-family:var(--font);
+      font-size:clamp(26px,3.5vw,40px);
+      font-weight:800;letter-spacing:-1.2px;
+      margin-bottom:10px;line-height:1.1;
+    }
+    .section-desc{
+      font-size:14px;color:var(--t2);
+      max-width:480px;line-height:1.7;
+    }
+
+    .faq-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    }
+    .faq-card{
+      border:1px solid var(--brd);border-radius:14px;
+      background:var(--bg1);overflow:hidden;cursor:pointer;
+      opacity:0;transform:translateY(16px);
+      transition:opacity .6s var(--ease),transform .6s var(--ease),
+                 border-color .25s ease,background .25s ease,box-shadow .25s ease;
+    }
+    .faq-card.revealed{opacity:1;transform:translateY(0)}
+    .faq-card:not(.open):hover{
+      border-color:rgba(255,255,255,.11);
+      background:rgba(255,255,255,.025);
+      transform:translateY(-2px);
+    }
+    .faq-card.open{
+      border-color:rgba(var(--pri-rgb),.22);
+      background:rgba(var(--pri-rgb),.02);
+      box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(var(--pri-rgb),.06);
+      transform:translateY(-2px);
+    }
+    .faq-card-q{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 20px;gap:14px;user-select:none;
+    }
+    .faq-q-left{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+    .faq-idx{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      flex-shrink:0;letter-spacing:1px;
+      transition:color .25s ease;
+    }
+    .faq-card.open .faq-idx{color:var(--pri)}
+    .faq-q-text{
+      font-size:13px;font-weight:600;color:var(--t1);
+      line-height:1.45;flex:1;min-width:0;
+      transition:color .2s ease;
+    }
+    .faq-card:hover .faq-q-text,.faq-card.open .faq-q-text{color:var(--t0)}
+    .faq-toggle{
+      flex-shrink:0;width:24px;height:24px;border-radius:50%;
+      border:1px solid var(--brd);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--t2);transition:all .3s var(--ease);
+    }
+    .faq-card.open .faq-toggle{
+      border-color:rgba(var(--pri-rgb),.35);
+      background:rgba(var(--pri-rgb),.07);
+      color:var(--pri);transform:rotate(180deg);
+    }
+    .faq-body{
+      max-height:0;overflow:hidden;
+      transition:max-height .4s var(--ease);
+    }
+    .faq-card.open .faq-body{max-height:280px}
+    .faq-body-inner{
+      padding:14px 20px 18px;
+      border-top:1px solid rgba(255,255,255,.04);
+    }
+    .faq-answer{
+      font-size:12.5px;color:var(--t2);line-height:1.8;
+      margin-bottom:12px;
+    }
+    .faq-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .faq-chip{
+      padding:3px 9px;border:1px solid rgba(255,255,255,.05);
+      border-radius:100px;
+      font-family:var(--mono);font-size:9px;
+      color:rgba(255,255,255,.22);letter-spacing:.5px;
+      transition:all .25s ease;
+    }
+    .faq-card.open .faq-chip{
+      border-color:rgba(var(--pri-rgb),.12);
+      color:rgba(var(--pri-rgb),.5);
+    }
+
+    /* ── Footer (matches landing) ── */
+    .app-footer{
+      border-top:1px solid var(--brd);
+      padding:32px;
+      background:rgba(255,255,255,.005);
+    }
+    .footer-inner{
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;flex-wrap:wrap;
+    }
     .footer-copy{font-size:12px;color:var(--t2)}
     .footer-copy a{color:var(--pri);text-decoration:none;font-weight:600}
     .footer-links{display:flex;gap:20px}
-    .footer-links a{font-size:12px;color:var(--t2);text-decoration:none;transition:color .2s}
+    .footer-links a{
+      font-size:12px;color:var(--t2);text-decoration:none;
+      transition:color .2s;
+    }
     .footer-links a:hover{color:var(--pri)}
 
-    /* Modal */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+    /* ── Modal ── */
+    .modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.85);
+      backdrop-filter:blur(10px);z-index:1000;
+      display:none;align-items:center;justify-content:center;padding:20px;
+    }
     .modal-overlay.open{display:flex}
-    .modal-box{background:var(--bg1);border:1px solid rgba(var(--pri-rgb),.15);border-radius:14px;padding:32px;max-width:580px;width:100%;max-height:85vh;overflow-y:auto;color:var(--t1);font-size:13px;line-height:1.9;position:relative}
-    .modal-box h2{font-family:var(--font);font-size:18px;font-weight:800;color:var(--t0);margin-bottom:18px}
-    .modal-box h3{color:var(--pri);font-weight:700;font-size:12px;margin:16px 0 4px;font-family:var(--font);text-transform:uppercase;letter-spacing:.5px}
-    .modal-box p{margin-bottom:6px}
+    .modal-box{
+      background:var(--bg1);border:1px solid rgba(var(--pri-rgb),.15);
+      border-radius:16px;padding:36px;
+      max-width:620px;width:100%;
+      max-height:85vh;overflow-y:auto;
+      color:var(--t1);font-size:13px;line-height:1.85;
+      position:relative;
+    }
+    .modal-box h2{
+      font-family:var(--font);font-size:20px;font-weight:800;
+      color:var(--t0);margin-bottom:20px;letter-spacing:-.4px;
+    }
+    .modal-box h3{
+      color:var(--pri);font-weight:700;font-size:11px;
+      margin:18px 0 6px;font-family:var(--mono);
+      text-transform:uppercase;letter-spacing:1px;
+    }
+    .modal-box p{margin-bottom:7px}
     .modal-box strong{color:var(--t0)}
-    .modal-close{position:absolute;top:12px;right:12px;background:var(--bg2);border:1px solid var(--brd);border-radius:7px;color:var(--t2);font-size:13px;cursor:pointer;padding:5px 9px;transition:all .2s}
-    .modal-close:hover{color:var(--t1)}
+    .modal-close{
+      position:absolute;top:14px;right:14px;
+      width:32px;height:32px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:8px;color:var(--t2);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .modal-close:hover{border-color:rgba(var(--pri-rgb),.2);color:var(--t1)}
 
-    /* Responsive */
-    @media(max-width:1100px){.app-body{grid-template-columns:260px 1fr}}
+    /* ── Responsive ── */
+    @media(max-width:1100px){.app-body{grid-template-columns:280px 1fr}}
     @media(max-width:900px){
       .app-body{grid-template-columns:1fr}
-      .sidebar{border-right:none;border-bottom:1px solid var(--brd);position:static;height:auto}
+      .sidebar{
+        border-right:none;border-bottom:1px solid var(--brd);
+        position:static;height:auto;
+      }
       .hero-bar{grid-template-columns:1fr 1fr 1fr}
       .detail-row{grid-template-columns:1fr}
       .faq-grid{grid-template-columns:1fr}
+      .hero-strip{padding:20px}
+      .main-panel{padding:18px}
+      .faq-section{padding:50px 20px}
+      .app-header{padding:0 18px}
     }
     @media(max-width:600px){
-      .app-header{padding:0 14px}
-      .hdr-badge,.hdr-sep+*{display:none}
-      .main-panel{padding:12px}
+      .hdr-status,.hdr-sep,.hdr-tool-name{display:none}
       .hero-bar{grid-template-columns:1fr 1fr}
       .sim-big{grid-template-columns:1fr 1fr 1fr}
-      .faq-section{padding:28px 14px 0}
+      .pctl-row{flex-wrap:wrap}
+      .pctl-card{min-width:calc(33% - 5px)}
+      .rev-row{grid-template-columns:1fr}
+      .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
     }
     @media(max-width:400px){
       .vinputs.c2,.vinputs.c3{grid-template-columns:1fr 1fr}
       .hero-bar{grid-template-columns:1fr 1fr}
     }
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    }
   </style>
 </head>
 <body>
 
-<!-- Tooltip popup (singleton) -->
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- Tooltip -->
 <div class="itip-popup" id="globalTip" role="tooltip" aria-hidden="true"></div>
 
 <!-- HEADER -->
 <header class="app-header" role="banner">
-  <div class="hdr-left">
-    <a href="/" class="hdr-logo" aria-label="Datapad home">
-      <img src="/logo.png" alt="Datapad"/>
-      <span class="hdr-logo-name">Datapad</span>
-    </a>
-    <span class="hdr-sep" aria-hidden="true">/</span>
-    <span class="hdr-tool-name">A/B Test Calculator</span>
-    <span class="hdr-badge">Free</span>
-  </div>
-  <div class="hdr-right">
-    <div class="dropdown">
-      <button class="hbtn hbtn-ghost">Other Tools <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="dd-menu" role="menu">
-        <a href="/json-studio" class="dd-item" role="menuitem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>JSON Studio</a>
-        <div class="dd-div"></div>
-        <a href="/pre-post-analyzer" class="dd-item" role="menuitem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Pre/Post Analyzer</a>
-      </div>
+  <div class="hdr-inner">
+    <div class="hdr-left">
+      <a href="/" class="hdr-logo" aria-label="Datapad home">
+        <img src="/logo.png" alt="Datapad"/>
+        <span class="hdr-logo-name">Datapad</span>
+      </a>
+      <span class="hdr-sep" aria-hidden="true">/</span>
+      <span class="hdr-tool-name">A/B Test Calculator</span>
+      <span class="hdr-badge">Free</span>
     </div>
-    <button class="hbtn hbtn-ghost" onclick="toggleGuide()" id="guideBtn" aria-label="Open guide" aria-expanded="false">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
-      Guide
-    </button>
-    <button class="hbtn hbtn-pri" id="exportBtn" disabled onclick="doExport()" aria-label="Export to Excel">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-      Export Excel
-    </button>
+    <div class="hdr-right">
+      <div class="hdr-status" role="status" aria-label="All systems online">
+        <span class="status-dot"></span>
+        <span>Online</span>
+      </div>
+      <div class="dropdown">
+        <button class="hbtn hbtn-ghost" aria-haspopup="true">
+          Other Tools
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dd-menu" role="menu">
+          <a href="/json-studio" class="dd-item" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            JSON Studio
+          </a>
+          <div class="dd-div"></div>
+          <a href="/pre-post-analyzer" class="dd-item" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Pre/Post Analyzer
+          </a>
+        </div>
+      </div>
+      <button class="hbtn hbtn-ghost" onclick="toggleGuide()" id="guideBtn" aria-label="Open guide" aria-expanded="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        Guide
+      </button>
+      <button class="hbtn hbtn-pri" id="exportBtn" disabled onclick="doExport()" aria-label="Export to Excel">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export Excel
+      </button>
+    </div>
   </div>
 </header>
+
+<!-- HERO STRIP -->
+<section class="hero-strip">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="status-dot"></span>
+        Statistical Significance Engine
+      </div>
+      <h1 class="hero-title">
+        Validate experiments. <span class="accent">Ship with confidence.</span>
+      </h1>
+      <p class="hero-desc">
+        Two-proportion Z-test with Wilson confidence intervals, power analysis, Monte Carlo simulation, and multi-variant Bonferroni correction — all running locally in your browser.
+      </p>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        100% Client-side
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Wilson CIs
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        5,000 Trials
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Excel Export
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- BODY -->
 <div class="app-body">
   <!-- SIDEBAR -->
   <aside class="sidebar" aria-label="Test configuration">
-    <div style="margin-bottom:14px">
+    <div class="sb-section">
       <div class="sb-label">Configuration</div>
+
       <div class="ig">
         <div class="il">Test Type <button class="ibtn" data-tip="Conversion: Measures rate of a binary action.&#10;Revenue: Also compares revenue per visitor.">i</button></div>
         <div class="trow">
@@ -293,6 +943,7 @@
           <button class="tbtn" onclick="setMode('revenue',this)">Revenue</button>
         </div>
       </div>
+
       <div class="ig">
         <div class="il">Variants <button class="ibtn" data-tip="A/B tests two versions. A/B/C and A/B/C/D compare multiple variants against control. Bonferroni correction is applied automatically for 3+ variants.">i</button></div>
         <div class="trow">
@@ -301,14 +952,15 @@
           <button class="tbtn" onclick="setVariants(4,this)">A/B/C/D</button>
         </div>
       </div>
+
       <div class="ig">
         <div class="conf-row">
-          <div class="il">Confidence <button class="ibtn" data-tip="How certain you need to be that the result is real. Alpha = 1 - confidence level.">i</button></div>
+          <div class="il" style="margin-bottom:0">Confidence <button class="ibtn" data-tip="How certain you need to be that the result is real. Alpha = 1 - confidence level.">i</button></div>
           <span class="conf-val"><span id="confLabel">95</span>%</span>
         </div>
         <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level"/>
-        <div class="conf-ticks"><span>80%</span><span>90%</span><span>95%</span><span>99%</span></div>
       </div>
+
       <div class="ig">
         <div class="il">Hypothesis <button class="ibtn" data-tip="Two-sided: Tests if variant differs in either direction. Recommended default.&#10;One-sided: Tests only if variant is better. Only use when harm is impossible.">i</button></div>
         <div class="trow">
@@ -319,24 +971,36 @@
       </div>
     </div>
 
-    <div style="margin-bottom:12px">
+    <div class="sb-section">
       <div class="sb-label">Input Data</div>
       <div id="variantInputs"></div>
       <div id="warnBox"></div>
     </div>
 
     <div class="tip-box">
-      <span class="tip-em">Tip:</span> Pre-filled with sample data. Enter your own numbers. All computation is local — no data leaves your browser.
+      <span class="tip-em">●</span> <strong style="color:var(--t1)">Privacy-first</strong> — Pre-filled with sample data. Edit freely. All computation runs locally — your data never leaves the browser.
     </div>
   </aside>
 
   <!-- MAIN -->
   <main class="main-panel" aria-label="Analysis results">
     <nav class="tab-bar" role="tablist">
-      <button class="tab-btn active" role="tab" aria-selected="true" onclick="setTab('results',this)">Results</button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('power',this)">Power Analysis</button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('sim',this)">Simulation</button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('insights',this)">Insights</button>
+      <button class="tab-btn active" role="tab" aria-selected="true" onclick="setTab('results',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Results
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('power',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Power Analysis
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('sim',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/></svg>
+        Simulation
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('insights',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H5a2 2 0 00-2 2v7h6V11zM15 7h-6v13h6V7zM21 4h-6v16h6V4z"/></svg>
+        Insights
+      </button>
     </nav>
     <div id="tabContent" role="tabpanel" aria-live="polite"></div>
   </main>
@@ -344,15 +1008,148 @@
 
 <!-- FAQ -->
 <section class="faq-section" aria-labelledby="faq-hd">
-  <h2 class="faq-hd" id="faq-hd">Frequently Asked Questions</h2>
-  <p class="faq-sub">Everything you need to know about A/B testing statistics.</p>
-  <div class="faq-grid">
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">What p-value is statistically significant?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">At 95% confidence, a p-value below 0.05 is significant. At 99% confidence, you need p &lt; 0.01. A smaller p-value means stronger evidence that the difference is real. This calculator adjusts thresholds for your chosen confidence level and applies Bonferroni correction automatically for multi-variant tests.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">How many visitors do I need for an A/B test?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Sample size depends on four factors: baseline conversion rate, minimum effect size (MDE), desired statistical power (typically 80%), and significance level (typically 95%). Use the Power Analysis tab to see exact sample sizes for various MDE values.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">What is statistical power in A/B testing?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Power is the probability of detecting a real effect when one exists. Aim for ≥80% power. Low power means your test might be inconclusive even if the variant truly performs differently. The calculator shows current power and the sample size needed for 80% power.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">When should I use Bonferroni correction?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Use Bonferroni correction when testing multiple variants simultaneously (A/B/C or A/B/C/D). Without correction, testing 3 variants at 95% confidence gives a 14% chance of at least one false positive. Applied automatically here for 3+ variants.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">What is a Sample Ratio Mismatch (SRM)?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">SRM occurs when the observed traffic split differs significantly from the intended split. It often indicates a bug in randomization or bot traffic. SRM can invalidate results even if the p-value looks significant. Detected using a chi-square test with a 1% threshold.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)">One-sided or two-sided test — which to use?<span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Two-sided tests are recommended for most A/B tests because they protect against both positive and negative outcomes. A one-sided test only checks if the variant is better, making it easier to reach significance but ignoring potential harm.</div></div></div>
+  <div class="faq-top">
+    <div>
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title" id="faq-hd">Common questions</h2>
+      <p class="section-desc">Everything you need to know about A/B testing statistics and how this calculator works.</p>
+    </div>
+  </div>
+
+  <div class="faq-grid" id="faqGrid">
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">01</span>
+          <span class="faq-q-text">What p-value is statistically significant?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">At 95% confidence, a p-value below 0.05 is significant. At 99% confidence, you need p &lt; 0.01. A smaller p-value means stronger evidence that the difference is real. This calculator adjusts thresholds for your chosen confidence level and applies Bonferroni correction automatically for multi-variant tests.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">p-value</span>
+            <span class="faq-chip">significance</span>
+            <span class="faq-chip">95-confidence</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">02</span>
+          <span class="faq-q-text">How many visitors do I need?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Sample size depends on four factors: baseline conversion rate, minimum effect size (MDE), desired statistical power (typically 80%), and significance level (typically 95%). Use the Power Analysis tab to see exact sample sizes for various MDE values.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">sample-size</span>
+            <span class="faq-chip">mde</span>
+            <span class="faq-chip">power</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">03</span>
+          <span class="faq-q-text">What is statistical power in A/B testing?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Power is the probability of detecting a real effect when one exists. Aim for ≥80% power. Low power means your test might be inconclusive even if the variant truly performs differently. The calculator shows current power and the sample size needed for 80% power.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">power</span>
+            <span class="faq-chip">80%-target</span>
+            <span class="faq-chip">type-II-error</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">04</span>
+          <span class="faq-q-text">When should I use Bonferroni correction?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Use Bonferroni correction when testing multiple variants simultaneously (A/B/C or A/B/C/D). Without correction, testing 3 variants at 95% confidence gives a 14% chance of at least one false positive. Applied automatically here for 3+ variants.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">bonferroni</span>
+            <span class="faq-chip">multi-variant</span>
+            <span class="faq-chip">false-positive</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">05</span>
+          <span class="faq-q-text">What is a Sample Ratio Mismatch (SRM)?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">SRM occurs when the observed traffic split differs significantly from the intended split. It often indicates a bug in randomization or bot traffic. SRM can invalidate results even if the p-value looks significant. Detected using a chi-square test with a 1% threshold.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">srm</span>
+            <span class="faq-chip">chi-square</span>
+            <span class="faq-chip">randomization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">06</span>
+          <span class="faq-q-text">One-sided or two-sided test?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Two-sided tests are recommended for most A/B tests because they protect against both positive and negative outcomes. A one-sided test only checks if the variant is better, making it easier to reach significance but ignoring potential harm.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">hypothesis</span>
+            <span class="faq-chip">two-sided</span>
+            <span class="faq-chip">safer-default</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -372,7 +1169,9 @@
 <!-- GUIDE MODAL -->
 <div class="modal-overlay" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
   <div class="modal-box">
-    <button class="modal-close" onclick="toggleGuide()">✕</button>
+    <button class="modal-close" onclick="toggleGuide()" aria-label="Close guide">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
     <h2 id="guideTitle">How to Use This Calculator</h2>
     <h3>1. Enter Your Data</h3>
     <p>Input <strong>visitors</strong> and <strong>conversions</strong> for control and at least one variant. You can rename each variant (e.g. "amazon_A_Group") by clicking the name field.</p>
@@ -429,7 +1228,7 @@ function fmtPct(n,d){d=d==null?2:d;return(isNaN(n)||!isFinite(n))?'—':(n*100).
 function fmtRaw(n,d){d=d==null?2:d;return(isNaN(n)||!isFinite(n))?'—':n.toFixed(d)+'%'}
 function fmtNum(n){return(isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleString()}
 
-// ═══════════ TOOLTIP — fixed, no closest() on SVGElement ═══════════
+// ═══════════ TOOLTIP ═══════════
 (function(){
   var tip=document.getElementById('globalTip');
   var cur=null;
@@ -437,7 +1236,7 @@ function fmtNum(n){return(isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleSt
     tip.innerHTML=btn.getAttribute('data-tip').replace(/&#10;/g,'<br>');
     tip.style.display='none';
     tip.classList.add('vis');
-    var r=btn.getBoundingClientRect(),tw=240;
+    var r=btn.getBoundingClientRect(),tw=260;
     tip.style.display='block';
     var th=tip.offsetHeight,top=r.top-th-8,left=r.left+r.width/2-tw/2;
     if(top<8)top=r.bottom+8;
@@ -447,10 +1246,8 @@ function fmtNum(n){return(isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleSt
     cur=btn;
   }
   function hideTip(){tip.classList.remove('vis');tip.style.display='none';cur=null}
-  // Use mouseover/mouseout directly on buttons with data-tip attribute
   document.addEventListener('mouseover',function(e){
     var t=e.target;
-    // Walk up max 3 levels to find an ibtn
     for(var i=0;i<3;i++){
       if(t&&t.getAttribute&&t.getAttribute('data-tip')){showTip(t);return}
       if(!t||!t.parentElement)break;
@@ -469,12 +1266,36 @@ function fmtNum(n){return(isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleSt
   window.addEventListener('resize',function(){if(cur)showTip(cur)});
 })();
 
+// ═══════════ CURSOR GLOW ═══════════
+(function(){
+  var glow=document.getElementById('cursorGlow');
+  if(!glow)return;
+  var mx=0,my=0,gx=0,gy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  (function anim(){
+    gx+=(mx-gx)*0.1;gy+=(my-gy)*0.1;
+    glow.style.transform='translate('+(gx-200)+'px,'+(gy-200)+'px)';
+    requestAnimationFrame(anim);
+  })();
+})();
+
 // ═══════════ FAQ ═══════════
-function tFaq(btn){
-  var item=btn.closest('.faq-item'),open=item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(function(el){el.classList.remove('open')});
-  if(!open)item.classList.add('open');
+function faqTog(card){
+  var wasOpen=card.classList.contains('open');
+  document.querySelectorAll('.faq-card.open').forEach(function(c){c.classList.remove('open')});
+  if(!wasOpen)card.classList.add('open');
 }
+
+// Reveal FAQ on scroll
+(function(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('revealed')});
+  },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.faq-card').forEach(function(el,i){
+    el.style.transitionDelay=(i*0.05)+'s';
+    obs.observe(el);
+  });
+})();
 
 // ═══════════ CONTROLS ═══════════
 function actToggle(el){el.parentNode.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active')});el.classList.add('active')}
@@ -499,9 +1320,9 @@ function buildInputs(){
     if(isCtrl)h+='<span class="vbox-ctrl-lbl">Control</span>';
     h+='</div>';
     h+='<div class="vinputs '+cols+'">';
-    h+='<div class="vinput-wrap"><div class="vinput-lbl">Visitors</div><input class="ifield" id="'+id+'-v" type="number" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)"/></div>';
-    h+='<div class="vinput-wrap"><div class="vinput-lbl">Conversions</div><input class="ifield" id="'+id+'-c" type="number" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)"/></div>';
-    if(S.mode==='revenue')h+='<div class="vinput-wrap"><div class="vinput-lbl">Revenue (₹)</div><input class="ifield" id="'+id+'-r" type="number" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" oninput="onInput(this)"/></div>';
+    h+='<div><div class="vinput-lbl">Visitors</div><input class="ifield" id="'+id+'-v" type="number" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)"/></div>';
+    h+='<div><div class="vinput-lbl">Conversions</div><input class="ifield" id="'+id+'-c" type="number" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)"/></div>';
+    if(S.mode==='revenue')h+='<div><div class="vinput-lbl">Revenue (₹)</div><input class="ifield" id="'+id+'-r" type="number" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" oninput="onInput(this)"/></div>';
     h+='</div></div>';
   }
   c.innerHTML=h;
@@ -540,8 +1361,8 @@ function getVerdict(v){if(!v)return{text:'Enter data',color:'var(--t2)',bg:'rgba
 
 // ═══════════ MINI GAUGE SVG ═══════════
 function miniGauge(val,color){
-  var size=56,r=size/2-5,circ=Math.PI*r,prog=Math.min(Math.max(val/100,0),1),offset=circ*(1-prog),dv=isFinite(val)?fmtRaw(val,1):'—';
-  return '<svg width="'+size+'" height="'+(size/2+10)+'" aria-hidden="true">'+
+  var size=58,r=size/2-5,circ=Math.PI*r,prog=Math.min(Math.max(val/100,0),1),offset=circ*(1-prog),dv=isFinite(val)?fmtRaw(val,1):'—';
+  return '<svg width="'+size+'" height="'+(size/2+12)+'" aria-hidden="true">'+
     '<path d="M 5 '+size/2+' A '+r+' '+r+' 0 0 1 '+(size-5)+' '+size/2+'" fill="none" stroke="var(--bg3)" stroke-width="4" stroke-linecap="round"/>'+
     '<path d="M 5 '+size/2+' A '+r+' '+r+' 0 0 1 '+(size-5)+' '+size/2+'" fill="none" stroke="'+color+'" stroke-width="4" stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'" style="transition:stroke-dashoffset .5s"/>'+
     '<text x="'+size/2+'" y="'+(size/2)+'" text-anchor="middle" fill="'+color+'" font-size="11" font-weight="800" font-family="var(--font)">'+dv+'</text>'+
@@ -551,37 +1372,37 @@ function miniGauge(val,color){
 // ═══════════ DIST SVG ═══════════
 function distSVG(p1,p2,se){
   if(!se||se===0)return'<div style="color:var(--t2);font-size:11px;text-align:center;padding:16px 0">No data</div>';
-  var w=220,h=70,pts=80,range=4.5*se,step=2*range/pts,maxY=1/(se*Math.sqrt(2*Math.PI)),path='',diff=p2-p1;
+  var w=240,h=80,pts=80,range=4.5*se,step=2*range/pts,maxY=1/(se*Math.sqrt(2*Math.PI)),path='',diff=p2-p1;
   for(var i=0;i<=pts;i++){var x=-range+i*step,y=Math.exp(-0.5*Math.pow(x/se,2))/(se*Math.sqrt(2*Math.PI)),px=((x+range)/(2*range))*w,py=h-6-(y/maxY)*(h-16);path+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1)}
   var diffX=Math.min(Math.max(((diff+range)/(2*range))*w,3),w-3),zeroX=((0+range)/(2*range))*w,dc=diff>=0?'var(--pri)':'var(--red)';
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" style="display:block;width:100%" aria-hidden="true">'+
-    '<defs><linearGradient id="dg'+Math.round(Math.random()*999)+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--pri)" stop-opacity="0.12"/><stop offset="100%" stop-color="var(--pri)" stop-opacity="0.01"/></linearGradient></defs>'+
     '<path d="'+path+'L'+w+','+(h-6)+'L0,'+(h-6)+'Z" fill="rgba(0,255,136,0.08)"/>'+
-    '<path d="'+path+'" fill="none" stroke="var(--pri)" stroke-width="1.5" opacity="0.8"/>'+
+    '<path d="'+path+'" fill="none" stroke="var(--pri)" stroke-width="1.5" opacity="0.85"/>'+
     '<line x1="'+zeroX+'" y1="3" x2="'+zeroX+'" y2="'+(h-6)+'" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="3,3"/>'+
     '<line x1="'+diffX+'" y1="3" x2="'+diffX+'" y2="'+(h-6)+'" stroke="'+dc+'" stroke-width="2"/>'+
-    '<text x="'+Math.min(diffX+3,w-12)+'" y="12" fill="'+dc+'" font-size="8" font-family="var(--mono)">Δ</text>'+
+    '<text x="'+Math.min(diffX+3,w-12)+'" y="12" fill="'+dc+'" font-size="9" font-family="var(--mono)" font-weight="600">Δ</text>'+
     '</svg>'
 }
 
 // ═══════════ POWER CURVE ═══════════
 function powerCurveSVG(baseRate,n1,n2){
-  var w=480,h=120,pts=60,maxMDE=Math.max(baseRate*0.5,0.02),path='';
+  var w=520,h=140,pts=60,maxMDE=Math.max(baseRate*0.5,0.02),path='';
   for(var i=0;i<=pts;i++){var mde=(i/pts)*maxMDE,p2=Math.min(baseRate+mde,0.9999),pw=calcPower(n1,baseRate,n2,p2)*100,px=(i/pts)*w,py=h-6-(Math.min(pw,100)/100)*(h-16);path+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1)}
   var y80=h-6-0.8*(h-16);
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" style="display:block;width:100%;max-width:100%" aria-hidden="true">'+
-    '<path d="'+path+'L'+w+','+(h-6)+'L0,'+(h-6)+'Z" fill="rgba(0,212,255,0.06)"/>'+
+    '<defs><linearGradient id="pcg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--acc)" stop-opacity="0.18"/><stop offset="100%" stop-color="var(--acc)" stop-opacity="0.01"/></linearGradient></defs>'+
+    '<path d="'+path+'L'+w+','+(h-6)+'L0,'+(h-6)+'Z" fill="url(#pcg)"/>'+
     '<path d="'+path+'" fill="none" stroke="var(--acc)" stroke-width="2" opacity="0.9"/>'+
     '<line x1="0" y1="'+y80+'" x2="'+w+'" y2="'+y80+'" stroke="rgba(0,212,255,0.25)" stroke-width="1" stroke-dasharray="4,4"/>'+
-    '<text x="'+(w-4)+'" y="'+(y80-3)+'" text-anchor="end" fill="rgba(0,212,255,0.45)" font-size="9" font-family="var(--mono)">80% power</text>'+
-    '<text x="'+w/2+'" y="'+h+'" text-anchor="middle" fill="rgba(255,255,255,0.15)" font-size="9" font-family="var(--mono)">Effect size →</text>'+
+    '<text x="'+(w-4)+'" y="'+(y80-3)+'" text-anchor="end" fill="rgba(0,212,255,0.5)" font-size="9" font-family="var(--mono)" font-weight="500">80% power</text>'+
+    '<text x="'+w/2+'" y="'+h+'" text-anchor="middle" fill="rgba(255,255,255,0.18)" font-size="9" font-family="var(--mono)">Effect size →</text>'+
     '</svg>'
 }
 
 // ═══════════ RENDER ═══════════
 function render(){
   var el=document.getElementById('tabContent');
-  if(!R||R.variantResults.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Enter Your Test Data</div><div class="empty-desc">Fill in visitors and conversions on the left to see results.</div></div>';return}
+  if(!R||R.variantResults.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Enter Your Test Data</div><div class="empty-desc">Fill in visitors and conversions on the left to see your statistical analysis.</div></div>';return}
   if(S.activeTab==='results')renderResults(el);
   else if(S.activeTab==='power')renderPower(el);
   else if(S.activeTab==='sim')renderSim(el);
@@ -591,7 +1412,7 @@ function render(){
 function renderResults(el){
   var h='';
   if(R.srm&&!R.srm.ok)h+='<div class="srm-err" role="alert">⚠️ <strong>Sample Ratio Mismatch detected</strong> (χ² p = '+fmt(R.srm.pValue,4)+'). Check your randomisation setup.</div>';
-  else if(R.srm&&R.variantResults.length>0)h+='<div class="srm-ok">✓ <strong>SRM Check Passed</strong> — Traffic split balanced (χ² p = '+fmt(R.srm.pValue,3)+')</div>';
+  else if(R.srm&&R.variantResults.length>0)h+='<div class="srm-ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> <strong>SRM Check Passed</strong> — Traffic split balanced (χ² p = '+fmt(R.srm.pValue,3)+')</div>';
   if(R.numComparisons>1)h+='<div class="bonf-badge">⚡ Bonferroni active — α = '+fmt(R.alphaAdj,4)+' for '+R.numComparisons+' comparisons</div>';
 
   R.variantResults.forEach(function(v){
@@ -604,45 +1425,28 @@ function renderResults(el){
 
     h+='<article class="card">';
 
-    // Top bar
     h+='<div class="rc-topbar">';
     h+='<div class="rc-left"><span class="rc-name">'+v.name+'</span><span class="rc-vs">vs Control</span></div>';
     h+='<span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span>';
     h+='</div>';
 
-    // Hero bar — all key stats in one compact row
     h+='<div class="hero-bar">';
-
-    // Lift
     h+='<div class="hstat"><div class="hstat-lbl">Relative Lift</div><div class="hstat-val" style="color:'+lc+';font-size:22px;letter-spacing:-0.5px">'+ld+'</div><div class="hstat-sub">abs: '+(v.absDiff>=0?'+':'')+fmtPct(v.absDiff)+'</div></div>';
-
-    // Certainty with mini gauge
-    h+='<div class="hstat"><div class="hstat-lbl">Certainty <button class="ibtn" data-tip="1 − p-value. Goal: ≥'+S.confidence+'%">i</button></div>';
-    h+='<div class="mini-gauge">'+miniGauge((1-v.pValue)*100,v.isSignificant?'var(--pri)':'var(--red)')+'</div></div>';
-
-    // Power with mini gauge
-    h+='<div class="hstat"><div class="hstat-lbl">Power <button class="ibtn" data-tip="Probability of detecting a real effect. Target ≥80%.">i</button></div>';
-    h+='<div class="mini-gauge">'+miniGauge(v.power,pwc)+'</div></div>';
-
-    // P-Value
+    h+='<div class="hstat"><div class="hstat-lbl">Certainty <button class="ibtn" data-tip="1 − p-value. Goal: ≥'+S.confidence+'%">i</button></div><div class="mini-gauge">'+miniGauge((1-v.pValue)*100,v.isSignificant?'var(--pri)':'var(--red)')+'</div></div>';
+    h+='<div class="hstat"><div class="hstat-lbl">Power <button class="ibtn" data-tip="Probability of detecting a real effect. Target ≥80%.">i</button></div><div class="mini-gauge">'+miniGauge(v.power,pwc)+'</div></div>';
     h+='<div class="hstat"><div class="hstat-lbl">P-Value <button class="ibtn" data-tip="Probability of result by chance. Threshold: '+fmt(R.alphaAdj,4)+'">i</button></div><div class="hstat-val" style="color:'+pvc+'">'+fmt(v.pValue,4)+'</div><div class="hstat-sub">thresh: '+fmt(R.alphaAdj,4)+'</div></div>';
-
-    // Conv rate
     h+='<div class="hstat"><div class="hstat-lbl">Conv. Rate</div><div class="hstat-val">'+fmtPct(v.rate)+'</div><div class="hstat-sub">ctrl: '+fmtPct(R.baseRate)+'</div></div>';
+    h+='</div>';
 
-    h+='</div>'; // hero-bar
-
-    // Bottom: CI + Distribution
     h+='<div class="detail-row">';
     h+='<div class="dcard"><div class="dcard-lbl">'+S.confidence+'% CI (Wilson) <button class="ibtn" data-tip="Range where the true conversion rate most likely falls. Wilson method is more accurate for small samples.">i</button></div>';
     h+='<div class="ci-row"><span class="ci-val" style="color:var(--acc)">'+fmtPct(v.ci[0])+'</span><div class="ci-track"><div class="ci-fill" style="width:'+ciW+'%"></div></div><span class="ci-val" style="color:var(--pri)">'+fmtPct(v.ci[1])+'</span></div>';
     h+='<div class="ci-ctrl">Control: '+fmtPct(v.ciCtrl[0])+' – '+fmtPct(v.ciCtrl[1])+'</div>';
-    h+='<div style="margin-top:10px"><div class="hstat-lbl" style="margin-bottom:4px">MDE at current n</div><div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--acc)">'+fmtPct(v.mde)+'</div><div class="hstat-sub">sample needed: '+(isFinite(v.sampleNeeded)?fmtNum(v.sampleNeeded):'∞')+'</div></div>';
+    h+='<div style="margin-top:12px"><div class="hstat-lbl" style="margin-bottom:5px">MDE at current n</div><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--acc)">'+fmtPct(v.mde)+'</div><div class="hstat-sub" style="margin-top:3px">sample needed: '+(isFinite(v.sampleNeeded)?fmtNum(v.sampleNeeded):'∞')+'</div></div>';
     h+='</div>';
     h+='<div class="dcard"><div class="dcard-lbl">Distribution <button class="ibtn" data-tip="Bell curve centred on zero. Δ marks observed difference. Δ far from centre = strong evidence.">i</button></div>'+distSVG(R.baseRate,v.rate,v.se)+'</div>';
     h+='</div>';
 
-    // Revenue
     if(S.mode==='revenue'&&v.rvc){
       h+='<div class="rev-row">';
       h+='<div class="hstat"><div class="hstat-lbl">Rev/Visitor (Ctrl)</div><div class="hstat-val">₹'+fmt(v.rvc)+'</div></div>';
@@ -662,9 +1466,9 @@ function renderPower(el){
     var n=calcSampleSize(R.baseRate,mde/100,R.alphaAdj),pw=calcPower(n,R.baseRate,n,R.baseRate+mde/100)*100,cur=v0&&Math.abs(v0.absDiff*100)>=mde-0.01;
     rows+='<tr'+(cur?' style="background:rgba(0,255,136,0.04)"':'')+'><td>'+mde+'%</td><td>'+(isFinite(n)?n.toLocaleString():'∞')+'</td><td>'+(isFinite(n)?(n*S.numVariants).toLocaleString():'∞')+'</td><td style="color:'+(pw>=80?'var(--pri)':'var(--warn)')+'">'+fmtRaw(pw,1)+'</td></tr>';
   });
-  el.innerHTML='<div class="card"><div style="font-family:var(--font);font-size:14px;font-weight:800;margin-bottom:10px">Power Curve</div>'+powerCurveSVG(R.baseRate,+R.ctrl.visitors,n2)+'<div style="font-size:10px;color:rgba(255,255,255,0.15);text-align:center;margin-top:4px">Statistical power vs. absolute effect size at current sample sizes</div></div>'+
-    '<div class="card"><div style="font-family:var(--font);font-size:14px;font-weight:800;margin-bottom:4px">Sample Size Table</div><p style="font-size:11px;color:var(--t2);margin-bottom:10px">Visitors per variant needed to detect each MDE with 80% power at '+S.confidence+'% confidence.</p><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>MDE</th><th>Per Variant</th><th>Total</th><th>Power at current n</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-    '<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><p style="font-size:13px;color:var(--t1);line-height:1.9">With <strong style="color:var(--t0)">'+fmtNum(+R.ctrl.visitors)+'</strong> visitors/variant and baseline <strong style="color:var(--pri)">'+fmtPct(R.baseRate)+'</strong>, your current MDE is <strong style="color:var(--acc)">'+(v0?fmtPct(v0.mde):'—')+'</strong>.</p></div>';
+  el.innerHTML='<div class="card"><div class="card-head"><div><div class="card-head-title">Power Curve</div><div class="card-head-sub">Detection probability vs effect size</div></div></div>'+powerCurveSVG(R.baseRate,+R.ctrl.visitors,n2)+'</div>'+
+    '<div class="card"><div class="card-head"><div><div class="card-head-title">Sample Size Table</div><div class="card-head-sub">Visitors per variant for 80% power at '+S.confidence+'% confidence</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>MDE</th><th>Per Variant</th><th>Total</th><th>Power at current n</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+    '<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><p style="font-size:13px;color:var(--t1);line-height:1.85">Currently testing with <strong style="color:var(--t0);font-family:var(--mono)">'+fmtNum(+R.ctrl.visitors)+'</strong> visitors/variant at baseline <strong style="color:var(--pri);font-family:var(--mono)">'+fmtPct(R.baseRate)+'</strong>. Your current MDE is <strong style="color:var(--acc);font-family:var(--mono)">'+(v0?fmtPct(v0.mde):'—')+'</strong>.</p></div>';
 }
 
 function renderSim(el){
@@ -675,16 +1479,16 @@ function renderSim(el){
     sh+='<div class="sim-card"><div class="sim-val" style="color:var(--red)">'+fmtRaw(sim.lossRate,1)+'</div><div class="sim-lbl">Loss Rate</div></div>';
     sh+='<div class="sim-card"><div class="sim-val" style="color:var(--warn)">'+fmtRaw(sim.incRate,1)+'</div><div class="sim-lbl">Inconclusive</div></div>';
     sh+='</div>';
-    sh+='<div style="font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Lift Percentile Distribution</div>';
+    sh+='<div style="font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-family:var(--mono)">Lift Percentile Distribution</div>';
     sh+='<div class="pctl-row">';
     [{l:'P5',v:sim.p5},{l:'P25',v:sim.p25},{l:'Median',v:sim.p50},{l:'P75',v:sim.p75},{l:'P95',v:sim.p95}].forEach(function(p){
       sh+='<div class="pctl-card"><div class="pctl-val" style="color:'+(p.v>=0?'var(--pri)':'var(--red)')+'">'+(p.v>=0?'+':'')+fmtRaw(p.v,1)+'</div><div class="pctl-lbl">'+p.l+'</div></div>';
     });
     sh+='</div>';
-  }else{sh='<div class="empty" style="padding:40px 20px"><div class="empty-icon">🎲</div><div class="empty-title">Run Simulation</div><div class="empty-desc">Click below to run 5,000 randomised binomial trials</div></div>'}
-  el.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">'+
-    '<div><div style="font-family:var(--font);font-size:14px;font-weight:800">Monte Carlo Simulation</div><div style="font-size:11px;color:var(--t2);margin-top:2px">5,000 trials · true binomial sampling</div></div>'+
-    '<button class="hbtn hbtn-pri" id="simBtn" onclick="doSim()">▶ Run Simulation</button></div>'+sh+'</div>';
+  }else{sh='<div class="empty" style="padding:50px 20px"><div class="empty-icon">🎲</div><div class="empty-title">Run Simulation</div><div class="empty-desc">Click the button above to run 5,000 randomised binomial trials.</div></div>'}
+  el.innerHTML='<div class="card"><div class="card-head">'+
+    '<div><div class="card-head-title">Monte Carlo Simulation</div><div class="card-head-sub">5,000 trials · true binomial sampling</div></div>'+
+    '<button class="hbtn hbtn-pri" id="simBtn" onclick="doSim()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Run Simulation</button></div>'+sh+'</div>';
 }
 
 function doSim(){
@@ -700,14 +1504,14 @@ function renderInsights(el){
   R.variantResults.forEach(function(v){
     var vd=getVerdict(v),winner=v.isSignificant&&v.lift>0,loser=v.isSignificant&&v.lift<0,lowPow=v.power<80,advice='';
     if(winner){var proj=isFinite(v.lift)?Math.round(100000*Math.abs(v.lift)).toLocaleString():'significant';
-      advice='<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p><p>'+v.name+' shows a significant <strong>'+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+'</strong> improvement (p = '+fmt(v.pValue,4)+', power = '+fmtRaw(v.power)+'). Wilson CI: ['+fmtPct(v.ci[0])+' – '+fmtPct(v.ci[1])+'].'+(R.numComparisons>1?' Bonferroni-adjusted α = '+fmt(R.alphaAdj,4)+'.':'')+'</p><p style="margin-top:8px;color:var(--t2)">📈 If baseline yields 100,000 conversions/year, this lift adds ~<strong style="color:var(--t1)">+'+proj+'</strong> conversions annually.</p>';}
+      advice='<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p><p>'+v.name+' shows a significant <strong>'+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+'</strong> improvement (p = '+fmt(v.pValue,4)+', power = '+fmtRaw(v.power)+'). Wilson CI: ['+fmtPct(v.ci[0])+' – '+fmtPct(v.ci[1])+'].'+(R.numComparisons>1?' Bonferroni-adjusted α = '+fmt(R.alphaAdj,4)+'.':'')+'</p><p style="margin-top:10px;color:var(--t2)">📈 If baseline yields 100,000 conversions/year, this lift adds ~<strong style="color:var(--t1)">+'+proj+'</strong> conversions annually.</p>';}
     else if(loser){advice='<p><strong style="color:var(--red)">❌ Do NOT deploy.</strong></p><p>'+v.name+' is significantly worse (<strong>'+fmtRaw(v.lift*100,2)+'</strong>, p = '+fmt(v.pValue,4)+'). Revert to control and investigate why.</p>';}
     else if(!v.isSignificant&&lowPow){var periods=v.sampleNeeded>0&&isFinite(v.sampleNeeded)?Math.ceil(v.sampleNeeded/(+R.ctrl.visitors||1)):'?';
       advice='<p><strong style="color:var(--warn)">⏳ Continue collecting data.</strong></p><p>Not significant (p = '+fmt(v.pValue,4)+') and power is only '+fmtRaw(v.power)+' (below 80%). Need ~<strong>'+(isFinite(v.sampleNeeded)?v.sampleNeeded.toLocaleString():'∞')+'</strong> visitors/variant (~'+periods+' more collection periods).</p>';}
     else{advice='<p><strong style="color:var(--acc)">🔄 No meaningful difference detected.</strong></p><p>Sufficient power ('+fmtRaw(v.power)+') but no significant result. True effect likely smaller than MDE of '+fmtPct(v.mde)+'. Consider if that small effect is business-relevant.</p>';}
-    h+='<article class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><span style="font-family:var(--font);font-size:16px;font-weight:800">'+v.name+'</span><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div><div style="font-size:13px;color:var(--t1);line-height:2">'+advice+'</div></article>';
+    h+='<article class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;position:relative;z-index:1"><span style="font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:-.3px">'+v.name+'</span><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div><div style="font-size:13px;color:var(--t1);line-height:2;position:relative;z-index:1">'+advice+'</div></article>';
   });
-  h+='<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><div style="font-size:10px;font-weight:700;color:var(--acc);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">📐 Statistical Methodology</div><div style="font-size:12px;color:var(--t2);line-height:2"><strong>Test:</strong> Two-proportion Z-test with signed z-statistic.<br><strong>CIs:</strong> Wilson interval — superior to Wald for small samples.<br><strong>Power:</strong> Non-central normal approximation with unpooled variance.<br><strong>Multiple testing:</strong> Bonferroni correction for 3+ variants.<br><strong>SRM:</strong> Chi-square test (Wilson-Hilferty approximation).<br><strong>Simulation:</strong> True binomial Monte Carlo, 5,000 trials.<br><strong>Privacy:</strong> 100% client-side. Zero data transmitted.</div></div>';
+  h+='<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><div style="font-size:10px;font-weight:700;color:var(--acc);margin-bottom:10px;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono)">📐 Statistical Methodology</div><div style="font-size:12.5px;color:var(--t2);line-height:2;position:relative;z-index:1"><strong>Test:</strong> Two-proportion Z-test with signed z-statistic.<br><strong>CIs:</strong> Wilson interval — superior to Wald for small samples.<br><strong>Power:</strong> Non-central normal approximation with unpooled variance.<br><strong>Multiple testing:</strong> Bonferroni correction for 3+ variants.<br><strong>SRM:</strong> Chi-square test (Wilson-Hilferty approximation).<br><strong>Simulation:</strong> True binomial Monte Carlo, 5,000 trials.<br><strong>Privacy:</strong> 100% client-side. Zero data transmitted.</div></div>';
   el.innerHTML=h;
 }
 
