@@ -15,208 +15,922 @@
   <meta property="og:description" content="Format, validate, diff, and convert JSON instantly. Plus API cleaner, log analyzer, request converter. Free, no sign-up, 100% browser-based."/>
   <meta property="og:image" content="https://datapad.in/og-json-studio.png"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/json-studio#app","name":"JSON Studio","url":"https://datapad.in/json-studio","description":"Free browser-based JSON toolkit with formatter, validator, minifier, diff, API cleaner, log analyzer, and request converter.","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["JSON formatter","JSON minifier","JSON validator","JSON auto-fix","JSON diff","API response cleaner","Log analyzer","Request converter — cURL Fetch Axios"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is JSON Studio free?","acceptedAnswer":{"@type":"Answer","text":"Yes. JSON Studio is completely free with no sign-up required."}},{"@type":"Question","name":"Does JSON Studio store my data?","acceptedAnswer":{"@type":"Answer","text":"No. All processing runs entirely in your browser. Your data never leaves your device."}},{"@type":"Question","name":"How do I format JSON online?","acceptedAnswer":{"@type":"Answer","text":"Paste your JSON into the Format tool and click Format. JSON Studio beautifies it instantly."}},{"@type":"Question","name":"Can JSON Studio fix broken JSON?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Auto-Fix feature repairs trailing commas, single quotes, and unquoted keys."}},{"@type":"Question","name":"How do I compare two JSON objects?","acceptedAnswer":{"@type":"Answer","text":"Use the JSON Diff tool. Paste both objects and click Compare to see added, removed, and changed keys."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapad.in/"},{"@type":"ListItem","position":2,"name":"JSON Studio","item":"https://datapad.in/json-studio"}]}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/json-studio#app","name":"JSON Studio","url":"https://datapad.in/json-studio","description":"Free browser-based JSON toolkit with formatter, validator, minifier, diff, API cleaner, log analyzer, and request converter.","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["JSON formatter","JSON minifier","JSON validator","JSON auto-fix","JSON diff","API response cleaner","Log analyzer","Request converter — cURL Fetch Axios"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is JSON Studio free?","acceptedAnswer":{"@type":"Answer","text":"Yes. JSON Studio is completely free with no sign-up required."}},{"@type":"Question","name":"Does JSON Studio store my data?","acceptedAnswer":{"@type":"Answer","text":"No. All processing runs entirely in your browser. Your data never leaves your device."}}]}]}</script>
   <link rel="icon" type="image/png" href="/logo.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    ::selection{background:rgba(0,255,136,0.18);color:#fff}
-    ::-moz-selection{background:rgba(0,255,136,0.18);color:#fff}
+    ::selection{background:rgba(0,255,136,0.25);color:#fff}
+    ::-moz-selection{background:rgba(0,255,136,0.25);color:#fff}
+
     :root{
       --pri:#00ff88;--pri-rgb:0,255,136;
       --acc:#00d4ff;--acc-rgb:0,212,255;
       --red:#ff4466;--red-rgb:255,68,102;
       --warn:#ffaa00;--warn-rgb:255,170,0;
+      --purple:#c084fc;--purple-rgb:192,132,252;
+      --orange:#ff9f43;--orange-rgb:255,159,67;
+
       --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
       --t0:#fff;--t1:#c8c8d4;--t2:#6e6e82;
       --brd:rgba(255,255,255,0.06);
-      --font:'Outfit',sans-serif;--mono:'DM Mono',monospace;
-      --ease:cubic-bezier(0.16,1,0.3,1);--hh:62px;
+
+      --font:'Outfit', sans-serif;
+      --body-font:'Outfit', sans-serif;
+      --mono:'DM Mono', monospace;
+      --code:'JetBrains Mono', 'DM Mono', monospace;
+      --ease:cubic-bezier(0.16, 1, 0.3, 1);
+      --hh:64px;
+
+      /* JSON syntax colors */
+      --j-key:#00d4ff;
+      --j-string:#00ff88;
+      --j-number:#ff9f43;
+      --j-bool:#c084fc;
+      --j-null:#ff4466;
+      --j-bracket:#c8c8d4;
+      --j-punct:#6e6e82;
     }
+
     html{scroll-behavior:smooth}
-    body{font-family:var(--font);background:var(--bg0);color:var(--t0);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
-    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:128px}
+    body{
+      font-family:var(--body-font);
+      background:var(--bg0);color:var(--t0);
+      line-height:1.6;overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      min-height:100vh;
+      font-feature-settings:"ss01","cv01","cv02";
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
 
-    /* HEADER — unified */
-    .dp-header{height:var(--hh);padding:0 28px;border-bottom:1px solid var(--brd);background:rgba(5,5,8,.96);backdrop-filter:blur(24px);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .dp-hdr-l{display:flex;align-items:center;gap:10px}
-    .dp-hdr-r{display:flex;align-items:center;gap:7px}
-    .dp-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit}
-    .dp-logo img{width:32px;height:32px;object-fit:contain}
-    .dp-logo-name{font-size:16px;font-weight:800;letter-spacing:.3px}
-    .dp-sep{color:rgba(255,255,255,.1);font-size:20px;font-weight:100}
-    .dp-tool-name{font-size:13px;font-weight:600;color:var(--t1)}
-    .dp-badge-beta{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:rgba(var(--acc-rgb),.08);border:1px solid rgba(var(--acc-rgb),.2);color:var(--acc)}
-    .dp-hbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:1px solid var(--brd);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-decoration:none;transition:all .2s;background:rgba(255,255,255,.03);color:var(--t1)}
-    .dp-hbtn:hover{background:rgba(255,255,255,.07);color:var(--t0)}
-    .dp-dropdown{position:relative}
-    .dp-dd{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;min-width:196px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:200;opacity:0;visibility:hidden;transform:translateY(-4px);transition:all .18s var(--ease)}
-    .dp-dropdown:hover .dp-dd{opacity:1;visibility:visible;transform:translateY(0)}
-    .dp-dd-item{display:flex;align-items:center;gap:9px;padding:10px 14px;font-size:12px;color:var(--t1);text-decoration:none;transition:all .15s;border-bottom:1px solid var(--brd)}
-    .dp-dd-item:last-child{border-bottom:none}
-    .dp-dd-item:hover{background:rgba(var(--pri-rgb),.05);color:var(--pri)}
+    .cursor-glow{
+      position:fixed;width:400px;height:400px;
+      background:radial-gradient(circle, rgba(var(--pri-rgb),0.05) 0%, transparent 70%);
+      border-radius:50%;pointer-events:none;z-index:0;
+      transition:opacity .3s;will-change:transform;
+    }
 
-    /* LAYOUT */
-    .app-body{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - var(--hh) - 56px)}
+    /* ── HEADER (matches landing) ── */
+    .app-header{
+      padding:0 32px;height:var(--hh);
+      border-bottom:1px solid var(--brd);
+      background:rgba(5,5,8,.9);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;
+    }
+    .hdr-inner{
+      width:100%;max-width:1600px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .hdr-left{display:flex;align-items:center;gap:14px;min-width:0}
+    .hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .hdr-logo img{
+      width:36px;height:36px;object-fit:contain;
+      filter:contrast(1.2) brightness(1.1) saturate(1.2);
+    }
+    .hdr-logo:hover img{filter:contrast(1.3) brightness(1.15) saturate(1.3)}
+    .hdr-logo-name{font-family:var(--font);font-size:18px;font-weight:800;letter-spacing:1px}
+    .hdr-sep{color:rgba(255,255,255,.12);font-size:18px;font-weight:200}
+    .hdr-tool-name{font-size:13px;font-weight:600;color:var(--t1)}
+    .hdr-badge{
+      padding:3px 8px;border-radius:100px;
+      font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.2);
+      color:var(--acc);font-family:var(--mono);
+    }
+    .hdr-status{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 12px;border-radius:100px;
+      border:1px solid rgba(var(--pri-rgb),.15);
+      background:rgba(var(--pri-rgb),.04);
+      font-size:11px;color:var(--t2);
+    }
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--pri);box-shadow:0 0 8px rgba(var(--pri-rgb),.7);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--pri-rgb),.7)}
+      50%{opacity:.6;box-shadow:0 0 4px rgba(var(--pri-rgb),.3)}
+    }
 
-    /* SIDEBAR */
-    .sidebar{border-right:1px solid var(--brd);background:var(--bg1);padding:16px 10px;position:sticky;top:var(--hh);height:calc(100vh - var(--hh));overflow-y:auto;display:flex;flex-direction:column;gap:2px}
-    .sb-label{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:var(--mono);padding:4px 10px 10px;margin-top:4px}
-    .nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:none;background:transparent;color:var(--t2);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-align:left;transition:all .2s;position:relative}
-    .nb-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--brd);flex-shrink:0;transition:all .2s}
-    .nb-icon svg{opacity:.5;transition:opacity .2s}
-    .nb-text{line-height:1.3}
-    .nb-text small{display:block;font-size:10px;color:var(--t2);font-weight:400;margin-top:1px}
-    .nav-btn:hover{color:var(--t1)}
+    .hbtn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:9px 14px;border-radius:9px;border:none;
+      font-size:12.5px;font-weight:600;font-family:var(--body-font);
+      cursor:pointer;text-decoration:none;transition:all .25s var(--ease);
+      white-space:nowrap;
+    }
+    .hbtn-ghost{
+      background:transparent;border:1px solid var(--brd);color:var(--t1);
+    }
+    .hbtn-ghost:hover{border-color:rgba(255,255,255,.15);color:var(--t0);background:rgba(255,255,255,.03)}
+    .dropdown{position:relative}
+    .dd-menu{
+      position:absolute;top:calc(100% + 8px);right:0;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:12px;min-width:200px;overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:200;
+      opacity:0;visibility:hidden;transform:translateY(-4px);
+      transition:all .18s var(--ease);
+    }
+    .dropdown:hover .dd-menu,.dropdown:focus-within .dd-menu{opacity:1;visibility:visible;transform:translateY(0)}
+    .dd-item{
+      display:flex;align-items:center;gap:10px;padding:11px 14px;
+      font-size:13px;color:var(--t1);text-decoration:none;
+      transition:all .15s;font-family:var(--body-font);
+    }
+    .dd-item:hover{background:rgba(var(--pri-rgb),.06);color:var(--pri)}
+    .dd-div{height:1px;background:var(--brd);margin:4px 0}
+
+    /* ── HERO STRIP ── */
+    .hero-strip{
+      position:relative;
+      padding:28px 32px 22px;
+      border-bottom:1px solid var(--brd);
+      background:linear-gradient(180deg, rgba(var(--acc-rgb),0.025) 0%, transparent 100%);
+      overflow:hidden;
+    }
+    .hero-strip::before{
+      content:'';position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 60% 80% at 30% 50%, black 30%, transparent 100%);
+      pointer-events:none;
+    }
+    .hero-strip::after{
+      content:'';position:absolute;
+      width:300px;height:300px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--acc-rgb),0.06) 0%, transparent 70%);
+      top:-150px;right:-50px;pointer-events:none;
+    }
+    .hero-inner{
+      position:relative;z-index:1;
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+    }
+    .hero-left{flex:1;min-width:260px}
+    .hero-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:4px 11px;border-radius:100px;
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.15);
+      font-size:10px;font-weight:600;color:var(--acc);
+      letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);
+      margin-bottom:12px;
+    }
+    .hero-title{
+      font-family:var(--font);
+      font-size:clamp(22px,2.4vw,30px);
+      font-weight:800;letter-spacing:-0.8px;
+      line-height:1.15;margin-bottom:6px;
+    }
+    .hero-title .accent{color:var(--acc)}
+    .hero-desc{
+      font-size:13px;color:var(--t2);
+      max-width:560px;line-height:1.6;
+    }
+    .hero-meta{
+      display:flex;gap:20px;flex-wrap:wrap;
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);letter-spacing:1px;text-transform:uppercase;
+    }
+    .hero-meta-item{display:flex;align-items:center;gap:6px}
+    .hero-meta-item svg{color:var(--pri);flex-shrink:0}
+
+    /* ── LAYOUT ── */
+    .app-body{
+      display:grid;grid-template-columns:240px 1fr;
+      max-width:1600px;margin:0 auto;
+      min-height:calc(100vh - var(--hh) - 100px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      border-right:1px solid var(--brd);
+      background:var(--bg1);padding:20px 14px;
+      position:sticky;top:var(--hh);
+      height:calc(100vh - var(--hh));
+      overflow-y:auto;display:flex;flex-direction:column;gap:3px;
+      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:6px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+
+    .sb-label{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:2px;
+      font-weight:500;padding:6px 10px 14px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .sb-label::before{content:'';display:block;width:18px;height:1px;background:var(--t2)}
+
+    .nav-btn{
+      width:100%;display:flex;align-items:center;gap:11px;
+      padding:10px 11px;border-radius:10px;border:none;
+      background:transparent;color:var(--t2);
+      font-size:12.5px;font-weight:600;font-family:var(--body-font);
+      cursor:pointer;text-align:left;transition:all .2s var(--ease);
+      position:relative;
+    }
+    .nb-icon{
+      width:30px;height:30px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--bg2);border:1px solid var(--brd);
+      flex-shrink:0;transition:all .2s;
+    }
+    .nb-icon svg{opacity:.55;transition:all .2s}
+    .nb-text{line-height:1.3;flex:1}
+    .nb-text small{
+      display:block;font-size:10px;color:var(--t2);
+      font-weight:400;margin-top:2px;font-family:var(--mono);
+      letter-spacing:.2px;
+    }
+    .nav-btn:hover{color:var(--t1);background:rgba(255,255,255,.02)}
     .nav-btn:hover .nb-icon{background:rgba(var(--pri-rgb),.06);border-color:rgba(var(--pri-rgb),.15)}
-    .nav-btn:hover .nb-icon svg{opacity:.8}
-    .nav-btn.active{color:var(--t0)}
-    .nav-btn.active .nb-icon{background:rgba(var(--pri-rgb),.1);border-color:rgba(var(--pri-rgb),.25)}
+    .nav-btn:hover .nb-icon svg{opacity:.85}
+    .nav-btn.active{color:var(--t0);background:rgba(var(--pri-rgb),.04)}
+    .nav-btn.active .nb-icon{
+      background:rgba(var(--pri-rgb),.1);
+      border-color:rgba(var(--pri-rgb),.25);
+    }
     .nav-btn.active .nb-icon svg{opacity:1;color:var(--pri)}
-    .nav-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--pri);border-radius:0 2px 2px 0}
-    .sb-div{height:1px;background:var(--brd);margin:8px 4px}
-    .trust-chips{padding:10px 10px 0;display:flex;flex-direction:column;gap:5px;margin-top:auto}
-    .trust-chip{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--t2);font-weight:500}
+    .nav-btn.active::before{
+      content:'';position:absolute;left:-14px;top:50%;
+      transform:translateY(-50%);width:3px;height:22px;
+      background:var(--pri);border-radius:0 2px 2px 0;
+      box-shadow:0 0 8px rgba(var(--pri-rgb),.4);
+    }
+
+    .sb-div{height:1px;background:var(--brd);margin:10px 6px}
+
+    .trust-chips{
+      padding:12px 10px;display:flex;flex-direction:column;gap:8px;
+      margin-top:auto;
+      background:rgba(var(--acc-rgb),.025);
+      border-radius:10px;border:1px solid rgba(var(--acc-rgb),.08);
+    }
+    .trust-chip{
+      display:flex;align-items:center;gap:8px;
+      font-size:10.5px;color:var(--t2);font-weight:500;
+      letter-spacing:.2px;
+    }
     .trust-chip svg{color:var(--pri);flex-shrink:0}
 
-    /* MOBILE TABS */
-    .mob-tabs{display:none;overflow-x:auto;padding:10px 12px;gap:6px;background:var(--bg1);border-bottom:1px solid var(--brd);-webkit-overflow-scrolling:touch}
+    /* ── MOBILE TABS ── */
+    .mob-tabs{
+      display:none;overflow-x:auto;
+      padding:12px 16px;gap:6px;
+      background:var(--bg1);border-bottom:1px solid var(--brd);
+      -webkit-overflow-scrolling:touch;
+    }
     .mob-tabs::-webkit-scrollbar{display:none}
-    .mob-tab{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px solid var(--brd);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;white-space:nowrap;transition:all .2s}
-    .mob-tab.active{background:rgba(var(--pri-rgb),.08);border-color:rgba(var(--pri-rgb),.2);color:var(--pri)}
+    .mob-tab{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 13px;border-radius:9px;
+      border:1px solid var(--brd);background:var(--bg2);
+      color:var(--t2);font-size:11.5px;font-weight:600;
+      font-family:var(--body-font);cursor:pointer;
+      white-space:nowrap;transition:all .2s;
+    }
+    .mob-tab.active{
+      background:rgba(var(--pri-rgb),.08);
+      border-color:rgba(var(--pri-rgb),.2);
+      color:var(--pri);
+    }
 
-    /* MAIN */
-    .main-panel{padding:28px;min-width:0}
-    .tool-section{display:none;animation:fadeUp .25s var(--ease) both}
+    /* ── MAIN ── */
+    .main-panel{padding:24px 32px;min-width:0}
+    .tool-section{display:none;animation:fadeUp .3s var(--ease) both}
     .tool-section.active{display:block}
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    .sec-hd{margin-bottom:18px}
-    .sec-hd h2{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+    .sec-hd{margin-bottom:20px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px}
+    .sec-hd-left{flex:1;min-width:260px}
+    .sec-hd-tag{
+      display:inline-flex;align-items:center;gap:7px;
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;
+    }
+    .sec-hd-tag::before{
+      content:'';display:block;width:18px;height:1px;background:var(--t2);
+    }
+    .sec-hd h2{
+      font-family:var(--font);font-size:22px;font-weight:800;
+      letter-spacing:-.6px;margin-bottom:4px;line-height:1.15;
+    }
     .sec-hd p{font-size:13px;color:var(--t2);line-height:1.6}
 
-    /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:9px 13px;background:var(--bg1);border:1px solid var(--brd);border-radius:10px}
-    .tb-sep{width:1px;height:18px;background:var(--brd);margin:0 2px}
+    .sec-hd-right{
+      display:flex;gap:8px;font-family:var(--mono);
+      font-size:10px;color:var(--t2);letter-spacing:1px;
+    }
+    .sec-stat{
+      padding:6px 11px;border-radius:7px;
+      background:var(--bg1);border:1px solid var(--brd);
+      display:flex;align-items:center;gap:6px;
+    }
+    .sec-stat strong{color:var(--pri);font-weight:600}
+
+    /* ── TOOLBAR ── */
+    .toolbar{
+      display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+      margin-bottom:14px;padding:10px 14px;
+      background:var(--bg1);border:1px solid var(--brd);border-radius:11px;
+    }
+    .tb-sep{width:1px;height:20px;background:var(--brd);margin:0 4px}
     .tb-push{margin-left:auto}
-    .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;border:none;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s}
+
+    .btn{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 14px;border-radius:8px;border:none;
+      font-size:12px;font-weight:700;font-family:var(--body-font);
+      cursor:pointer;transition:all .25s var(--ease);letter-spacing:.2px;
+    }
     .b-pri{background:var(--pri);color:var(--bg0);border:1.5px solid var(--pri)}
-    .b-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 16px rgba(var(--pri-rgb),.2)}
-    .b-sec{background:rgba(255,255,255,.04);color:var(--t1);border:1px solid var(--brd)}
-    .b-sec:hover{border-color:rgba(var(--pri-rgb),.25);color:var(--pri);background:rgba(var(--pri-rgb),.04)}
+    .b-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 18px rgba(var(--pri-rgb),.2)}
+    .b-sec{
+      background:rgba(255,255,255,.03);color:var(--t1);
+      border:1px solid var(--brd);
+    }
+    .b-sec:hover{
+      border-color:rgba(var(--pri-rgb),.25);
+      color:var(--pri);background:rgba(var(--pri-rgb),.04);
+    }
     .b-del{background:transparent;color:var(--t2);border:1px solid var(--brd)}
     .b-del:hover{color:var(--red);border-color:rgba(var(--red-rgb),.3);background:rgba(var(--red-rgb),.04)}
-    .b-copy{background:transparent;color:var(--acc);border:1px solid rgba(var(--acc-rgb),.2)}
+    .b-copy{
+      background:transparent;color:var(--acc);
+      border:1px solid rgba(var(--acc-rgb),.2);
+    }
     .b-copy:hover{background:rgba(var(--acc-rgb),.06);border-color:rgba(var(--acc-rgb),.35)}
 
-    /* ALERTS */
+    /* ── ALERTS ── */
     .alert-wrap{margin-bottom:12px}
-    .alert{padding:9px 13px;border-radius:8px;font-size:12px;line-height:1.7;font-family:var(--mono)}
-    .alert pre{white-space:pre-wrap;margin:0}
-    .a-err{background:rgba(var(--red-rgb),.06);border:1px solid rgba(var(--red-rgb),.2);color:var(--red)}
-    .a-ok{background:rgba(var(--pri-rgb),.06);border:1px solid rgba(var(--pri-rgb),.2);color:var(--pri)}
-    .a-info{background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.15);color:var(--acc)}
-    .a-warn{background:rgba(var(--warn-rgb),.06);border:1px solid rgba(var(--warn-rgb),.2);color:var(--warn)}
+    .alert{
+      padding:11px 14px;border-radius:10px;
+      font-size:12px;line-height:1.7;font-family:var(--mono);
+      display:flex;align-items:flex-start;gap:9px;
+    }
+    .alert-icon{flex-shrink:0;margin-top:1px}
+    .alert pre{white-space:pre-wrap;margin:0;flex:1}
+    .a-err{
+      background:rgba(var(--red-rgb),.06);
+      border:1px solid rgba(var(--red-rgb),.2);
+      color:var(--red);
+    }
+    .a-ok{
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.2);
+      color:var(--pri);
+    }
+    .a-info{
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.15);
+      color:var(--acc);
+    }
+    .a-warn{
+      background:rgba(var(--warn-rgb),.06);
+      border:1px solid rgba(var(--warn-rgb),.2);
+      color:var(--warn);
+    }
 
-    /* EDITORS */
+    /* ── EDITORS ── */
     .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .editor-col{display:flex;flex-direction:column;gap:8px}
-    .ed-label{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:2px;font-weight:700;font-family:var(--mono)}
-    .ed-dot{width:6px;height:6px;border-radius:50%;background:var(--pri);flex-shrink:0}
-    .ed-wrap{background:var(--bg2);border:1px solid var(--brd);border-radius:10px;overflow:hidden;transition:border-color .2s}
-    .ed-wrap:focus-within{border-color:rgba(var(--pri-rgb),.3);box-shadow:0 0 0 3px rgba(var(--pri-rgb),.05)}
-    .ed-wrap.ro:focus-within{border-color:rgba(var(--acc-rgb),.2);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.04)}
-    .ed-top{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid var(--brd);background:rgba(255,255,255,.02)}
-    .ed-top-lbl{font-size:10px;color:var(--t2);font-family:var(--mono);letter-spacing:1px}
-    .ed-top-btn{font-size:10px;color:var(--t2);background:none;border:none;cursor:pointer;font-family:var(--font);transition:color .15s;padding:2px 6px;border-radius:4px}
+    .editor-col{display:flex;flex-direction:column;gap:9px}
+    .ed-label{
+      display:flex;align-items:center;gap:8px;
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;font-weight:600;
+    }
+    .ed-dot{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--pri);flex-shrink:0;
+      box-shadow:0 0 6px rgba(var(--pri-rgb),.5);
+    }
+    .ed-dot.b{background:var(--acc);box-shadow:0 0 6px rgba(var(--acc-rgb),.5)}
+    .ed-dot.w{background:var(--warn);box-shadow:0 0 6px rgba(var(--warn-rgb),.5)}
+
+    .ed-wrap{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:11px;overflow:hidden;
+      transition:all .25s var(--ease);
+      position:relative;
+    }
+    .ed-wrap:focus-within{
+      border-color:rgba(var(--pri-rgb),.3);
+      box-shadow:0 0 0 3px rgba(var(--pri-rgb),.05);
+    }
+    .ed-wrap.ro:focus-within{
+      border-color:rgba(var(--acc-rgb),.2);
+      box-shadow:0 0 0 3px rgba(var(--acc-rgb),.04);
+    }
+    .ed-top{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:9px 14px;border-bottom:1px solid var(--brd);
+      background:rgba(255,255,255,.015);
+    }
+    .ed-top-lbl{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      letter-spacing:1.2px;font-weight:500;
+      display:flex;align-items:center;gap:8px;
+    }
+    .ed-top-actions{display:flex;align-items:center;gap:4px}
+    .ed-top-btn{
+      font-size:10px;color:var(--t2);
+      background:none;border:none;cursor:pointer;
+      font-family:var(--body-font);transition:all .15s;
+      padding:4px 8px;border-radius:5px;font-weight:600;
+      letter-spacing:.3px;
+    }
     .ed-top-btn:hover{color:var(--pri);background:rgba(var(--pri-rgb),.06)}
-    textarea{width:100%;min-height:360px;padding:14px 16px;background:transparent;border:none;color:var(--pri);font-family:var(--mono);font-size:13px;line-height:1.75;resize:vertical;outline:none;display:block}
-    textarea.ro-ta{color:var(--t1);cursor:default}
-    textarea::placeholder{color:var(--t2);font-style:italic;opacity:.6}
+    .ed-top-btn.copy{color:var(--acc)}
+    .ed-top-btn.copy:hover{color:var(--acc);background:rgba(var(--acc-rgb),.07)}
 
-    /* STATS */
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
-    .stat-card{background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center;position:relative;overflow:hidden;transition:border-color .2s}
-    .stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--pri);opacity:.35}
-    .stat-val{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--pri);line-height:1;margin-bottom:5px}
-    .stat-lbl{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+    /* Plain textarea (input) */
+    .ta-plain{
+      width:100%;min-height:380px;
+      padding:16px 18px;background:transparent;border:none;
+      color:var(--t1);font-family:var(--code);
+      font-size:13px;line-height:1.75;
+      resize:vertical;outline:none;display:block;
+      caret-color:var(--pri);
+      tab-size:2;
+    }
+    .ta-plain::placeholder{color:var(--t2);font-style:italic;opacity:.55}
 
-    /* INFO PANEL */
-    .info-panel{background:rgba(var(--acc-rgb),.03);border:1px solid rgba(var(--acc-rgb),.1);border-radius:10px;padding:12px 15px;margin-bottom:14px}
-    .info-panel strong{color:var(--acc);font-size:11px;text-transform:uppercase;letter-spacing:1px}
-    .info-panel pre{font-family:var(--mono);font-size:12px;color:var(--t1);margin-top:7px;line-height:1.7;white-space:pre-wrap}
+    /* === JSON HIGHLIGHTED EDITOR === */
+    .json-editor{
+      position:relative;min-height:380px;
+      max-height:600px;
+    }
+    .json-editor-input,
+    .json-editor-display{
+      width:100%;min-height:380px;
+      padding:16px 18px 16px 56px;
+      font-family:var(--code);font-size:13px;
+      line-height:1.75;letter-spacing:0;
+      tab-size:2;white-space:pre;
+    }
+    .json-editor-input{
+      position:absolute;inset:0;z-index:2;
+      background:transparent;border:none;outline:none;
+      color:transparent;caret-color:var(--pri);
+      resize:none;overflow:auto;
+      -webkit-text-fill-color:transparent;
+    }
+    .json-editor-input::selection{
+      background:rgba(0,255,136,.25);
+      -webkit-text-fill-color:transparent;
+    }
+    .json-editor-display{
+      position:relative;z-index:1;
+      pointer-events:none;
+      color:var(--t1);overflow:auto;
+      min-height:380px;
+      white-space:pre;
+    }
+    .json-editor-input::placeholder{
+      color:var(--t2);font-style:italic;opacity:.5;
+      -webkit-text-fill-color:var(--t2);
+    }
 
-    /* BREAKDOWN */
-    .bk-card{background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:14px;margin-top:12px}
-    .bk-title{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:var(--mono);margin-bottom:10px}
-    .bk-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px}
+    /* line numbers gutter (decorative) */
+    .json-editor::before{
+      content:'';position:absolute;
+      left:0;top:0;bottom:0;width:42px;
+      background:rgba(255,255,255,.012);
+      border-right:1px solid var(--brd);
+      pointer-events:none;z-index:0;
+    }
+    .ln-gutter{
+      position:absolute;left:0;top:16px;width:42px;
+      font-family:var(--code);font-size:13px;
+      line-height:1.75;letter-spacing:0;
+      color:rgba(255,255,255,0.18);
+      text-align:right;padding-right:10px;
+      pointer-events:none;user-select:none;
+      font-weight:500;z-index:1;
+    }
+
+    /* readonly version (output) */
+    .json-output-display{
+      width:100%;min-height:380px;
+      padding:16px 18px 16px 56px;
+      background:transparent;
+      font-family:var(--code);font-size:13px;
+      line-height:1.75;color:var(--t1);
+      overflow:auto;white-space:pre;
+      max-height:600px;
+      position:relative;
+    }
+    .json-output-empty{
+      padding:16px 18px;
+      color:var(--t2);font-style:italic;
+      font-family:var(--code);font-size:13px;
+      opacity:.5;
+    }
+
+    /* ── JSON SYNTAX COLORS ── */
+    .jt-key{color:var(--j-key);font-weight:500}
+    .jt-string{color:var(--j-string)}
+    .jt-number{color:var(--j-number);font-weight:500}
+    .jt-bool{color:var(--j-bool);font-weight:500}
+    .jt-null{color:var(--j-null);font-weight:500}
+    .jt-bracket{color:var(--j-bracket);font-weight:600}
+    .jt-punct{color:var(--j-punct)}
+
+    /* diff colors */
+    .jd-add{color:var(--pri);font-weight:500}
+    .jd-rem{color:var(--red);font-weight:500;text-decoration:line-through;text-decoration-color:rgba(var(--red-rgb),.4)}
+    .jd-chg-old{color:var(--red);text-decoration:line-through;text-decoration-color:rgba(var(--red-rgb),.4)}
+    .jd-chg-new{color:var(--pri)}
+    .jd-arrow{color:var(--t2)}
+    .jd-line-add{background:rgba(var(--pri-rgb),.04);border-left:2px solid var(--pri);padding-left:14px;margin-left:-16px}
+    .jd-line-rem{background:rgba(var(--red-rgb),.04);border-left:2px solid var(--red);padding-left:14px;margin-left:-16px}
+    .jd-line-chg{background:rgba(var(--warn-rgb),.04);border-left:2px solid var(--warn);padding-left:14px;margin-left:-16px}
+
+    /* ── STATS ── */
+    .stats-row{
+      display:grid;grid-template-columns:repeat(4,1fr);
+      gap:12px;margin-bottom:14px;
+    }
+    .stat-card{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:11px;padding:16px;text-align:center;
+      position:relative;overflow:hidden;
+      transition:all .2s;
+    }
+    .stat-card::before{
+      content:'';position:absolute;top:0;right:0;
+      width:80px;height:80px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--pri-rgb),0.04) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .stat-card::after{
+      content:'';position:absolute;bottom:0;left:0;right:0;
+      height:2px;background:var(--pri);opacity:.4;
+    }
+    .stat-card:hover{border-color:rgba(255,255,255,.1)}
+    .stat-val{
+      font-size:26px;font-weight:800;
+      font-family:var(--mono);color:var(--pri);
+      line-height:1;margin-bottom:6px;
+      letter-spacing:-.5px;
+    }
+    .stat-lbl{
+      font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
+      font-family:var(--mono);
+    }
+
+    /* ── INFO PANEL ── */
+    .info-panel{
+      background:rgba(var(--acc-rgb),.03);
+      border:1px solid rgba(var(--acc-rgb),.1);
+      border-radius:11px;padding:13px 16px;margin-bottom:14px;
+    }
+    .info-panel-hd{
+      display:flex;align-items:center;gap:8px;margin-bottom:8px;
+    }
+    .info-panel-hd strong{
+      color:var(--acc);font-size:10px;
+      text-transform:uppercase;letter-spacing:1.5px;font-weight:700;
+      font-family:var(--mono);
+    }
+    .info-panel pre{
+      font-family:var(--code);font-size:12px;
+      color:var(--t1);margin-top:4px;line-height:1.7;
+      white-space:pre-wrap;
+    }
+
+    /* ── BREAKDOWN CARD ── */
+    .bk-card{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:11px;padding:16px;margin-top:12px;
+    }
+    .bk-title{
+      font-family:var(--mono);font-size:10px;color:var(--acc);
+      text-transform:uppercase;letter-spacing:1.5px;font-weight:600;
+      margin-bottom:12px;display:flex;align-items:center;gap:8px;
+    }
+    .bk-title::before{
+      content:'';display:block;width:14px;height:1px;background:var(--acc);
+    }
+    .bk-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);
+      font-size:13px;
+    }
     .bk-item:last-child{border-bottom:none}
-    .bk-key{color:var(--pri);font-family:var(--mono)}
-    .bk-cnt{color:var(--t2);font-size:12px}
+    .bk-key{
+      color:var(--pri);font-family:var(--code);font-weight:500;
+      display:flex;align-items:center;gap:8px;
+    }
+    .bk-cnt{
+      color:var(--t2);font-size:11px;font-family:var(--mono);
+      padding:3px 8px;border-radius:5px;
+      background:rgba(255,255,255,.03);
+    }
 
-    /* FAQ — unified Datapad style */
-    .faq-section{padding:56px 28px 64px;border-top:1px solid var(--brd)}
-    .faq-top-label{font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-    .faq-top-label::before{content:'';display:block;width:20px;height:1px;background:var(--t2)}
-    .faq-hd{font-size:clamp(22px,3vw,34px);font-weight:800;letter-spacing:-1px;margin-bottom:6px}
-    .faq-sub{font-size:13px;color:var(--t2);margin-bottom:32px}
-    .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .faq-item{background:var(--bg1);border:1px solid var(--brd);border-radius:13px;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:pointer}
-    .faq-item:hover{border-color:rgba(var(--pri-rgb),.15)}
-    .faq-item.open{border-color:rgba(var(--pri-rgb),.28);box-shadow:0 8px 32px rgba(0,0,0,.4)}
-    .faq-q{width:100%;padding:16px 18px;background:none;border:none;display:flex;align-items:center;gap:12px;cursor:pointer;color:var(--t0);font-size:12px;font-weight:600;font-family:var(--font);text-align:left;transition:background .15s}
-    .faq-q:hover{background:rgba(255,255,255,.02)}
-    .faq-item.open .faq-q{color:var(--pri)}
-    .faq-q-text{flex:1;line-height:1.45}
-    .faq-chev{width:22px;height:22px;border-radius:50%;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s var(--ease);color:var(--t2)}
-    .faq-item.open .faq-chev{transform:rotate(180deg);border-color:rgba(var(--pri-rgb),.35);color:var(--pri);background:rgba(var(--pri-rgb),.06)}
-    .faq-a{max-height:0;overflow:hidden;opacity:0;transition:max-height .38s var(--ease),opacity .22s}
-    .faq-item.open .faq-a{max-height:300px;opacity:1}
-    .faq-ai{padding:0 18px 16px;border-top:1px solid rgba(255,255,255,.04);padding-top:12px;font-size:12px;color:var(--t2);line-height:1.75}
+    .log-line{
+      padding:8px 12px;margin-bottom:4px;
+      border-radius:6px;font-family:var(--code);
+      font-size:12px;color:var(--t1);
+      background:rgba(255,255,255,.015);
+      border-left:2px solid var(--red);
+      display:flex;gap:10px;align-items:flex-start;
+    }
+    .log-line-num{
+      color:var(--t2);font-weight:500;
+      flex-shrink:0;min-width:20px;font-size:10px;padding-top:1px;
+    }
 
-    @media(max-width:1024px){.app-body{grid-template-columns:180px 1fr}}
-    @media(max-width:860px){
+    /* ── DIFF SUMMARY ── */
+    .diff-summary{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+      margin-bottom:14px;
+    }
+    .diff-stat{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;padding:11px 14px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;
+    }
+    .diff-stat-l{
+      font-family:var(--mono);font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.2px;font-weight:600;
+    }
+    .diff-stat-v{
+      font-size:18px;font-weight:800;font-family:var(--mono);
+      letter-spacing:-.3px;
+    }
+
+    /* ── EMPTY STATES ── */
+    .empty-state{
+      text-align:center;padding:60px 20px;
+      background:var(--bg2);border:1px dashed var(--brd);
+      border-radius:11px;
+    }
+    .empty-state-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+    .empty-state-text{font-size:13px;color:var(--t2);font-family:var(--mono)}
+
+    /* ── FAQ (matches landing page) ── */
+    .faq-section{
+      padding:80px 32px;
+      border-top:1px solid var(--brd);
+      max-width:1600px;margin:0 auto;
+    }
+    .faq-top{
+      display:flex;align-items:flex-end;justify-content:space-between;
+      gap:24px;margin-bottom:36px;flex-wrap:wrap;
+    }
+    .section-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+    }
+    .section-tag::before{
+      content:'';display:block;width:24px;height:1px;background:var(--t2);
+    }
+    .section-title{
+      font-family:var(--font);
+      font-size:clamp(26px,3.5vw,40px);
+      font-weight:800;letter-spacing:-1.2px;
+      margin-bottom:10px;line-height:1.1;
+    }
+    .section-desc{
+      font-size:14px;color:var(--t2);
+      max-width:480px;line-height:1.7;
+    }
+
+    .faq-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    }
+    .faq-card{
+      border:1px solid var(--brd);border-radius:14px;
+      background:var(--bg1);overflow:hidden;cursor:pointer;
+      opacity:0;transform:translateY(16px);
+      transition:opacity .6s var(--ease),transform .6s var(--ease),
+                 border-color .25s ease,background .25s ease,box-shadow .25s ease;
+    }
+    .faq-card.revealed{opacity:1;transform:translateY(0)}
+    .faq-card:not(.open):hover{
+      border-color:rgba(255,255,255,.11);
+      background:rgba(255,255,255,.025);
+      transform:translateY(-2px);
+    }
+    .faq-card.open{
+      border-color:rgba(var(--pri-rgb),.22);
+      background:rgba(var(--pri-rgb),.02);
+      box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(var(--pri-rgb),.06);
+      transform:translateY(-2px);
+    }
+    .faq-card-q{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 20px;gap:14px;user-select:none;
+    }
+    .faq-q-left{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+    .faq-idx{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      flex-shrink:0;letter-spacing:1px;
+      transition:color .25s ease;
+    }
+    .faq-card.open .faq-idx{color:var(--pri)}
+    .faq-q-text{
+      font-size:13px;font-weight:600;color:var(--t1);
+      line-height:1.45;flex:1;min-width:0;
+      transition:color .2s ease;
+    }
+    .faq-card:hover .faq-q-text,.faq-card.open .faq-q-text{color:var(--t0)}
+    .faq-toggle{
+      flex-shrink:0;width:24px;height:24px;border-radius:50%;
+      border:1px solid var(--brd);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--t2);transition:all .3s var(--ease);
+    }
+    .faq-card.open .faq-toggle{
+      border-color:rgba(var(--pri-rgb),.35);
+      background:rgba(var(--pri-rgb),.07);
+      color:var(--pri);transform:rotate(180deg);
+    }
+    .faq-body{
+      max-height:0;overflow:hidden;
+      transition:max-height .4s var(--ease);
+    }
+    .faq-card.open .faq-body{max-height:280px}
+    .faq-body-inner{
+      padding:14px 20px 18px;
+      border-top:1px solid rgba(255,255,255,.04);
+    }
+    .faq-answer{
+      font-size:12.5px;color:var(--t2);line-height:1.8;
+      margin-bottom:12px;
+    }
+    .faq-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .faq-chip{
+      padding:3px 9px;border:1px solid rgba(255,255,255,.05);
+      border-radius:100px;
+      font-family:var(--mono);font-size:9px;
+      color:rgba(255,255,255,.22);letter-spacing:.5px;
+      transition:all .25s ease;
+    }
+    .faq-card.open .faq-chip{
+      border-color:rgba(var(--pri-rgb),.12);
+      color:rgba(var(--pri-rgb),.5);
+    }
+
+    /* ── FOOTER ── */
+    .app-footer{
+      border-top:1px solid var(--brd);
+      padding:32px;
+      background:rgba(255,255,255,.005);
+    }
+    .footer-inner{
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;flex-wrap:wrap;
+    }
+    .footer-copy{font-size:12px;color:var(--t2)}
+    .footer-copy a{color:var(--pri);text-decoration:none;font-weight:600}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{
+      font-size:12px;color:var(--t2);text-decoration:none;
+      transition:color .2s;
+    }
+    .footer-links a:hover{color:var(--pri)}
+
+    /* ── Toast ── */
+    .toast{
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+      padding:11px 18px;background:var(--bg2);
+      border:1px solid rgba(var(--pri-rgb),.3);
+      border-radius:10px;
+      box-shadow:0 12px 40px rgba(0,0,0,.6);
+      font-size:12.5px;font-weight:600;color:var(--pri);
+      display:flex;align-items:center;gap:9px;
+      opacity:0;pointer-events:none;
+      transition:all .3s var(--ease);z-index:1001;
+    }
+    .toast.show{
+      opacity:1;transform:translateX(-50%) translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media(max-width:1100px){.app-body{grid-template-columns:200px 1fr}}
+    @media(max-width:900px){
       .app-body{grid-template-columns:1fr}
       .sidebar{display:none}
       .mob-tabs{display:flex}
       .editor-grid{grid-template-columns:1fr}
       .stats-row{grid-template-columns:1fr 1fr}
+      .diff-summary{grid-template-columns:1fr 1fr}
       .faq-grid{grid-template-columns:1fr}
-      .main-panel{padding:16px}
+      .main-panel{padding:18px}
+      .hero-strip{padding:20px}
+      .faq-section{padding:50px 20px}
+      .app-header{padding:0 18px}
     }
     @media(max-width:600px){
-      .dp-header{padding:0 14px}
-      textarea{min-height:220px;font-size:12px}
-      .faq-section{padding:36px 16px 48px}
+      .hdr-status,.hdr-sep,.hdr-tool-name{display:none}
+      .ta-plain,.json-editor-input,.json-editor-display,.json-output-display{
+        min-height:240px;font-size:12px;
+      }
+      .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER — unified -->
-<header class="dp-header" role="banner">
-  <div class="dp-hdr-l">
-    <a href="/" class="dp-logo" aria-label="Datapad home">
-      <img src="/logo.png" alt="Datapad"/>
-      <span class="dp-logo-name">Datapad</span>
-    </a>
-    <span class="dp-sep" aria-hidden="true">/</span>
-    <span class="dp-tool-name">JSON Studio</span>
-    <span class="dp-badge-beta">Beta</span>
-  </div>
-  <div class="dp-hdr-r">
-    <div class="dp-dropdown">
-      <button class="dp-hbtn">Other Tools <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="dp-dd">
-        <a href="/ab-test-calculator" class="dp-dd-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>A/B Test Calculator</a>
-        <a href="/pre-post-analyzer" class="dp-dd-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Pre/Post Analyzer</a>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- HEADER -->
+<header class="app-header" role="banner">
+  <div class="hdr-inner">
+    <div class="hdr-left">
+      <a href="/" class="hdr-logo" aria-label="Datapad home">
+        <img src="/logo.png" alt="Datapad"/>
+        <span class="hdr-logo-name">Datapad</span>
+      </a>
+      <span class="hdr-sep" aria-hidden="true">/</span>
+      <span class="hdr-tool-name">JSON Studio</span>
+      <span class="hdr-badge">Beta</span>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-status" role="status">
+        <span class="status-dot"></span>
+        <span>Online</span>
+      </div>
+      <div class="dropdown">
+        <button class="hbtn hbtn-ghost" aria-haspopup="true">
+          Other Tools
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dd-menu" role="menu">
+          <a href="/ab-test-calculator" class="dd-item" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            A/B Test Calculator
+          </a>
+          <div class="dd-div"></div>
+          <a href="/pre-post-analyzer" class="dd-item" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+            Pre/Post Analyzer
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </header>
 
+<!-- HERO STRIP -->
+<section class="hero-strip">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="status-dot"></span>
+        Developer Toolkit
+      </div>
+      <h1 class="hero-title">
+        Format. Validate. <span class="accent">Transform.</span>
+      </h1>
+      <p class="hero-desc">
+        A complete JSON workbench — formatter with syntax highlighting, auto-fix, diff, API cleaner, log analyzer, and request converter. Every tool runs locally in your browser.
+      </p>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Syntax Highlighting
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Auto-Fix
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Smart Diff
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Zero Telemetry
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOBILE TABS -->
 <div class="mob-tabs" role="tablist">
   <button class="mob-tab active" onclick="sw('json',this)">Format</button>
   <button class="mob-tab" onclick="sw('api',this)">API Cleaner</button>
@@ -226,92 +940,281 @@
 </div>
 
 <div class="app-body">
+  <!-- SIDEBAR -->
   <nav class="sidebar" aria-label="Tools">
     <div class="sb-label">Tools</div>
-    <button class="nav-btn active" onclick="sw('json',this)"><span class="nb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><span class="nb-text">Format & Minify<small>Beautify, minify, fix</small></span></button>
-    <button class="nav-btn" onclick="sw('api',this)"><span class="nb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="nb-text">API Cleaner<small>Remove nulls, flatten</small></span></button>
-    <button class="nav-btn" onclick="sw('diff',this)"><span class="nb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span><span class="nb-text">JSON Diff<small>Compare two objects</small></span></button>
-    <button class="nav-btn" onclick="sw('logs',this)"><span class="nb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="nb-text">Log Analyzer<small>Error grouping, stats</small></span></button>
-    <button class="nav-btn" onclick="sw('convert',this)"><span class="nb-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></span><span class="nb-text">Request Converter<small>cURL, Fetch, Axios</small></span></button>
+
+    <button class="nav-btn active" onclick="sw('json',this)">
+      <span class="nb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </span>
+      <span class="nb-text">Format & Minify<small>Beautify, fix, validate</small></span>
+    </button>
+
+    <button class="nav-btn" onclick="sw('api',this)">
+      <span class="nb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </span>
+      <span class="nb-text">API Cleaner<small>Remove nulls, flatten</small></span>
+    </button>
+
+    <button class="nav-btn" onclick="sw('diff',this)">
+      <span class="nb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14 14 0 010 20"/><path d="M2 12h20"/></svg>
+      </span>
+      <span class="nb-text">JSON Diff<small>Compare two objects</small></span>
+    </button>
+
+    <button class="nav-btn" onclick="sw('logs',this)">
+      <span class="nb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </span>
+      <span class="nb-text">Log Analyzer<small>Group errors, stats</small></span>
+    </button>
+
+    <button class="nav-btn" onclick="sw('convert',this)">
+      <span class="nb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+      </span>
+      <span class="nb-text">Request Converter<small>cURL, Fetch, Axios</small></span>
+    </button>
+
     <div class="sb-div"></div>
+
     <div class="trust-chips">
-      <div class="trust-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>No data leaves browser</div>
-      <div class="trust-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Free, no sign-up</div>
-      <div class="trust-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Works offline</div>
+      <div class="trust-chip">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        No data leaves browser
+      </div>
+      <div class="trust-chip">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Free, no sign-up
+      </div>
+      <div class="trust-chip">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
+        Works offline
+      </div>
     </div>
   </nav>
 
+  <!-- MAIN -->
   <main class="main-panel">
 
-    <!-- FORMAT -->
+    <!-- ════════ FORMAT ════════ -->
     <section class="tool-section active" id="tool-json">
-      <div class="sec-hd"><h2>Format &amp; Minify JSON</h2><p>Beautify, minify, validate, and auto-fix broken JSON with intelligent error detection.</p></div>
+      <div class="sec-hd">
+        <div class="sec-hd-left">
+          <div class="sec-hd-tag">01 / Format</div>
+          <h2>Format &amp; Minify JSON</h2>
+          <p>Beautify, minify, validate, and auto-fix broken JSON with intelligent error detection and live syntax highlighting.</p>
+        </div>
+        <div class="sec-hd-right" id="json-stats"></div>
+      </div>
       <div class="alert-wrap" id="json-alert"></div>
       <div class="toolbar">
-        <button class="btn b-pri" onclick="fmtJSON()">Format</button>
-        <button class="btn b-sec" onclick="minJSON()">Minify</button>
-        <button class="btn b-sec" onclick="fixJSON()">Auto-Fix</button>
+        <button class="btn b-pri" onclick="fmtJSON()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10H3M21 6H3M21 14H3M21 18H3"/></svg>
+          Format
+        </button>
+        <button class="btn b-sec" onclick="minJSON()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          Minify
+        </button>
+        <button class="btn b-sec" onclick="fixJSON()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          Auto-Fix
+        </button>
+        <button class="btn b-sec" onclick="loadSample('json')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="14 2 14 8 20 8"/><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Sample
+        </button>
         <div class="tb-sep"></div>
-        <button class="btn b-copy" onclick="cp('json-out',this)">Copy Output</button>
+        <button class="btn b-copy" onclick="cpJson('json-out',this)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Output
+        </button>
+        <button class="btn b-sec" onclick="dlJson('json-out')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
         <button class="btn b-del tb-push" onclick="clr('json')">Clear</button>
       </div>
       <div class="editor-grid">
         <div class="editor-col">
           <div class="ed-label"><span class="ed-dot"></span>Input</div>
-          <div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">JSON</span><button class="ed-top-btn" onclick="cf('json-in')">clear</button></div><textarea id="json-in" placeholder='{"paste": "your JSON here"}'></textarea></div>
+          <div class="ed-wrap">
+            <div class="ed-top">
+              <span class="ed-top-lbl">JSON INPUT</span>
+              <div class="ed-top-actions">
+                <button class="ed-top-btn" onclick="cf('json-in')">clear</button>
+              </div>
+            </div>
+            <div class="json-editor" id="json-in-wrap">
+              <div class="ln-gutter" id="json-in-gutter">1</div>
+              <div class="json-editor-display" id="json-in-display"></div>
+              <textarea class="json-editor-input" id="json-in" spellcheck="false" placeholder='{"paste": "your JSON here", "and": ["see", "magic"]}'></textarea>
+            </div>
+          </div>
         </div>
         <div class="editor-col">
-          <div class="ed-label"><span class="ed-dot" style="background:var(--acc)"></span>Output</div>
-          <div class="ed-wrap ro"><div class="ed-top"><span class="ed-top-lbl">FORMATTED</span><button class="ed-top-btn" onclick="cp('json-out',this)">copy</button></div><textarea id="json-out" class="ro-ta" readonly placeholder="// Output will appear here"></textarea></div>
+          <div class="ed-label"><span class="ed-dot b"></span>Output</div>
+          <div class="ed-wrap ro">
+            <div class="ed-top">
+              <span class="ed-top-lbl">FORMATTED OUTPUT</span>
+              <div class="ed-top-actions">
+                <button class="ed-top-btn copy" onclick="cpJson('json-out',this)">copy</button>
+              </div>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="json-out-gutter"></div>
+              <div class="json-output-display" id="json-out-display"><div class="json-output-empty">// Formatted output will appear here</div></div>
+              <textarea id="json-out" style="display:none"></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- API CLEANER -->
+    <!-- ════════ API CLEANER ════════ -->
     <section class="tool-section" id="tool-api">
-      <div class="sec-hd"><h2>API Response Cleaner</h2><p>Remove null values, flatten nested objects, and sanitize messy API responses instantly.</p></div>
+      <div class="sec-hd">
+        <div class="sec-hd-left">
+          <div class="sec-hd-tag">02 / Cleaner</div>
+          <h2>API Response Cleaner</h2>
+          <p>Remove null values, flatten nested objects, and sanitize messy API responses instantly.</p>
+        </div>
+        <div class="sec-hd-right" id="api-stats"></div>
+      </div>
       <div class="alert-wrap" id="api-alert"></div>
       <div class="toolbar">
         <button class="btn b-pri" onclick="rmNull()">Remove Nulls</button>
         <button class="btn b-sec" onclick="flatJ()">Flatten Object</button>
+        <button class="btn b-sec" onclick="rmEmpty()">Remove Empty</button>
+        <button class="btn b-sec" onclick="loadSample('api')">Sample</button>
         <div class="tb-sep"></div>
-        <button class="btn b-copy" onclick="cp('api-out',this)">Copy Output</button>
+        <button class="btn b-copy" onclick="cpJson('api-out',this)">Copy Output</button>
         <button class="btn b-del tb-push" onclick="clr('api')">Clear</button>
       </div>
       <div class="editor-grid">
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot"></span>Input</div><div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">API RESPONSE</span><button class="ed-top-btn" onclick="cf('api-in')">clear</button></div><textarea id="api-in" placeholder='{"user": {"name": "John", "email": null, "age": null}}'></textarea></div></div>
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot" style="background:var(--acc)"></span>Output</div><div class="ed-wrap ro"><div class="ed-top"><span class="ed-top-lbl">CLEANED</span><button class="ed-top-btn" onclick="cp('api-out',this)">copy</button></div><textarea id="api-out" class="ro-ta" readonly placeholder="// Cleaned output will appear here"></textarea></div></div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot"></span>API Response</div>
+          <div class="ed-wrap">
+            <div class="ed-top">
+              <span class="ed-top-lbl">RAW RESPONSE</span>
+              <button class="ed-top-btn" onclick="cf('api-in')">clear</button>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="api-in-gutter">1</div>
+              <div class="json-editor-display" id="api-in-display"></div>
+              <textarea class="json-editor-input" id="api-in" spellcheck="false" placeholder='{"user": {"name": "John", "email": null, "age": null}}'></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot b"></span>Cleaned Output</div>
+          <div class="ed-wrap ro">
+            <div class="ed-top">
+              <span class="ed-top-lbl">CLEANED</span>
+              <button class="ed-top-btn copy" onclick="cpJson('api-out',this)">copy</button>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="api-out-gutter"></div>
+              <div class="json-output-display" id="api-out-display"><div class="json-output-empty">// Cleaned output will appear here</div></div>
+              <textarea id="api-out" style="display:none"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- DIFF -->
+    <!-- ════════ DIFF ════════ -->
     <section class="tool-section" id="tool-diff">
-      <div class="sec-hd"><h2>JSON Diff</h2><p>Compare two JSON objects and instantly see what was added, removed, or changed.</p></div>
+      <div class="sec-hd">
+        <div class="sec-hd-left">
+          <div class="sec-hd-tag">03 / Diff</div>
+          <h2>JSON Diff</h2>
+          <p>Compare two JSON objects and instantly see what was added, removed, or changed — with key-by-key precision.</p>
+        </div>
+      </div>
       <div class="alert-wrap" id="diff-alert"></div>
       <div class="toolbar">
         <button class="btn b-pri" onclick="doDiff()">Compare</button>
+        <button class="btn b-sec" onclick="loadSample('diff')">Sample</button>
         <button class="btn b-del tb-push" onclick="clr('diff')">Clear</button>
       </div>
       <div class="editor-grid">
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot"></span>JSON A — Original</div><div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">ORIGINAL</span><button class="ed-top-btn" onclick="cf('diff-a')">clear</button></div><textarea id="diff-a" placeholder='{"name": "John", "age": 30, "city": "NYC"}'></textarea></div></div>
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot" style="background:var(--warn)"></span>JSON B — Modified</div><div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">MODIFIED</span><button class="ed-top-btn" onclick="cf('diff-b')">clear</button></div><textarea id="diff-b" placeholder='{"name": "Jane", "age": 25, "role": "admin"}'></textarea></div></div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot"></span>JSON A — Original</div>
+          <div class="ed-wrap">
+            <div class="ed-top">
+              <span class="ed-top-lbl">ORIGINAL</span>
+              <button class="ed-top-btn" onclick="cf('diff-a')">clear</button>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="diff-a-gutter">1</div>
+              <div class="json-editor-display" id="diff-a-display"></div>
+              <textarea class="json-editor-input" id="diff-a" spellcheck="false" placeholder='{"name": "John", "age": 30, "city": "NYC"}'></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot w"></span>JSON B — Modified</div>
+          <div class="ed-wrap">
+            <div class="ed-top">
+              <span class="ed-top-lbl">MODIFIED</span>
+              <button class="ed-top-btn" onclick="cf('diff-b')">clear</button>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="diff-b-gutter">1</div>
+              <div class="json-editor-display" id="diff-b-display"></div>
+              <textarea class="json-editor-input" id="diff-b" spellcheck="false" placeholder='{"name": "Jane", "age": 25, "role": "admin"}'></textarea>
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="diff-out" style="display:none;margin-top:14px">
-        <div class="ed-label" style="margin-bottom:8px"><span class="ed-dot" style="background:var(--acc)"></span>Differences &nbsp;<span style="font-size:10px;color:var(--pri)">+added</span>&nbsp;<span style="font-size:10px;color:var(--red)">−removed</span>&nbsp;<span style="font-size:10px;color:var(--warn)">~changed</span></div>
-        <div class="ed-wrap ro"><div class="ed-top"><span class="ed-top-lbl">DIFF RESULT</span><button class="ed-top-btn" onclick="cp('diff-res',this)">copy</button></div><textarea id="diff-res" class="ro-ta" readonly style="min-height:180px"></textarea></div>
+      <div id="diff-out" style="display:none;margin-top:16px">
+        <div class="diff-summary" id="diff-summary"></div>
+        <div class="ed-label" style="margin-bottom:9px">
+          <span class="ed-dot b"></span>
+          Differences
+          <span style="font-size:9.5px;color:var(--pri);margin-left:6px;font-family:var(--mono)">+ added</span>
+          <span style="font-size:9.5px;color:var(--red);font-family:var(--mono)">− removed</span>
+          <span style="font-size:9.5px;color:var(--warn);font-family:var(--mono)">~ changed</span>
+        </div>
+        <div class="ed-wrap ro">
+          <div class="ed-top">
+            <span class="ed-top-lbl">DIFF RESULT</span>
+            <button class="ed-top-btn copy" onclick="cpRaw('diff-res-text',this)">copy</button>
+          </div>
+          <div id="diff-res" class="json-output-display" style="padding-left:18px"></div>
+          <textarea id="diff-res-text" style="display:none"></textarea>
+        </div>
       </div>
     </section>
 
-    <!-- LOGS -->
+    <!-- ════════ LOGS ════════ -->
     <section class="tool-section" id="tool-logs">
-      <div class="sec-hd"><h2>Log Analyzer</h2><p>Paste server or application logs to instantly count errors, warnings, and group error types.</p></div>
+      <div class="sec-hd">
+        <div class="sec-hd-left">
+          <div class="sec-hd-tag">04 / Logs</div>
+          <h2>Log Analyzer</h2>
+          <p>Paste server or application logs to instantly count errors, warnings, info messages, and group error types.</p>
+        </div>
+      </div>
       <div class="alert-wrap" id="logs-alert"></div>
       <div class="toolbar">
         <button class="btn b-pri" onclick="doLogs()">Analyze</button>
+        <button class="btn b-sec" onclick="loadSample('logs')">Sample</button>
         <button class="btn b-del tb-push" onclick="clr('logs')">Clear</button>
       </div>
-      <div class="ed-label" style="margin-bottom:8px"><span class="ed-dot"></span>Paste Logs</div>
-      <div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">LOG INPUT</span><button class="ed-top-btn" onclick="cf('logs-in')">clear</button></div><textarea id="logs-in" placeholder="[ERROR] Database connection failed&#10;[WARN]  Slow query detected — 2340ms&#10;[INFO]  Server started on port 3000&#10;[ERROR] NullPointerException in UserService.java:142"></textarea></div>
+      <div class="ed-label" style="margin-bottom:9px"><span class="ed-dot"></span>Log Input</div>
+      <div class="ed-wrap">
+        <div class="ed-top">
+          <span class="ed-top-lbl">PASTE LOGS</span>
+          <button class="ed-top-btn" onclick="cf('logs-in')">clear</button>
+        </div>
+        <textarea class="ta-plain" id="logs-in" spellcheck="false" placeholder="[ERROR] Database connection failed&#10;[WARN]  Slow query detected — 2340ms&#10;[INFO]  Server started on port 3000&#10;[ERROR] NullPointerException in UserService.java:142"></textarea>
+      </div>
       <div id="logs-res" style="display:none;margin-top:18px">
         <div class="stats-row" id="logs-stats"></div>
         <div id="logs-bk"></div>
@@ -319,83 +1222,811 @@
       </div>
     </section>
 
-    <!-- CONVERTER -->
+    <!-- ════════ CONVERTER ════════ -->
     <section class="tool-section" id="tool-convert">
-      <div class="sec-hd"><h2>Request Converter</h2><p>Convert API requests between cURL, JavaScript Fetch, and Axios.</p></div>
-      <div class="info-panel"><strong>Input Format</strong><pre>{"url":"https://api.example.com/users","method":"POST","headers":{"Content-Type":"application/json"},"body":{"name":"John"}}</pre></div>
+      <div class="sec-hd">
+        <div class="sec-hd-left">
+          <div class="sec-hd-tag">05 / Convert</div>
+          <h2>Request Converter</h2>
+          <p>Convert API requests between cURL, JavaScript Fetch, and Axios with full header and body support.</p>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-hd"><strong>Input Format</strong></div>
+        <pre>{"url": "https://api.example.com/users", "method": "POST", "headers": {"Content-Type": "application/json"}, "body": {"name": "John"}}</pre>
+      </div>
       <div class="alert-wrap" id="conv-alert"></div>
       <div class="toolbar">
         <button class="btn b-pri" onclick="conv('curl')">→ cURL</button>
         <button class="btn b-sec" onclick="conv('fetch')">→ Fetch</button>
         <button class="btn b-sec" onclick="conv('axios')">→ Axios</button>
+        <button class="btn b-sec" onclick="loadSample('convert')">Sample</button>
         <div class="tb-sep"></div>
-        <button class="btn b-copy" onclick="cp('conv-out',this)">Copy Output</button>
+        <button class="btn b-copy" onclick="cpRaw('conv-out',this)">Copy Output</button>
         <button class="btn b-del tb-push" onclick="clr('convert')">Clear</button>
       </div>
       <div class="editor-grid">
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot"></span>Input (JSON)</div><div class="ed-wrap"><div class="ed-top"><span class="ed-top-lbl">REQUEST JSON</span><button class="ed-top-btn" onclick="cf('conv-in')">clear</button></div><textarea id="conv-in" placeholder='{"url":"https://api.example.com","method":"POST"}'></textarea></div></div>
-        <div class="editor-col"><div class="ed-label"><span class="ed-dot" style="background:var(--acc)"></span>Output</div><div class="ed-wrap ro"><div class="ed-top"><span class="ed-top-lbl">CONVERTED CODE</span><button class="ed-top-btn" onclick="cp('conv-out',this)">copy</button></div><textarea id="conv-out" class="ro-ta" readonly placeholder="// Converted code will appear here"></textarea></div></div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot"></span>Request JSON</div>
+          <div class="ed-wrap">
+            <div class="ed-top">
+              <span class="ed-top-lbl">INPUT</span>
+              <button class="ed-top-btn" onclick="cf('conv-in')">clear</button>
+            </div>
+            <div class="json-editor">
+              <div class="ln-gutter" id="conv-in-gutter">1</div>
+              <div class="json-editor-display" id="conv-in-display"></div>
+              <textarea class="json-editor-input" id="conv-in" spellcheck="false" placeholder='{"url":"https://api.example.com","method":"POST"}'></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="editor-col">
+          <div class="ed-label"><span class="ed-dot b"></span>Generated Code</div>
+          <div class="ed-wrap ro">
+            <div class="ed-top">
+              <span class="ed-top-lbl">OUTPUT CODE</span>
+              <button class="ed-top-btn copy" onclick="cpRaw('conv-out',this)">copy</button>
+            </div>
+            <textarea class="ta-plain" id="conv-out" readonly placeholder="// Converted code will appear here" style="color:var(--t1)"></textarea>
+          </div>
+        </div>
       </div>
     </section>
 
   </main>
 </div>
 
-<!-- FAQ — unified Datapad style -->
-<section class="faq-section" id="faq" aria-labelledby="faq-hd">
-  <div class="faq-top-label">JSON Studio / FAQ</div>
-  <h2 class="faq-hd" id="faq-hd">Frequently Asked Questions</h2>
-  <p class="faq-sub">Everything you need to know about JSON Studio.</p>
-  <div class="faq-grid">
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">Is JSON Studio free?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Yes. Completely free, no sign-up, no paywall, no premium tier. Every feature is available to everyone, forever.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">Does it store my data?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">No. All processing runs entirely in your browser. Your JSON never leaves your device — zero server calls for any tool input.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">How do I format JSON online?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Paste your JSON into the Format tool and click Format. JSON Studio beautifies it with proper indentation instantly, even for deeply nested structures.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">Can it fix broken JSON?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Yes. Auto-Fix repairs trailing commas, single quotes, and unquoted keys. Always review auto-fixed output before using in production.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">How do I compare two JSON objects?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Use JSON Diff. Paste both objects in A and B panels, then click Compare. Added keys are marked +, removed −, changed values ~.</div></div></div>
-    <div class="faq-item"><button class="faq-q" onclick="tFaq(this)" aria-expanded="false"><span class="faq-q-text">What does the API Cleaner do?</span><span class="faq-chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="faq-a"><div class="faq-ai">Removes all null and undefined values from API responses recursively, and can flatten deeply nested objects into dot-notation keys.</div></div></div>
+<!-- FAQ -->
+<section class="faq-section" aria-labelledby="faq-hd">
+  <div class="faq-top">
+    <div>
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title" id="faq-hd">Common questions</h2>
+      <p class="section-desc">Everything you need to know about JSON Studio and how each tool works under the hood.</p>
+    </div>
+  </div>
+
+  <div class="faq-grid" id="faqGrid">
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">01</span>
+          <span class="faq-q-text">Is JSON Studio free?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Yes. Completely free, no sign-up, no paywall, no premium tier. Every feature is available to everyone, forever — including formatting, diff, conversion, and analysis.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">free-forever</span>
+            <span class="faq-chip">no-signup</span>
+            <span class="faq-chip">no-limits</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">02</span>
+          <span class="faq-q-text">Does it store or transmit my data?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">No. All processing runs entirely in your browser via JavaScript. Your JSON, logs, or API responses never leave your device — zero server calls for any tool input. Safe for sensitive payloads.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">client-side</span>
+            <span class="faq-chip">privacy-first</span>
+            <span class="faq-chip">offline-capable</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">03</span>
+          <span class="faq-q-text">How do I format JSON online?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Paste JSON into the Format tool and click Format. JSON Studio beautifies with proper indentation instantly, even for deeply nested structures. Live syntax highlighting shows keys, strings, numbers, booleans, and nulls in distinct colors.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">format</span>
+            <span class="faq-chip">beautify</span>
+            <span class="faq-chip">highlighting</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">04</span>
+          <span class="faq-q-text">Can it fix broken JSON?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Yes. Auto-Fix repairs trailing commas, single quotes, and unquoted keys — the three most common JSON syntax mistakes. Always review auto-fixed output before using it in production.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">auto-fix</span>
+            <span class="faq-chip">trailing-commas</span>
+            <span class="faq-chip">unquoted-keys</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">05</span>
+          <span class="faq-q-text">How do I compare two JSON objects?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Use JSON Diff. Paste both objects in panels A and B, then click Compare. Added keys are marked with +, removed with −, and changed values with ~. The summary shows total changes by category.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">diff</span>
+            <span class="faq-chip">compare</span>
+            <span class="faq-chip">key-by-key</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">06</span>
+          <span class="faq-q-text">What does the API Cleaner do?</span>
+        </div>
+        <div class="faq-toggle">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-inner">
+          <p class="faq-answer">Removes all null and undefined values from API responses recursively, and can flatten deeply nested objects into dot-notation keys (e.g. user.address.city). Perfect for prepping responses before display or storage.</p>
+          <div class="faq-chips">
+            <span class="faq-chip">cleanup</span>
+            <span class="faq-chip">flatten</span>
+            <span class="faq-chip">dot-notation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- FOOTER — unified -->
-<footer role="contentinfo" style="border-top:1px solid var(--brd);padding:22px 28px">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-    <p style="font-size:11px;color:var(--t2)">© 2026 <a href="/" style="color:var(--pri);text-decoration:none;font-weight:600">Datapad</a>. All rights reserved.</p>
-    <nav style="display:flex;gap:20px" aria-label="Footer navigation">
-      <a href="/" style="font-size:11px;color:var(--t2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--pri)'" onmouseout="this.style.color='var(--t2)'">Home</a>
-      <a href="/ab-test-calculator" style="font-size:11px;color:var(--t2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--pri)'" onmouseout="this.style.color='var(--t2)'">A/B Calculator</a>
-      <a href="/pre-post-analyzer" style="font-size:11px;color:var(--t2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--pri)'" onmouseout="this.style.color='var(--t2)'">Pre/Post Analyzer</a>
-      <a href="mailto:hello.datapad@gmail.com" style="font-size:11px;color:var(--t2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--pri)'" onmouseout="this.style.color='var(--t2)'">Contact</a>
+<!-- FOOTER -->
+<footer class="app-footer" role="contentinfo">
+  <div class="footer-inner">
+    <span class="footer-copy">© 2026 <a href="/">Datapad</a>. All rights reserved.</span>
+    <nav class="footer-links">
+      <a href="/">Home</a>
+      <a href="/ab-test-calculator">A/B Calculator</a>
+      <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
+      <a href="mailto:hello.datapad@gmail.com">Contact</a>
     </nav>
   </div>
 </footer>
 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toast-msg">Copied to clipboard</span>
+</div>
+
 <script>
-function sw(id,btn){
-  document.querySelectorAll('.tool-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn,.mob-tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tool-'+id).classList.add('active');
-  document.querySelectorAll('[onclick*="sw(\''+id+'\'"]').forEach(b=>b.classList.add('active'));
+/* ═══════════ CURSOR GLOW ═══════════ */
+(function(){
+  var glow=document.getElementById('cursorGlow');
+  if(!glow)return;
+  var mx=0,my=0,gx=0,gy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  (function anim(){
+    gx+=(mx-gx)*0.1;gy+=(my-gy)*0.1;
+    glow.style.transform='translate('+(gx-200)+'px,'+(gy-200)+'px)';
+    requestAnimationFrame(anim);
+  })();
+})();
+
+/* ═══════════ TOAST ═══════════ */
+function toast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg||'Copied to clipboard';
+  t.classList.add('show');
+  clearTimeout(window._toastTo);
+  window._toastTo=setTimeout(function(){t.classList.remove('show')},2200);
 }
-function tFaq(btn){const item=btn.closest('.faq-item'),open=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(el=>{el.classList.remove('open')});if(!open)item.classList.add('open')}
-function cf(id){const e=document.getElementById(id);if(e)e.value=''}
-function cp(id,btn){const v=document.getElementById(id).value;if(!v||v.startsWith('//'))return;navigator.clipboard.writeText(v).then(()=>{if(!btn)return;const o=btn.textContent;btn.textContent='✓ copied';btn.style.color='var(--pri)';setTimeout(()=>{btn.textContent=o;btn.style.color=''},2000)})}
-function al(id,msg,type){const el=document.getElementById(id);if(!msg){el.innerHTML='';return}const m={success:'a-ok',info:'a-info',warn:'a-warn',error:'a-err'};el.innerHTML=`<div class="alert ${m[type]||'a-err'}"><pre>${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre></div>`}
-function clr(t){const m={json:['json-in','json-out','json-alert'],api:['api-in','api-out','api-alert'],diff:['diff-a','diff-b','diff-res','diff-alert'],logs:['logs-in','logs-alert'],convert:['conv-in','conv-out','conv-alert']};m[t].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.tagName==='TEXTAREA'?e.value='':e.innerHTML=''});if(t==='diff')document.getElementById('diff-out').style.display='none';if(t==='logs'){document.getElementById('logs-res').style.display='none';['logs-stats','logs-bk','logs-top'].forEach(i=>document.getElementById(i).innerHTML='')}}
 
-function fmtJSON(){const v=document.getElementById('json-in').value.trim();if(!v){al('json-alert','Please paste some JSON to format.','warn');return}try{document.getElementById('json-out').value=JSON.stringify(JSON.parse(v),null,2);al('json-alert','')}catch(e){al('json-alert','❌ '+e.message,'error')}}
-function minJSON(){const v=document.getElementById('json-in').value.trim();if(!v){al('json-alert','Please paste some JSON to minify.','warn');return}try{document.getElementById('json-out').value=JSON.stringify(JSON.parse(v));al('json-alert','')}catch(e){al('json-alert','❌ '+e.message,'error')}}
-function fixJSON(){const v=document.getElementById('json-in').value.trim();if(!v){al('json-alert','Please paste some JSON to auto-fix.','warn');return}try{let f=v.replace(/,(\s*[}\]])/g,'$1').replace(/'/g,'"').replace(/([{,]\s*)([a-zA-Z0-9_$]+)\s*:/g,'$1"$2":');document.getElementById('json-out').value=JSON.stringify(JSON.parse(f),null,2);al('json-alert','✅ Auto-fixed — please review before using in production.','success')}catch(e){al('json-alert','❌ Could not auto-fix: '+e.message,'error')}}
+/* ═══════════ JSON SYNTAX HIGHLIGHTER ═══════════ */
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
-function deepRmNull(o){if(Array.isArray(o))return o.map(deepRmNull).filter(v=>v!=null);if(o!==null&&typeof o==='object')return Object.fromEntries(Object.entries(o).filter(([,v])=>v!=null).map(([k,v])=>[k,deepRmNull(v)]));return o}
-function flatObj(o,p=''){return Object.keys(o).reduce((a,k)=>{const pre=p?p+'.':'',v=o[k];if(v&&typeof v==='object'&&!Array.isArray(v))Object.assign(a,flatObj(v,pre+k));else a[pre+k]=Array.isArray(v)?JSON.stringify(v):v;return a},{})}
-function rmNull(){const v=document.getElementById('api-in').value.trim();if(!v){al('api-alert','Please paste an API response.','warn');return}try{document.getElementById('api-out').value=JSON.stringify(deepRmNull(JSON.parse(v)),null,2);al('api-alert','')}catch(e){al('api-alert','❌ '+e.message,'error')}}
-function flatJ(){const v=document.getElementById('api-in').value.trim();if(!v){al('api-alert','Please paste an API response.','warn');return}try{document.getElementById('api-out').value=JSON.stringify(flatObj(JSON.parse(v)),null,2);al('api-alert','')}catch(e){al('api-alert','❌ '+e.message,'error')}}
+/**
+ * Tokenize and highlight JSON (or partial/invalid JSON for live editing).
+ * Walks character-by-character, classifying tokens as keys, strings, numbers, etc.
+ * For invalid/partial input, falls back to plain escaped text so the editor never breaks.
+ */
+function highlightJSON(text){
+  if(!text)return '';
+  var out='',i=0,n=text.length;
+  // Detect if a string is followed by `:` (=> it's a key) or just a value
+  function nextNonWs(idx){
+    while(idx<n){
+      var c=text[idx];
+      if(c!==' '&&c!=='\t'&&c!=='\n'&&c!=='\r')return c;
+      idx++;
+    }
+    return '';
+  }
+  while(i<n){
+    var c=text[i];
+    // String
+    if(c==='"'){
+      var start=i,j=i+1,esc=false;
+      while(j<n){
+        var cc=text[j];
+        if(esc){esc=false;j++;continue}
+        if(cc==='\\'){esc=true;j++;continue}
+        if(cc==='"'){j++;break}
+        j++;
+      }
+      var raw=text.substring(start,j);
+      // Determine: key or string value?
+      var after=nextNonWs(j);
+      var cls=after===':'?'jt-key':'jt-string';
+      out+='<span class="'+cls+'">'+escHtml(raw)+'</span>';
+      i=j;continue;
+    }
+    // Number
+    if((c>='0'&&c<='9')||(c==='-'&&i+1<n&&((text[i+1]>='0'&&text[i+1]<='9')||text[i+1]==='.'))){
+      var ns=i;i++;
+      while(i<n&&/[0-9eE+\-.]/.test(text[i]))i++;
+      out+='<span class="jt-number">'+escHtml(text.substring(ns,i))+'</span>';
+      continue;
+    }
+    // Keywords: true / false / null
+    if((c==='t'||c==='f'||c==='n')&&i+3<=n){
+      var rem=text.substring(i,i+5);
+      if(rem.indexOf('true')===0){out+='<span class="jt-bool">true</span>';i+=4;continue}
+      if(rem.indexOf('false')===0){out+='<span class="jt-bool">false</span>';i+=5;continue}
+      if(rem.indexOf('null')===0){out+='<span class="jt-null">null</span>';i+=4;continue}
+    }
+    // Brackets
+    if(c==='{'||c==='}'||c==='['||c===']'){
+      out+='<span class="jt-bracket">'+c+'</span>';i++;continue;
+    }
+    // Punctuation
+    if(c===','||c===':'){
+      out+='<span class="jt-punct">'+c+'</span>';i++;continue;
+    }
+    // Whitespace / other → preserve verbatim (escaped)
+    out+=escHtml(c);i++;
+  }
+  return out;
+}
 
-function doDiff(){const a=document.getElementById('diff-a').value.trim(),b=document.getElementById('diff-b').value.trim();if(!a||!b){al('diff-alert','Please fill both JSON fields.','warn');return}try{const oa=JSON.parse(a),ob=JSON.parse(b),keys=new Set([...Object.keys(oa),...Object.keys(ob)]),lines=[];keys.forEach(k=>{const va=JSON.stringify(oa[k]),vb=JSON.stringify(ob[k]);if(!(k in oa))lines.push('+ "'+k+'": '+vb);else if(!(k in ob))lines.push('- "'+k+'": '+va);else if(va!==vb)lines.push('~ "'+k+'": '+va+'  →  '+vb);else lines.push('  "'+k+'": '+va)});document.getElementById('diff-res').value=lines.join('\n');document.getElementById('diff-out').style.display='block';al('diff-alert','')}catch(e){al('diff-alert','❌ '+e.message,'error')}}
+function updateGutter(gutterEl, text){
+  if(!gutterEl)return;
+  var lines=text?text.split('\n').length:1;
+  var s='';
+  for(var i=1;i<=Math.max(lines,1);i++)s+=i+'\n';
+  gutterEl.textContent=s.trimEnd();
+}
 
-function doLogs(){const v=document.getElementById('logs-in').value.trim();if(!v){al('logs-alert','Please paste some log content.','warn');return}const lines=v.split('\n').filter(l=>l.trim());const errs=lines.filter(l=>/error|exception|fail/i.test(l));const warns=lines.filter(l=>/warn|warning/i.test(l));const infos=lines.filter(l=>/info|success/i.test(l));const grp={};errs.forEach(e=>{const t=e.match(/Error|Exception|Failed/i)?.[0]||'Unknown';grp[t]=(grp[t]||0)+1});document.getElementById('logs-stats').innerHTML=`<div class="stat-card"><div class="stat-val">${lines.length}</div><div class="stat-lbl">Total Lines</div></div><div class="stat-card"><div class="stat-val" style="color:var(--red)">${errs.length}</div><div class="stat-lbl">Errors</div></div><div class="stat-card"><div class="stat-val" style="color:var(--warn)">${warns.length}</div><div class="stat-lbl">Warnings</div></div><div class="stat-card"><div class="stat-val" style="color:var(--acc)">${infos.length}</div><div class="stat-lbl">Info</div></div>`;const bk=document.getElementById('logs-bk');if(Object.keys(grp).length){bk.innerHTML=`<div class="bk-card"><div class="bk-title">Error Breakdown</div>${Object.entries(grp).map(([t,c])=>`<div class="bk-item"><span class="bk-key">${t.replace(/</g,'&lt;')}</span><span class="bk-cnt">${c} occurrence${c>1?'s':''}</span></div>`).join('')}</div>`}const te=document.getElementById('logs-top');if(errs.length){te.innerHTML=`<div class="bk-card" style="margin-top:10px"><div class="bk-title">Top Errors (first 5)</div>${errs.slice(0,5).map((e,i)=>`<div style="padding:7px 0;border-bottom:1px solid var(--brd);font-size:12px;font-family:var(--mono);color:var(--t1)">[${i+1}] ${e.replace(/</g,'&lt;')}</div>`).join('')}</div>`}document.getElementById('logs-res').style.display='block';al('logs-alert','')}
+/* ═══════════ HOOK UP HIGHLIGHTING ON EDITORS ═══════════ */
+function bindHighlightedEditor(inputId, displayId, gutterId){
+  var input=document.getElementById(inputId);
+  var disp=document.getElementById(displayId);
+  var gut=document.getElementById(gutterId);
+  if(!input||!disp)return;
 
-function conv(fmt){const v=document.getElementById('conv-in').value.trim();if(!v){al('conv-alert','Please paste a request JSON.','warn');return}try{const req=JSON.parse(v);if(!req.url){al('conv-alert','❌ Missing "url" field.','error');return}const m=req.method||'GET';let out='';if(fmt==='curl'){out=`curl -X ${m} '${req.url}'`;if(req.headers)Object.entries(req.headers).forEach(([k,val])=>{out+=` \\\n  -H '${k}: ${String(val).replace(/'/g,"'\\''")}' `});if(req.body)out+=` \\\n  -d '${JSON.stringify(req.body).replace(/'/g,"'\\''")}' `}else if(fmt==='fetch'){out=`fetch('${req.url}', {\n  method: '${m}',`;if(req.headers)out+=`\n  headers: ${JSON.stringify(req.headers,null,2)},`;if(req.body)out+=`\n  body: JSON.stringify(${JSON.stringify(req.body,null,2)})`;out+=`\n})\n  .then(r => r.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err))`}else{out=`axios({\n  method: '${m.toLowerCase()}',\n  url: '${req.url}',`;if(req.headers)out+=`\n  headers: ${JSON.stringify(req.headers,null,2)},`;if(req.body)out+=`\n  data: ${JSON.stringify(req.body,null,2)}`;out+=`\n})\n  .then(res => console.log(res.data))\n  .catch(err => console.error(err))`}document.getElementById('conv-out').value=out;al('conv-alert','')}catch(e){al('conv-alert','❌ Invalid JSON: '+e.message,'error')}}
+  function sync(){
+    var v=input.value;
+    disp.innerHTML=v?highlightJSON(v):'';
+    if(gut)updateGutter(gut,v);
+  }
+  function syncScroll(){
+    disp.scrollTop=input.scrollTop;
+    disp.scrollLeft=input.scrollLeft;
+    if(gut)gut.style.top=(16-input.scrollTop)+'px';
+  }
+
+  input.addEventListener('input',sync);
+  input.addEventListener('scroll',syncScroll);
+  input.addEventListener('keydown',function(e){
+    // Tab → 2 spaces
+    if(e.key==='Tab'){
+      e.preventDefault();
+      var s=input.selectionStart,en=input.selectionEnd;
+      input.value=input.value.substring(0,s)+'  '+input.value.substring(en);
+      input.selectionStart=input.selectionEnd=s+2;
+      sync();
+    }
+  });
+  sync();
+}
+
+function setHighlightedOutput(displayId, gutterId, text){
+  var disp=document.getElementById(displayId);
+  var gut=document.getElementById(gutterId);
+  if(!disp)return;
+  if(!text){
+    disp.innerHTML='<div class="json-output-empty">// Output will appear here</div>';
+    if(gut)gut.textContent='';
+    return;
+  }
+  disp.innerHTML=highlightJSON(text);
+  if(gut)updateGutter(gut,text);
+}
+
+/* ═══════════ COPY / DOWNLOAD ═══════════ */
+function cpJson(id, btn){
+  // For highlighted editors we read from the hidden textarea
+  var el=document.getElementById(id);
+  if(!el)return;
+  var v=el.value;
+  if(!v)return;
+  navigator.clipboard.writeText(v).then(function(){
+    if(btn){
+      var orig=btn.innerHTML;
+      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Copied';
+      btn.style.color='var(--pri)';
+      setTimeout(function(){btn.innerHTML=orig;btn.style.color=''},1800);
+    }
+    toast('Copied to clipboard');
+  });
+}
+function cpRaw(id, btn){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var v=el.value;
+  if(!v)return;
+  navigator.clipboard.writeText(v).then(function(){
+    if(btn){
+      var orig=btn.innerHTML;
+      btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Copied';
+      setTimeout(function(){btn.innerHTML=orig},1800);
+    }
+    toast('Copied to clipboard');
+  });
+}
+function dlJson(id){
+  var el=document.getElementById(id);
+  if(!el||!el.value)return;
+  var blob=new Blob([el.value],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='datapad-'+Date.now()+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('File downloaded');
+}
+
+/* ═══════════ CLEAR / SWITCH ═══════════ */
+function cf(id){
+  var e=document.getElementById(id);
+  if(!e)return;
+  e.value='';
+  e.dispatchEvent(new Event('input'));
+}
+function clr(t){
+  var m={
+    json:[['json-in','input'],['json-out','out'],['json-alert','html'],['json-stats','html']],
+    api:[['api-in','input'],['api-out','out'],['api-alert','html'],['api-stats','html']],
+    diff:[['diff-a','input'],['diff-b','input'],['diff-res-text','val'],['diff-alert','html']],
+    logs:[['logs-in','val'],['logs-alert','html']],
+    convert:[['conv-in','input'],['conv-out','val'],['conv-alert','html']]
+  };
+  m[t].forEach(function(spec){
+    var id=spec[0],kind=spec[1];
+    var e=document.getElementById(id);
+    if(!e)return;
+    if(kind==='input'){e.value='';e.dispatchEvent(new Event('input'))}
+    else if(kind==='out'){
+      var pair={'json-out':['json-out-display','json-out-gutter'],'api-out':['api-out-display','api-out-gutter']}[id];
+      e.value='';
+      if(pair)setHighlightedOutput(pair[0],pair[1],'');
+    }
+    else if(kind==='val')e.value='';
+    else if(kind==='html')e.innerHTML='';
+  });
+  if(t==='diff'){
+    document.getElementById('diff-out').style.display='none';
+    document.getElementById('diff-res').innerHTML='';
+    document.getElementById('diff-summary').innerHTML='';
+  }
+  if(t==='logs'){
+    document.getElementById('logs-res').style.display='none';
+    ['logs-stats','logs-bk','logs-top'].forEach(function(i){document.getElementById(i).innerHTML=''});
+  }
+}
+
+function sw(id,btn){
+  document.querySelectorAll('.tool-section').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nav-btn,.mob-tab').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('tool-'+id).classList.add('active');
+  document.querySelectorAll('[onclick*="sw(\''+id+'\'"]').forEach(function(b){b.classList.add('active')});
+}
+
+/* ═══════════ FAQ ═══════════ */
+function faqTog(card){
+  var wasOpen=card.classList.contains('open');
+  document.querySelectorAll('.faq-card.open').forEach(function(c){c.classList.remove('open')});
+  if(!wasOpen)card.classList.add('open');
+}
+(function(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('revealed')});
+  },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.faq-card').forEach(function(el,i){
+    el.style.transitionDelay=(i*0.05)+'s';
+    obs.observe(el);
+  });
+})();
+
+/* ═══════════ ALERTS ═══════════ */
+function al(id,msg,type){
+  var el=document.getElementById(id);
+  if(!msg){el.innerHTML='';return}
+  var classes={success:'a-ok',info:'a-info',warn:'a-warn',error:'a-err'};
+  var icons={
+    success:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+    error:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    warn:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    info:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  el.innerHTML='<div class="alert '+(classes[type]||'a-err')+'"><span class="alert-icon">'+(icons[type]||icons.error)+'</span><pre>'+escHtml(msg)+'</pre></div>';
+}
+
+/* ═══════════ STATS DISPLAY ═══════════ */
+function setStats(id, items){
+  var el=document.getElementById(id);
+  if(!el)return;
+  if(!items||!items.length){el.innerHTML='';return}
+  el.innerHTML=items.map(function(it){
+    return '<div class="sec-stat">'+it.label+': <strong>'+it.value+'</strong></div>';
+  }).join('');
+}
+
+function jsonStats(obj){
+  var keys=0,depth=0,arrays=0,strings=0,numbers=0;
+  function walk(v,d){
+    if(d>depth)depth=d;
+    if(Array.isArray(v)){arrays++;v.forEach(function(it){walk(it,d+1)})}
+    else if(v&&typeof v==='object'){
+      Object.keys(v).forEach(function(k){keys++;walk(v[k],d+1)});
+    }
+    else if(typeof v==='string')strings++;
+    else if(typeof v==='number')numbers++;
+  }
+  walk(obj,0);
+  return {keys:keys,depth:depth,arrays:arrays,strings:strings,numbers:numbers};
+}
+
+/* ═══════════ FORMAT / MINIFY / FIX ═══════════ */
+function fmtJSON(){
+  var input=document.getElementById('json-in');
+  var v=input.value.trim();
+  if(!v){al('json-alert','Please paste some JSON to format.','warn');return}
+  try{
+    var parsed=JSON.parse(v);
+    var out=JSON.stringify(parsed,null,2);
+    document.getElementById('json-out').value=out;
+    setHighlightedOutput('json-out-display','json-out-gutter',out);
+    var s=jsonStats(parsed);
+    setStats('json-stats',[
+      {label:'Keys',value:s.keys},
+      {label:'Depth',value:s.depth},
+      {label:'Size',value:(out.length/1024).toFixed(1)+' KB'}
+    ]);
+    al('json-alert','Valid JSON. Formatted successfully.','success');
+  }catch(e){
+    al('json-alert','Invalid JSON: '+e.message,'error');
+  }
+}
+function minJSON(){
+  var v=document.getElementById('json-in').value.trim();
+  if(!v){al('json-alert','Please paste some JSON to minify.','warn');return}
+  try{
+    var parsed=JSON.parse(v);
+    var out=JSON.stringify(parsed);
+    document.getElementById('json-out').value=out;
+    setHighlightedOutput('json-out-display','json-out-gutter',out);
+    var origSize=v.length,newSize=out.length;
+    var saved=origSize>0?((1-newSize/origSize)*100).toFixed(1):0;
+    setStats('json-stats',[
+      {label:'Original',value:(origSize/1024).toFixed(1)+' KB'},
+      {label:'Minified',value:(newSize/1024).toFixed(1)+' KB'},
+      {label:'Saved',value:saved+'%'}
+    ]);
+    al('json-alert','Minified — saved '+saved+'% size.','success');
+  }catch(e){
+    al('json-alert','Invalid JSON: '+e.message,'error');
+  }
+}
+function fixJSON(){
+  var v=document.getElementById('json-in').value.trim();
+  if(!v){al('json-alert','Please paste some JSON to auto-fix.','warn');return}
+  try{
+    var f=v
+      .replace(/,(\s*[}\]])/g,'$1')
+      .replace(/'/g,'"')
+      .replace(/([{,]\s*)([a-zA-Z0-9_$]+)\s*:/g,'$1"$2":');
+    var parsed=JSON.parse(f);
+    var out=JSON.stringify(parsed,null,2);
+    document.getElementById('json-out').value=out;
+    setHighlightedOutput('json-out-display','json-out-gutter',out);
+    al('json-alert','Auto-fixed successfully — please review before using in production.','success');
+  }catch(e){
+    al('json-alert','Could not auto-fix: '+e.message,'error');
+  }
+}
+
+/* ═══════════ API CLEANER ═══════════ */
+function deepRmNull(o){
+  if(Array.isArray(o))return o.map(deepRmNull).filter(function(v){return v!=null});
+  if(o!==null&&typeof o==='object'){
+    var r={};
+    Object.keys(o).forEach(function(k){
+      if(o[k]!=null)r[k]=deepRmNull(o[k]);
+    });
+    return r;
+  }
+  return o;
+}
+function deepRmEmpty(o){
+  if(Array.isArray(o)){
+    var arr=o.map(deepRmEmpty).filter(function(v){
+      if(v==null)return false;
+      if(typeof v==='string'&&v==='')return false;
+      if(Array.isArray(v)&&v.length===0)return false;
+      if(typeof v==='object'&&Object.keys(v).length===0)return false;
+      return true;
+    });
+    return arr;
+  }
+  if(o!==null&&typeof o==='object'){
+    var r={};
+    Object.keys(o).forEach(function(k){
+      var v=deepRmEmpty(o[k]);
+      if(v==null)return;
+      if(typeof v==='string'&&v==='')return;
+      if(Array.isArray(v)&&v.length===0)return;
+      if(typeof v==='object'&&Object.keys(v).length===0)return;
+      r[k]=v;
+    });
+    return r;
+  }
+  return o;
+}
+function flatObj(o,p){
+  p=p||'';
+  return Object.keys(o).reduce(function(a,k){
+    var pre=p?p+'.':'',v=o[k];
+    if(v&&typeof v==='object'&&!Array.isArray(v))Object.assign(a,flatObj(v,pre+k));
+    else a[pre+k]=Array.isArray(v)?JSON.stringify(v):v;
+    return a;
+  },{});
+}
+function rmNull(){
+  var v=document.getElementById('api-in').value.trim();
+  if(!v){al('api-alert','Please paste an API response.','warn');return}
+  try{
+    var parsed=JSON.parse(v),orig=jsonStats(parsed);
+    var cleaned=deepRmNull(parsed),now=jsonStats(cleaned);
+    var out=JSON.stringify(cleaned,null,2);
+    document.getElementById('api-out').value=out;
+    setHighlightedOutput('api-out-display','api-out-gutter',out);
+    setStats('api-stats',[
+      {label:'Removed',value:(orig.keys-now.keys)+' keys'}
+    ]);
+    al('api-alert','Removed null values.','success');
+  }catch(e){al('api-alert','Invalid JSON: '+e.message,'error')}
+}
+function rmEmpty(){
+  var v=document.getElementById('api-in').value.trim();
+  if(!v){al('api-alert','Please paste an API response.','warn');return}
+  try{
+    var parsed=JSON.parse(v);
+    var cleaned=deepRmEmpty(parsed);
+    var out=JSON.stringify(cleaned,null,2);
+    document.getElementById('api-out').value=out;
+    setHighlightedOutput('api-out-display','api-out-gutter',out);
+    al('api-alert','Removed empty strings, arrays, and objects.','success');
+  }catch(e){al('api-alert','Invalid JSON: '+e.message,'error')}
+}
+function flatJ(){
+  var v=document.getElementById('api-in').value.trim();
+  if(!v){al('api-alert','Please paste an API response.','warn');return}
+  try{
+    var out=JSON.stringify(flatObj(JSON.parse(v)),null,2);
+    document.getElementById('api-out').value=out;
+    setHighlightedOutput('api-out-display','api-out-gutter',out);
+    al('api-alert','Flattened nested object to dot-notation keys.','success');
+  }catch(e){al('api-alert','Invalid JSON: '+e.message,'error')}
+}
+
+/* ═══════════ DIFF ═══════════ */
+function doDiff(){
+  var a=document.getElementById('diff-a').value.trim();
+  var b=document.getElementById('diff-b').value.trim();
+  if(!a||!b){al('diff-alert','Please fill both JSON fields.','warn');return}
+  try{
+    var oa=JSON.parse(a),ob=JSON.parse(b);
+    var keys=Array.from(new Set(Object.keys(oa).concat(Object.keys(ob))));
+    var added=0,removed=0,changed=0,same=0;
+    var html='',plain='';
+    keys.forEach(function(k){
+      var va=JSON.stringify(oa[k]),vb=JSON.stringify(ob[k]);
+      if(!(k in oa)){
+        added++;
+        html+='<div class="jd-line-add"><span class="jd-add">+ "'+escHtml(k)+'": '+highlightJSON(vb)+'</span></div>';
+        plain+='+ "'+k+'": '+vb+'\n';
+      }else if(!(k in ob)){
+        removed++;
+        html+='<div class="jd-line-rem"><span class="jd-rem">− "'+escHtml(k)+'": '+escHtml(va)+'</span></div>';
+        plain+='- "'+k+'": '+va+'\n';
+      }else if(va!==vb){
+        changed++;
+        html+='<div class="jd-line-chg"><span class="jd-chg-old">"'+escHtml(k)+'": '+escHtml(va)+'</span> <span class="jd-arrow">→</span> '+highlightJSON(vb)+'</div>';
+        plain+='~ "'+k+'": '+va+' → '+vb+'\n';
+      }else{
+        same++;
+        html+='<div style="opacity:.4">  '+highlightJSON('"'+k+'": '+va)+'</div>';
+        plain+='  "'+k+'": '+va+'\n';
+      }
+    });
+
+    document.getElementById('diff-summary').innerHTML=
+      '<div class="diff-stat"><span class="diff-stat-l">Added</span><span class="diff-stat-v" style="color:var(--pri)">+'+added+'</span></div>'+
+      '<div class="diff-stat"><span class="diff-stat-l">Removed</span><span class="diff-stat-v" style="color:var(--red)">−'+removed+'</span></div>'+
+      '<div class="diff-stat"><span class="diff-stat-l">Changed</span><span class="diff-stat-v" style="color:var(--warn)">~'+changed+'</span></div>'+
+      '<div class="diff-stat"><span class="diff-stat-l">Unchanged</span><span class="diff-stat-v" style="color:var(--t2)">'+same+'</span></div>';
+
+    document.getElementById('diff-res').innerHTML=html;
+    document.getElementById('diff-res-text').value=plain;
+    document.getElementById('diff-out').style.display='block';
+    al('diff-alert','Diff complete — '+added+' added, '+removed+' removed, '+changed+' changed.','success');
+  }catch(e){al('diff-alert','Invalid JSON: '+e.message,'error')}
+}
+
+/* ═══════════ LOGS ═══════════ */
+function doLogs(){
+  var v=document.getElementById('logs-in').value.trim();
+  if(!v){al('logs-alert','Please paste some log content.','warn');return}
+  var lines=v.split('\n').filter(function(l){return l.trim()});
+  var errs=lines.filter(function(l){return /error|exception|fail/i.test(l)});
+  var warns=lines.filter(function(l){return /warn|warning/i.test(l)});
+  var infos=lines.filter(function(l){return /info|success/i.test(l)});
+  var grp={};
+  errs.forEach(function(e){
+    var t=(e.match(/Error|Exception|Failed/i)||['Unknown'])[0];
+    grp[t]=(grp[t]||0)+1;
+  });
+  document.getElementById('logs-stats').innerHTML=
+    '<div class="stat-card"><div class="stat-val">'+lines.length+'</div><div class="stat-lbl">Total Lines</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--red)">'+errs.length+'</div><div class="stat-lbl">Errors</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--warn)">'+warns.length+'</div><div class="stat-lbl">Warnings</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--acc)">'+infos.length+'</div><div class="stat-lbl">Info</div></div>';
+
+  var bk=document.getElementById('logs-bk');
+  if(Object.keys(grp).length){
+    bk.innerHTML='<div class="bk-card"><div class="bk-title">Error Breakdown</div>'+
+      Object.keys(grp).map(function(t){
+        var c=grp[t];
+        return '<div class="bk-item"><span class="bk-key">'+escHtml(t)+'</span><span class="bk-cnt">'+c+' occurrence'+(c>1?'s':'')+'</span></div>';
+      }).join('')+'</div>';
+  }else{bk.innerHTML=''}
+
+  var te=document.getElementById('logs-top');
+  if(errs.length){
+    te.innerHTML='<div class="bk-card" style="margin-top:12px"><div class="bk-title">Top Errors (first 5)</div>'+
+      errs.slice(0,5).map(function(e,i){
+        return '<div class="log-line"><span class="log-line-num">'+(i+1)+'</span><span>'+escHtml(e)+'</span></div>';
+      }).join('')+'</div>';
+  }else{te.innerHTML=''}
+
+  document.getElementById('logs-res').style.display='block';
+  al('logs-alert','Analyzed '+lines.length+' log lines.','success');
+}
+
+/* ═══════════ CONVERTER ═══════════ */
+function conv(fmt){
+  var v=document.getElementById('conv-in').value.trim();
+  if(!v){al('conv-alert','Please paste a request JSON.','warn');return}
+  try{
+    var req=JSON.parse(v);
+    if(!req.url){al('conv-alert','Missing "url" field in request JSON.','error');return}
+    var m=req.method||'GET',out='';
+    if(fmt==='curl'){
+      out="curl -X "+m+" '"+req.url+"'";
+      if(req.headers)Object.keys(req.headers).forEach(function(k){
+        out+=" \\\n  -H '"+k+": "+String(req.headers[k]).replace(/'/g,"'\\''")+"'";
+      });
+      if(req.body)out+=" \\\n  -d '"+JSON.stringify(req.body).replace(/'/g,"'\\''")+"'";
+    }else if(fmt==='fetch'){
+      out="fetch('"+req.url+"', {\n  method: '"+m+"',";
+      if(req.headers)out+="\n  headers: "+JSON.stringify(req.headers,null,2)+",";
+      if(req.body)out+="\n  body: JSON.stringify("+JSON.stringify(req.body,null,2)+")";
+      out+="\n})\n  .then(r => r.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err))";
+    }else{
+      out="axios({\n  method: '"+m.toLowerCase()+"',\n  url: '"+req.url+"',";
+      if(req.headers)out+="\n  headers: "+JSON.stringify(req.headers,null,2)+",";
+      if(req.body)out+="\n  data: "+JSON.stringify(req.body,null,2);
+      out+="\n})\n  .then(res => console.log(res.data))\n  .catch(err => console.error(err))";
+    }
+    document.getElementById('conv-out').value=out;
+    al('conv-alert','Converted to '+fmt.toUpperCase()+' format.','success');
+  }catch(e){al('conv-alert','Invalid JSON: '+e.message,'error')}
+}
+
+/* ═══════════ SAMPLE DATA ═══════════ */
+function loadSample(t){
+  var samples={
+    json:'{\n  "user": {\n    "id": 1042,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "verified": true,\n    "age": 28,\n    "roles": ["admin", "editor"],\n    "preferences": {\n      "theme": "dark",\n      "notifications": null\n    }\n  },\n  "metadata": {\n    "created": "2026-04-29T10:00:00Z",\n    "version": 2.1\n  }\n}',
+    api:'{\n  "user": {\n    "id": 1042,\n    "name": "Jane Doe",\n    "email": null,\n    "phone": null,\n    "address": {\n      "street": "123 Main St",\n      "city": "Mumbai",\n      "zip": null\n    }\n  },\n  "subscription": null,\n  "tags": []\n}',
+    diff:{
+      a:'{\n  "name": "John Doe",\n  "age": 30,\n  "email": "john@old.com",\n  "city": "NYC"\n}',
+      b:'{\n  "name": "John Doe",\n  "age": 31,\n  "email": "john@new.com",\n  "role": "admin"\n}'
+    },
+    logs:'[INFO]  Server started on port 3000\n[INFO]  Database connected successfully\n[ERROR] NullPointerException at UserService.java:142\n[WARN]  Slow query detected — 2340ms\n[ERROR] Database connection failed — retrying...\n[INFO]  Cache warmed up\n[ERROR] Failed to load module: payments\n[WARN]  High memory usage: 87%\n[INFO]  Background job completed\n[ERROR] Exception in thread "main": StackOverflowError',
+    convert:'{\n  "url": "https://api.example.com/users",\n  "method": "POST",\n  "headers": {\n    "Content-Type": "application/json",\n    "Authorization": "Bearer YOUR_TOKEN"\n  },\n  "body": {\n    "name": "Jane Doe",\n    "email": "jane@example.com"\n  }\n}'
+  };
+  if(t==='diff'){
+    var ea=document.getElementById('diff-a'),eb=document.getElementById('diff-b');
+    ea.value=samples.diff.a;eb.value=samples.diff.b;
+    ea.dispatchEvent(new Event('input'));eb.dispatchEvent(new Event('input'));
+    return;
+  }
+  var idMap={json:'json-in',api:'api-in',logs:'logs-in',convert:'conv-in'};
+  var el=document.getElementById(idMap[t]);
+  if(!el)return;
+  el.value=samples[t];
+  el.dispatchEvent(new Event('input'));
+}
+
+/* ═══════════ INIT ═══════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  bindHighlightedEditor('json-in','json-in-display','json-in-gutter');
+  bindHighlightedEditor('api-in','api-in-display','api-in-gutter');
+  bindHighlightedEditor('diff-a','diff-a-display','diff-a-gutter');
+  bindHighlightedEditor('diff-b','diff-b-display','diff-b-gutter');
+  bindHighlightedEditor('conv-in','conv-in-display','conv-in-gutter');
+});
+// also bind synchronously in case DOMContentLoaded already fired
+bindHighlightedEditor('json-in','json-in-display','json-in-gutter');
+bindHighlightedEditor('api-in','api-in-display','api-in-gutter');
+bindHighlightedEditor('diff-a','diff-a-display','diff-a-gutter');
+bindHighlightedEditor('diff-b','diff-b-display','diff-b-gutter');
+bindHighlightedEditor('conv-in','conv-in-display','conv-in-gutter');
 </script>
 </body>
 </html>
