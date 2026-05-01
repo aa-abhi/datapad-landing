@@ -210,11 +210,17 @@
     .hero-meta-item{display:flex;align-items:center;gap:6px}
     .hero-meta-item svg{color:var(--pri);flex-shrink:0}
 
-    /* ── LAYOUT ── */
+    /* ── LAYOUT ──
+       Two-column structure where the sidebar is fixed at the viewport's
+       LEFT edge (no big empty margin on huge screens), and the main panel
+       takes the remaining space with its content max-width-constrained.
+       The grid uses minmax(0, 1fr) on the main column so long lines never
+       blow out the layout — they scroll inside the editor instead. */
     .app-body{
-      display:grid;grid-template-columns:240px 1fr;
-      max-width:1600px;margin:0 auto;
+      display:grid;
+      grid-template-columns:240px minmax(0, 1fr);
       min-height:calc(100vh - var(--hh) - 100px);
+      width:100%;
     }
 
     /* ── SIDEBAR ── */
@@ -311,8 +317,25 @@
       color:var(--pri);
     }
 
-    /* ── MAIN ── */
-    .main-panel{padding:24px 32px;min-width:0}
+    /* ── MAIN ──
+       The panel itself fills the grid column (no max-width here, so the
+       grid can do its job). The .panel-inner wrapper inside is what
+       constrains content to a readable max-width and centres it within
+       the main column. This way the sidebar stays glued to the viewport
+       left edge while the main content stays nicely centred on big screens.
+       overflow:hidden + min-width:0 prevent long JSON lines from forcing
+       the column wider than its allotted grid track. */
+    .main-panel{
+      padding:24px 32px;
+      min-width:0;
+      overflow:hidden;
+    }
+    .panel-inner{
+      max-width:1280px;
+      margin:0 auto;
+      width:100%;
+      min-width:0;
+    }
     .tool-section{display:none;animation:fadeUp .3s var(--ease) both}
     .tool-section.active{display:block}
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -408,8 +431,12 @@
     }
 
     /* ── EDITORS ── */
-    .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .editor-col{display:flex;flex-direction:column;gap:9px}
+    .editor-grid{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+      gap:14px;
+    }
+    .editor-col{display:flex;flex-direction:column;gap:9px;min-width:0}
     .ed-label{
       display:flex;align-items:center;gap:8px;
       font-family:var(--mono);font-size:10px;color:var(--t2);
@@ -471,71 +498,150 @@
     }
     .ta-plain::placeholder{color:var(--t2);font-style:italic;opacity:.55}
 
-    /* === JSON HIGHLIGHTED EDITOR === */
+    /* === JSON HIGHLIGHTED EDITOR ===
+       Word-wrapping editor (no horizontal scroll, no bleed):
+       - Both layers use white-space:pre-wrap + word-break:break-all
+         so ANY content (including minified JSON with no spaces) wraps
+         to fit the editor's width.
+       - Textarea on bottom (visible monochrome text, fallback if highlight breaks).
+       - Highlight overlay on top (pointer-events:none) covers with colored tokens.
+       - Gutter shows logical line numbers (one per \n in source).
+         Wrapped visual lines share a logical number — that's correct & expected.
+       - Vertical scroll only; transform-mirrors textarea scrollTop to gutter. */
     .json-editor{
-      position:relative;min-height:380px;
+      position:relative;
+      height:420px;
       max-height:600px;
+      overflow:hidden;
+      width:100%;
+      background:var(--bg2);
     }
-    .json-editor-input,
-    .json-editor-display{
-      width:100%;min-height:380px;
-      padding:16px 18px 16px 56px;
-      font-family:var(--code);font-size:13px;
-      line-height:1.75;letter-spacing:0;
-      tab-size:2;white-space:pre;
-    }
+    /* === EDITOR LAYERS ===
+       Two stacked layers; only the highlight overlay shows visible text.
+       Textarea is invisible (transparent text-fill) and only captures input,
+       providing the caret. This eliminates any chance of double-rendering. */
+    .json-editor-display,
     .json-editor-input{
-      position:absolute;inset:0;z-index:2;
-      background:transparent;border:none;outline:none;
-      color:transparent;caret-color:var(--pri);
-      resize:none;overflow:auto;
-      -webkit-text-fill-color:transparent;
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      margin:0;border:0;
+      font-family:var(--code);
+      font-size:13px;
+      line-height:1.75;
+      letter-spacing:0;
+      tab-size:2;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      box-sizing:border-box;
     }
+    /* Textarea — invisible, captures input only.
+       overflow-y:scroll (not auto) means the scrollbar ALWAYS reserves space,
+       so textarea content width is constant regardless of whether content
+       overflows. The display layer compensates with extra right-padding. */
+    .json-editor-input{
+      z-index:1;
+      background:transparent;
+      outline:none;
+      color:transparent;
+      -webkit-text-fill-color:transparent;
+      caret-color:var(--pri);
+      resize:none;
+      overflow-y:scroll;
+      overflow-x:hidden;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.12) transparent;
+      padding:16px 10px 16px 56px;
+    }
+    .json-editor-input::-webkit-scrollbar{width:8px;height:0}
+    .json-editor-input::-webkit-scrollbar-track{background:transparent}
+    .json-editor-input::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px}
+    .json-editor-input::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.18)}
+
+    /* Selection still visible even when text-fill is transparent */
     .json-editor-input::selection{
       background:rgba(0,255,136,.25);
+      color:transparent;
       -webkit-text-fill-color:transparent;
     }
-    .json-editor-display{
-      position:relative;z-index:1;
-      pointer-events:none;
-      color:var(--t1);overflow:auto;
-      min-height:380px;
-      white-space:pre;
+    .json-editor-input::-moz-selection{
+      background:rgba(0,255,136,.25);
+      color:transparent;
     }
     .json-editor-input::placeholder{
-      color:var(--t2);font-style:italic;opacity:.5;
+      color:var(--t2);
       -webkit-text-fill-color:var(--t2);
+      font-style:italic;
+      opacity:.55;
+    }
+    /* Highlight overlay — the ONLY visible text. Has 8px more right-padding
+       than the textarea to compensate for the textarea's always-on scrollbar,
+       guaranteeing both layers wrap at identical character positions. */
+    .json-editor-display{
+      z-index:2;
+      pointer-events:none;
+      color:var(--t1);
+      overflow:hidden;
+      padding:16px 18px 16px 56px;
     }
 
-    /* line numbers gutter (decorative) */
+    /* gutter background — solid enough to hide any text that might
+       sneak under it via the padding area */
     .json-editor::before{
       content:'';position:absolute;
       left:0;top:0;bottom:0;width:42px;
-      background:rgba(255,255,255,.012);
+      background:var(--bg2);
       border-right:1px solid var(--brd);
-      pointer-events:none;z-index:0;
+      pointer-events:none;
+      z-index:3; /* above highlight, masks left-padding bleed */
     }
     .ln-gutter{
-      position:absolute;left:0;top:16px;width:42px;
+      position:absolute;left:0;top:0;width:42px;height:100%;
+      padding:16px 10px 16px 0;
       font-family:var(--code);font-size:13px;
       line-height:1.75;letter-spacing:0;
-      color:rgba(255,255,255,0.18);
-      text-align:right;padding-right:10px;
+      color:rgba(255,255,255,0.22);
+      text-align:right;
       pointer-events:none;user-select:none;
-      font-weight:500;z-index:1;
+      font-weight:500;z-index:4;
+      white-space:pre;
+      box-sizing:border-box;
+      overflow:hidden;
+    }
+    .ln-gutter-inner{will-change:transform}
+
+    /* Inner wrap that we transform to mirror textarea scroll */
+    .json-display-inner{
+      will-change:transform;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      font-family:var(--code);
+      font-size:13px;
+      line-height:1.75;
+      letter-spacing:0;
+      tab-size:2;
     }
 
-    /* readonly version (output) */
+    /* readonly version (output): one scrollable layer */
     .json-output-display{
-      width:100%;min-height:380px;
+      width:100%;
+      height:420px;max-height:600px;
       padding:16px 18px 16px 56px;
       background:transparent;
       font-family:var(--code);font-size:13px;
       line-height:1.75;color:var(--t1);
-      overflow:auto;white-space:pre;
-      max-height:600px;
-      position:relative;
+      overflow-y:scroll;overflow-x:hidden;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      position:relative;z-index:1;
+      box-sizing:border-box;
     }
+    .json-output-display{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent}
+    .json-output-display::-webkit-scrollbar{width:8px;height:0}
+    .json-output-display::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
     .json-output-empty{
       padding:16px 18px;
       color:var(--t2);font-style:italic;
@@ -999,6 +1105,7 @@
 
   <!-- MAIN -->
   <main class="main-panel">
+    <div class="panel-inner">
 
     <!-- ════════ FORMAT ════════ -->
     <section class="tool-section active" id="tool-json">
@@ -1273,6 +1380,7 @@
       </div>
     </section>
 
+    </div>
   </main>
 </div>
 
@@ -1535,43 +1643,70 @@ function highlightJSON(text){
 
 function updateGutter(gutterEl, text){
   if(!gutterEl)return;
+  var inner=gutterEl.firstElementChild;
+  if(!inner||!inner.classList.contains('ln-gutter-inner')){
+    gutterEl.innerHTML='<div class="ln-gutter-inner"></div>';
+    inner=gutterEl.firstElementChild;
+  }
   var lines=text?text.split('\n').length:1;
   var s='';
   for(var i=1;i<=Math.max(lines,1);i++)s+=i+'\n';
-  gutterEl.textContent=s.trimEnd();
+  inner.textContent=s.trimEnd();
 }
 
-/* ═══════════ HOOK UP HIGHLIGHTING ON EDITORS ═══════════ */
+/* ═══════════ HOOK UP HIGHLIGHTING ON EDITORS ═══════════
+   The textarea is the master: it shows the user's text in monochrome (--t1),
+   handles all input, and scrolls naturally. The highlight overlay on top
+   replaces the visible text with colored tokens by perfect pixel-alignment.
+   When the textarea scrolls, we translate the highlight's inner wrapper to
+   match — keeping the colored text glued to the caret. */
 function bindHighlightedEditor(inputId, displayId, gutterId){
   var input=document.getElementById(inputId);
   var disp=document.getElementById(displayId);
   var gut=document.getElementById(gutterId);
   if(!input||!disp)return;
 
+  // Wrap the highlight content in an inner div we can transform
+  function ensureInner(){
+    var inner=disp.firstElementChild;
+    if(!inner||!inner.classList||!inner.classList.contains('json-display-inner')){
+      disp.innerHTML='<div class="json-display-inner"></div>';
+      inner=disp.firstElementChild;
+    }
+    return inner;
+  }
+
   function sync(){
     var v=input.value;
-    disp.innerHTML=v?highlightJSON(v):'';
+    var inner=ensureInner();
+    inner.innerHTML=v?highlightJSON(v):'';
     if(gut)updateGutter(gut,v);
   }
   function syncScroll(){
-    disp.scrollTop=input.scrollTop;
-    disp.scrollLeft=input.scrollLeft;
-    if(gut)gut.style.top=(16-input.scrollTop)+'px';
+    // Wrapping mode: only vertical scroll exists. Mirror textarea scrollTop
+    // to both the highlight inner wrapper and the gutter inner wrapper.
+    var sy=input.scrollTop;
+    var inner=ensureInner();
+    inner.style.transform='translateY('+(-sy)+'px)';
+    if(gut){
+      var gi=gut.firstElementChild;
+      if(gi)gi.style.transform='translateY('+(-sy)+'px)';
+    }
   }
 
-  input.addEventListener('input',sync);
+  input.addEventListener('input',function(){sync();syncScroll()});
   input.addEventListener('scroll',syncScroll);
   input.addEventListener('keydown',function(e){
-    // Tab → 2 spaces
     if(e.key==='Tab'){
       e.preventDefault();
       var s=input.selectionStart,en=input.selectionEnd;
       input.value=input.value.substring(0,s)+'  '+input.value.substring(en);
       input.selectionStart=input.selectionEnd=s+2;
-      sync();
+      sync();syncScroll();
     }
   });
   sync();
+  syncScroll();
 }
 
 function setHighlightedOutput(displayId, gutterId, text){
@@ -1580,11 +1715,23 @@ function setHighlightedOutput(displayId, gutterId, text){
   if(!disp)return;
   if(!text){
     disp.innerHTML='<div class="json-output-empty">// Output will appear here</div>';
-    if(gut)gut.textContent='';
+    if(gut){
+      var inner=gut.firstElementChild;
+      if(inner)inner.textContent='';
+      else gut.textContent='';
+    }
     return;
   }
   disp.innerHTML=highlightJSON(text);
   if(gut)updateGutter(gut,text);
+  if(gut){
+    var inner=gut.firstElementChild;
+    disp.onscroll=function(){
+      if(inner)inner.style.transform='translateY('+(-disp.scrollTop)+'px)';
+    };
+    if(inner)inner.style.transform='translateY(0)';
+    disp.scrollTop=0;
+  }
 }
 
 /* ═══════════ COPY / DOWNLOAD ═══════════ */
