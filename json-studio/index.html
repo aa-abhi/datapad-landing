@@ -211,89 +211,216 @@
     .hero-meta-item svg{color:var(--pri);flex-shrink:0}
 
     /* ── LAYOUT ──
-       Two-column structure where the sidebar is fixed at the viewport's
-       LEFT edge (no big empty margin on huge screens), and the main panel
-       takes the remaining space with its content max-width-constrained.
-       The grid uses minmax(0, 1fr) on the main column so long lines never
-       blow out the layout — they scroll inside the editor instead. */
+       All top-level sections (header, hero, app, faq, footer) share the
+       SAME layout pattern:
+         outer container: padding:0 32px (creates safe gutter)
+         inner content: max-width:1600px; margin:0 auto (caps & centres)
+       This guarantees the sidebar's left edge aligns with the header logo
+       and hero text — at every viewport width and zoom level. */
+    .app-body-outer{
+      padding:0 32px;
+    }
     .app-body{
       display:grid;
       grid-template-columns:240px minmax(0, 1fr);
+      max-width:1600px;
+      margin:0 auto;
       min-height:calc(100vh - var(--hh) - 100px);
       width:100%;
     }
 
-    /* ── SIDEBAR ── */
+    /* ════════════════════════════════════════════════════════════════
+       SIDEBAR — Navigation Rail
+       Design: minimal "command palette" / magazine-column-gutter feel.
+       - No card/box framing — feels like part of the page structure
+       - Numbered tools (matches "01 / Format" section-tag pattern elsewhere)
+       - Active state: layered subtle gradient + neon edge marker + chevron
+       - Inactive: tons of breathing room, very low visual weight
+       - Bottom info block uses the same eyebrow pattern as section headers
+       ════════════════════════════════════════════════════════════════ */
     .sidebar{
       border-right:1px solid var(--brd);
-      background:var(--bg1);padding:20px 14px;
+      background:transparent;
+      padding:28px 0;
       position:sticky;top:var(--hh);
       height:calc(100vh - var(--hh));
-      overflow-y:auto;display:flex;flex-direction:column;gap:3px;
-      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+      overflow-y:auto;
+      display:flex;flex-direction:column;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.06) transparent;
     }
-    .sidebar::-webkit-scrollbar{width:6px}
-    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
 
+    /* Eyebrow label — matches landing page section-tag pattern */
     .sb-label{
+      display:inline-flex;align-items:center;gap:8px;
       font-family:var(--mono);font-size:10px;
-      color:var(--t2);text-transform:uppercase;letter-spacing:2px;
-      font-weight:500;padding:6px 10px 14px;
-      display:flex;align-items:center;gap:8px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:2.2px;
+      font-weight:500;
+      padding:0 18px 18px;
+      margin:0 4px 6px;
     }
-    .sb-label::before{content:'';display:block;width:18px;height:1px;background:var(--t2)}
+    .sb-label::before{
+      content:'';display:block;width:18px;height:1px;
+      background:var(--t2);
+    }
 
+    /* Nav list container */
+    .sb-nav{
+      display:flex;flex-direction:column;gap:2px;
+      padding:0 8px;
+    }
+
+    /* Each nav button */
     .nav-btn{
-      width:100%;display:flex;align-items:center;gap:11px;
-      padding:10px 11px;border-radius:10px;border:none;
-      background:transparent;color:var(--t2);
-      font-size:12.5px;font-weight:600;font-family:var(--body-font);
-      cursor:pointer;text-align:left;transition:all .2s var(--ease);
+      width:100%;
+      display:grid;
+      grid-template-columns:24px 1fr auto;
+      align-items:center;
+      gap:14px;
+      padding:13px 14px 13px 12px;
+      border-radius:10px;
+      border:none;
+      background:transparent;
+      color:var(--t2);
+      font-family:var(--body-font);
+      cursor:pointer;
+      text-align:left;
+      transition:color .2s var(--ease), background .2s var(--ease);
       position:relative;
+      overflow:hidden;
     }
-    .nb-icon{
-      width:30px;height:30px;border-radius:8px;
+
+    /* Numbered prefix — small, monospace, dim — matches "01 / Format" elsewhere */
+    .nb-num{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--t2);
+      font-weight:500;
+      letter-spacing:1px;
+      transition:color .2s var(--ease);
+      text-align:center;
+      opacity:.55;
+    }
+
+    /* Label + sub-label */
+    .nb-text{
+      display:flex;flex-direction:column;
+      line-height:1.3;
+      min-width:0;
+    }
+    .nb-label{
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:-.1px;
+      color:var(--t1);
+      transition:color .2s var(--ease);
+    }
+    .nb-sub{
+      font-size:10.5px;
+      color:var(--t2);
+      font-weight:400;
+      margin-top:3px;
+      font-family:var(--mono);
+      letter-spacing:.1px;
+      opacity:.85;
+      transition:color .2s var(--ease), opacity .2s var(--ease);
+    }
+
+    /* Trailing chevron — appears only on active/hover, signals "this is selected" */
+    .nb-arrow{
+      width:14px;height:14px;
       display:flex;align-items:center;justify-content:center;
-      background:var(--bg2);border:1px solid var(--brd);
-      flex-shrink:0;transition:all .2s;
+      color:var(--pri);
+      opacity:0;
+      transform:translateX(-4px);
+      transition:opacity .25s var(--ease), transform .25s var(--ease);
     }
-    .nb-icon svg{opacity:.55;transition:all .2s}
-    .nb-text{line-height:1.3;flex:1}
-    .nb-text small{
-      display:block;font-size:10px;color:var(--t2);
-      font-weight:400;margin-top:2px;font-family:var(--mono);
-      letter-spacing:.2px;
+
+    /* Hover: subtle tint, slightly elevated text */
+    .nav-btn:hover{
+      background:rgba(255,255,255,.022);
     }
-    .nav-btn:hover{color:var(--t1);background:rgba(255,255,255,.02)}
-    .nav-btn:hover .nb-icon{background:rgba(var(--pri-rgb),.06);border-color:rgba(var(--pri-rgb),.15)}
-    .nav-btn:hover .nb-icon svg{opacity:.85}
-    .nav-btn.active{color:var(--t0);background:rgba(var(--pri-rgb),.04)}
-    .nav-btn.active .nb-icon{
-      background:rgba(var(--pri-rgb),.1);
-      border-color:rgba(var(--pri-rgb),.25);
+    .nav-btn:hover .nb-label{color:var(--t0)}
+    .nav-btn:hover .nb-num{color:var(--t1);opacity:.8}
+    .nav-btn:hover .nb-sub{opacity:1}
+    .nav-btn:hover .nb-arrow{opacity:.4;transform:translateX(0)}
+
+    /* Active: layered gradient bg, neon left edge, full chevron */
+    .nav-btn.active{
+      background:linear-gradient(90deg,
+        rgba(var(--pri-rgb),.08) 0%,
+        rgba(var(--pri-rgb),.02) 50%,
+        transparent 100%);
     }
-    .nav-btn.active .nb-icon svg{opacity:1;color:var(--pri)}
     .nav-btn.active::before{
-      content:'';position:absolute;left:-14px;top:50%;
-      transform:translateY(-50%);width:3px;height:22px;
-      background:var(--pri);border-radius:0 2px 2px 0;
-      box-shadow:0 0 8px rgba(var(--pri-rgb),.4);
+      /* neon left rail — sits inside the button's rounded corner */
+      content:'';position:absolute;
+      left:0;top:9px;bottom:9px;
+      width:2px;
+      background:var(--pri);
+      border-radius:0 2px 2px 0;
+      box-shadow:
+        0 0 8px rgba(var(--pri-rgb),.5),
+        0 0 16px rgba(var(--pri-rgb),.2);
     }
+    .nav-btn.active::after{
+      /* very subtle ambient glow trailing the rail */
+      content:'';position:absolute;
+      left:0;top:0;bottom:0;width:30px;
+      background:radial-gradient(
+        ellipse at left center,
+        rgba(var(--pri-rgb),.12) 0%,
+        transparent 70%
+      );
+      pointer-events:none;
+    }
+    .nav-btn.active .nb-num{
+      color:var(--pri);opacity:1;font-weight:600;
+    }
+    .nav-btn.active .nb-label{color:var(--t0)}
+    .nav-btn.active .nb-sub{color:var(--t1);opacity:1}
+    .nav-btn.active .nb-arrow{opacity:1;transform:translateX(0)}
 
-    .sb-div{height:1px;background:var(--brd);margin:10px 6px}
-
-    .trust-chips{
-      padding:12px 10px;display:flex;flex-direction:column;gap:8px;
-      margin-top:auto;
-      background:rgba(var(--acc-rgb),.025);
-      border-radius:10px;border:1px solid rgba(var(--acc-rgb),.08);
+    /* Bottom info card — uses same "eyebrow + body" pattern as section headers */
+    .sb-info{
+      margin:auto 8px 0;
+      padding:24px 18px 4px;
+      border-top:1px solid var(--brd);
     }
-    .trust-chip{
-      display:flex;align-items:center;gap:8px;
-      font-size:10.5px;color:var(--t2);font-weight:500;
-      letter-spacing:.2px;
+    .sb-info-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      font-family:var(--mono);font-size:9.5px;
+      color:var(--pri);text-transform:uppercase;letter-spacing:1.8px;
+      font-weight:600;margin-bottom:14px;
     }
-    .trust-chip svg{color:var(--pri);flex-shrink:0}
+    .sb-info-eyebrow::before{
+      content:'';display:block;width:6px;height:6px;border-radius:50%;
+      background:var(--pri);
+      box-shadow:0 0 6px rgba(var(--pri-rgb),.6);
+      animation:pulse 2s infinite;
+    }
+    .sb-info-list{
+      display:flex;flex-direction:column;gap:11px;
+    }
+    .sb-info-row{
+      display:flex;align-items:flex-start;gap:9px;
+      font-size:11px;color:var(--t2);line-height:1.45;
+    }
+    .sb-info-row svg{
+      color:var(--pri);flex-shrink:0;margin-top:2px;
+      opacity:.7;
+    }
+    .sb-info-row b{
+      color:var(--t1);font-weight:600;display:block;
+      font-size:11.5px;letter-spacing:-.1px;
+    }
+    .sb-info-row span{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);opacity:.75;letter-spacing:.1px;
+      margin-top:1px;display:block;
+    }
 
     /* ── MOBILE TABS ── */
     .mob-tabs{
@@ -318,23 +445,12 @@
     }
 
     /* ── MAIN ──
-       The panel itself fills the grid column (no max-width here, so the
-       grid can do its job). The .panel-inner wrapper inside is what
-       constrains content to a readable max-width and centres it within
-       the main column. This way the sidebar stays glued to the viewport
-       left edge while the main content stays nicely centred on big screens.
-       overflow:hidden + min-width:0 prevent long JSON lines from forcing
-       the column wider than its allotted grid track. */
+       The panel uses the full grid column. min-width:0 + overflow:hidden
+       prevent long JSON lines from forcing the column wider than allotted. */
     .main-panel{
       padding:24px 32px;
       min-width:0;
       overflow:hidden;
-    }
-    .panel-inner{
-      max-width:1280px;
-      margin:0 auto;
-      width:100%;
-      min-width:0;
     }
     .tool-section{display:none;animation:fadeUp .3s var(--ease) both}
     .tool-section.active{display:block}
@@ -948,6 +1064,7 @@
       .hero-strip{padding:20px}
       .faq-section{padding:50px 20px}
       .app-header{padding:0 18px}
+      .app-body-outer{padding:0 18px}
     }
     @media(max-width:600px){
       .hdr-status,.hdr-sep,.hdr-tool-name{display:none}
@@ -1045,67 +1162,99 @@
   <button class="mob-tab" onclick="sw('convert',this)">Converter</button>
 </div>
 
+<div class="app-body-outer">
 <div class="app-body">
   <!-- SIDEBAR -->
   <nav class="sidebar" aria-label="Tools">
-    <div class="sb-label">Tools</div>
+    <div class="sb-label">Toolkit</div>
 
-    <button class="nav-btn active" onclick="sw('json',this)">
-      <span class="nb-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      </span>
-      <span class="nb-text">Format & Minify<small>Beautify, fix, validate</small></span>
-    </button>
+    <div class="sb-nav">
+      <button class="nav-btn active" onclick="sw('json',this)">
+        <span class="nb-num">01</span>
+        <span class="nb-text">
+          <span class="nb-label">Format &amp; Minify</span>
+          <span class="nb-sub">Beautify, fix, validate</span>
+        </span>
+        <span class="nb-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
 
-    <button class="nav-btn" onclick="sw('api',this)">
-      <span class="nb-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </span>
-      <span class="nb-text">API Cleaner<small>Remove nulls, flatten</small></span>
-    </button>
+      <button class="nav-btn" onclick="sw('api',this)">
+        <span class="nb-num">02</span>
+        <span class="nb-text">
+          <span class="nb-label">API Cleaner</span>
+          <span class="nb-sub">Remove nulls, flatten</span>
+        </span>
+        <span class="nb-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
 
-    <button class="nav-btn" onclick="sw('diff',this)">
-      <span class="nb-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14 14 0 010 20"/><path d="M2 12h20"/></svg>
-      </span>
-      <span class="nb-text">JSON Diff<small>Compare two objects</small></span>
-    </button>
+      <button class="nav-btn" onclick="sw('diff',this)">
+        <span class="nb-num">03</span>
+        <span class="nb-text">
+          <span class="nb-label">JSON Diff</span>
+          <span class="nb-sub">Compare two objects</span>
+        </span>
+        <span class="nb-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
 
-    <button class="nav-btn" onclick="sw('logs',this)">
-      <span class="nb-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </span>
-      <span class="nb-text">Log Analyzer<small>Group errors, stats</small></span>
-    </button>
+      <button class="nav-btn" onclick="sw('logs',this)">
+        <span class="nb-num">04</span>
+        <span class="nb-text">
+          <span class="nb-label">Log Analyzer</span>
+          <span class="nb-sub">Group errors &amp; stats</span>
+        </span>
+        <span class="nb-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
 
-    <button class="nav-btn" onclick="sw('convert',this)">
-      <span class="nb-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-      </span>
-      <span class="nb-text">Request Converter<small>cURL, Fetch, Axios</small></span>
-    </button>
+      <button class="nav-btn" onclick="sw('convert',this)">
+        <span class="nb-num">05</span>
+        <span class="nb-text">
+          <span class="nb-label">Request Converter</span>
+          <span class="nb-sub">cURL · Fetch · Axios</span>
+        </span>
+        <span class="nb-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
+      </button>
+    </div>
 
-    <div class="sb-div"></div>
-
-    <div class="trust-chips">
-      <div class="trust-chip">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        No data leaves browser
-      </div>
-      <div class="trust-chip">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Free, no sign-up
-      </div>
-      <div class="trust-chip">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
-        Works offline
+    <div class="sb-info">
+      <div class="sb-info-eyebrow">Live · Local</div>
+      <div class="sb-info-list">
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div>
+            <b>Zero data sent</b>
+            <span>everything runs in-browser</span>
+          </div>
+        </div>
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <div>
+            <b>Free forever</b>
+            <span>no sign-up, no limits</span>
+          </div>
+        </div>
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0114 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+          <div>
+            <b>Offline-capable</b>
+            <span>works after first load</span>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
 
   <!-- MAIN -->
   <main class="main-panel">
-    <div class="panel-inner">
 
     <!-- ════════ FORMAT ════════ -->
     <section class="tool-section active" id="tool-json">
@@ -1380,8 +1529,8 @@
       </div>
     </section>
 
-    </div>
   </main>
+</div>
 </div>
 
 <!-- FAQ -->
