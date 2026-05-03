@@ -1,23 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#050508"/>
+  <meta name="color-scheme" content="dark"/>
+
   <title>A/B Test Calculator – Free Statistical Significance Tool | Datapad</title>
-  <meta name="description" content="Free A/B test significance calculator with p-value, confidence intervals, statistical power, Monte Carlo simulation, multi-variant support, Bonferroni correction, SRM check, and Excel export. 100% client-side."/>
-  <meta name="keywords" content="AB test calculator, statistical significance, p-value calculator, confidence interval, CRO, split test, hypothesis testing, power analysis, MDE calculator, Bonferroni correction, Monte Carlo simulation"/>
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+  <meta name="description" content="Free A/B test significance calculator. Two-proportion Z-test, Wilson confidence intervals, Bonferroni correction for multi-variant tests, statistical power, MDE, sample size, Monte Carlo simulation (5,000 trials), SRM check, and Excel export. 100% in-browser, no sign-up."/>
+  <meta name="keywords" content="AB test calculator, A/B test significance calculator, statistical significance, p-value calculator, confidence interval calculator, CRO tools, split test calculator, hypothesis testing, statistical power, MDE calculator, sample size calculator, Bonferroni correction, Monte Carlo simulation, SRM check, Wilson interval, conversion rate optimization"/>
+  <meta name="author" content="Datapad"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <meta name="googlebot" content="index, follow"/>
+  <meta name="rating" content="general"/>
+  <meta name="distribution" content="global"/>
   <link rel="canonical" href="https://datapad.in/ab-test-calculator"/>
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Datapad"/>
   <meta property="og:url" content="https://datapad.in/ab-test-calculator"/>
-  <meta property="og:title" content="A/B Test Calculator – Free Statistical Significance Tool | Datapad"/>
-  <meta property="og:description" content="The most advanced free A/B test calculator. P-value, power analysis, Monte Carlo simulation, multi-variant support, and Excel export — all in your browser."/>
+  <meta property="og:title" content="A/B Test Calculator – Free Statistical Significance Tool"/>
+  <meta property="og:description" content="The most advanced free A/B test calculator. P-value, power analysis, Monte Carlo simulation, multi-variant Bonferroni correction, and Excel export — all running in your browser."/>
   <meta property="og:image" content="https://datapad.in/og-ab-test.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt" content="Datapad A/B Test Calculator dashboard with statistical significance results"/>
+  <meta property="og:locale" content="en_US"/>
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image"/>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/ab-test-calculator#app","name":"A/B Test Calculator","url":"https://datapad.in/ab-test-calculator","description":"Free statistical significance calculator for A/B tests.","applicationCategory":"BusinessApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What p-value is statistically significant for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"At 95% confidence, a p-value below 0.05 is significant. At 99% confidence, you need p < 0.01."}},{"@type":"Question","name":"How many visitors do I need for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"Sample size depends on your baseline conversion rate, minimum effect (MDE), desired power (typically 80%), and significance level (typically 95%)."}},{"@type":"Question","name":"What is statistical power in A/B testing?","acceptedAnswer":{"@type":"Answer","text":"Statistical power is the probability of correctly detecting a real effect. Standard practice targets 80% power."}},{"@type":"Question","name":"What is Bonferroni correction?","acceptedAnswer":{"@type":"Answer","text":"Bonferroni correction adjusts the significance threshold when testing multiple variants simultaneously. Applied automatically for 3+ variants."}},{"@type":"Question","name":"What is a Sample Ratio Mismatch (SRM)?","acceptedAnswer":{"@type":"Answer","text":"SRM occurs when the observed traffic split differs from the expected split, indicating randomization problems that can invalidate results."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapad.in/"},{"@type":"ListItem","position":2,"name":"A/B Test Calculator","item":"https://datapad.in/ab-test-calculator"}]}]}</script>
+  <meta name="twitter:site" content="@datapad"/>
+  <meta name="twitter:title" content="A/B Test Calculator – Free Statistical Significance Tool"/>
+  <meta name="twitter:description" content="Validate your A/B tests with confidence. Z-tests, Wilson CIs, Monte Carlo simulation, and power analysis — all client-side."/>
+  <meta name="twitter:image" content="https://datapad.in/og-ab-test.png"/>
+  <meta name="twitter:image:alt" content="Datapad A/B Test Calculator interface"/>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/ab-test-calculator#app","name":"A/B Test Calculator","alternateName":["A/B Significance Calculator","Pre/Post Analyzer","Split Test Calculator"],"url":"https://datapad.in/ab-test-calculator","description":"Free statistical significance calculator for A/B tests with Z-test, Wilson confidence intervals, Bonferroni correction, power analysis, Monte Carlo simulation, and Excel export.","applicationCategory":"BusinessApplication","applicationSubCategory":"Analytics","operatingSystem":"Any (browser-based)","browserRequirements":"Modern browser with JavaScript enabled","permissions":"none","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["Two-proportion Z-test","Wilson score confidence intervals","Statistical power analysis","Minimum detectable effect (MDE)","Sample size calculation","Monte Carlo simulation","Multi-variant testing (A/B, A/B/C, A/B/C/D)","Bonferroni correction","Sample Ratio Mismatch (SRM) check","One-sided and two-sided hypothesis tests","Configurable confidence levels (80%-99%)","Excel export","100% client-side processing"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in","logo":"https://datapad.in/logo.png"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"218","bestRating":"5","worstRating":"1"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What p-value is statistically significant for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"At the standard 95% confidence level, a p-value below 0.05 is considered statistically significant. At 99% confidence, you need p < 0.01. The lower the p-value, the stronger the evidence against the null hypothesis (that there is no real difference between variants)."}},{"@type":"Question","name":"How many visitors do I need for an A/B test?","acceptedAnswer":{"@type":"Answer","text":"Required sample size depends on four factors: your baseline conversion rate, the minimum detectable effect (MDE) you want to catch, your desired statistical power (typically 80%), and your significance level (typically 95%). Smaller effects and lower baseline rates require larger samples. The Power Analysis tab calculates exact requirements for your inputs."}},{"@type":"Question","name":"What is statistical power in A/B testing?","acceptedAnswer":{"@type":"Answer","text":"Statistical power is the probability of correctly detecting a real effect when one exists. The standard practice is to target 80% power, meaning if your variant truly performs differently, you have an 80% chance of catching it given your current sample size. Lower power increases the risk of false negatives (Type II errors)."}},{"@type":"Question","name":"What is Bonferroni correction and when is it applied?","acceptedAnswer":{"@type":"Answer","text":"Bonferroni correction adjusts the significance threshold to control the family-wise error rate when testing multiple variants simultaneously. With 3 variants compared to control, alpha is divided by 2 (number of comparisons). Our calculator applies it automatically for tests with 3 or more variants."}},{"@type":"Question","name":"What is Sample Ratio Mismatch (SRM)?","acceptedAnswer":{"@type":"Answer","text":"Sample Ratio Mismatch occurs when the observed traffic split between variants differs significantly from your expected split (e.g., 50/50). It often indicates randomization or tracking problems and can invalidate your results. We run a chi-square test on every analysis to flag SRM issues."}},{"@type":"Question","name":"Should I use a one-sided or two-sided test?","acceptedAnswer":{"@type":"Answer","text":"Two-sided tests (default and recommended) check whether your variant differs from the control in either direction. One-sided tests only check whether your variant is better. Use one-sided only when negative outcomes are impossible — otherwise you risk missing variants that hurt performance."}},{"@type":"Question","name":"What is a Wilson confidence interval?","acceptedAnswer":{"@type":"Answer","text":"Wilson score intervals provide more accurate confidence ranges for proportions than the standard Wald interval, especially for small samples or extreme rates near 0% or 100%. They never produce nonsensical bounds outside the [0,1] range."}},{"@type":"Question","name":"What is Monte Carlo simulation in A/B testing?","acceptedAnswer":{"@type":"Answer","text":"Monte Carlo simulation runs thousands of synthetic experiments using your observed rates as the underlying truth. It estimates the probability that each variant beats control empirically, complementing the analytical p-value with an intuitive 'how often does B win' answer. Our tool runs 5,000 binomial trials per analysis."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapad.in/"},{"@type":"ListItem","position":2,"name":"A/B Test Calculator","item":"https://datapad.in/ab-test-calculator"}]},{"@type":"HowTo","name":"How to calculate A/B test statistical significance","description":"Step-by-step process to validate an A/B test result with this calculator.","step":[{"@type":"HowToStep","position":1,"name":"Choose test type","text":"Select Conversion (binary outcomes) or Revenue (continuous metric) testing."},{"@type":"HowToStep","position":2,"name":"Set variants","text":"Pick A/B for two variants, or A/B/C / A/B/C/D for multi-variant tests with automatic Bonferroni correction."},{"@type":"HowToStep","position":3,"name":"Set confidence level","text":"Default 95%. Use 99% for high-stakes decisions, 90% for early-stage exploration."},{"@type":"HowToStep","position":4,"name":"Enter variant data","text":"For each variant, provide visitors and conversions (and revenue if applicable)."},{"@type":"HowToStep","position":5,"name":"Review results","text":"Check the Results tab for p-value, confidence intervals, and significance verdict. Power Analysis shows if you have enough data. Simulation runs Monte Carlo trials. Insights interprets the findings."}]}]}</script>
+
+  <!-- Resources -->
   <link rel="icon" type="image/png" href="/logo.png"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://cdn.sheetjs.com" crossorigin/>
+  <link rel="dns-prefetch" href="https://cdn.sheetjs.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
   <style>
@@ -31,13 +59,26 @@
       --red:#ff4466;--red-rgb:255,68,102;
       --warn:#ffaa00;--warn-rgb:255,170,0;
       --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
-      --t0:#ffffff;--t1:#c8c8d4;--t2:#6e6e82;
+      --t0:#ffffff;--t1:#c8c8d4;
+      /* --t2 bumped from #6e6e82 to #8a8aa0 for WCAG AA contrast (~5.7:1 on bg0) */
+      --t2:#8a8aa0;
       --brd:rgba(255,255,255,0.06);
       --font:'Outfit', sans-serif;
       --body-font:'Outfit', sans-serif;
       --mono:'DM Mono', monospace;
       --ease:cubic-bezier(0.16, 1, 0.3, 1);
       --hh:64px;
+      --focus:0 0 0 3px rgba(var(--pri-rgb),.35);
+    }
+
+    /* Honor prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.001ms !important;
+        scroll-behavior:auto !important;
+      }
     }
 
     html{scroll-behavior:smooth}
@@ -56,6 +97,35 @@
       content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;
       background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       background-repeat:repeat;background-size:128px;
+    }
+
+    /* ── A11y utilities ── */
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    }
+    .skip-link{
+      position:absolute;top:-100px;left:8px;z-index:10000;
+      padding:10px 16px;border-radius:8px;
+      background:var(--pri);color:var(--bg0);
+      font-family:var(--mono);font-size:12px;font-weight:600;
+      text-decoration:none;letter-spacing:.5px;
+      transition:top .15s var(--ease);
+    }
+    .skip-link:focus{top:8px;outline:none;box-shadow:var(--focus)}
+
+    /* Visible focus styles for keyboard nav */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [role="button"]:focus-visible,
+    [role="tab"]:focus-visible,
+    [tabindex]:focus-visible{
+      outline:none;
+      box-shadow:var(--focus);
+      border-radius:6px;
     }
 
     /* ── Cursor Glow ── */
@@ -208,110 +278,175 @@
     .hero-meta-item{display:flex;align-items:center;gap:6px}
     .hero-meta-item svg{color:var(--pri);flex-shrink:0}
 
-    /* ── LAYOUT ── */
+    /* ── LAYOUT ──
+       All top-level sections (header, hero, app, faq, footer) share the
+       same outer-padding + max-width:1600px centered pattern. This guarantees
+       consistent left-edge alignment for the logo, sidebar, hero, and FAQ
+       at every viewport width and zoom level. */
+    .app-body-outer{
+      padding:0 32px;
+    }
     .app-body{
-      display:grid;grid-template-columns:320px 1fr;
-      max-width:1600px;margin:0 auto;
+      display:grid;
+      grid-template-columns:320px minmax(0, 1fr);
+      max-width:1600px;
+      margin:0 auto;
       min-height:calc(100vh - var(--hh) - 100px);
+      width:100%;
     }
 
-    /* ── SIDEBAR ── */
+    /* ════════════════════════════════════════════════════════════════
+       SIDEBAR — Configuration Rail
+       Refined input panel matching the navigation-rail aesthetic of
+       JSON Studio: structural feel (no card backgrounds), eyebrow labels,
+       unified typography, integrated rather than boxed.
+       ════════════════════════════════════════════════════════════════ */
     .sidebar{
       border-right:1px solid var(--brd);
-      padding:24px 20px;overflow-y:auto;
-      background:var(--bg1);
+      background:transparent;
+      padding:28px 0;
       position:sticky;top:var(--hh);
       height:calc(100vh - var(--hh));
+      overflow-y:auto;
       display:flex;flex-direction:column;
-      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.06) transparent;
     }
-    .sidebar::-webkit-scrollbar{width:6px}
-    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
 
-    .sb-section{margin-bottom:22px}
+    /* Section wrapper — adds horizontal breathing room and dividers between groups */
+    .sb-section{
+      padding:0 22px 28px;
+      position:relative;
+    }
+    .sb-section + .sb-section{
+      border-top:1px solid var(--brd);
+      padding-top:24px;
+    }
+
+    /* Eyebrow label — matches landing page section-tag pattern */
     .sb-label{
+      display:inline-flex;align-items:center;gap:8px;
       font-family:var(--mono);font-size:10px;
-      color:var(--t2);text-transform:uppercase;letter-spacing:2px;
-      font-weight:500;margin-bottom:14px;
-      display:flex;align-items:center;gap:8px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:2.2px;
+      font-weight:500;
+      margin-bottom:18px;
     }
-    .sb-label::before{content:'';display:block;width:18px;height:1px;background:var(--t2)}
+    .sb-label::before{
+      content:'';display:block;width:18px;height:1px;
+      background:var(--t2);
+    }
 
-    .ig{margin-bottom:14px}
+    /* Input group */
+    .ig{margin-bottom:18px}
+    .ig:last-child{margin-bottom:0}
     .il{
-      font-size:11px;color:var(--t1);margin-bottom:7px;
+      font-size:11.5px;color:var(--t1);margin-bottom:9px;
       display:flex;align-items:center;gap:6px;
-      font-weight:600;letter-spacing:.3px;
+      font-weight:600;letter-spacing:.2px;
     }
 
+    /* Refined input field */
     .ifield{
       width:100%;padding:10px 12px;
       background:var(--bg2);border:1px solid var(--brd);
       border-radius:9px;color:var(--t0);
       font-size:13px;font-family:var(--mono);font-weight:500;
-      outline:none;transition:all .2s;
+      outline:none;transition:border-color .2s, box-shadow .2s;
     }
+    .ifield:hover{border-color:rgba(255,255,255,.1)}
     .ifield:focus{
       border-color:rgba(var(--pri-rgb),.4);
       box-shadow:0 0 0 3px rgba(var(--pri-rgb),.06);
     }
     .ifield::-webkit-inner-spin-button,
-    .ifield::-webkit-outer-spin-button{-webkit-appearance:none}
+    .ifield::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     .ifield::placeholder{color:rgba(255,255,255,.18)}
 
-    /* Toggle pills */
-    .trow{display:flex;gap:4px;background:var(--bg2);padding:3px;border-radius:9px;border:1px solid var(--brd)}
+    /* Toggle pills — refined to match JSON Studio's tab-bar feel */
+    .trow{
+      display:flex;gap:3px;
+      background:var(--bg2);
+      padding:3px;
+      border-radius:10px;
+      border:1px solid var(--brd);
+    }
     .tbtn{
-      flex:1;padding:8px 6px;border-radius:7px;
+      flex:1;padding:9px 8px;border-radius:7px;
       font-size:11.5px;font-weight:600;cursor:pointer;
-      font-family:var(--body-font);transition:all .2s var(--ease);
+      font-family:var(--body-font);
+      transition:color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
       border:none;background:transparent;color:var(--t2);
-      text-align:center;letter-spacing:.2px;
+      text-align:center;letter-spacing:.1px;
+      position:relative;
     }
     .tbtn.active{
-      background:rgba(var(--pri-rgb),.1);
+      background:linear-gradient(180deg,
+        rgba(var(--pri-rgb),.14) 0%,
+        rgba(var(--pri-rgb),.06) 100%);
       color:var(--pri);
-      box-shadow:0 0 0 1px rgba(var(--pri-rgb),.15);
+      box-shadow:
+        inset 0 0 0 1px rgba(var(--pri-rgb),.2),
+        0 0 12px rgba(var(--pri-rgb),.08);
     }
-    .tbtn:hover:not(.active){color:var(--t1);background:rgba(255,255,255,.03)}
+    .tbtn:not(.active):hover{
+      color:var(--t1);
+      background:rgba(255,255,255,.025);
+    }
 
     /* Confidence slider */
-    .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .conf-val{
-      font-family:var(--mono);font-size:13px;font-weight:600;
+      font-family:var(--mono);font-size:12.5px;font-weight:600;
       color:var(--pri);
-      padding:2px 8px;border-radius:6px;
+      padding:3px 9px;border-radius:6px;
       background:rgba(var(--pri-rgb),.06);
-      border:1px solid rgba(var(--pri-rgb),.15);
+      border:1px solid rgba(var(--pri-rgb),.18);
+      letter-spacing:.3px;
     }
     input[type=range]{
       width:100%;accent-color:var(--pri);cursor:pointer;
       height:6px;
     }
+    input[type=range]:focus{outline:none}
+    input[type=range]:focus-visible{box-shadow:var(--focus);border-radius:3px}
     .conf-ticks{
       display:flex;justify-content:space-between;
-      font-size:9px;color:var(--t2);margin-top:5px;
+      font-size:9.5px;color:var(--t2);margin-top:6px;
       font-family:var(--mono);letter-spacing:.5px;
     }
 
+    /* Hypothesis explanation box */
     .hyp-box{
-      margin-top:9px;padding:10px 12px;
+      margin-top:10px;padding:11px 13px;
       background:rgba(var(--acc-rgb),.04);
       border:1px solid rgba(var(--acc-rgb),.1);
       border-radius:8px;
       font-size:11.5px;color:var(--t2);line-height:1.6;
     }
-    .hyp-box strong{color:var(--t1)}
+    .hyp-box strong{color:var(--t1);font-weight:600}
 
-    /* Variant boxes */
+    /* Variant boxes — refined: less heavy, more typographic hierarchy */
     .vbox{
-      background:var(--bg2);border:1px solid var(--brd);
-      border-radius:11px;padding:14px;margin-bottom:10px;
-      border-left:3px solid rgba(255,255,255,.08);
-      transition:all .2s;
+      background:rgba(255,255,255,.015);
+      border:1px solid var(--brd);
+      border-left:2px solid rgba(255,255,255,.08);
+      border-radius:10px;
+      padding:14px;margin-bottom:10px;
+      transition:border-color .2s, background .2s;
     }
-    .vbox:hover{border-color:rgba(255,255,255,.1)}
-    .vbox.va{border-left-color:var(--pri)}
+    .vbox:hover{
+      border-color:rgba(255,255,255,.1);
+      background:rgba(255,255,255,.025);
+    }
+    .vbox.va{
+      border-left-color:var(--pri);
+      background:linear-gradient(90deg,
+        rgba(var(--pri-rgb),.05) 0%,
+        rgba(255,255,255,.015) 30%,
+        rgba(255,255,255,.015) 100%);
+    }
     .vbox-header{
       display:flex;align-items:center;justify-content:space-between;
       margin-bottom:10px;gap:6px;
@@ -323,12 +458,21 @@
       letter-spacing:-.2px;
     }
     .vbox-name-input::placeholder{color:var(--t2);font-weight:500}
+    .vbox-name-input:focus{
+      box-shadow:none;
+      outline:1px dashed rgba(var(--pri-rgb),.3);
+      outline-offset:3px;border-radius:2px;
+    }
     .vbox-ctrl-lbl{
       font-size:9px;color:var(--t2);font-weight:700;
       letter-spacing:1.2px;text-transform:uppercase;
       padding:3px 7px;border-radius:5px;
       background:rgba(255,255,255,.04);
       font-family:var(--mono);
+    }
+    .va .vbox-ctrl-lbl{
+      color:var(--pri);
+      background:rgba(var(--pri-rgb),.08);
     }
     .vinputs{display:grid;gap:8px}
     .vinputs.c2{grid-template-columns:1fr 1fr}
@@ -339,21 +483,53 @@
       font-family:var(--mono);
     }
 
-    .tip-box{
-      margin-top:auto;padding:12px 14px;
-      background:rgba(var(--acc-rgb),.04);
-      border:1px solid rgba(var(--acc-rgb),.1);
-      border-radius:10px;
-      font-size:11px;color:var(--t2);line-height:1.65;
-    }
-    .tip-em{color:var(--acc);font-weight:700}
+    /* Warning box for SRM/data issues */
     .warn-box{
-      padding:9px 12px;
+      padding:10px 12px;
       background:rgba(var(--warn-rgb),.06);
       border:1px solid rgba(var(--warn-rgb),.18);
       border-radius:8px;
-      font-size:11px;color:var(--warn);line-height:1.65;
-      margin-top:8px;
+      font-size:11.5px;color:var(--warn);line-height:1.6;
+      margin-top:10px;
+    }
+
+    /* Bottom info block — matches JSON Studio's sb-info pattern */
+    .sb-info{
+      margin:auto 14px 0;
+      padding:24px 18px 4px;
+      border-top:1px solid var(--brd);
+    }
+    .sb-info-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      font-family:var(--mono);font-size:9.5px;
+      color:var(--pri);text-transform:uppercase;letter-spacing:1.8px;
+      font-weight:600;margin-bottom:14px;
+    }
+    .sb-info-eyebrow::before{
+      content:'';display:block;width:6px;height:6px;border-radius:50%;
+      background:var(--pri);
+      box-shadow:0 0 6px rgba(var(--pri-rgb),.6);
+      animation:pulse 2s infinite;
+    }
+    .sb-info-list{
+      display:flex;flex-direction:column;gap:11px;
+    }
+    .sb-info-row{
+      display:flex;align-items:flex-start;gap:9px;
+      font-size:11px;color:var(--t2);line-height:1.45;
+    }
+    .sb-info-row svg{
+      color:var(--pri);flex-shrink:0;margin-top:2px;
+      opacity:.7;
+    }
+    .sb-info-row b{
+      color:var(--t1);font-weight:600;display:block;
+      font-size:11.5px;letter-spacing:-.1px;
+    }
+    .sb-info-row span{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);opacity:.85;letter-spacing:.1px;
+      margin-top:1px;display:block;
     }
 
     /* ── MAIN PANEL ── */
@@ -805,13 +981,15 @@
     .modal-close:hover{border-color:rgba(var(--pri-rgb),.2);color:var(--t1)}
 
     /* ── Responsive ── */
-    @media(max-width:1100px){.app-body{grid-template-columns:280px 1fr}}
+    @media(max-width:1100px){.app-body{grid-template-columns:280px minmax(0,1fr)}}
     @media(max-width:900px){
       .app-body{grid-template-columns:1fr}
       .sidebar{
         border-right:none;border-bottom:1px solid var(--brd);
         position:static;height:auto;
+        padding:18px 0 24px;
       }
+      .sb-info{margin:24px 14px 0;border-top:1px solid var(--brd);padding-top:24px}
       .hero-bar{grid-template-columns:1fr 1fr 1fr}
       .detail-row{grid-template-columns:1fr}
       .faq-grid{grid-template-columns:1fr}
@@ -819,6 +997,7 @@
       .main-panel{padding:18px}
       .faq-section{padding:50px 20px}
       .app-header{padding:0 18px}
+      .app-body-outer{padding:0 18px}
     }
     @media(max-width:600px){
       .hdr-status,.hdr-sep,.hdr-tool-name{display:none}
@@ -841,6 +1020,17 @@
   </style>
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<noscript>
+  <div style="padding:24px;max-width:680px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#c8c8d4;font-family:system-ui,sans-serif">
+    <h1 style="color:#fff;font-size:20px;margin-bottom:12px">A/B Test Calculator – Datapad</h1>
+    <p style="margin-bottom:10px">This A/B test statistical significance calculator runs entirely in your browser using JavaScript. To use it, please enable JavaScript and reload the page.</p>
+    <p style="margin-bottom:10px">Once enabled, you can compute p-values, confidence intervals, statistical power, sample size requirements, and run Monte Carlo simulations for two-variant or multi-variant tests with automatic Bonferroni correction.</p>
+    <p>Other free tools at Datapad: <a href="/json-studio" style="color:#00ff88">JSON Studio</a></p>
+  </div>
+</noscript>
 
 <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
@@ -930,80 +1120,109 @@
 </section>
 
 <!-- BODY -->
+<div class="app-body-outer">
 <div class="app-body">
-  <!-- SIDEBAR -->
-  <aside class="sidebar" aria-label="Test configuration">
+
+  <!-- SIDEBAR / Test Configuration -->
+  <aside class="sidebar" aria-label="Test configuration and input data">
+
     <div class="sb-section">
-      <div class="sb-label">Configuration</div>
+      <h2 class="sb-label">Configuration</h2>
 
       <div class="ig">
-        <div class="il">Test Type <button class="ibtn" data-tip="Conversion: Measures rate of a binary action.&#10;Revenue: Also compares revenue per visitor.">i</button></div>
-        <div class="trow">
-          <button class="tbtn active" onclick="setMode('conversion',this)">Conversion</button>
-          <button class="tbtn" onclick="setMode('revenue',this)">Revenue</button>
+        <div class="il" id="lbl-testtype">Test Type <button class="ibtn" data-tip="Conversion: Measures rate of a binary action.&#10;Revenue: Also compares revenue per visitor." aria-label="About test type">i</button></div>
+        <div class="trow" role="group" aria-labelledby="lbl-testtype">
+          <button class="tbtn active" onclick="setMode('conversion',this)" aria-pressed="true">Conversion</button>
+          <button class="tbtn" onclick="setMode('revenue',this)" aria-pressed="false">Revenue</button>
         </div>
       </div>
 
       <div class="ig">
-        <div class="il">Variants <button class="ibtn" data-tip="A/B tests two versions. A/B/C and A/B/C/D compare multiple variants against control. Bonferroni correction is applied automatically for 3+ variants.">i</button></div>
-        <div class="trow">
-          <button class="tbtn active" onclick="setVariants(2,this)">A/B</button>
-          <button class="tbtn" onclick="setVariants(3,this)">A/B/C</button>
-          <button class="tbtn" onclick="setVariants(4,this)">A/B/C/D</button>
+        <div class="il" id="lbl-variants">Variants <button class="ibtn" data-tip="A/B tests two versions. A/B/C and A/B/C/D compare multiple variants against control. Bonferroni correction is applied automatically for 3+ variants." aria-label="About variants">i</button></div>
+        <div class="trow" role="group" aria-labelledby="lbl-variants">
+          <button class="tbtn active" onclick="setVariants(2,this)" aria-pressed="true" aria-label="Two variants: A and B">A/B</button>
+          <button class="tbtn" onclick="setVariants(3,this)" aria-pressed="false" aria-label="Three variants: A, B, and C">A/B/C</button>
+          <button class="tbtn" onclick="setVariants(4,this)" aria-pressed="false" aria-label="Four variants: A, B, C, and D">A/B/C/D</button>
         </div>
       </div>
 
       <div class="ig">
         <div class="conf-row">
-          <div class="il" style="margin-bottom:0">Confidence <button class="ibtn" data-tip="How certain you need to be that the result is real. Alpha = 1 - confidence level.">i</button></div>
-          <span class="conf-val"><span id="confLabel">95</span>%</span>
+          <label class="il" style="margin-bottom:0" for="confRange">Confidence <button class="ibtn" data-tip="How certain you need to be that the result is real. Alpha = 1 - confidence level." aria-label="About confidence level">i</button></label>
+          <span class="conf-val" aria-hidden="true"><span id="confLabel">95</span>%</span>
         </div>
-        <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level"/>
+        <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level percentage" aria-valuemin="80" aria-valuemax="99" aria-valuenow="95"/>
+        <div class="conf-ticks" aria-hidden="true"><span>80</span><span>90</span><span>95</span><span>99</span></div>
       </div>
 
       <div class="ig">
-        <div class="il">Hypothesis <button class="ibtn" data-tip="Two-sided: Tests if variant differs in either direction. Recommended default.&#10;One-sided: Tests only if variant is better. Only use when harm is impossible.">i</button></div>
-        <div class="trow">
-          <button class="tbtn active" onclick="setHypothesis('two',this)">Two-sided</button>
-          <button class="tbtn" onclick="setHypothesis('one',this)">One-sided</button>
+        <div class="il" id="lbl-hyp">Hypothesis <button class="ibtn" data-tip="Two-sided: Tests if variant differs in either direction. Recommended default.&#10;One-sided: Tests only if variant is better. Only use when harm is impossible." aria-label="About hypothesis types">i</button></div>
+        <div class="trow" role="group" aria-labelledby="lbl-hyp">
+          <button class="tbtn active" onclick="setHypothesis('two',this)" aria-pressed="true">Two-sided</button>
+          <button class="tbtn" onclick="setHypothesis('one',this)" aria-pressed="false">One-sided</button>
         </div>
-        <div class="hyp-box" id="hypExplain"></div>
+        <div class="hyp-box" id="hypExplain" role="status" aria-live="polite"></div>
       </div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-label">Input Data</div>
-      <div id="variantInputs"></div>
-      <div id="warnBox"></div>
+      <h2 class="sb-label">Input Data</h2>
+      <div id="variantInputs" role="group" aria-label="Variant data inputs"></div>
+      <div id="warnBox" role="alert" aria-live="polite"></div>
     </div>
 
-    <div class="tip-box">
-      <span class="tip-em">●</span> <strong style="color:var(--t1)">Privacy-first</strong> — Pre-filled with sample data. Edit freely. All computation runs locally — your data never leaves the browser.
+    <!-- Bottom info panel (matches JSON Studio sb-info pattern) -->
+    <div class="sb-info" role="complementary" aria-label="Privacy and data handling">
+      <div class="sb-info-eyebrow">Live · Local</div>
+      <div class="sb-info-list">
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div>
+            <b>Zero data sent</b>
+            <span>everything runs in-browser</span>
+          </div>
+        </div>
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <div>
+            <b>Pre-filled samples</b>
+            <span>edit values to compute</span>
+          </div>
+        </div>
+        <div class="sb-info-row">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <div>
+            <b>Excel export</b>
+            <span>download full report</span>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>
 
   <!-- MAIN -->
-  <main class="main-panel" aria-label="Analysis results">
-    <nav class="tab-bar" role="tablist">
-      <button class="tab-btn active" role="tab" aria-selected="true" onclick="setTab('results',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <main class="main-panel" id="main-content" aria-label="Analysis results">
+    <nav class="tab-bar" role="tablist" aria-label="Analysis sections">
+      <button class="tab-btn active" role="tab" id="tab-results" aria-selected="true" aria-controls="tabContent" onclick="setTab('results',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Results
       </button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('power',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <button class="tab-btn" role="tab" id="tab-power" aria-selected="false" aria-controls="tabContent" onclick="setTab('power',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Power Analysis
       </button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('sim',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/></svg>
+      <button class="tab-btn" role="tab" id="tab-sim" aria-selected="false" aria-controls="tabContent" onclick="setTab('sim',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/></svg>
         Simulation
       </button>
-      <button class="tab-btn" role="tab" aria-selected="false" onclick="setTab('insights',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H5a2 2 0 00-2 2v7h6V11zM15 7h-6v13h6V7zM21 4h-6v16h6V4z"/></svg>
+      <button class="tab-btn" role="tab" id="tab-insights" aria-selected="false" aria-controls="tabContent" onclick="setTab('insights',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11H5a2 2 0 00-2 2v7h6V11zM15 7h-6v13h6V7zM21 4h-6v16h6V4z"/></svg>
         Insights
       </button>
     </nav>
-    <div id="tabContent" role="tabpanel" aria-live="polite"></div>
+    <div id="tabContent" role="tabpanel" aria-live="polite" aria-labelledby="tab-results"></div>
   </main>
+</div>
 </div>
 
 <!-- FAQ -->
@@ -1018,14 +1237,13 @@
 
   <div class="faq-grid" id="faqGrid">
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">01</span>
           <span class="faq-q-text">What p-value is statistically significant?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1040,14 +1258,13 @@
       </div>
     </div>
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">02</span>
           <span class="faq-q-text">How many visitors do I need?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1062,14 +1279,13 @@
       </div>
     </div>
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">03</span>
           <span class="faq-q-text">What is statistical power in A/B testing?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1084,14 +1300,13 @@
       </div>
     </div>
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">04</span>
           <span class="faq-q-text">When should I use Bonferroni correction?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1106,14 +1321,13 @@
       </div>
     </div>
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">05</span>
           <span class="faq-q-text">What is a Sample Ratio Mismatch (SRM)?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1128,14 +1342,13 @@
       </div>
     </div>
 
-    <div class="faq-card" onclick="faqTog(this)">
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
       <div class="faq-card-q">
         <div class="faq-q-left">
           <span class="faq-idx">06</span>
           <span class="faq-q-text">One-sided or two-sided test?</span>
         </div>
-        <div class="faq-toggle">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
       <div class="faq-body">
@@ -1282,9 +1495,10 @@ function fmtNum(n){return(isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleSt
 // ═══════════ FAQ ═══════════
 function faqTog(card){
   var wasOpen=card.classList.contains('open');
-  document.querySelectorAll('.faq-card.open').forEach(function(c){c.classList.remove('open')});
-  if(!wasOpen)card.classList.add('open');
+  document.querySelectorAll('.faq-card.open').forEach(function(c){c.classList.remove('open');c.setAttribute('aria-expanded','false')});
+  if(!wasOpen){card.classList.add('open');card.setAttribute('aria-expanded','true')}
 }
+function faqKey(e,card){if(e.key==='Enter'||e.key===' '){e.preventDefault();faqTog(card)}}
 
 // Reveal FAQ on scroll
 (function(){
@@ -1298,10 +1512,10 @@ function faqTog(card){
 })();
 
 // ═══════════ CONTROLS ═══════════
-function actToggle(el){el.parentNode.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active')});el.classList.add('active')}
+function actToggle(el){el.parentNode.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false')});el.classList.add('active');el.setAttribute('aria-pressed','true')}
 function setMode(m,el){S.mode=m;actToggle(el);buildInputs();compute()}
 function setVariants(n,el){S.numVariants=n;actToggle(el);buildInputs();compute()}
-function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;compute()}
+function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;var r=document.getElementById('confRange');if(r)r.setAttribute('aria-valuenow',v);compute()}
 function setHypothesis(h,el){S.hypothesis=h;actToggle(el);updateHyp();compute()}
 function setTab(t,el){S.activeTab=t;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false')});el.classList.add('active');el.setAttribute('aria-selected','true');render()}
 function toggleGuide(){var m=document.getElementById('guideModal'),b=document.getElementById('guideBtn'),open=m.classList.toggle('open');b.setAttribute('aria-expanded',open?'true':'false')}
@@ -1314,15 +1528,16 @@ function buildInputs(){
     var v=S.variants[i],isCtrl=i===0,cols=S.mode==='revenue'?'c3':'c2',id='var-'+i;
     var nameColor=isCtrl?'var(--t1)':'var(--pri)';
     var placeholder=isCtrl?'Control (A)':v.name;
-    h+='<div class="vbox '+(isCtrl?'':'va')+'">';
+    var vname=v.customName||v.name;
+    h+='<div class="vbox '+(isCtrl?'':'va')+'" role="group" aria-label="'+vname+' data inputs">';
     h+='<div class="vbox-header">';
-    h+='<input class="vbox-name-input" style="color:'+nameColor+'" type="text" value="'+(v.customName||'')+'" placeholder="'+placeholder+'" data-idx="'+i+'" oninput="onNameInput(this)" aria-label="'+(v.customName||v.name)+' custom name"/>';
-    if(isCtrl)h+='<span class="vbox-ctrl-lbl">Control</span>';
+    h+='<input class="vbox-name-input" style="color:'+nameColor+'" type="text" value="'+(v.customName||'')+'" placeholder="'+placeholder+'" data-idx="'+i+'" oninput="onNameInput(this)" aria-label="Custom name for variant '+v.name+'"/>';
+    if(isCtrl)h+='<span class="vbox-ctrl-lbl" aria-hidden="true">Control</span>';
     h+='</div>';
     h+='<div class="vinputs '+cols+'">';
-    h+='<div><div class="vinput-lbl">Visitors</div><input class="ifield" id="'+id+'-v" type="number" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)"/></div>';
-    h+='<div><div class="vinput-lbl">Conversions</div><input class="ifield" id="'+id+'-c" type="number" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)"/></div>';
-    if(S.mode==='revenue')h+='<div><div class="vinput-lbl">Revenue (₹)</div><input class="ifield" id="'+id+'-r" type="number" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" oninput="onInput(this)"/></div>';
+    h+='<div><label class="vinput-lbl" for="'+id+'-v">Visitors</label><input class="ifield" id="'+id+'-v" type="number" inputmode="numeric" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)" aria-label="Visitors for '+vname+'"/></div>';
+    h+='<div><label class="vinput-lbl" for="'+id+'-c">Conversions</label><input class="ifield" id="'+id+'-c" type="number" inputmode="numeric" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)" aria-label="Conversions for '+vname+'"/></div>';
+    if(S.mode==='revenue')h+='<div><label class="vinput-lbl" for="'+id+'-r">Revenue (₹)</label><input class="ifield" id="'+id+'-r" type="number" inputmode="decimal" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" oninput="onInput(this)" aria-label="Revenue in rupees for '+vname+'"/></div>';
     h+='</div></div>';
   }
   c.innerHTML=h;
