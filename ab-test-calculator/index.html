@@ -537,17 +537,39 @@
 
     /* Tab bar */
     .tab-bar{
-      display:flex;gap:4px;margin-bottom:20px;
-      background:var(--bg1);border-radius:11px;padding:4px;
+      display:flex;
+      gap:8px;
+      margin-bottom:20px;
+      background:var(--bg1);
+      border-radius:11px;padding:4px;
       border:1px solid var(--brd);
+      /* gap: 8px; */
+      width: 100%;
+      overflow-x: auto;          /* key for mobile */
+      scrollbar-width: none;     /* Firefox */
+    }
+    .tab-bar::-webkit-scrollbar {
+      display: none;             /* Chrome */
     }
     .tab-btn{
-      flex:1;padding:10px 12px;border-radius:8px;border:none;
-      background:transparent;color:var(--t2);
-      font-size:12.5px;font-weight:600;cursor:pointer;
-      font-family:var(--body-font);transition:all .25s var(--ease);
+      flex:1;
+      padding:10px 12px;
+      border-radius:8px;
+      border:none;
+      background:transparent;
+      color:var(--t2);
+      font-size:12.5px;
+      font-weight:600;
+      cursor:pointer;
+      font-family:var(--body-font);
+      transition:all .25s var(--ease);
       text-align:center;letter-spacing:.2px;
-      display:flex;align-items:center;justify-content:center;gap:7px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      flex: 0 0 auto;     
+      white-space: nowrap;
     }
     .tab-btn svg{flex-shrink:0;opacity:.7}
     .tab-btn.active{
@@ -1304,7 +1326,6 @@
           <span class="conf-val" aria-hidden="true"><span id="confLabel">95</span>%</span>
         </div>
         <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level percentage" aria-valuemin="80" aria-valuemax="99" aria-valuenow="95"/>
-        <div class="conf-ticks" aria-hidden="true"><span>80</span><span>90</span><span>95</span><span>99</span></div>
       </div>
 
       <div class="ig">
