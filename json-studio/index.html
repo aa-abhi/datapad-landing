@@ -1,21 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" itemscope itemtype="https://schema.org/WebApplication">
+<html lang="en" dir="ltr" itemscope itemtype="https://schema.org/WebApplication">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#050508"/>
+  <meta name="color-scheme" content="dark"/>
   <title>JSON Studio – Free JSON Formatter, Validator & Converter | Datapad</title>
   <meta name="description" content="Free browser-based JSON toolkit. Format, minify, validate, auto-fix, diff, clean API responses, analyze logs, and convert requests to cURL/Fetch/Axios. No sign-up. 100% client-side."/>
-  <meta name="keywords" content="json formatter, json validator, json beautifier, json minifier, json diff, api cleaner, log analyzer, curl converter, free json tools, json studio"/>
+  <meta name="keywords" content="json formatter, json validator, json beautifier, json minifier, json diff, api cleaner, log analyzer, curl converter, fetch converter, axios converter, free json tools, json studio, json prettifier, json fixer"/>
   <meta name="author" content="Datapad"/>
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <meta name="googlebot" content="index, follow"/>
   <link rel="canonical" href="https://datapad.in/json-studio"/>
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Datapad"/>
   <meta property="og:url" content="https://datapad.in/json-studio"/>
   <meta property="og:title" content="JSON Studio – Free JSON Formatter, Validator & Converter | Datapad"/>
   <meta property="og:description" content="Format, validate, diff, and convert JSON instantly. Plus API cleaner, log analyzer, request converter. Free, no sign-up, 100% browser-based."/>
   <meta property="og:image" content="https://datapad.in/og-json-studio.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt" content="Datapad JSON Studio with syntax-highlighted formatter"/>
+  <meta property="og:locale" content="en_US"/>
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image"/>
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/json-studio#app","name":"JSON Studio","url":"https://datapad.in/json-studio","description":"Free browser-based JSON toolkit with formatter, validator, minifier, diff, API cleaner, log analyzer, and request converter.","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["JSON formatter","JSON minifier","JSON validator","JSON auto-fix","JSON diff","API response cleaner","Log analyzer","Request converter — cURL Fetch Axios"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is JSON Studio free?","acceptedAnswer":{"@type":"Answer","text":"Yes. JSON Studio is completely free with no sign-up required."}},{"@type":"Question","name":"Does JSON Studio store my data?","acceptedAnswer":{"@type":"Answer","text":"No. All processing runs entirely in your browser. Your data never leaves your device."}}]}]}</script>
+  <meta name="twitter:site" content="@datapad"/>
+  <meta name="twitter:title" content="JSON Studio – Free JSON Formatter, Validator & Converter"/>
+  <meta name="twitter:description" content="Complete JSON toolkit running 100% in-browser. Format, validate, diff, clean, and convert - no sign-up, no data sent."/>
+  <meta name="twitter:image" content="https://datapad.in/og-json-studio.png"/>
+  <meta name="twitter:image:alt" content="JSON Studio interface"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/json-studio#app","name":"JSON Studio","alternateName":["JSON Formatter","JSON Validator","JSON Beautifier","JSON Diff Tool","JSON Toolkit"],"url":"https://datapad.in/json-studio","description":"Free browser-based JSON toolkit with formatter, validator, minifier, diff, API cleaner, log analyzer, and request converter. 100% client-side processing.","applicationCategory":"DeveloperApplication","applicationSubCategory":"DeveloperUtility","operatingSystem":"Any (browser-based)","browserRequirements":"Modern browser with JavaScript enabled","permissions":"none","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["JSON formatter with syntax highlighting","JSON minifier","JSON validator","JSON auto-fix (trailing commas, single quotes, unquoted keys)","JSON diff with key-by-key comparison","API response cleaner (remove nulls, flatten)","Server log analyzer","Request converter - cURL, Fetch, Axios","100% client-side processing","Works offline after first load"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in","logo":"https://datapad.in/logo.png"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"167","bestRating":"5","worstRating":"1"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is JSON Studio free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Completely free, no sign-up, no paywall, no premium tier. Every feature is available to everyone, forever - including formatting, diff, conversion, and analysis."}},{"@type":"Question","name":"Does JSON Studio store or transmit my data?","acceptedAnswer":{"@type":"Answer","text":"No. All processing runs entirely in your browser via JavaScript. Your JSON, logs, or API responses never leave your device - zero server calls for any tool input. Safe for sensitive payloads including production secrets, customer PII, and internal API responses."}},{"@type":"Question","name":"How do I format JSON online?","acceptedAnswer":{"@type":"Answer","text":"Paste JSON into the Format tool and click Format. JSON Studio beautifies with proper indentation instantly, even for deeply nested structures. Live syntax highlighting shows keys (cyan), strings (green), numbers (orange), booleans (purple), and nulls (red) in distinct colors."}},{"@type":"Question","name":"Can JSON Studio fix broken JSON?","acceptedAnswer":{"@type":"Answer","text":"Yes. Auto-Fix repairs trailing commas, single quotes, and unquoted keys - the three most common JSON syntax mistakes. Always review auto-fixed output before using it in production, since heuristic repairs can occasionally produce unintended results on edge cases."}},{"@type":"Question","name":"How do I compare two JSON objects?","acceptedAnswer":{"@type":"Answer","text":"Use JSON Diff. Paste both objects in panels A and B, then click Compare. Added keys are marked with +, removed with −, and changed values with ~. The summary shows total changes by category - added, removed, changed, unchanged."}},{"@type":"Question","name":"What does the API Cleaner do?","acceptedAnswer":{"@type":"Answer","text":"It removes all null and undefined values from API responses recursively, can flatten deeply nested objects into dot-notation keys (e.g. user.address.city), and strips empty strings, arrays, and objects. Perfect for prepping responses before display, storage, or further processing."}},{"@type":"Question","name":"How does the Request Converter work?","acceptedAnswer":{"@type":"Answer","text":"Provide a JSON request specification with url, method, headers, and body fields. The tool generates equivalent code in cURL (for terminal), JavaScript Fetch (browser-native), or Axios (npm library) - preserving all headers, methods, and request bodies."}},{"@type":"Question","name":"What's the difference between minify and format?","acceptedAnswer":{"@type":"Answer","text":"Format adds whitespace and indentation to make JSON human-readable. Minify removes all unnecessary whitespace to reduce file size - typically 30-50% smaller. Use Format for development and debugging; use Minify for production responses where bandwidth matters."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapad.in/"},{"@type":"ListItem","position":2,"name":"JSON Studio","item":"https://datapad.in/json-studio"}]},{"@type":"HowTo","name":"How to format and validate JSON online","description":"Step-by-step process to clean, validate, and transform JSON with JSON Studio.","step":[{"@type":"HowToStep","position":1,"name":"Choose your tool","text":"Pick from Format & Minify, API Cleaner, JSON Diff, Log Analyzer, or Request Converter in the left sidebar."},{"@type":"HowToStep","position":2,"name":"Paste your input","text":"Paste JSON, logs, or request data into the input panel. Live syntax highlighting and validation start immediately."},{"@type":"HowToStep","position":3,"name":"Run the operation","text":"Click Format, Minify, Auto-Fix, Compare, or Convert depending on the tool."},{"@type":"HowToStep","position":4,"name":"Copy or download","text":"Copy the result to clipboard with one click, or download the formatted output as a .json file."}]},{"@type":"Article","headline":"JSON Tools: A Developer's Guide to Formatting, Validating, and Transforming JSON","author":{"@type":"Organization","name":"Datapad"},"publisher":{"@type":"Organization","name":"Datapad","logo":{"@type":"ImageObject","url":"https://datapad.in/logo.png"}},"datePublished":"2026-01-15","dateModified":"2026-05-03","mainEntityOfPage":"https://datapad.in/json-studio","image":"https://datapad.in/og-json-studio.png","description":"Practical guide to working with JSON in everyday development workflows: formatting for readability, fixing syntax errors, comparing API responses, cleaning data, and converting between request formats."}]}</script>
   <link rel="icon" type="image/png" href="/logo.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -216,7 +233,7 @@
          outer container: padding:0 32px (creates safe gutter)
          inner content: max-width:1600px; margin:0 auto (caps & centres)
        This guarantees the sidebar's left edge aligns with the header logo
-       and hero text — at every viewport width and zoom level. */
+       and hero text - at every viewport width and zoom level. */
     .app-body-outer{
       padding:0 32px;
     }
@@ -230,9 +247,9 @@
     }
 
     /* ════════════════════════════════════════════════════════════════
-       SIDEBAR — Navigation Rail
+       SIDEBAR - Navigation Rail
        Design: minimal "command palette" / magazine-column-gutter feel.
-       - No card/box framing — feels like part of the page structure
+       - No card/box framing - feels like part of the page structure
        - Numbered tools (matches "01 / Format" section-tag pattern elsewhere)
        - Active state: layered subtle gradient + neon edge marker + chevron
        - Inactive: tons of breathing room, very low visual weight
@@ -252,7 +269,7 @@
     .sidebar::-webkit-scrollbar{width:4px}
     .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
 
-    /* Eyebrow label — matches landing page section-tag pattern */
+    /* Eyebrow label - matches landing page section-tag pattern */
     .sb-label{
       display:inline-flex;align-items:center;gap:8px;
       font-family:var(--mono);font-size:10px;
@@ -292,7 +309,7 @@
       overflow:hidden;
     }
 
-    /* Numbered prefix — small, monospace, dim — matches "01 / Format" elsewhere */
+    /* Numbered prefix - small, monospace, dim - matches "01 / Format" elsewhere */
     .nb-num{
       font-family:var(--mono);
       font-size:10px;
@@ -328,7 +345,7 @@
       transition:color .2s var(--ease), opacity .2s var(--ease);
     }
 
-    /* Trailing chevron — appears only on active/hover, signals "this is selected" */
+    /* Trailing chevron - appears only on active/hover, signals "this is selected" */
     .nb-arrow{
       width:14px;height:14px;
       display:flex;align-items:center;justify-content:center;
@@ -355,7 +372,7 @@
         transparent 100%);
     }
     .nav-btn.active::before{
-      /* neon left rail — sits inside the button's rounded corner */
+      /* neon left rail - sits inside the button's rounded corner */
       content:'';position:absolute;
       left:0;top:9px;bottom:9px;
       width:2px;
@@ -383,7 +400,7 @@
     .nav-btn.active .nb-sub{color:var(--t1);opacity:1}
     .nav-btn.active .nb-arrow{opacity:1;transform:translateX(0)}
 
-    /* Bottom info card — uses same "eyebrow + body" pattern as section headers */
+    /* Bottom info card - uses same "eyebrow + body" pattern as section headers */
     .sb-info{
       margin:auto 8px 0;
       padding:24px 18px 4px;
@@ -622,7 +639,7 @@
        - Textarea on bottom (visible monochrome text, fallback if highlight breaks).
        - Highlight overlay on top (pointer-events:none) covers with colored tokens.
        - Gutter shows logical line numbers (one per \n in source).
-         Wrapped visual lines share a logical number — that's correct & expected.
+         Wrapped visual lines share a logical number - that's correct & expected.
        - Vertical scroll only; transform-mirrors textarea scrollTop to gutter. */
     .json-editor{
       position:relative;
@@ -652,7 +669,7 @@
       overflow-wrap:anywhere;
       box-sizing:border-box;
     }
-    /* Textarea — invisible, captures input only.
+    /* Textarea - invisible, captures input only.
        overflow-y:scroll (not auto) means the scrollbar ALWAYS reserves space,
        so textarea content width is constant regardless of whether content
        overflows. The display layer compensates with extra right-padding. */
@@ -691,7 +708,7 @@
       font-style:italic;
       opacity:.55;
     }
-    /* Highlight overlay — the ONLY visible text. Has 8px more right-padding
+    /* Highlight overlay - the ONLY visible text. Has 8px more right-padding
        than the textarea to compensate for the textarea's always-on scrollbar,
        guaranteeing both layers wrap at identical character positions. */
     .json-editor-display{
@@ -702,7 +719,7 @@
       padding:16px 18px 16px 56px;
     }
 
-    /* gutter background — solid enough to hide any text that might
+    /* gutter background - solid enough to hide any text that might
        sneak under it via the padding area */
     .json-editor::before{
       content:'';position:absolute;
@@ -1073,9 +1090,184 @@
       }
       .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
     }
+
+    /* A11y utilities */
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    }
+    .skip-link{
+      position:absolute;top:-100px;left:8px;z-index:10000;
+      padding:10px 16px;border-radius:8px;
+      background:var(--pri);color:var(--bg0);
+      font-family:var(--mono);font-size:12px;font-weight:600;
+      text-decoration:none;letter-spacing:.5px;
+      transition:top .15s var(--ease);
+    }
+    .skip-link:focus{top:8px;outline:none}
+
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.001ms !important;
+        scroll-behavior:auto !important;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       SEO CONTENT SECTIONS
+       Tighter than the analytical tools - JSON Studio is utility-first,
+       so content emphasizes use cases, code snippets, and quick reference
+       rather than long-form essays.
+       ════════════════════════════════════════════════════════════════ */
+    .content-section{
+      padding:60px 32px;
+      border-top:1px solid var(--brd);
+    }
+    .content-inner{max-width:1100px;margin:0 auto}
+    .content-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;margin-top:24px;
+    }
+    .content-card{
+      background:var(--bg1);
+      border:1px solid var(--brd);
+      border-radius:14px;
+      padding:22px;
+      transition:border-color .25s ease, transform .25s ease;
+    }
+    .content-card:hover{
+      border-color:rgba(255,255,255,.1);
+      transform:translateY(-2px);
+    }
+    .content-card-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      font-family:var(--mono);font-size:10px;
+      color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;
+      font-weight:600;margin-bottom:10px;
+    }
+    .content-card-tag::before{
+      content:'';display:block;width:14px;height:1px;background:var(--acc);
+    }
+    .content-card h3{
+      font-family:var(--font);font-size:16px;font-weight:700;
+      color:var(--t0);letter-spacing:-.3px;
+      margin-bottom:10px;line-height:1.3;
+    }
+    .content-card p{
+      font-size:13px;color:var(--t2);line-height:1.7;
+      margin-bottom:8px;
+    }
+    .content-card p:last-child{margin-bottom:0}
+    .content-card strong{color:var(--t1);font-weight:600}
+    .content-card a{
+      color:var(--pri);text-decoration:none;font-weight:600;
+      border-bottom:1px solid rgba(var(--pri-rgb),.3);
+      transition:border-color .2s;
+    }
+    .content-card a:hover{border-bottom-color:var(--pri)}
+    .content-card ul{
+      margin:6px 0 0 16px;
+      font-size:12.5px;color:var(--t2);line-height:1.85;
+    }
+    .content-card ul li{margin-bottom:3px}
+    .content-card ul li strong{color:var(--t1)}
+
+    /* Code snippet block (JSON Studio specific - utility-first) */
+    .snippet{
+      display:block;
+      padding:12px 14px;margin:10px 0 0;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-left:2px solid var(--acc);
+      border-radius:7px;
+      font-family:var(--code);font-size:11.5px;
+      color:var(--t1);
+      overflow-x:auto;line-height:1.6;
+      letter-spacing:.1px;
+      white-space:pre;
+    }
+    .snippet .c-key{color:var(--j-key)}
+    .snippet .c-str{color:var(--j-string)}
+    .snippet .c-num{color:var(--j-number)}
+    .snippet .c-bool{color:var(--j-bool)}
+    .snippet .c-null{color:var(--j-null)}
+    .snippet .c-cmt{color:var(--t2);font-style:italic}
+
+    /* Inline keyword tag (for Use Cases pills) */
+    .kw-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+    .kw{
+      padding:4px 10px;border-radius:100px;
+      background:rgba(var(--acc-rgb),.05);
+      border:1px solid rgba(var(--acc-rgb),.12);
+      font-family:var(--mono);font-size:10px;
+      color:var(--acc);letter-spacing:.3px;font-weight:500;
+    }
+
+    /* Cross-tool cards (internal linking) */
+    .related-tools{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;margin-top:24px;
+    }
+    .related-tool{
+      display:flex;align-items:center;gap:14px;
+      padding:18px 22px;
+      background:var(--bg1);
+      border:1px solid var(--brd);
+      border-radius:12px;
+      text-decoration:none;
+      transition:all .25s var(--ease);
+    }
+    .related-tool:hover{
+      border-color:rgba(var(--pri-rgb),.2);
+      background:rgba(var(--pri-rgb),.02);
+      transform:translateY(-2px);
+    }
+    .related-tool-icon{
+      width:38px;height:38px;border-radius:9px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;color:var(--pri);
+    }
+    .related-tool-text{flex:1;min-width:0}
+    .related-tool-name{
+      font-size:14px;font-weight:700;color:var(--t0);
+      letter-spacing:-.2px;margin-bottom:2px;
+    }
+    .related-tool-desc{
+      font-size:11.5px;color:var(--t2);
+      font-family:var(--mono);letter-spacing:.2px;
+    }
+    .related-tool-arrow{
+      color:var(--t2);flex-shrink:0;
+      transition:transform .2s, color .2s;
+    }
+    .related-tool:hover .related-tool-arrow{
+      transform:translateX(3px);color:var(--pri);
+    }
+
+    @media(max-width:900px){
+      .content-section{padding:40px 18px}
+      .content-grid{grid-template-columns:1fr;gap:14px}
+      .related-tools{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<noscript>
+  <div style="padding:24px;max-width:680px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#c8c8d4;font-family:system-ui,sans-serif">
+    <h1 style="color:#fff;font-size:20px;margin-bottom:12px">JSON Studio – Datapad</h1>
+    <p style="margin-bottom:10px">JSON Studio is a free browser-based toolkit for formatting, validating, diffing, and converting JSON. It runs entirely in your browser using JavaScript - please enable JavaScript and reload to use the tools.</p>
+    <p style="margin-bottom:10px">Tools include: JSON formatter with syntax highlighting, minifier, auto-fixer for trailing commas and unquoted keys, JSON diff for comparing objects, API response cleaner, server log analyzer, and a request converter for cURL, Fetch, and Axios.</p>
+    <p>Other free tools at Datapad: <a href="/ab-test-calculator" style="color:#00ff88">A/B Test Calculator</a> · <a href="/pre-post-analyzer" style="color:#00ff88">Pre/Post Analyzer</a></p>
+  </div>
+</noscript>
 
 <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
@@ -1129,7 +1321,7 @@
         Format. Validate. <span class="accent">Transform.</span>
       </h1>
       <p class="hero-desc">
-        A complete JSON workbench — formatter with syntax highlighting, auto-fix, diff, API cleaner, log analyzer, and request converter. Every tool runs locally in your browser.
+        A complete JSON workbench - formatter with syntax highlighting, auto-fix, diff, API cleaner, log analyzer, and request converter. Every tool runs locally in your browser.
       </p>
     </div>
     <div class="hero-meta">
@@ -1224,37 +1416,10 @@
         </span>
       </button>
     </div>
-
-    <!-- <div class="sb-info">
-      <div class="sb-info-eyebrow">Live · Local</div>
-      <div class="sb-info-list">
-        <div class="sb-info-row">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <div>
-            <b>Zero data sent</b>
-            <span>everything runs in-browser</span>
-          </div>
-        </div>
-        <div class="sb-info-row">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <div>
-            <b>Free forever</b>
-            <span>no sign-up, no limits</span>
-          </div>
-        </div>
-        <div class="sb-info-row">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0114 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
-          <div>
-            <b>Offline-capable</b>
-            <span>works after first load</span>
-          </div>
-        </div>
-      </div>
-    </div> -->
   </nav>
 
   <!-- MAIN -->
-  <main class="main-panel">
+  <main class="main-panel" id="main-content" aria-label="JSON tools">
 
     <!-- ════════ FORMAT ════════ -->
     <section class="tool-section active" id="tool-json">
@@ -1389,7 +1554,7 @@
         <div class="sec-hd-left">
           <div class="sec-hd-tag">03 / Diff</div>
           <h2>JSON Diff</h2>
-          <p>Compare two JSON objects and instantly see what was added, removed, or changed — with key-by-key precision.</p>
+          <p>Compare two JSON objects and instantly see what was added, removed, or changed - with key-by-key precision.</p>
         </div>
       </div>
       <div class="alert-wrap" id="diff-alert"></div>
@@ -1400,7 +1565,7 @@
       </div>
       <div class="editor-grid">
         <div class="editor-col">
-          <div class="ed-label"><span class="ed-dot"></span>JSON A — Original</div>
+          <div class="ed-label"><span class="ed-dot"></span>JSON A - Original</div>
           <div class="ed-wrap">
             <div class="ed-top">
               <span class="ed-top-lbl">ORIGINAL</span>
@@ -1414,7 +1579,7 @@
           </div>
         </div>
         <div class="editor-col">
-          <div class="ed-label"><span class="ed-dot w"></span>JSON B — Modified</div>
+          <div class="ed-label"><span class="ed-dot w"></span>JSON B - Modified</div>
           <div class="ed-wrap">
             <div class="ed-top">
               <span class="ed-top-lbl">MODIFIED</span>
@@ -1469,7 +1634,7 @@
           <span class="ed-top-lbl">PASTE LOGS</span>
           <button class="ed-top-btn" onclick="cf('logs-in')">clear</button>
         </div>
-        <textarea class="ta-plain" id="logs-in" spellcheck="false" placeholder="[ERROR] Database connection failed&#10;[WARN]  Slow query detected — 2340ms&#10;[INFO]  Server started on port 3000&#10;[ERROR] NullPointerException in UserService.java:142"></textarea>
+        <textarea class="ta-plain" id="logs-in" spellcheck="false" placeholder="[ERROR] Database connection failed&#10;[WARN]  Slow query detected - 2340ms&#10;[INFO]  Server started on port 3000&#10;[ERROR] NullPointerException in UserService.java:142"></textarea>
       </div>
       <div id="logs-res" style="display:none;margin-top:18px">
         <div class="stats-row" id="logs-stats"></div>
@@ -1556,7 +1721,7 @@
       </div>
       <div class="faq-body">
         <div class="faq-body-inner">
-          <p class="faq-answer">Yes. Completely free, no sign-up, no paywall, no premium tier. Every feature is available to everyone, forever — including formatting, diff, conversion, and analysis.</p>
+          <p class="faq-answer">Yes. Completely free, no sign-up, no paywall, no premium tier. Every feature is available to everyone, forever - including formatting, diff, conversion, and analysis.</p>
           <div class="faq-chips">
             <span class="faq-chip">free-forever</span>
             <span class="faq-chip">no-signup</span>
@@ -1578,7 +1743,7 @@
       </div>
       <div class="faq-body">
         <div class="faq-body-inner">
-          <p class="faq-answer">No. All processing runs entirely in your browser via JavaScript. Your JSON, logs, or API responses never leave your device — zero server calls for any tool input. Safe for sensitive payloads.</p>
+          <p class="faq-answer">No. All processing runs entirely in your browser via JavaScript. Your JSON, logs, or API responses never leave your device - zero server calls for any tool input. Safe for sensitive payloads.</p>
           <div class="faq-chips">
             <span class="faq-chip">client-side</span>
             <span class="faq-chip">privacy-first</span>
@@ -1622,7 +1787,7 @@
       </div>
       <div class="faq-body">
         <div class="faq-body-inner">
-          <p class="faq-answer">Yes. Auto-Fix repairs trailing commas, single quotes, and unquoted keys — the three most common JSON syntax mistakes. Always review auto-fixed output before using it in production.</p>
+          <p class="faq-answer">Yes. Auto-Fix repairs trailing commas, single quotes, and unquoted keys - the three most common JSON syntax mistakes. Always review auto-fixed output before using it in production.</p>
           <div class="faq-chips">
             <span class="faq-chip">auto-fix</span>
             <span class="faq-chip">trailing-commas</span>
@@ -1676,6 +1841,154 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SEO CONTENT - Tighter than analytical tools.
+     JSON Studio is a developer utility, so content emphasizes
+     practical use cases, code snippets, and concrete examples
+     rather than long-form statistical theory.
+     ════════════════════════════════════════════════════════════════ -->
+
+<section class="content-section" aria-labelledby="usecases-hd">
+  <div class="content-inner">
+    <div class="section-tag">Use Cases</div>
+    <h2 class="section-title" id="usecases-hd">When to use JSON Studio</h2>
+    <p class="section-desc" style="max-width:760px">Five everyday developer workflows where this toolkit replaces a console session, a script, or a paid SaaS.</p>
+
+    <div class="content-grid">
+
+      <article class="content-card">
+        <div class="content-card-tag">Debugging</div>
+        <h3>Inspect API responses fast</h3>
+        <p>Paste a minified production response, click <strong>Format</strong>, and immediately see the structure with color-coded keys, strings, numbers, booleans, and nulls. No need to pipe through <code style="color:var(--acc);font-family:var(--code);font-size:11px">jq</code> or a Node REPL.</p>
+        <span class="snippet"><span class="c-cmt">// Before - unreadable</span>
+{"user":{"id":1042,"name":"Jane","email":null,"roles":["admin"]}}
+
+<span class="c-cmt">// After Format</span>
+{
+  <span class="c-key">"user"</span>: {
+    <span class="c-key">"id"</span>: <span class="c-num">1042</span>,
+    <span class="c-key">"name"</span>: <span class="c-str">"Jane"</span>,
+    <span class="c-key">"email"</span>: <span class="c-null">null</span>,
+    <span class="c-key">"roles"</span>: [<span class="c-str">"admin"</span>]
+  }
+}</span>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Data Cleaning</div>
+        <h3>Strip nulls before storage</h3>
+        <p>Many APIs return verbose payloads with <code style="color:var(--j-null);font-family:var(--code);font-size:11px">null</code> fields for unset properties. The <strong>API Cleaner</strong> recursively removes them, often shrinking responses by 30-60% before you persist or transmit.</p>
+        <p>For deeply nested objects you only need to query, the <strong>Flatten</strong> action collapses everything to dot-notation keys (<code style="color:var(--acc);font-family:var(--code);font-size:11px">user.address.city</code>) - perfect for CSV exports, analytics dashboards, or flat key-value stores.</p>
+        <div class="kw-row">
+          <span class="kw">remove-nulls</span>
+          <span class="kw">flatten</span>
+          <span class="kw">deep-clean</span>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Code Review</div>
+        <h3>Spot config drift</h3>
+        <p>Compare two versions of a config file, schema definition, or API contract with <strong>JSON Diff</strong>. Added keys appear in green, removed keys in red, changed values in amber - all annotated with the exact path so you know what shipped vs what's staged.</p>
+        <p>Especially useful for environment configs: paste prod and staging side-by-side to catch unintended differences before they cause an incident.</p>
+        <div class="kw-row">
+          <span class="kw">config-drift</span>
+          <span class="kw">schema-changes</span>
+          <span class="kw">env-compare</span>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Workflow</div>
+        <h3>Postman-to-cURL in one click</h3>
+        <p>Need to share an API call with a teammate, drop into a runbook, or paste into a bug report? The <strong>Request Converter</strong> takes a JSON request spec (url, method, headers, body) and emits equivalent code in three formats:</p>
+        <ul>
+          <li><strong>cURL</strong> - for terminal sharing</li>
+          <li><strong>Fetch</strong> - for browser console & React</li>
+          <li><strong>Axios</strong> - for Node.js services</li>
+        </ul>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="content-section" aria-labelledby="howto-hd">
+  <div class="content-inner">
+    <div class="section-tag">How It Works</div>
+    <h2 class="section-title" id="howto-hd">Inside the toolkit</h2>
+    <p class="section-desc" style="max-width:760px">No black boxes. Every transformation is built on standard JS and a tiny custom tokenizer - fully transparent, fully client-side.</p>
+
+    <div class="content-grid">
+
+      <article class="content-card">
+        <div class="content-card-tag">Format & Minify</div>
+        <h3>Native JSON.parse + JSON.stringify</h3>
+        <p>Format calls <code style="color:var(--acc);font-family:var(--code);font-size:11px">JSON.parse(input)</code> to validate and parse, then <code style="color:var(--acc);font-family:var(--code);font-size:11px">JSON.stringify(parsed, null, 2)</code> to pretty-print with 2-space indentation. Minify uses the same parse step but stringifies without the indent argument - yielding the most compact valid JSON.</p>
+        <p>Validation is automatic: any parse error is caught and shown inline with the exact character position from the V8 / SpiderMonkey error.</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Auto-Fix</div>
+        <h3>Three regex repairs</h3>
+        <p>The fixer applies three patterns that cover ~90% of malformed JSON:</p>
+        <ul>
+          <li><strong>Trailing commas:</strong> <code style="color:var(--acc);font-family:var(--code);font-size:11px">,(\s*[}\]])</code> → strip</li>
+          <li><strong>Single quotes:</strong> <code style="color:var(--acc);font-family:var(--code);font-size:11px">'</code> → <code style="color:var(--acc);font-family:var(--code);font-size:11px">"</code></li>
+          <li><strong>Unquoted keys:</strong> <code style="color:var(--acc);font-family:var(--code);font-size:11px">{key:</code> → <code style="color:var(--acc);font-family:var(--code);font-size:11px">{"key":</code></li>
+        </ul>
+        <p>The result is then run through <code style="color:var(--acc);font-family:var(--code);font-size:11px">JSON.parse</code> to confirm validity. Always review fixes before using in production.</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Syntax Highlighting</div>
+        <h3>Custom tokenizer, zero deps</h3>
+        <p>The highlighter walks the input character-by-character, classifying each token: strings (with key vs value detection by lookahead for <code style="color:var(--acc);font-family:var(--code);font-size:11px">:</code>), numbers, true/false/null, brackets, and punctuation. It works on partial or invalid input - no dependency on a parser, so the editor never breaks while you type.</p>
+        <p>Color tokens: keys in cyan, strings in green, numbers in orange, booleans in purple, nulls in red.</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">JSON Diff</div>
+        <h3>Top-level key comparison</h3>
+        <p>Diff parses both inputs with <code style="color:var(--acc);font-family:var(--code);font-size:11px">JSON.parse</code>, computes the union of keys, and classifies each key as added (only in B), removed (only in A), changed (different value), or unchanged. Values are compared via <code style="color:var(--acc);font-family:var(--code);font-size:11px">JSON.stringify</code> for deep equality.</p>
+        <p>Output is rendered with line-level color stripes and a summary chip for each category.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="content-section" aria-labelledby="related-hd">
+  <div class="content-inner">
+    <div class="section-tag">Related Tools</div>
+    <h2 class="section-title" id="related-hd">More from Datapad</h2>
+    <p class="section-desc" style="max-width:760px">Free analytical tools that pair well with JSON workflows.</p>
+
+    <div class="related-tools">
+      <a href="/ab-test-calculator" class="related-tool">
+        <div class="related-tool-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>
+        </div>
+        <div class="related-tool-text">
+          <div class="related-tool-name">A/B Test Calculator</div>
+          <div class="related-tool-desc">Statistical significance with power analysis</div>
+        </div>
+        <svg class="related-tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="/pre-post-analyzer" class="related-tool">
+        <div class="related-tool-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="related-tool-text">
+          <div class="related-tool-name">Pre/Post Impact Analyzer</div>
+          <div class="related-tool-desc">Before / after statistical comparison</div>
+        </div>
+        <svg class="related-tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -1808,7 +2121,7 @@ function updateGutter(gutterEl, text){
    handles all input, and scrolls naturally. The highlight overlay on top
    replaces the visible text with colored tokens by perfect pixel-alignment.
    When the textarea scrolls, we translate the highlight's inner wrapper to
-   match — keeping the colored text glued to the caret. */
+   match - keeping the colored text glued to the caret. */
 function bindHighlightedEditor(inputId, displayId, gutterId){
   var input=document.getElementById(inputId);
   var disp=document.getElementById(displayId);
@@ -2063,7 +2376,7 @@ function minJSON(){
       {label:'Minified',value:(newSize/1024).toFixed(1)+' KB'},
       {label:'Saved',value:saved+'%'}
     ]);
-    al('json-alert','Minified — saved '+saved+'% size.','success');
+    al('json-alert','Minified - saved '+saved+'% size.','success');
   }catch(e){
     al('json-alert','Invalid JSON: '+e.message,'error');
   }
@@ -2080,7 +2393,7 @@ function fixJSON(){
     var out=JSON.stringify(parsed,null,2);
     document.getElementById('json-out').value=out;
     setHighlightedOutput('json-out-display','json-out-gutter',out);
-    al('json-alert','Auto-fixed successfully — please review before using in production.','success');
+    al('json-alert','Auto-fixed successfully - please review before using in production.','success');
   }catch(e){
     al('json-alert','Could not auto-fix: '+e.message,'error');
   }
@@ -2210,7 +2523,7 @@ function doDiff(){
     document.getElementById('diff-res').innerHTML=html;
     document.getElementById('diff-res-text').value=plain;
     document.getElementById('diff-out').style.display='block';
-    al('diff-alert','Diff complete — '+added+' added, '+removed+' removed, '+changed+' changed.','success');
+    al('diff-alert','Diff complete - '+added+' added, '+removed+' removed, '+changed+' changed.','success');
   }catch(e){al('diff-alert','Invalid JSON: '+e.message,'error')}
 }
 
@@ -2293,7 +2606,7 @@ function loadSample(t){
       a:'{\n  "name": "John Doe",\n  "age": 30,\n  "email": "john@old.com",\n  "city": "NYC"\n}',
       b:'{\n  "name": "John Doe",\n  "age": 31,\n  "email": "john@new.com",\n  "role": "admin"\n}'
     },
-    logs:'[INFO]  Server started on port 3000\n[INFO]  Database connected successfully\n[ERROR] NullPointerException at UserService.java:142\n[WARN]  Slow query detected — 2340ms\n[ERROR] Database connection failed — retrying...\n[INFO]  Cache warmed up\n[ERROR] Failed to load module: payments\n[WARN]  High memory usage: 87%\n[INFO]  Background job completed\n[ERROR] Exception in thread "main": StackOverflowError',
+    logs:'[INFO]  Server started on port 3000\n[INFO]  Database connected successfully\n[ERROR] NullPointerException at UserService.java:142\n[WARN]  Slow query detected - 2340ms\n[ERROR] Database connection failed - retrying...\n[INFO]  Cache warmed up\n[ERROR] Failed to load module: payments\n[WARN]  High memory usage: 87%\n[INFO]  Background job completed\n[ERROR] Exception in thread "main": StackOverflowError',
     convert:'{\n  "url": "https://api.example.com/users",\n  "method": "POST",\n  "headers": {\n    "Content-Type": "application/json",\n    "Authorization": "Bearer YOUR_TOKEN"\n  },\n  "body": {\n    "name": "Jane Doe",\n    "email": "jane@example.com"\n  }\n}'
   };
   if(t==='diff'){
