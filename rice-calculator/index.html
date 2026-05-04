@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#050508"/>
+  <meta name="color-scheme" content="dark"/>
+
+  <title>RICE Calculator – Free Feature Prioritization Tool for PMs | Datapad</title>
+  <meta name="description" content="Free RICE scoring calculator for product managers. Prioritize features with Reach × Impact × Confidence ÷ Effort. ICE framework, sensitivity analysis, bulk paste, share via URL, multi-board support. 100% in-browser, no sign-up."/>
+  <meta name="keywords" content="RICE calculator, RICE scoring, ICE framework, feature prioritization, product management, roadmap prioritization, RICE formula, product backlog, feature scoring, PM tools, Notion alternative, prioritization framework"/>
+  <meta name="author" content="Datapad"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <meta name="googlebot" content="index, follow"/>
+  <link rel="canonical" href="https://datapad.in/rice-calculator"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Datapad"/>
+  <meta property="og:url" content="https://datapad.in/rice-calculator"/>
+  <meta property="og:title" content="RICE Calculator – Free Feature Prioritization Tool"/>
+  <meta property="og:description" content="Score and rank features with the RICE framework. Bulk paste from Sheets, share via URL, multiple boards, sensitivity analysis - all in your browser."/>
+  <meta property="og:image" content="https://datapad.in/og-rice.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:locale" content="en_US"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site" content="@datapad"/>
+  <meta name="twitter:title" content="RICE Calculator – Free Feature Prioritization Tool"/>
+  <meta name="twitter:description" content="Prioritize features with RICE or ICE scoring. Bulk paste, share via URL, multi-board, sensitivity analysis - all client-side."/>
+  <meta name="twitter:image" content="https://datapad.in/og-rice.png"/>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","@id":"https://datapad.in/rice-calculator#app","name":"RICE Calculator","alternateName":["RICE Scoring Tool","ICE Calculator","Feature Prioritization Calculator","Product Roadmap Prioritizer"],"url":"https://datapad.in/rice-calculator","description":"Free RICE and ICE scoring calculator for product managers. Prioritize features by Reach, Impact, Confidence, and Effort. Multi-board support, bulk paste, share via URL, sensitivity analysis.","applicationCategory":"BusinessApplication","applicationSubCategory":"Product Management","operatingSystem":"Any (browser-based)","browserRequirements":"Modern browser with JavaScript enabled","permissions":"none","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["RICE scoring formula","ICE framework toggle","Multi-board support","Bulk paste from Sheets/Notion","Natural language input","Sensitivity analysis","Custom weights","Confidence audit","Effort sanity check","Shareable URL","Markdown export","Excel export","CSV import","Auto-save to localStorage","Color-blind safe palette","Print-friendly view","100% client-side processing"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in","logo":"https://datapad.in/logo.png"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"86","bestRating":"5","worstRating":"1"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the RICE scoring framework?","acceptedAnswer":{"@type":"Answer","text":"RICE is a prioritization framework developed by Intercom. It scores features by four factors: Reach (how many users), Impact (how much it matters per user), Confidence (how sure you are), and Effort (person-months to build). The formula is (Reach × Impact × Confidence) ÷ Effort. Higher scores rank higher in your roadmap."}},{"@type":"Question","name":"What is the difference between RICE and ICE?","acceptedAnswer":{"@type":"Answer","text":"RICE includes Reach as a separate input. ICE drops Reach, scoring on Impact × Confidence × Ease (where Ease replaces Effort). ICE is simpler for early-stage products without reach data; RICE is better when you can estimate audience size."}},{"@type":"Question","name":"Is RICE the right framework for my team?","acceptedAnswer":{"@type":"Answer","text":"RICE works well for B2C and product-led B2B teams with measurable user reach. For pure B2B or strategic bets, consider ICE, MoSCoW, or value-vs-effort. RICE is best when you have data on user reach and want a numerical, defensible ranking."}},{"@type":"Question","name":"How do I estimate Impact in RICE?","acceptedAnswer":{"@type":"Answer","text":"Use a fixed scale: 0.25 minimal, 0.5 low, 1 medium, 2 high, 3 massive. Stick to this scale across all features for comparability. Resist using arbitrary numbers - the discreteness forces you to commit to a level."}},{"@type":"Question","name":"What does Confidence mean in RICE?","acceptedAnswer":{"@type":"Answer","text":"Confidence (0-100%) reflects how certain you are in your Reach and Impact estimates. 100% means you have hard data. 80% means you have research or analogues. 50% means you're guessing. Low confidence is a flag to validate before investing."}},{"@type":"Question","name":"How do I measure Effort?","acceptedAnswer":{"@type":"Answer","text":"Effort is in person-months - rough estimates from engineering. A 3-week feature is roughly 0.75 person-months. If you don't know yet, ask your tech lead for a t-shirt size and convert: S=0.5, M=1, L=2, XL=4, XXL=8."}},{"@type":"Question","name":"Does the calculator save my data?","acceptedAnswer":{"@type":"Answer","text":"Yes, automatically to your browser's localStorage. Your boards persist across page reloads and sessions on the same device. Nothing is sent to a server. Use the share URL feature to send a board to teammates - the state is encoded in the URL itself."}},{"@type":"Question","name":"Can I share my prioritization with my team?","acceptedAnswer":{"@type":"Answer","text":"Yes - click Share to copy a URL containing your full board state. Anyone opening the URL sees the same boards, scores, and rankings. No account required, works across any modern browser."}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://datapad.in/"},{"@type":"ListItem","position":2,"name":"RICE Calculator","item":"https://datapad.in/rice-calculator"}]}]}</script>
+
+  <link rel="icon" type="image/png" href="/logo.png"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://cdn.sheetjs.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js" defer></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    ::selection{background:rgba(0,255,136,0.25);color:#fff}
+    ::-moz-selection{background:rgba(0,255,136,0.25);color:#fff}
+
+    :root{
+      --pri:#00ff88;--pri-rgb:0,255,136;
+      --acc:#00d4ff;--acc-rgb:0,212,255;
+      --purple:#c084fc;--purple-rgb:192,132,252;
+      --red:#ff4466;--red-rgb:255,68,102;
+      --warn:#ffaa00;--warn-rgb:255,170,0;
+      --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+      --t0:#fff;--t1:#c8c8d4;--t2:#8a8aa0;
+      --brd:rgba(255,255,255,0.06);
+      --font:'Outfit',sans-serif;
+      --body-font:'Outfit',sans-serif;
+      --mono:'DM Mono',monospace;
+      --ease:cubic-bezier(0.16,1,0.3,1);
+      --hh:64px;
+      --focus:0 0 0 3px rgba(var(--pri-rgb),.35);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.001ms !important;
+        scroll-behavior:auto !important;
+      }
+    }
+
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--body-font);
+      background:var(--bg0);color:var(--t0);
+      line-height:1.6;overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      font-feature-settings:"ss01","cv01","cv02";
+    }
+    body::before{
+      content:'';position:fixed;inset:0;
+      pointer-events:none;z-index:9998;opacity:.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
+
+    /* A11y */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{
+      position:absolute;top:-100px;left:8px;z-index:10000;
+      padding:10px 16px;border-radius:8px;
+      background:var(--pri);color:var(--bg0);
+      font-family:var(--mono);font-size:12px;font-weight:600;
+      text-decoration:none;letter-spacing:.5px;
+      transition:top .15s var(--ease);
+    }
+    .skip-link:focus{top:8px;outline:none;box-shadow:var(--focus)}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
+    [role="button"]:focus-visible,[role="tab"]:focus-visible,[tabindex]:focus-visible{
+      outline:none;box-shadow:var(--focus);border-radius:6px;
+    }
+
+    .cursor-glow{
+      position:fixed;width:400px;height:400px;
+      background:radial-gradient(circle,rgba(var(--pri-rgb),0.05) 0%,transparent 70%);
+      border-radius:50%;pointer-events:none;z-index:0;
+      transition:opacity .3s;will-change:transform;
+    }
+
+    /* HEADER */
+    .app-header{
+      padding:0 32px;height:var(--hh);
+      border-bottom:1px solid var(--brd);
+      background:rgba(5,5,8,.9);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;
+    }
+    .hdr-inner{
+      width:100%;max-width:1600px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+    }
+    .hdr-left{display:flex;align-items:center;gap:14px;min-width:0;flex-wrap:wrap}
+    .hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .hdr-logo img{
+      width:36px;height:36px;object-fit:contain;
+      filter:contrast(1.2) brightness(1.1) saturate(1.2);
+    }
+    .hdr-logo:hover img{filter:contrast(1.3) brightness(1.15) saturate(1.3)}
+    .hdr-logo-name{font-family:var(--font);font-size:18px;font-weight:800;letter-spacing:1px}
+    .hdr-sep{color:rgba(255,255,255,.12);font-size:18px;font-weight:200}
+    .hdr-tool-name{font-size:13px;font-weight:600;color:var(--t1)}
+    .hdr-badge{
+      padding:3px 8px;border-radius:100px;
+      font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.2);
+      color:var(--pri);font-family:var(--mono);
+    }
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--pri);box-shadow:0 0 8px rgba(var(--pri-rgb),.7);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--pri-rgb),.7)}
+      50%{opacity:.6;box-shadow:0 0 4px rgba(var(--pri-rgb),.3)}
+    }
+
+    .hbtn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:9px 14px;border-radius:9px;border:none;
+      font-size:12.5px;font-weight:600;font-family:var(--body-font);
+      cursor:pointer;text-decoration:none;transition:all .25s var(--ease);
+      white-space:nowrap;
+    }
+    .hbtn-ghost{background:transparent;border:1px solid var(--brd);color:var(--t1)}
+    .hbtn-ghost:hover{border-color:rgba(255,255,255,.15);color:var(--t0);background:rgba(255,255,255,.03)}
+    .hbtn-pri{background:var(--pri);color:var(--bg0);font-weight:700;border:1.5px solid var(--pri)}
+    .hbtn-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 24px rgba(var(--pri-rgb),.2)}
+    .hbtn-pri:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+    /* HERO */
+    .hero-strip{
+      position:relative;
+      padding:28px 32px 22px;
+      border-bottom:1px solid var(--brd);
+      background:linear-gradient(180deg,rgba(var(--pri-rgb),0.025) 0%,transparent 100%);
+      overflow:hidden;
+    }
+    .hero-strip::before{
+      content:'';position:absolute;inset:0;
+      background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 60% 80% at 30% 50%,black 30%,transparent 100%);
+      pointer-events:none;
+    }
+    .hero-strip::after{
+      content:'';position:absolute;
+      width:300px;height:300px;border-radius:50%;
+      background:radial-gradient(circle,rgba(var(--pri-rgb),0.06) 0%,transparent 70%);
+      top:-150px;right:-50px;pointer-events:none;
+    }
+    .hero-inner{
+      position:relative;z-index:1;
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+    }
+    .hero-left{flex:1;min-width:260px}
+    .hero-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:4px 11px;border-radius:100px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      font-size:10px;font-weight:600;color:var(--pri);
+      letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);
+      margin-bottom:12px;
+    }
+    .hero-title{
+      font-family:var(--font);
+      font-size:clamp(22px,2.4vw,30px);
+      font-weight:800;letter-spacing:-0.8px;
+      line-height:1.15;margin-bottom:6px;
+    }
+    .hero-title .accent{color:var(--pri)}
+    .hero-desc{font-size:13px;color:var(--t2);max-width:560px;line-height:1.6}
+    .hero-meta{
+      display:flex;gap:20px;flex-wrap:wrap;
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);letter-spacing:1px;text-transform:uppercase;
+    }
+    .hero-meta-item{display:flex;align-items:center;gap:6px}
+    .hero-meta-item svg{color:var(--pri);flex-shrink:0}
+
+    /* LAYOUT */
+    .app-body-outer{padding:0 32px}
+    .app-body{
+      display:grid;
+      grid-template-columns:320px minmax(0,1fr);
+      max-width:1600px;margin:0 auto;
+      min-height:calc(100vh - var(--hh) - 100px);
+      width:100%;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      border-right:1px solid var(--brd);
+      background:transparent;
+      padding:28px 0;
+      position:sticky;top:var(--hh);
+      height:calc(100vh - var(--hh));
+      overflow-y:auto;
+      display:flex;flex-direction:column;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.06) transparent;
+    }
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
+
+    .sb-section{padding:0 22px 24px;position:relative}
+    .sb-section + .sb-section{border-top:1px solid var(--brd);padding-top:24px}
+    .sb-label{
+      display:inline-flex;align-items:center;gap:8px;
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:2.2px;
+      font-weight:500;margin-bottom:16px;
+    }
+    .sb-label::before{content:'';display:block;width:18px;height:1px;background:var(--t2)}
+
+    .ig{margin-bottom:16px}
+    .ig:last-child{margin-bottom:0}
+    .il{
+      font-size:11.5px;color:var(--t1);margin-bottom:9px;
+      display:flex;align-items:center;gap:6px;
+      font-weight:600;letter-spacing:.2px;
+    }
+    .il-meta{
+      margin-left:auto;font-family:var(--mono);font-size:10px;
+      color:var(--t2);font-weight:500;letter-spacing:.3px;
+    }
+
+    .ifield{
+      width:100%;padding:9px 12px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;color:var(--t0);
+      font-size:13px;font-family:var(--mono);font-weight:500;
+      outline:none;transition:border-color .2s,box-shadow .2s;
+    }
+    .ifield:hover{border-color:rgba(255,255,255,.1)}
+    .ifield:focus{
+      border-color:rgba(var(--pri-rgb),.4);
+      box-shadow:0 0 0 3px rgba(var(--pri-rgb),.06);
+    }
+    .ifield::-webkit-inner-spin-button,.ifield::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .ifield::placeholder{color:rgba(255,255,255,.18)}
+
+    /* Toggle pills */
+    .trow{
+      display:flex;gap:3px;
+      background:var(--bg2);
+      padding:3px;border-radius:10px;
+      border:1px solid var(--brd);
+    }
+    .tbtn{
+      flex:1;padding:9px 8px;border-radius:7px;
+      font-size:11.5px;font-weight:600;cursor:pointer;
+      font-family:var(--body-font);
+      transition:color .2s var(--ease),background .2s var(--ease),box-shadow .2s var(--ease);
+      border:none;background:transparent;color:var(--t2);
+      text-align:center;letter-spacing:.1px;position:relative;
+    }
+    .tbtn.active{
+      background:linear-gradient(180deg,rgba(var(--pri-rgb),.14) 0%,rgba(var(--pri-rgb),.06) 100%);
+      color:var(--pri);
+      box-shadow:inset 0 0 0 1px rgba(var(--pri-rgb),.2),0 0 12px rgba(var(--pri-rgb),.08);
+    }
+    .tbtn:not(.active):hover{color:var(--t1);background:rgba(255,255,255,.025)}
+
+    /* Boards manager */
+    .board-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .board-item{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:9px;
+      background:var(--bg2);border:1px solid var(--brd);
+      cursor:pointer;transition:all .2s;position:relative;
+    }
+    .board-item:hover{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.025)}
+    .board-item.active{
+      border-color:rgba(var(--pri-rgb),.3);
+      background:rgba(var(--pri-rgb),.04);
+    }
+    .board-item.active::before{
+      content:'';position:absolute;left:0;top:8px;bottom:8px;width:2px;
+      background:var(--pri);border-radius:0 2px 2px 0;
+    }
+    .board-info{flex:1;min-width:0}
+    .board-name{
+      font-size:12.5px;font-weight:600;color:var(--t1);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      letter-spacing:-.1px;
+    }
+    .board-item.active .board-name{color:var(--t0)}
+    .board-meta{
+      font-family:var(--mono);font-size:9.5px;
+      color:var(--t2);margin-top:2px;letter-spacing:.3px;
+    }
+    .board-del{
+      width:22px;height:22px;border-radius:5px;
+      background:transparent;border:1px solid transparent;
+      color:var(--t2);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .15s;flex-shrink:0;opacity:0;
+    }
+    .board-item:hover .board-del{opacity:1}
+    .board-del:hover{
+      color:var(--red);
+      background:rgba(var(--red-rgb),.08);
+      border-color:rgba(var(--red-rgb),.2);
+    }
+
+    .btn-block{
+      width:100%;padding:9px 12px;
+      background:transparent;border:1px dashed var(--brd);
+      border-radius:9px;color:var(--t2);
+      font-size:11.5px;font-weight:600;font-family:var(--body-font);
+      cursor:pointer;transition:all .2s;
+      display:flex;align-items:center;justify-content:center;gap:7px;
+    }
+    .btn-block:hover{
+      color:var(--pri);border-color:rgba(var(--pri-rgb),.3);
+      background:rgba(var(--pri-rgb),.04);
+    }
+
+    /* Weight controls */
+    .weight-row{
+      display:flex;align-items:center;gap:8px;margin-bottom:10px;
+    }
+    .weight-lbl{
+      font-family:var(--mono);font-size:10.5px;color:var(--t2);
+      letter-spacing:.5px;text-transform:uppercase;font-weight:600;
+      width:60px;flex-shrink:0;
+    }
+    .weight-input{
+      flex:1;padding:7px 10px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:7px;color:var(--t0);
+      font-size:12px;font-family:var(--mono);font-weight:500;
+      outline:none;transition:border-color .2s;
+      width:100%;
+    }
+    .weight-input:focus{border-color:rgba(var(--pri-rgb),.4)}
+
+    .collapsible{
+      border:1px solid var(--brd);border-radius:9px;
+      overflow:hidden;background:rgba(255,255,255,.012);
+    }
+    .collapsible-head{
+      padding:10px 13px;cursor:pointer;
+      display:flex;align-items:center;justify-content:space-between;
+      font-size:11.5px;font-weight:600;color:var(--t1);
+      transition:background .15s;letter-spacing:.1px;
+      user-select:none;
+    }
+    .collapsible-head:hover{background:rgba(255,255,255,.025)}
+    .collapsible-head svg{
+      transition:transform .25s var(--ease);
+      color:var(--t2);
+    }
+    .collapsible.open .collapsible-head svg{transform:rotate(180deg);color:var(--pri)}
+    .collapsible-body{
+      max-height:0;overflow:hidden;
+      transition:max-height .3s var(--ease);
+    }
+    .collapsible.open .collapsible-body{max-height:400px}
+    .collapsible-inner{padding:12px 13px;border-top:1px solid var(--brd)}
+
+    .help-text{
+      font-size:10.5px;color:var(--t2);
+      line-height:1.5;letter-spacing:.1px;
+      margin-top:8px;
+    }
+    .help-text strong{color:var(--t1);font-weight:600}
+
+    /* Settings checkboxes */
+    .check-row{
+      display:flex;align-items:center;gap:10px;
+      padding:8px 0;cursor:pointer;
+      font-size:11.5px;color:var(--t1);
+      user-select:none;
+    }
+    .check-row input{
+      width:14px;height:14px;cursor:pointer;
+      accent-color:var(--pri);
+    }
+    .check-row:hover{color:var(--t0)}
+
+    /* MAIN PANEL */
+    .main-panel{padding:24px 32px;min-width:0}
+
+    /* Tab bar */
+    .tab-bar{
+      display:flex;gap:4px;margin-bottom:16px;
+      background:var(--bg1);border-radius:11px;padding:4px;
+      border:1px solid var(--brd);
+      overflow-x:auto;scrollbar-width:none;
+    }
+    .tab-bar::-webkit-scrollbar{display:none}
+    .tab-btn{
+      flex:1;padding:10px 12px;border-radius:8px;border:none;
+      background:transparent;color:var(--t2);
+      font-size:12.5px;font-weight:600;cursor:pointer;
+      font-family:var(--body-font);transition:all .25s var(--ease);
+      text-align:center;letter-spacing:.2px;
+      display:flex;align-items:center;justify-content:center;gap:7px;
+      white-space:nowrap;flex:0 0 auto;min-width:130px;
+    }
+    .tab-btn svg{flex-shrink:0;opacity:.7}
+    .tab-btn.active{
+      background:rgba(var(--pri-rgb),.08);
+      color:var(--pri);
+      box-shadow:inset 0 0 0 1px rgba(var(--pri-rgb),.15);
+    }
+    .tab-btn.active svg{opacity:1}
+    .tab-btn:hover:not(.active){color:var(--t1);background:rgba(255,255,255,.02)}
+
+    /* Action toolbar above table */
+    .action-bar{
+      display:flex;align-items:center;gap:8px;
+      margin-bottom:14px;flex-wrap:wrap;
+    }
+    .action-bar .total-stat{
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      padding:8px 12px;border-radius:8px;
+      background:rgba(255,255,255,.018);
+      border:1px solid var(--brd);letter-spacing:.3px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .total-stat strong{color:var(--pri);font-weight:600}
+    .action-bar-spacer{flex:1}
+    .abtn{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 12px;border-radius:8px;
+      background:transparent;border:1px solid var(--brd);
+      color:var(--t1);font-size:12px;font-weight:600;
+      cursor:pointer;font-family:var(--body-font);
+      transition:all .2s;
+    }
+    .abtn:hover{
+      border-color:rgba(255,255,255,.12);
+      color:var(--t0);background:rgba(255,255,255,.025);
+    }
+    .abtn.pri{
+      background:rgba(var(--pri-rgb),.06);
+      border-color:rgba(var(--pri-rgb),.2);
+      color:var(--pri);
+    }
+    .abtn.pri:hover{
+      background:rgba(var(--pri-rgb),.12);
+      border-color:rgba(var(--pri-rgb),.35);
+    }
+
+    /* CARDS */
+    .card{
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:14px;padding:0;margin-bottom:14px;
+      transition:border-color .25s var(--ease);
+      position:relative;overflow:hidden;
+    }
+    .card.padded{padding:20px}
+    .card-head{
+      padding:16px 20px;
+      display:flex;justify-content:space-between;align-items:center;
+      flex-wrap:wrap;gap:10px;
+      border-bottom:1px solid var(--brd);
+    }
+    .card-head-title{
+      font-family:var(--font);font-size:15px;font-weight:800;
+      letter-spacing:-.3px;
+    }
+    .card-head-sub{
+      font-size:11px;color:var(--t2);margin-top:2px;
+      font-family:var(--mono);letter-spacing:.3px;
+    }
+
+    /* Empty state */
+    .empty{
+      text-align:center;padding:60px 24px;
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:14px;
+      position:relative;overflow:hidden;
+    }
+    .empty::before{
+      content:'';position:absolute;
+      width:400px;height:400px;border-radius:50%;
+      background:radial-gradient(circle,rgba(var(--pri-rgb),0.04) 0%,transparent 70%);
+      top:-150px;left:50%;transform:translateX(-50%);
+      pointer-events:none;
+    }
+    .empty-icon{font-size:42px;margin-bottom:14px;position:relative;z-index:1;opacity:.7}
+    .empty-title{
+      font-family:var(--font);font-size:18px;font-weight:800;
+      margin-bottom:6px;position:relative;z-index:1;letter-spacing:-.3px;
+    }
+    .empty-desc{
+      font-size:13px;color:var(--t2);
+      position:relative;z-index:1;max-width:400px;margin:0 auto 20px;
+    }
+    .empty-examples{
+      display:flex;flex-wrap:wrap;gap:8px;
+      justify-content:center;
+      position:relative;z-index:1;max-width:520px;margin:0 auto;
+    }
+    .ex-pill{
+      padding:7px 14px;border-radius:100px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.18);
+      color:var(--pri);font-size:11.5px;font-weight:600;
+      cursor:pointer;font-family:var(--font);
+      transition:all .2s;
+    }
+    .ex-pill:hover{
+      background:rgba(var(--pri-rgb),.12);
+      border-color:rgba(var(--pri-rgb),.35);
+      transform:translateY(-1px);
+    }
+
+    /* TABLE */
+    .rice-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .rice-table{
+      width:100%;border-collapse:separate;border-spacing:0;
+      font-size:12.5px;min-width:780px;
+    }
+    .rice-table th{
+      padding:12px 10px;text-align:left;
+      color:var(--t2);font-weight:700;font-size:9.5px;
+      text-transform:uppercase;letter-spacing:1.3px;
+      border-bottom:1px solid var(--brd);
+      font-family:var(--mono);
+      background:rgba(255,255,255,.012);
+      white-space:nowrap;
+      position:sticky;top:0;z-index:2;
+    }
+    .rice-table th.num{text-align:right}
+    .rice-table th.score{
+      color:var(--pri);background:rgba(var(--pri-rgb),.04);
+    }
+    .rice-table tbody tr{
+      transition:background .2s,transform .35s var(--ease);
+      will-change:transform;
+    }
+    .rice-table tbody tr:hover{background:rgba(255,255,255,.018)}
+    .rice-table tbody tr.dragging{
+      opacity:.6;
+      background:rgba(var(--pri-rgb),.04);
+    }
+    .rice-table tbody tr.tier-top{
+      background:linear-gradient(90deg,rgba(var(--pri-rgb),.025) 0%,transparent 60%);
+    }
+    .rice-table tbody tr.tier-top:hover{
+      background:linear-gradient(90deg,rgba(var(--pri-rgb),.05) 0%,rgba(255,255,255,.018) 60%);
+    }
+    .rice-table tbody tr.tier-bot{
+      background:linear-gradient(90deg,rgba(var(--red-rgb),.02) 0%,transparent 60%);
+    }
+    .rice-table td{
+      padding:8px 10px;
+      border-bottom:1px solid rgba(255,255,255,.03);
+      vertical-align:middle;
+    }
+    .rice-table td.num{text-align:right;font-family:var(--mono)}
+    .rice-table td.score{
+      text-align:right;font-family:var(--mono);
+      font-weight:700;font-size:14px;color:var(--t0);
+      letter-spacing:-.3px;
+    }
+    .rice-table tr.tier-top td.score{color:var(--pri)}
+    .rice-table tr.tier-bot td.score{color:var(--red)}
+
+    /* Drag handle */
+    .drag-handle{
+      width:18px;height:24px;
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,.18);cursor:grab;
+      transition:color .15s;flex-shrink:0;
+      user-select:none;
+    }
+    .drag-handle:hover{color:var(--t2)}
+    .drag-handle:active{cursor:grabbing}
+
+    /* Rank badge */
+    .rank-cell{display:flex;align-items:center;gap:8px}
+    .rank-badge{
+      width:26px;height:26px;border-radius:7px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--mono);font-size:11px;font-weight:700;
+      flex-shrink:0;letter-spacing:-.3px;
+      background:rgba(255,255,255,.04);color:var(--t2);
+      border:1px solid var(--brd);
+    }
+    tr.tier-top .rank-badge{
+      background:rgba(var(--pri-rgb),.1);
+      color:var(--pri);
+      border-color:rgba(var(--pri-rgb),.25);
+    }
+    .rank-badge.r1{
+      background:rgba(var(--pri-rgb),.18);
+      box-shadow:0 0 12px rgba(var(--pri-rgb),.25);
+    }
+    .rank-badge.r2{
+      background:rgba(var(--pri-rgb),.14);
+    }
+    .rank-badge.r3{
+      background:rgba(var(--pri-rgb),.1);
+    }
+    tr.tier-bot .rank-badge{
+      background:rgba(var(--red-rgb),.06);
+      color:var(--red);
+      border-color:rgba(var(--red-rgb),.18);
+    }
+
+    /* Inline cells */
+    .name-input{
+      width:100%;background:transparent;border:none;
+      color:var(--t0);font-size:13px;font-weight:600;
+      font-family:var(--font);padding:6px 8px;
+      border-radius:6px;outline:none;
+      transition:background .15s;letter-spacing:-.1px;
+      min-width:140px;
+    }
+    .name-input:focus,.name-input:hover{
+      background:rgba(255,255,255,.03);
+    }
+    .name-input::placeholder{color:var(--t2);font-weight:500}
+
+    .num-input{
+      width:80px;background:transparent;border:1px solid transparent;
+      color:var(--t1);font-size:12.5px;font-family:var(--mono);
+      font-weight:500;text-align:right;
+      padding:5px 8px;border-radius:6px;outline:none;
+      transition:all .15s;
+    }
+    .num-input:hover{background:rgba(255,255,255,.025);border-color:var(--brd)}
+    .num-input:focus{
+      background:rgba(255,255,255,.025);
+      border-color:rgba(var(--pri-rgb),.4);
+      color:var(--t0);
+    }
+    .num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+    .impact-select{
+      background:rgba(255,255,255,.025);
+      border:1px solid var(--brd);color:var(--t1);
+      font-size:11.5px;font-family:var(--body-font);font-weight:600;
+      padding:5px 24px 5px 8px;border-radius:6px;outline:none;
+      cursor:pointer;transition:all .15s;
+      appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238a8aa0' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 6px center;
+    }
+    .impact-select:hover{border-color:rgba(255,255,255,.12);color:var(--t0)}
+    .impact-select:focus{border-color:rgba(var(--pri-rgb),.4)}
+
+    /* Confidence cell with mini bar */
+    .conf-cell{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+    .conf-bar{
+      width:40px;height:4px;background:var(--bg3);
+      border-radius:2px;overflow:hidden;
+    }
+    .conf-fill{
+      height:100%;background:var(--pri);
+      transition:width .25s var(--ease);
+    }
+    .conf-fill.warn{background:var(--warn)}
+    .conf-fill.bad{background:var(--red)}
+
+    /* Row actions */
+    .row-actions{
+      display:flex;gap:4px;justify-content:flex-end;
+      opacity:0;transition:opacity .15s;
+    }
+    tr:hover .row-actions{opacity:1}
+    .ra-btn{
+      width:24px;height:24px;border-radius:6px;
+      background:transparent;border:1px solid transparent;
+      color:var(--t2);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .15s;
+    }
+    .ra-btn:hover{
+      color:var(--t0);background:rgba(255,255,255,.04);
+      border-color:var(--brd);
+    }
+    .ra-btn.del:hover{
+      color:var(--red);background:rgba(var(--red-rgb),.08);
+      border-color:rgba(var(--red-rgb),.2);
+    }
+
+    /* Flag dots (audit warnings) */
+    .flag-dot{
+      width:6px;height:6px;border-radius:50%;
+      flex-shrink:0;
+    }
+    .flag-dot.conf{background:var(--warn)}
+    .flag-dot.effort{background:var(--red)}
+    .flag-cell{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+
+    /* Score popover */
+    .score-popover{
+      position:fixed;z-index:9999;
+      padding:12px 14px;
+      background:var(--bg3);border:1px solid rgba(var(--acc-rgb),.25);
+      border-radius:10px;
+      font-family:var(--mono);font-size:11.5px;
+      color:var(--t1);line-height:1.7;
+      box-shadow:0 16px 48px rgba(0,0,0,.7);
+      pointer-events:none;
+      max-width:300px;display:none;
+    }
+    .score-popover.vis{display:block}
+    .score-popover .formula{
+      color:var(--pri);font-weight:600;
+      margin-top:4px;display:block;
+    }
+    .score-popover .label{
+      font-family:var(--body-font);
+      color:var(--acc);font-size:9.5px;font-weight:700;
+      text-transform:uppercase;letter-spacing:1px;
+      margin-bottom:6px;display:block;
+    }
+
+    /* Insight panel under table */
+    .insight-row{
+      display:flex;align-items:flex-start;gap:12px;
+      padding:14px 16px;
+      background:rgba(var(--acc-rgb),.025);
+      border-top:1px solid rgba(var(--acc-rgb),.08);
+    }
+    .insight-icon{
+      width:30px;height:30px;border-radius:8px;
+      background:rgba(var(--acc-rgb),.1);
+      border:1px solid rgba(var(--acc-rgb),.2);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--acc);flex-shrink:0;
+    }
+    .insight-text{
+      font-size:12.5px;color:var(--t2);line-height:1.6;flex:1;
+    }
+    .insight-text strong{color:var(--t1);font-weight:600}
+
+    /* Sensitivity / Analysis */
+    .sens-controls{
+      display:flex;gap:10px;flex-wrap:wrap;
+      padding:14px 20px;background:rgba(255,255,255,.012);
+      border-bottom:1px solid var(--brd);
+    }
+    .sens-pill{
+      padding:7px 14px;border-radius:100px;
+      background:rgba(255,255,255,.025);
+      border:1px solid var(--brd);
+      font-family:var(--mono);font-size:10.5px;
+      color:var(--t2);font-weight:600;cursor:pointer;
+      transition:all .2s;letter-spacing:.3px;
+    }
+    .sens-pill:hover{
+      color:var(--t1);
+      border-color:rgba(255,255,255,.12);
+    }
+    .sens-pill.active{
+      background:rgba(var(--purple-rgb),.08);
+      border-color:rgba(var(--purple-rgb),.3);
+      color:var(--purple);
+    }
+
+    .delta-up{color:var(--pri)}
+    .delta-down{color:var(--red)}
+    .delta-same{color:var(--t2)}
+
+    /* Bulk paste textarea */
+    .bulk-textarea{
+      width:100%;min-height:80px;
+      padding:10px 12px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;color:var(--t1);
+      font-size:11.5px;font-family:var(--mono);
+      outline:none;resize:vertical;
+      transition:border-color .2s;line-height:1.5;
+    }
+    .bulk-textarea:focus{border-color:rgba(var(--pri-rgb),.4)}
+    .bulk-textarea::placeholder{color:rgba(255,255,255,.18);font-size:11px}
+
+    /* Toast */
+    .toast{
+      position:fixed;bottom:24px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:var(--bg2);
+      border:1px solid var(--brd);
+      border-radius:10px;padding:12px 18px;
+      font-size:12.5px;color:var(--t1);
+      font-weight:500;z-index:1100;
+      opacity:0;pointer-events:none;
+      transition:opacity .25s var(--ease),transform .25s var(--ease);
+      box-shadow:0 12px 40px rgba(0,0,0,.5);
+      display:flex;align-items:center;gap:10px;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{border-color:rgba(var(--pri-rgb),.3)}
+    .toast.success .toast-icon{color:var(--pri)}
+    .toast.error{border-color:rgba(var(--red-rgb),.3)}
+    .toast.error .toast-icon{color:var(--red)}
+
+    /* Drop zone overlay */
+    .drop-overlay{
+      position:fixed;inset:0;z-index:9990;
+      background:rgba(5,5,8,.85);backdrop-filter:blur(8px);
+      display:none;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    .drop-overlay.active{display:flex}
+    .drop-inner{
+      padding:60px 80px;border-radius:20px;
+      border:2px dashed rgba(var(--pri-rgb),.5);
+      background:rgba(var(--pri-rgb),.04);
+      text-align:center;
+    }
+    .drop-inner h3{
+      font-family:var(--font);font-size:24px;font-weight:800;
+      color:var(--pri);margin-bottom:8px;letter-spacing:-.5px;
+    }
+    .drop-inner p{
+      font-family:var(--mono);font-size:12px;
+      color:var(--t1);letter-spacing:.5px;
+    }
+
+    /* Tooltip (info icons) */
+    .ibtn{
+      width:14px;height:14px;border-radius:50%;
+      background:rgba(var(--acc-rgb),.1);
+      border:1px solid rgba(var(--acc-rgb),.2);
+      color:var(--acc);font-size:8px;font-weight:800;
+      cursor:help;display:inline-flex;align-items:center;justify-content:center;
+      font-family:var(--body-font);font-style:normal;
+      transition:all .2s;flex-shrink:0;vertical-align:middle;
+    }
+    .ibtn:hover{background:rgba(var(--acc-rgb),.2)}
+    .itip-popup{
+      position:fixed;width:260px;padding:12px 14px;
+      background:var(--bg3);border:1px solid rgba(var(--acc-rgb),.25);
+      border-radius:10px;
+      font-size:11.5px;color:var(--t1);line-height:1.65;
+      z-index:9999;pointer-events:none;
+      box-shadow:0 16px 48px rgba(0,0,0,.7);
+      font-family:var(--body-font);display:none;
+    }
+    .itip-popup.vis{display:block}
+
+    /* MODAL */
+    .modal-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.85);
+      backdrop-filter:blur(10px);z-index:1000;
+      display:none;align-items:center;justify-content:center;padding:20px;
+    }
+    .modal-overlay.open{display:flex}
+    .modal-box{
+      background:var(--bg1);border:1px solid rgba(var(--pri-rgb),.15);
+      border-radius:16px;padding:32px;
+      max-width:520px;width:100%;
+      max-height:85vh;overflow-y:auto;
+      color:var(--t1);font-size:13px;line-height:1.7;
+      position:relative;
+    }
+    .modal-box h2{
+      font-family:var(--font);font-size:20px;font-weight:800;
+      color:var(--t0);margin-bottom:14px;letter-spacing:-.4px;
+    }
+    .modal-box p{margin-bottom:14px;color:var(--t2)}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .modal-close{
+      position:absolute;top:14px;right:14px;
+      width:32px;height:32px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:8px;color:var(--t2);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .modal-close:hover{border-color:rgba(var(--pri-rgb),.2);color:var(--t1)}
+
+    .modal-input{
+      width:100%;padding:11px 14px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;color:var(--t0);
+      font-size:13.5px;font-family:var(--font);font-weight:500;
+      outline:none;margin-bottom:18px;
+      transition:border-color .2s;
+    }
+    .modal-input:focus{border-color:rgba(var(--pri-rgb),.4)}
+
+    .share-url-box{
+      display:flex;gap:6px;margin-bottom:18px;
+    }
+    .share-url-input{
+      flex:1;padding:11px 14px;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:9px;color:var(--t1);
+      font-size:11.5px;font-family:var(--mono);
+      outline:none;
+    }
+
+    /* FAQ */
+    .faq-section{
+      padding:80px 32px;
+      border-top:1px solid var(--brd);
+      max-width:1600px;margin:0 auto;
+    }
+    .faq-top{
+      display:flex;align-items:flex-end;justify-content:space-between;
+      gap:24px;margin-bottom:36px;flex-wrap:wrap;
+    }
+    .section-tag{
+      display:inline-flex;align-items:center;gap:8px;
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+    }
+    .section-tag::before{
+      content:'';display:block;width:24px;height:1px;background:var(--t2);
+    }
+    .section-title{
+      font-family:var(--font);
+      font-size:clamp(26px,3.5vw,40px);
+      font-weight:800;letter-spacing:-1.2px;
+      margin-bottom:10px;line-height:1.1;
+    }
+    .section-desc{
+      font-size:14px;color:var(--t2);
+      max-width:520px;line-height:1.7;
+    }
+    .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .faq-card{
+      border:1px solid var(--brd);border-radius:14px;
+      background:var(--bg1);overflow:hidden;cursor:pointer;
+      opacity:0;transform:translateY(16px);
+      transition:opacity .6s var(--ease),transform .6s var(--ease),
+                 border-color .25s ease,background .25s ease,box-shadow .25s ease;
+    }
+    .faq-card.revealed{opacity:1;transform:translateY(0)}
+    .faq-card:not(.open):hover{
+      border-color:rgba(255,255,255,.11);
+      background:rgba(255,255,255,.025);
+      transform:translateY(-2px);
+    }
+    .faq-card.open{
+      border-color:rgba(var(--pri-rgb),.22);
+      background:rgba(var(--pri-rgb),.02);
+      box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(var(--pri-rgb),.06);
+      transform:translateY(-2px);
+    }
+    .faq-card-q{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 20px;gap:14px;user-select:none;
+    }
+    .faq-q-left{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+    .faq-idx{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      flex-shrink:0;letter-spacing:1px;transition:color .25s ease;
+    }
+    .faq-card.open .faq-idx{color:var(--pri)}
+    .faq-q-text{
+      font-size:13px;font-weight:600;color:var(--t1);
+      line-height:1.45;flex:1;min-width:0;transition:color .2s ease;
+    }
+    .faq-card:hover .faq-q-text,.faq-card.open .faq-q-text{color:var(--t0)}
+    .faq-toggle{
+      flex-shrink:0;width:24px;height:24px;border-radius:50%;
+      border:1px solid var(--brd);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--t2);transition:all .3s var(--ease);
+    }
+    .faq-card.open .faq-toggle{
+      border-color:rgba(var(--pri-rgb),.35);
+      background:rgba(var(--pri-rgb),.07);
+      color:var(--pri);transform:rotate(180deg);
+    }
+    .faq-body{
+      max-height:0;overflow:hidden;
+      transition:max-height .4s var(--ease);
+    }
+    .faq-card.open .faq-body{max-height:280px}
+    .faq-body-inner{
+      padding:14px 20px 18px;
+      border-top:1px solid rgba(255,255,255,.04);
+    }
+    .faq-answer{
+      font-size:12.5px;color:var(--t2);line-height:1.8;
+      margin-bottom:12px;
+    }
+    .faq-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .faq-chip{
+      padding:3px 9px;border:1px solid rgba(255,255,255,.05);
+      border-radius:100px;
+      font-family:var(--mono);font-size:9px;
+      color:rgba(255,255,255,.22);letter-spacing:.5px;
+      transition:all .25s ease;
+    }
+    .faq-card.open .faq-chip{
+      border-color:rgba(var(--pri-rgb),.12);
+      color:rgba(var(--pri-rgb),.5);
+    }
+
+    /* SEO content sections */
+    .content-section{
+      padding:60px 32px;
+      border-top:1px solid var(--brd);
+    }
+    .content-inner{max-width:1100px;margin:0 auto}
+    .content-grid{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:24px;margin-top:24px;
+    }
+    .content-card{
+      background:var(--bg1);
+      border:1px solid var(--brd);
+      border-radius:14px;padding:24px;
+      transition:border-color .25s ease,transform .25s ease;
+    }
+    .content-card:hover{
+      border-color:rgba(255,255,255,.1);
+      transform:translateY(-2px);
+    }
+    .content-card-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      font-family:var(--mono);font-size:10px;
+      color:var(--pri);text-transform:uppercase;letter-spacing:1.5px;
+      font-weight:600;margin-bottom:12px;
+    }
+    .content-card-tag::before{
+      content:'';display:block;width:14px;height:1px;background:var(--pri);
+    }
+    .content-card h3{
+      font-family:var(--font);font-size:17px;font-weight:700;
+      color:var(--t0);letter-spacing:-.3px;
+      margin-bottom:10px;line-height:1.3;
+    }
+    .content-card p{
+      font-size:13.5px;color:var(--t2);line-height:1.75;
+      margin-bottom:10px;
+    }
+    .content-card p:last-child{margin-bottom:0}
+    .content-card strong{color:var(--t1);font-weight:600}
+    .content-card a{
+      color:var(--pri);text-decoration:none;font-weight:600;
+      border-bottom:1px solid rgba(var(--pri-rgb),.3);
+      transition:border-color .2s;
+    }
+    .content-card a:hover{border-bottom-color:var(--pri)}
+    .content-card ul{
+      margin:8px 0 0 18px;
+      font-size:13px;color:var(--t2);line-height:1.85;
+    }
+    .content-card ul li{margin-bottom:4px}
+    .content-card ul li strong{color:var(--t1)}
+
+    .formula-display{
+      display:block;padding:14px 18px;margin:12px 0;
+      background:var(--bg2);border:1px solid var(--brd);
+      border-left:2px solid var(--pri);border-radius:8px;
+      font-family:var(--mono);font-size:13px;color:var(--pri);
+      overflow-x:auto;letter-spacing:.2px;
+    }
+
+    .related-tools{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:16px;margin-top:24px;
+    }
+    .related-tool{
+      display:flex;align-items:center;gap:14px;
+      padding:18px 22px;
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:12px;text-decoration:none;
+      transition:all .25s var(--ease);
+    }
+    .related-tool:hover{
+      border-color:rgba(var(--pri-rgb),.2);
+      background:rgba(var(--pri-rgb),.02);
+      transform:translateY(-2px);
+    }
+    .related-tool-icon{
+      width:38px;height:38px;border-radius:9px;
+      background:rgba(var(--pri-rgb),.06);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;color:var(--pri);
+    }
+    .related-tool-text{flex:1;min-width:0}
+    .related-tool-name{
+      font-size:14px;font-weight:700;color:var(--t0);
+      letter-spacing:-.2px;margin-bottom:2px;
+    }
+    .related-tool-desc{
+      font-size:11.5px;color:var(--t2);
+      font-family:var(--mono);letter-spacing:.2px;
+    }
+    .related-tool-arrow{
+      color:var(--t2);flex-shrink:0;
+      transition:transform .2s,color .2s;
+    }
+    .related-tool:hover .related-tool-arrow{
+      transform:translateX(3px);color:var(--pri);
+    }
+
+    /* FOOTER */
+    .app-footer{
+      border-top:1px solid var(--brd);padding:32px;
+      background:rgba(255,255,255,.005);
+    }
+    .footer-inner{
+      max-width:1600px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;flex-wrap:wrap;
+    }
+    .footer-copy{font-size:12px;color:var(--t2)}
+    .footer-copy a{color:var(--pri);text-decoration:none;font-weight:600}
+    .footer-links{display:flex;gap:20px;flex-wrap:wrap}
+    .footer-links a{
+      font-size:12px;color:var(--t2);text-decoration:none;
+      transition:color .2s;
+    }
+    .footer-links a:hover{color:var(--pri)}
+
+    /* Color-blind safe mode */
+    body.cb-safe tr.tier-top{
+      background:linear-gradient(90deg,rgba(var(--acc-rgb),.04) 0%,transparent 60%);
+    }
+    body.cb-safe tr.tier-top td.score,
+    body.cb-safe tr.tier-top .rank-badge{
+      color:var(--acc);
+    }
+    body.cb-safe tr.tier-top .rank-badge{
+      background:rgba(var(--acc-rgb),.12);
+      border-color:rgba(var(--acc-rgb),.25);
+    }
+
+    /* Print */
+    @media print{
+      header,.sidebar,.action-bar,.tab-bar,.faq-section,
+      .content-section,.app-footer,.cursor-glow,.toast,
+      .drop-overlay,.modal-overlay,.row-actions,.drag-handle,
+      .hero-strip::after,.hero-strip::before{display:none !important}
+      body{background:#fff;color:#000}
+      .app-body{grid-template-columns:1fr;display:block}
+      .main-panel{padding:20px}
+      .card{border-color:#ccc;background:#fff;break-inside:avoid}
+      .rice-table th,.rice-table td{color:#000 !important;background:#fff !important}
+      .rice-table th{border-bottom:1px solid #000}
+      .rank-badge{background:#eee !important;color:#000 !important;border-color:#999}
+      tr.tier-top td.score,tr.tier-top .rank-badge{color:#0a7d3f !important;background:#e8fff0 !important}
+      .name-input{color:#000 !important}
+      .num-input,.impact-select{color:#000 !important;border:none !important;background:#fff !important}
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:1100px){
+      .app-body{grid-template-columns:280px minmax(0,1fr)}
+    }
+    @media(max-width:900px){
+      .app-body{grid-template-columns:1fr}
+      .sidebar{
+        border-right:none;border-bottom:1px solid var(--brd);
+        position:static;height:auto;padding:18px 0 24px;
+      }
+      .faq-grid{grid-template-columns:1fr}
+      .hero-strip{padding:20px}
+      .main-panel{padding:18px}
+      .faq-section{padding:50px 20px}
+      .app-header{padding:0 18px}
+      .app-body-outer{padding:0 18px}
+      .content-section{padding:40px 18px}
+      .content-grid{grid-template-columns:1fr;gap:14px}
+      .related-tools{grid-template-columns:1fr}
+    }
+    @media(max-width:600px){
+      .hdr-tool-name,.hdr-sep{display:none}
+      .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
+      .name-input{min-width:120px;font-size:12.5px}
+      .rice-table{min-width:720px}
+    }
+    @media(max-width:420px){
+      .main-panel{padding:14px}
+      .app-body-outer{padding:0 12px}
+      .app-header{padding:0 14px;height:58px}
+      .hdr-logo-name{font-size:17px}
+      .hdr-logo img{width:32px;height:32px}
+      .empty{padding:40px 18px}
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<noscript>
+  <div style="padding:24px;max-width:680px;margin:40px auto;background:#0a0a0f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#c8c8d4;font-family:system-ui,sans-serif">
+    <h1 style="color:#fff;font-size:20px;margin-bottom:12px">RICE Calculator – Datapad</h1>
+    <p style="margin-bottom:10px">This RICE feature prioritization calculator runs entirely in your browser using JavaScript. To use it, please enable JavaScript and reload the page.</p>
+    <p style="margin-bottom:10px">Once enabled, you can score features by Reach × Impact × Confidence ÷ Effort, with multi-board support, sensitivity analysis, and export options.</p>
+    <p>Other free tools at Datapad: <a href="/ab-test-calculator" style="color:#00ff88">A/B Test Calculator</a> · <a href="/json-studio" style="color:#00ff88">JSON Studio</a></p>
+  </div>
+</noscript>
+
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- Tooltip -->
+<div class="itip-popup" id="globalTip" role="tooltip" aria-hidden="true"></div>
+
+<!-- Score popover -->
+<div class="score-popover" id="scorePopover" role="tooltip" aria-hidden="true"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Drop overlay -->
+<div class="drop-overlay" id="dropOverlay" aria-hidden="true">
+  <div class="drop-inner">
+    <h3>Drop your CSV file</h3>
+    <p>We'll auto-populate your features</p>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header" role="banner">
+  <div class="hdr-inner">
+    <div class="hdr-left">
+      <a href="/" class="hdr-logo" aria-label="Datapad home">
+        <img src="/logo.png" alt="Datapad"/>
+        <span class="hdr-logo-name">Datapad</span>
+      </a>
+      <span class="hdr-sep" aria-hidden="true">/</span>
+      <span class="hdr-tool-name">RICE Calculator</span>
+      <span class="hdr-badge">Beta</span>
+    </div>
+    <div class="hdr-right">
+      <button class="hbtn hbtn-ghost" onclick="openShare()" aria-label="Share board" title="Share board (Cmd/Ctrl+S)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Share
+      </button>
+      <button class="hbtn hbtn-pri" id="exportBtn" onclick="openExportMenu()" aria-label="Export options">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO STRIP -->
+<section class="hero-strip">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="status-dot"></span>
+        Feature Prioritization Engine
+      </div>
+      <h1 class="hero-title">
+        Score features. <span class="accent">Ship the right ones first.</span>
+      </h1>
+      <p class="hero-desc">
+        RICE and ICE scoring with sensitivity analysis, bulk paste from Sheets, multi-board support, and shareable URLs - all running locally in your browser.
+      </p>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Auto-saves locally
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        RICE + ICE
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Share via URL
+      </div>
+      <div class="hero-meta-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Excel + Markdown
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BODY -->
+<div class="app-body-outer">
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Settings and boards">
+
+    <!-- Boards -->
+    <div class="sb-section">
+      <h2 class="sb-label">Boards</h2>
+      <div class="board-list" id="boardList"></div>
+      <button class="btn-block" onclick="newBoard()" aria-label="Create new board">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New board
+      </button>
+    </div>
+
+    <!-- Framework -->
+    <div class="sb-section">
+      <h2 class="sb-label">Framework</h2>
+      <div class="ig">
+        <div class="il" id="lbl-fw">Scoring method <button class="ibtn" data-tip="RICE: Reach × Impact × Confidence ÷ Effort.&#10;ICE: Impact × Confidence × Ease (no Reach, simpler for early-stage products).">i</button></div>
+        <div class="trow" role="group" aria-labelledby="lbl-fw">
+          <button class="tbtn active" onclick="setFramework('rice',this)" aria-pressed="true">RICE</button>
+          <button class="tbtn" onclick="setFramework('ice',this)" aria-pressed="false">ICE</button>
+        </div>
+      </div>
+
+      <div class="ig">
+        <div class="il" id="lbl-horizon">Reach window <button class="ibtn" data-tip="Time period for the Reach metric. Affects what 'reach' means - users per month, quarter, or year.">i</button></div>
+        <div class="trow" role="group" aria-labelledby="lbl-horizon">
+          <button class="tbtn" onclick="setHorizon('month',this)" aria-pressed="false">/ mo</button>
+          <button class="tbtn active" onclick="setHorizon('quarter',this)" aria-pressed="true">/ qtr</button>
+          <button class="tbtn" onclick="setHorizon('year',this)" aria-pressed="false">/ yr</button>
+        </div>
+      </div>
+
+      <div class="collapsible" id="weightsCollapsible">
+        <div class="collapsible-head" onclick="toggleCollapsible('weightsCollapsible')">
+          <span>Custom weights <button class="ibtn" data-tip="Adjust weighting for risk-averse teams. Effort exponent > 1 punishes large efforts more.">i</button></span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="collapsible-body">
+          <div class="collapsible-inner">
+            <div class="weight-row">
+              <span class="weight-lbl">Reach ×</span>
+              <input class="weight-input" id="wReach" type="number" step="0.1" min="0" value="1" oninput="updateWeights()" aria-label="Reach weight"/>
+            </div>
+            <div class="weight-row">
+              <span class="weight-lbl">Impact ×</span>
+              <input class="weight-input" id="wImpact" type="number" step="0.1" min="0" value="1" oninput="updateWeights()" aria-label="Impact weight"/>
+            </div>
+            <div class="weight-row">
+              <span class="weight-lbl">Effort ^</span>
+              <input class="weight-input" id="wEffort" type="number" step="0.1" min="0.5" max="3" value="1" oninput="updateWeights()" aria-label="Effort exponent"/>
+            </div>
+            <p class="help-text"><strong>Default = 1</strong> for all. Effort exponent of 2 squares effort, penalizing big projects.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk paste -->
+    <div class="sb-section">
+      <h2 class="sb-label">Bulk add</h2>
+      <div class="ig">
+        <div class="il">
+          Paste from Sheets / Notion
+          <button class="ibtn" data-tip="Paste TSV/CSV directly. We'll detect headers and parse columns. Or use natural language: 'Dark mode, 5000 users, high impact, 80%, 2 months'">i</button>
+        </div>
+        <textarea class="bulk-textarea" id="bulkInput" placeholder="Paste tab-separated rows from Sheets, or one feature per line in natural language..." onpaste="setTimeout(handleBulkPaste,10)" aria-label="Bulk paste input"></textarea>
+        <button class="btn-block" style="margin-top:8px" onclick="parseBulkInput()" aria-label="Parse bulk input">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Parse and add
+        </button>
+        <p class="help-text" style="margin-top:8px">Supports TSV, CSV, and natural language. Drop a <strong>.csv</strong> file anywhere on the page to import.</p>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="sb-section">
+      <h2 class="sb-label">Settings</h2>
+      <label class="check-row">
+        <input type="checkbox" id="cbSafe" onchange="toggleColorblind()"/>
+        Color-blind safe palette
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="confAuditChk" checked onchange="render()"/>
+        Confidence audit (flag &lt; 50%)
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="effortAuditChk" checked onchange="render()"/>
+        Effort sanity check (flag &gt; 6mo)
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="autoSortChk" checked onchange="render()"/>
+        Auto-sort by score
+      </label>
+      <button class="btn-block" style="margin-top:14px" onclick="confirmReset()" aria-label="Reset all data">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/></svg>
+        Reset all data
+      </button>
+    </div>
+
+    <!-- Keyboard shortcuts info -->
+    <div class="sb-section">
+      <h2 class="sb-label">Shortcuts</h2>
+      <div style="font-family:var(--mono);font-size:10.5px;color:var(--t2);line-height:2;letter-spacing:.2px">
+        <div><span style="color:var(--t1)">Cmd/Ctrl + Enter</span> &nbsp; new row</div>
+        <div><span style="color:var(--t1)">Cmd/Ctrl + D</span> &nbsp; duplicate row</div>
+        <div><span style="color:var(--t1)">Cmd/Ctrl + S</span> &nbsp; share board</div>
+        <div><span style="color:var(--t1)">Cmd/Ctrl + P</span> &nbsp; print view</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-panel" id="main-content" aria-label="Features and rankings">
+
+    <nav class="tab-bar" role="tablist" aria-label="Sections">
+      <button class="tab-btn active" role="tab" id="tab-features" aria-selected="true" onclick="setTab('features',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Features
+      </button>
+      <button class="tab-btn" role="tab" id="tab-sensitivity" aria-selected="false" onclick="setTab('sensitivity',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Sensitivity
+      </button>
+      <button class="tab-btn" role="tab" id="tab-analysis" aria-selected="false" onclick="setTab('analysis',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H5a2 2 0 00-2 2v7h6V11zM15 7h-6v13h6V7zM21 4h-6v16h6V4z"/></svg>
+        Analysis
+      </button>
+    </nav>
+
+    <div id="tabContent" role="tabpanel" aria-live="polite"></div>
+  </main>
+</div>
+</div>
+
+<!-- FAQ -->
+<section class="faq-section" aria-labelledby="faq-hd">
+  <div class="faq-top">
+    <div>
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title" id="faq-hd">Common questions</h2>
+      <p class="section-desc">Everything you need to know about RICE scoring and how this calculator works.</p>
+    </div>
+  </div>
+
+  <div class="faq-grid" id="faqGrid">
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">01</span>
+          <span class="faq-q-text">What is the RICE scoring framework?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">RICE is a prioritization framework developed by Intercom. It scores features by four factors: <strong>Reach</strong> (how many users), <strong>Impact</strong> (how much it matters per user), <strong>Confidence</strong> (how sure you are), and <strong>Effort</strong> (person-months to build). The formula is <strong>(Reach × Impact × Confidence) ÷ Effort</strong>. Higher scores rank higher in your roadmap.</p>
+        <div class="faq-chips"><span class="faq-chip">rice</span><span class="faq-chip">framework</span><span class="faq-chip">prioritization</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">02</span>
+          <span class="faq-q-text">RICE vs ICE — which one should I use?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">RICE includes Reach as a separate input. ICE drops Reach, scoring on Impact × Confidence × Ease. Use ICE for early-stage products without reach data; RICE when you have audience-size estimates. This calculator supports both — toggle in the sidebar.</p>
+        <div class="faq-chips"><span class="faq-chip">rice-vs-ice</span><span class="faq-chip">methodology</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">03</span>
+          <span class="faq-q-text">How do I estimate Impact?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Use a fixed scale: <strong>0.25 minimal, 0.5 low, 1 medium, 2 high, 3 massive</strong>. Stick to this scale across all features for comparability. The discreteness forces you to commit to a level rather than fudging numbers.</p>
+        <div class="faq-chips"><span class="faq-chip">impact</span><span class="faq-chip">scale</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">04</span>
+          <span class="faq-q-text">What does Confidence mean?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Confidence (0-100%) reflects how certain you are in your Reach and Impact estimates. <strong>100%</strong> = hard data. <strong>80%</strong> = research or analogues. <strong>50%</strong> = guessing. Low confidence is a signal to validate before investing — this calculator flags rows below 50%.</p>
+        <div class="faq-chips"><span class="faq-chip">confidence</span><span class="faq-chip">audit</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">05</span>
+          <span class="faq-q-text">How do I measure Effort?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Effort is in person-months — rough estimates from engineering. A 3-week feature is roughly 0.75 person-months. If you don't know yet, ask your tech lead for a t-shirt size: <strong>S = 0.5, M = 1, L = 2, XL = 4, XXL = 8</strong>. Features over 6 months get flagged as "consider breaking down".</p>
+        <div class="faq-chips"><span class="faq-chip">effort</span><span class="faq-chip">person-months</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">06</span>
+          <span class="faq-q-text">Does the calculator save my data?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Yes — automatically to your browser's localStorage. Your boards persist across reloads and sessions on the same device. <strong>Nothing is sent to a server</strong>. Use Share to send a board to teammates — the state is encoded in the URL itself, no account needed.</p>
+        <div class="faq-chips"><span class="faq-chip">localStorage</span><span class="faq-chip">privacy</span><span class="faq-chip">no-server</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">07</span>
+          <span class="faq-q-text">Can I share my prioritization with my team?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Yes. Click <strong>Share</strong> to copy a URL containing your full board state. Anyone opening that URL sees the same boards, scores, and rankings — no login required. You can also export to Markdown for Notion/Slack, or to Excel for spreadsheet workflows.</p>
+        <div class="faq-chips"><span class="faq-chip">share</span><span class="faq-chip">collaboration</span></div>
+      </div></div>
+    </div>
+
+    <div class="faq-card" onclick="faqTog(this)" onkeydown="faqKey(event,this)" tabindex="0" role="button" aria-expanded="false">
+      <div class="faq-card-q">
+        <div class="faq-q-left">
+          <span class="faq-idx">08</span>
+          <span class="faq-q-text">What is sensitivity analysis?</span>
+        </div>
+        <div class="faq-toggle" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="faq-body"><div class="faq-body-inner">
+        <p class="faq-answer">Sensitivity analysis tests how much your ranking changes when assumptions shift. The Sensitivity tab simulates "what if effort doubles?" or "what if confidence is half?" — useful for stress-testing your priorities before committing to a roadmap.</p>
+        <div class="faq-chips"><span class="faq-chip">sensitivity</span><span class="faq-chip">scenario</span></div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEO content -->
+<section class="content-section" aria-labelledby="what-is-rice-hd">
+  <div class="content-inner">
+    <div class="section-tag">Methodology</div>
+    <h2 class="section-title" id="what-is-rice-hd">What is RICE scoring?</h2>
+    <p class="section-desc" style="max-width:760px">A complete primer on the RICE prioritization framework — what it measures, why teams use it, and how to apply it.</p>
+
+    <div class="content-grid">
+
+      <article class="content-card">
+        <div class="content-card-tag">Definition</div>
+        <h3>The four factors</h3>
+        <p><strong>RICE</strong> stands for Reach, Impact, Confidence, and Effort. Originally developed by Intercom's product team, it produces a single numerical score that ranks features against each other on a defensible, repeatable basis.</p>
+        <span class="formula-display">Score = (Reach × Impact × Confidence) ÷ Effort</span>
+        <ul>
+          <li><strong>Reach</strong> — number of users affected per time period (month/quarter/year)</li>
+          <li><strong>Impact</strong> — how much it matters per user (0.25 to 3, fixed scale)</li>
+          <li><strong>Confidence</strong> — how certain you are (0–100%)</li>
+          <li><strong>Effort</strong> — total person-months across design + eng + QA</li>
+        </ul>
+        <p>The formula intentionally divides by effort — ensuring quick wins outrank big bets that haven't earned their slot.</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Why it works</div>
+        <h3>Forced trade-offs</h3>
+        <p>Most prioritization conversations devolve into <em>"this feels important"</em> debates. RICE forces concrete inputs — you can't say a feature is high priority without committing to a Reach number, an Impact level, and an Effort estimate.</p>
+        <p>That commitment exposes weak reasoning early. If you can't estimate Reach, you probably haven't validated the problem. If Effort is "2-12 months," scope is undefined. The score is less important than the <strong>conversation it forces</strong>.</p>
+        <p>RICE also makes prioritization <em>auditable</em>. When stakeholders ask "why is X above Y?", you have a documented numerical answer rather than political instinct.</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">When to use</div>
+        <h3>Right context, right framework</h3>
+        <p>RICE is best for product teams with:</p>
+        <ul>
+          <li><strong>Measurable user reach</strong> — analytics-rich products with audience data</li>
+          <li><strong>Comparable features</strong> — multiple roadmap candidates targeting similar user groups</li>
+          <li><strong>Quarterly planning cycles</strong> — RICE excels at "which 5 of these 30 ideas?"</li>
+          <li><strong>Cross-functional reviews</strong> — when you need a defensible artifact for leadership</li>
+        </ul>
+        <p>Skip RICE for: pure strategic bets (use ICE or value-vs-effort), bug triage (use severity matrices), or single-user enterprise features (Reach loses meaning).</p>
+      </article>
+
+      <article class="content-card">
+        <div class="content-card-tag">Pitfalls</div>
+        <h3>Common mistakes</h3>
+        <p>Three traps that kill RICE workflows:</p>
+        <ul>
+          <li><strong>Reverse-engineering the score</strong> — adjusting inputs to justify a predetermined ranking. Use confidence honestly.</li>
+          <li><strong>Letting Effort dominate</strong> — small features always win on raw RICE. Combine with strategic themes so big bets aren't ignored.</li>
+          <li><strong>Treating it as the answer</strong> — RICE ranks; humans decide. Use it as input to a discussion, not the discussion itself.</li>
+        </ul>
+        <p>This calculator includes <strong>confidence audit</strong> (flags low-confidence rows) and <strong>effort sanity check</strong> (flags 6+ month efforts) to catch these issues automatically.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="content-section" aria-labelledby="related-hd">
+  <div class="content-inner">
+    <div class="section-tag">Related Tools</div>
+    <h2 class="section-title" id="related-hd">Continue your workflow</h2>
+    <p class="section-desc" style="max-width:760px">Free tools from Datapad that pair well with feature prioritization.</p>
+
+    <div class="related-tools">
+      <a href="/ab-test-calculator" class="related-tool">
+        <div class="related-tool-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="related-tool-text">
+          <div class="related-tool-name">A/B Test Calculator</div>
+          <div class="related-tool-desc">Validate features after you ship</div>
+        </div>
+        <svg class="related-tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="/pre-post-analyzer" class="related-tool">
+        <div class="related-tool-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>
+        </div>
+        <div class="related-tool-text">
+          <div class="related-tool-name">Pre/Post Analyzer</div>
+          <div class="related-tool-desc">Measure impact after launch</div>
+        </div>
+        <svg class="related-tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="app-footer" role="contentinfo">
+  <div class="footer-inner">
+    <span class="footer-copy">© 2026 <a href="/">Datapad</a>. All rights reserved.</span>
+    <nav class="footer-links">
+      <a href="/">Home</a>
+      <a href="/ab-test-calculator">A/B Calculator</a>
+      <a href="/pre-post-analyzer">Pre/Post Analyzer</a>
+      <a href="/json-studio">JSON Studio</a>
+      <a href="mailto:hello.datapad@gmail.com">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- MODALS -->
+
+<!-- Rename board -->
+<div class="modal-overlay" id="renameModal" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('renameModal')" aria-label="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="renameTitle">Rename board</h2>
+    <input type="text" class="modal-input" id="renameInput" placeholder="Q1 Roadmap" maxlength="50" aria-label="Board name"/>
+    <div class="modal-actions">
+      <button class="hbtn hbtn-ghost" onclick="closeModal('renameModal')">Cancel</button>
+      <button class="hbtn hbtn-pri" onclick="confirmRename()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share URL -->
+<div class="modal-overlay" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('shareModal')" aria-label="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="shareTitle">Share this board</h2>
+    <p>Anyone with this URL sees the exact same board state. No account required. The full data is encoded in the link itself — copy and send.</p>
+    <div class="share-url-box">
+      <input type="text" class="share-url-input" id="shareUrl" readonly aria-label="Shareable URL"/>
+      <button class="hbtn hbtn-pri" onclick="copyShareUrl()">Copy</button>
+    </div>
+    <p style="font-size:11.5px;color:var(--t2);font-family:var(--mono);letter-spacing:.3px">URL length scales with board size. Very large boards (50+ rows) may exceed browser limits.</p>
+  </div>
+</div>
+
+<!-- Export menu -->
+<div class="modal-overlay" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('exportModal')" aria-label="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="exportTitle">Export board</h2>
+    <p>Choose how to take this board with you. All formats include full ranking and scores.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="hbtn hbtn-pri" onclick="exportXLSX()" style="justify-content:flex-start;padding:14px 18px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Excel — multi-sheet workbook
+      </button>
+      <button class="hbtn hbtn-ghost" onclick="exportMarkdown()" style="justify-content:flex-start;padding:14px 18px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        Markdown — paste into Notion/Linear/Slack
+      </button>
+      <button class="hbtn hbtn-ghost" onclick="exportCSV()" style="justify-content:flex-start;padding:14px 18px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        CSV — re-import or open in Sheets
+      </button>
+      <button class="hbtn hbtn-ghost" onclick="window.print()" style="justify-content:flex-start;padding:14px 18px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print — clean stakeholder view
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset confirm -->
+<div class="modal-overlay" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('resetModal')" aria-label="Close">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="resetTitle">Reset all data?</h2>
+    <p>This deletes all boards, features, and settings stored in this browser. <strong>This cannot be undone.</strong> Consider exporting first if you want a backup.</p>
+    <div class="modal-actions">
+      <button class="hbtn hbtn-ghost" onclick="closeModal('resetModal')">Cancel</button>
+      <button class="hbtn hbtn-pri" style="background:var(--red);border-color:var(--red);color:#fff" onclick="doReset()">Reset everything</button>
+    </div>
+  </div>
+</div>
