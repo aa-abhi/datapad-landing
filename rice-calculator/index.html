@@ -1692,7 +1692,7 @@
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
     <h2 id="renameTitle">Rename board</h2>
-    <input type="text" class="modal-input" id="renameInput" placeholder="Q1 Roadmap" maxlength="50" aria-label="Board name"/>
+    <input type="text" class="modal-input" id="renameInput" placeholder="Q1 Roadmap" maxlength="50" aria-label="Board name" onkeydown="if(event.key==='Enter')confirmRename()"/>
     <div class="modal-actions">
       <button class="hbtn hbtn-ghost" onclick="closeModal('renameModal')">Cancel</button>
       <button class="hbtn hbtn-pri" onclick="confirmRename()">Save</button>
@@ -1759,3 +1759,1933 @@
     </div>
   </div>
 </div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   RICE CALCULATOR — Datapad
+   Pure JS, no frameworks. Persists to localStorage.
+   ═══════════════════════════════════════════════════════════════ */
+
+// ═══════════ STATE ═══════════
+var IMPACTS = [
+  {val:3,label:'Massive (3)'},
+  {val:2,label:'High (2)'},
+  {val:1,label:'Medium (1)'},
+  {val:0.5,label:'Low (0.5)'},
+  {val:0.25,label:'Minimal (0.25)'}
+];
+
+var DEFAULT_WEIGHTS = {reach:1,impact:1,effort:1};
+
+var STORAGE_KEYS = {
+  index:'rice:boards',
+  board:function(id){return 'rice:board:'+id},
+  settings:'rice:settings'
+};
+
+var S = {
+  framework:'rice',
+  horizon:'quarter',
+  weights:{reach:1,impact:1,effort:1},
+  features:[],
+  currentBoardId:null,
+  boards:[], // [{id, name, updatedAt}]
+  activeTab:'features',
+  sensitivity:'none', // 'none' | 'effort2x' | 'effort05x' | 'conf05x' | 'reach2x'
+  settings:{
+    cbSafe:false,
+    confAudit:true,
+    effortAudit:true,
+    autoSort:true
+  }
+};
+
+var DRAFT_RENAME_ID=null;
+var SAVE_TIMER=null;
+var LAST_FOCUSED_ROW=null;
+
+// ═══════════ UTILS ═══════════
+function uid(){return 'f'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3)}
+function boardId(){return 'b'+Math.random().toString(36).slice(2,7)+Date.now().toString(36).slice(-3)}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function fmt(n){
+  if(!isFinite(n)||isNaN(n))return '—';
+  if(n===0)return '0';
+  if(Math.abs(n)>=10000)return Math.round(n).toLocaleString();
+  if(Math.abs(n)>=100)return n.toFixed(0);
+  if(Math.abs(n)>=10)return n.toFixed(1);
+  return n.toFixed(2);
+}
+function fmtNum(n){return (isNaN(n)||!isFinite(n))?'—':Math.round(n).toLocaleString()}
+function fmtTime(ts){
+  if(!ts)return '';
+  var d=new Date(ts), now=Date.now(), diff=Math.round((now-ts)/1000);
+  if(diff<60)return 'just now';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  if(diff<604800)return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString();
+}
+function escHTML(s){
+  return String(s||'').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function impactLabel(v){
+  for(var i=0;i<IMPACTS.length;i++)if(IMPACTS[i].val===v)return IMPACTS[i].label;
+  return v;
+}
+
+// ═══════════ STORAGE ═══════════
+function safeGet(key){
+  try{var v=localStorage.getItem(key);return v?JSON.parse(v):null}catch(e){return null}
+}
+function safeSet(key,val){
+  try{localStorage.setItem(key,JSON.stringify(val));return true}catch(e){
+    showToast('Storage full — could not save','error');return false;
+  }
+}
+function safeDel(key){try{localStorage.removeItem(key)}catch(e){}}
+
+function loadBoards(){
+  var idx=safeGet(STORAGE_KEYS.index);
+  S.boards=Array.isArray(idx)?idx:[];
+}
+function saveBoardsIndex(){safeSet(STORAGE_KEYS.index,S.boards)}
+
+function saveCurrentBoard(){
+  if(!S.currentBoardId)return;
+  var snap={
+    id:S.currentBoardId,
+    framework:S.framework,
+    horizon:S.horizon,
+    weights:S.weights,
+    features:S.features,
+    settings:S.settings,
+    updatedAt:Date.now()
+  };
+  safeSet(STORAGE_KEYS.board(S.currentBoardId),snap);
+  // update index timestamp
+  for(var i=0;i<S.boards.length;i++){
+    if(S.boards[i].id===S.currentBoardId){
+      S.boards[i].updatedAt=snap.updatedAt;
+      break;
+    }
+  }
+  saveBoardsIndex();
+  renderBoardList();
+}
+
+function debouncedSave(){
+  clearTimeout(SAVE_TIMER);
+  SAVE_TIMER=setTimeout(saveCurrentBoard,500);
+}
+
+function loadBoardById(id){
+  var snap=safeGet(STORAGE_KEYS.board(id));
+  if(!snap)return false;
+  S.currentBoardId=id;
+  S.framework=snap.framework||'rice';
+  S.horizon=snap.horizon||'quarter';
+  S.weights=Object.assign({},DEFAULT_WEIGHTS,snap.weights||{});
+  S.features=Array.isArray(snap.features)?snap.features:[];
+  if(snap.settings)S.settings=Object.assign({},S.settings,snap.settings);
+  syncSettingsUI();
+  syncFrameworkUI();
+  syncWeightsUI();
+  return true;
+}
+
+// ═══════════ BOARD MGMT ═══════════
+function createBoard(name,features){
+  var id=boardId();
+  var board={id:id,name:name||'Untitled board',updatedAt:Date.now()};
+  S.boards.unshift(board);
+  S.currentBoardId=id;
+  S.features=features||[];
+  S.framework='rice';S.horizon='quarter';
+  S.weights=Object.assign({},DEFAULT_WEIGHTS);
+  saveBoardsIndex();
+  saveCurrentBoard();
+  return id;
+}
+
+function newBoard(){
+  // prompt for name via inline rename modal
+  DRAFT_RENAME_ID='__new__';
+  var input=document.getElementById('renameInput');
+  input.value='';
+  input.placeholder='e.g. Q1 Roadmap';
+  document.getElementById('renameTitle').textContent='New board';
+  openModal('renameModal');
+  setTimeout(function(){input.focus()},50);
+}
+
+function renameBoard(id){
+  DRAFT_RENAME_ID=id;
+  var board=S.boards.find(function(b){return b.id===id});
+  var input=document.getElementById('renameInput');
+  input.value=board?board.name:'';
+  document.getElementById('renameTitle').textContent='Rename board';
+  openModal('renameModal');
+  setTimeout(function(){input.focus();input.select()},50);
+}
+
+function confirmRename(){
+  var input=document.getElementById('renameInput');
+  var name=input.value.trim();
+  if(!name){showToast('Name required','error');return}
+  if(DRAFT_RENAME_ID==='__new__'){
+    createBoard(name,[]);
+    closeModal('renameModal');
+    renderBoardList();
+    render();
+    showToast('Board created','success');
+  }else if(DRAFT_RENAME_ID){
+    var board=S.boards.find(function(b){return b.id===DRAFT_RENAME_ID});
+    if(board){
+      board.name=name;
+      saveBoardsIndex();
+      renderBoardList();
+      showToast('Renamed','success');
+    }
+    closeModal('renameModal');
+  }
+  DRAFT_RENAME_ID=null;
+}
+
+function deleteBoard(id,e){
+  if(e)e.stopPropagation();
+  if(S.boards.length<=1){
+    showToast('Cannot delete last board','error');
+    return;
+  }
+  if(!confirm('Delete this board? This cannot be undone.'))return;
+  S.boards=S.boards.filter(function(b){return b.id!==id});
+  safeDel(STORAGE_KEYS.board(id));
+  saveBoardsIndex();
+  if(S.currentBoardId===id){
+    var next=S.boards[0];
+    if(next){loadBoardById(next.id)}
+  }
+  renderBoardList();
+  render();
+  showToast('Board deleted','success');
+}
+
+function switchBoard(id){
+  if(id===S.currentBoardId)return;
+  saveCurrentBoard(); // flush current
+  loadBoardById(id);
+  renderBoardList();
+  render();
+}
+
+function renderBoardList(){
+  var el=document.getElementById('boardList');
+  if(!el)return;
+  if(!S.boards.length){
+    el.innerHTML='<div style="font-family:var(--mono);font-size:10.5px;color:var(--t2);padding:8px 4px">No boards yet</div>';
+    return;
+  }
+  var html='';
+  S.boards.forEach(function(b){
+    var active=b.id===S.currentBoardId;
+    html+='<div class="board-item'+(active?' active':'')+'" onclick="switchBoard(\''+b.id+'\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){switchBoard(\''+b.id+'\')}">'+
+          '<div class="board-info">'+
+            '<div class="board-name">'+escHTML(b.name)+'</div>'+
+            '<div class="board-meta">'+fmtTime(b.updatedAt)+'</div>'+
+          '</div>'+
+          '<button class="board-del" onclick="renameBoard(\''+b.id+'\');event.stopPropagation()" title="Rename" aria-label="Rename board">'+
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+          '</button>'+
+          '<button class="board-del" onclick="deleteBoard(\''+b.id+'\',event)" title="Delete" aria-label="Delete board">'+
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>'+
+          '</button>'+
+          '</div>';
+  });
+  el.innerHTML=html;
+}
+
+// ═══════════ SCORING ═══════════
+function computeScore(f,sens){
+  // sens: optional sensitivity transform
+  var reach=Number(f.reach)||0;
+  var impact=Number(f.impact)||0;
+  var conf=clamp(Number(f.confidence)||0,0,100)/100;
+  var effort=Math.max(0.001,Number(f.effort)||0);
+  if(sens==='effort2x')effort=effort*2;
+  else if(sens==='effort05x')effort=effort*0.5;
+  else if(sens==='conf05x')conf=conf*0.5;
+  else if(sens==='reach2x')reach=reach*2;
+  var w=S.weights;
+  if(S.framework==='rice'){
+    var num=(reach*w.reach)*(impact*w.impact)*conf;
+    var denom=Math.pow(effort,w.effort);
+    return num/denom;
+  }else{
+    // ICE: Impact * Confidence * Ease (Ease = 10/effort)
+    var ease=10/effort;
+    return (impact*w.impact)*conf*ease*10; // scale for readability
+  }
+}
+
+function computeAll(sens){
+  return S.features.map(function(f){
+    return {f:f,score:computeScore(f,sens)};
+  });
+}
+
+function rankedFeatures(){
+  var rows=computeAll();
+  // attach original index for stable sort
+  rows.forEach(function(r,i){r.origIdx=i});
+  if(S.settings.autoSort){
+    rows.sort(function(a,b){
+      if(b.score!==a.score)return b.score-a.score;
+      return a.origIdx-b.origIdx;
+    });
+  }
+  // assign rank + tier (based on full sorted list, not display order)
+  var sorted=computeAll().map(function(r,i){return {origIdx:i,score:r.score}})
+    .sort(function(a,b){return b.score-a.score});
+  var rankByIdx={};
+  sorted.forEach(function(r,i){rankByIdx[r.origIdx]=i+1});
+  var n=rows.length;
+  var topCutoff=Math.max(1,Math.ceil(n*0.25));
+  var botCutoff=Math.max(1,Math.ceil(n*0.25));
+  rows.forEach(function(r){
+    r.rank=rankByIdx[r.origIdx];
+    if(r.rank<=topCutoff)r.tier='top';
+    else if(r.rank>n-botCutoff)r.tier='bot';
+    else r.tier='mid';
+  });
+  return rows;
+}
+
+function totalEffort(rows,topN){
+  rows=rows||rankedFeatures();
+  var n=topN||rows.length;
+  var sum=0,cnt=0;
+  for(var i=0;i<rows.length&&cnt<n;i++){
+    var e=Number(rows[i].f.effort);
+    if(isFinite(e)&&e>0){sum+=e;cnt++}
+  }
+  return sum;
+}
+
+// ═══════════ FEATURE CRUD ═══════════
+function addFeature(data){
+  var f=Object.assign({
+    id:uid(),
+    name:'',
+    reach:0,
+    impact:1,
+    confidence:80,
+    effort:1
+  },data||{});
+  S.features.push(f);
+  debouncedSave();
+  return f;
+}
+
+function deleteFeature(id){
+  S.features=S.features.filter(function(f){return f.id!==id});
+  debouncedSave();
+  render();
+}
+
+function duplicateFeature(id){
+  var idx=-1;
+  for(var i=0;i<S.features.length;i++)if(S.features[i].id===id){idx=i;break}
+  if(idx<0)return;
+  var orig=S.features[idx];
+  var copy=Object.assign({},orig,{
+    id:uid(),
+    name:(orig.name||'Untitled')+' (copy)'
+  });
+  S.features.splice(idx+1,0,copy);
+  debouncedSave();
+  render();
+}
+
+function moveFeature(id,direction){
+  var idx=-1;
+  for(var i=0;i<S.features.length;i++)if(S.features[i].id===id){idx=i;break}
+  if(idx<0)return;
+  var newIdx=idx+direction;
+  if(newIdx<0||newIdx>=S.features.length)return;
+  var tmp=S.features[idx];
+  S.features[idx]=S.features[newIdx];
+  S.features[newIdx]=tmp;
+  debouncedSave();
+  render();
+}
+
+function updateFeature(id,field,val){
+  var f=S.features.find(function(f){return f.id===id});
+  if(!f)return;
+  if(field==='reach'||field==='effort'){
+    f[field]=Math.max(0,Number(val)||0);
+  }else if(field==='impact'){
+    f[field]=Number(val)||1;
+  }else if(field==='confidence'){
+    f[field]=clamp(Number(val)||0,0,100);
+  }else if(field==='name'){
+    f[field]=String(val||'').slice(0,200);
+  }
+  debouncedSave();
+  // Smart partial update: avoid destroying focused inputs
+  // For impact (select), do full re-render since it changes via change event after blur
+  // For numeric inputs, just update score cells, conf bars, flags, and stats
+  if(field==='impact'){
+    render();
+  }else{
+    updateLiveScores();
+  }
+}
+
+// Update only score-related visuals without destroying input focus
+function updateLiveScores(){
+  if(S.activeTab!=='features')return;
+  var rows=rankedFeatures();
+  var topEffort=totalEffort(rows,5);
+
+  // Update top stat
+  var stats=document.querySelectorAll('.action-bar .total-stat strong');
+  if(stats.length>=2){
+    stats[0].textContent=rows.length;
+    stats[1].textContent=fmt(topEffort);
+  }
+
+  // Update each row's score, rank, tier, conf bar, flags
+  rows.forEach(function(r){
+    var f=r.f;
+    var tr=document.querySelector('tr[data-fid="'+f.id+'"]');
+    if(!tr)return;
+
+    // Tier class
+    tr.classList.remove('tier-top','tier-mid','tier-bot');
+    tr.classList.add(r.tier==='top'?'tier-top':(r.tier==='bot'?'tier-bot':'tier-mid'));
+
+    // Rank badge
+    var badge=tr.querySelector('.rank-badge');
+    if(badge){
+      badge.textContent=r.rank;
+      badge.classList.remove('r1','r2','r3');
+      if(r.rank===1)badge.classList.add('r1');
+      else if(r.rank===2)badge.classList.add('r2');
+      else if(r.rank===3)badge.classList.add('r3');
+    }
+
+    // Score cell
+    var scoreCell=tr.querySelector('td.score');
+    if(scoreCell){
+      scoreCell.textContent=fmt(r.score);
+      scoreCell.setAttribute('data-score',r.score);
+      scoreCell.setAttribute('data-reach',f.reach);
+      scoreCell.setAttribute('data-impact',f.impact);
+      scoreCell.setAttribute('data-conf',f.confidence);
+      scoreCell.setAttribute('data-effort',f.effort);
+    }
+
+    // Confidence bar
+    var confFill=tr.querySelector('.conf-fill');
+    if(confFill){
+      confFill.style.width=f.confidence+'%';
+      confFill.classList.remove('warn','bad');
+      if(f.confidence<50)confFill.classList.add('bad');
+      else if(f.confidence<70)confFill.classList.add('warn');
+    }
+
+    // Flag dots
+    var flagCell=tr.querySelector('.flag-cell');
+    if(flagCell){
+      var existingFlags=flagCell.querySelectorAll('.flag-dot');
+      existingFlags.forEach(function(d){d.parentNode.removeChild(d)});
+      var flags=[];
+      if(S.settings.confAudit&&f.confidence<50)flags.push({type:'conf',msg:'Low confidence — needs validation'});
+      if(S.settings.effortAudit&&f.effort>6)flags.push({type:'effort',msg:'Large effort — consider breaking down'});
+      // Insert dots before .row-actions
+      var actions=flagCell.querySelector('.row-actions');
+      flags.forEach(function(fl){
+        var dot=document.createElement('span');
+        dot.className='flag-dot '+fl.type;
+        dot.setAttribute('data-tip',fl.msg);
+        dot.setAttribute('tabindex','0');
+        dot.setAttribute('role','img');
+        dot.setAttribute('aria-label',fl.msg);
+        if(actions)flagCell.insertBefore(dot,actions);
+        else flagCell.appendChild(dot);
+      });
+    }
+  });
+
+  // If autoSort enabled and order changed, do a full FLIP re-render once user blurs
+  // (Re-rendering during typing destroys focus)
+  // We re-render on blur via the focusout handler.
+}
+
+// ═══════════ RENDER ═══════════
+function render(skipFlip){
+  var el=document.getElementById('tabContent');
+  if(!el)return;
+  if(S.activeTab==='features')renderFeatures(el,skipFlip);
+  else if(S.activeTab==='sensitivity')renderSensitivity(el);
+  else if(S.activeTab==='analysis')renderAnalysis(el);
+}
+
+function renderFeatures(el,skipFlip){
+  if(!S.features.length){
+    renderEmptyState(el);
+    return;
+  }
+
+  // Capture FLIP positions before re-rendering
+  var oldRects={};
+  if(!skipFlip){
+    var existingRows=el.querySelectorAll('tr[data-fid]');
+    for(var i=0;i<existingRows.length;i++){
+      var r=existingRows[i];
+      oldRects[r.getAttribute('data-fid')]=r.getBoundingClientRect();
+    }
+  }
+
+  var rows=rankedFeatures();
+  var topEffort=totalEffort(rows,5);
+  var horizonLbl={month:'/ mo',quarter:'/ qtr',year:'/ yr'}[S.horizon];
+
+  var headHtml=
+    '<div class="action-bar">'+
+      '<div class="total-stat"><span style="color:var(--t2)">Total features</span> <strong>'+rows.length+'</strong></div>'+
+      '<div class="total-stat"><span style="color:var(--t2)">Top 5 effort</span> <strong>'+fmt(topEffort)+'</strong> <span style="color:var(--t2)">person-mo</span></div>'+
+      '<div class="action-bar-spacer"></div>'+
+      '<button class="abtn pri" onclick="addFeature();render()" aria-label="Add row">'+
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+
+        'Add row'+
+      '</button>'+
+    '</div>';
+
+  var fwLabel=S.framework==='rice'?'RICE':'ICE';
+
+  var tableHtml=
+    '<div class="card" id="riceTableCard">'+
+      '<div class="card-head">'+
+        '<div>'+
+          '<div class="card-head-title">Feature ranking</div>'+
+          '<div class="card-head-sub">'+fwLabel+' score · '+rows.length+' features · '+horizonLbl+' window</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="rice-table-wrap">'+
+        '<table class="rice-table" role="grid" aria-label="Features ranked by '+fwLabel+' score">'+
+          '<thead><tr>'+
+            '<th style="width:32px"></th>'+
+            '<th style="width:40px">#</th>'+
+            '<th>Feature</th>'+
+            (S.framework==='rice'?'<th class="num">Reach '+horizonLbl+'</th>':'')+
+            '<th>Impact</th>'+
+            '<th class="num">Conf %</th>'+
+            '<th class="num">Effort (mo)</th>'+
+            '<th class="num score">Score</th>'+
+            '<th style="width:90px"></th>'+
+          '</tr></thead>'+
+          '<tbody id="riceTbody">'+
+            rows.map(function(r){return renderRow(r)}).join('')+
+          '</tbody>'+
+        '</table>'+
+      '</div>'+
+    '</div>';
+
+  el.innerHTML=headHtml+tableHtml;
+  attachRowHandlers();
+
+  // FLIP animation
+  if(!skipFlip&&Object.keys(oldRects).length){
+    var newRows=el.querySelectorAll('tr[data-fid]');
+    for(var i=0;i<newRows.length;i++){
+      var r=newRows[i];
+      var fid=r.getAttribute('data-fid');
+      var oldRect=oldRects[fid];
+      if(!oldRect)continue;
+      var newRect=r.getBoundingClientRect();
+      var dy=oldRect.top-newRect.top;
+      if(Math.abs(dy)>1){
+        r.style.transform='translateY('+dy+'px)';
+        r.style.transition='none';
+        // force reflow
+        void r.offsetHeight;
+        r.style.transform='';
+        r.style.transition='transform .35s var(--ease)';
+      }
+    }
+  }
+}
+
+function renderRow(r){
+  var f=r.f;
+  var tierClass=r.tier==='top'?'tier-top':(r.tier==='bot'?'tier-bot':'tier-mid');
+  var rankBadgeClass='';
+  if(r.rank===1)rankBadgeClass=' r1';
+  else if(r.rank===2)rankBadgeClass=' r2';
+  else if(r.rank===3)rankBadgeClass=' r3';
+
+  // Audit flags
+  var flags=[];
+  if(S.settings.confAudit&&f.confidence<50)flags.push({type:'conf',msg:'Low confidence — needs validation'});
+  if(S.settings.effortAudit&&f.effort>6)flags.push({type:'effort',msg:'Large effort — consider breaking down'});
+
+  var flagHtml=flags.map(function(fl){
+    return '<span class="flag-dot '+fl.type+'" data-tip="'+escHTML(fl.msg)+'" tabindex="0" role="img" aria-label="'+escHTML(fl.msg)+'"></span>';
+  }).join('');
+
+  // Confidence bar
+  var confClass='';
+  if(f.confidence<50)confClass=' bad';
+  else if(f.confidence<70)confClass=' warn';
+
+  var impactOpts=IMPACTS.map(function(imp){
+    return '<option value="'+imp.val+'"'+(imp.val==f.impact?' selected':'')+'>'+escHTML(imp.label)+'</option>';
+  }).join('');
+
+  var html=
+    '<tr data-fid="'+f.id+'" class="'+tierClass+'">'+
+      '<td><span class="drag-handle" draggable="true" data-fid="'+f.id+'" aria-label="Drag to reorder">'+
+        '<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="3" cy="3" r="1.2"/><circle cx="7" cy="3" r="1.2"/><circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/><circle cx="3" cy="11" r="1.2"/><circle cx="7" cy="11" r="1.2"/></svg>'+
+      '</span></td>'+
+      '<td><div class="rank-cell"><span class="rank-badge'+rankBadgeClass+'">'+r.rank+'</span></div></td>'+
+      '<td><input class="name-input" data-fid="'+f.id+'" data-field="name" type="text" value="'+escHTML(f.name)+'" placeholder="Feature name..." aria-label="Feature name"/></td>'+
+      (S.framework==='rice'?'<td class="num"><input class="num-input" data-fid="'+f.id+'" data-field="reach" type="number" min="0" step="100" value="'+(f.reach||0)+'" aria-label="Reach"/></td>':'')+
+      '<td><select class="impact-select" data-fid="'+f.id+'" data-field="impact" aria-label="Impact">'+impactOpts+'</select></td>'+
+      '<td class="num">'+
+        '<div class="conf-cell">'+
+          '<div class="conf-bar"><div class="conf-fill'+confClass+'" style="width:'+f.confidence+'%"></div></div>'+
+          '<input class="num-input" data-fid="'+f.id+'" data-field="confidence" type="number" min="0" max="100" step="5" value="'+f.confidence+'" style="width:54px" aria-label="Confidence percent"/>'+
+        '</div>'+
+      '</td>'+
+      '<td class="num"><input class="num-input" data-fid="'+f.id+'" data-field="effort" type="number" min="0" step="0.5" value="'+f.effort+'" aria-label="Effort in person-months"/></td>'+
+      '<td class="score" data-fid="'+f.id+'" data-score="'+r.score+'" data-reach="'+f.reach+'" data-impact="'+f.impact+'" data-conf="'+f.confidence+'" data-effort="'+f.effort+'">'+fmt(r.score)+'</td>'+
+      '<td><div class="flag-cell">'+flagHtml+'<div class="row-actions">'+
+        '<button class="ra-btn" onclick="duplicateFeature(\''+f.id+'\')" title="Duplicate" aria-label="Duplicate feature">'+
+          '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>'+
+        '</button>'+
+        '<button class="ra-btn del" onclick="deleteFeature(\''+f.id+'\')" title="Delete" aria-label="Delete feature">'+
+          '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>'+
+        '</button>'+
+      '</div></div></td>'+
+    '</tr>';
+  return html;
+}
+
+function attachRowHandlers(){
+  // Inputs (event delegation on tbody)
+  var tbody=document.getElementById('riceTbody');
+  if(!tbody)return;
+
+  tbody.addEventListener('input',function(e){
+    var t=e.target;
+    var fid=t.getAttribute('data-fid');
+    var field=t.getAttribute('data-field');
+    if(!fid||!field)return;
+    if(field==='name'){
+      var f=S.features.find(function(f){return f.id===fid});
+      if(f){f.name=t.value;debouncedSave()}
+      // don't re-render on name change (keep focus)
+    }else{
+      updateFeature(fid,field,t.value);
+    }
+  });
+
+  tbody.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.tagName==='SELECT'){
+      var fid=t.getAttribute('data-fid');
+      var field=t.getAttribute('data-field');
+      if(fid&&field)updateFeature(fid,field,t.value);
+    }
+  });
+
+  // Score cell hover → popover
+  var scoreCells=tbody.querySelectorAll('td.score');
+  scoreCells.forEach(function(c){
+    c.addEventListener('mouseenter',function(){showScorePopover(c)});
+    c.addEventListener('mouseleave',hideScorePopover);
+  });
+
+  // Drag-drop reorder
+  var handles=tbody.querySelectorAll('.drag-handle');
+  handles.forEach(function(h){
+    h.addEventListener('dragstart',function(e){
+      var fid=h.getAttribute('data-fid');
+      e.dataTransfer.setData('text/x-rice-fid',fid);
+      e.dataTransfer.effectAllowed='move';
+      var row=h.closest('tr');
+      if(row)row.classList.add('dragging');
+    });
+    h.addEventListener('dragend',function(){
+      var rows=tbody.querySelectorAll('tr.dragging');
+      rows.forEach(function(r){r.classList.remove('dragging')});
+    });
+  });
+
+  tbody.addEventListener('dragover',function(e){
+    if(!e.dataTransfer.types.includes('text/x-rice-fid'))return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+  });
+
+  tbody.addEventListener('drop',function(e){
+    var fid=e.dataTransfer.getData('text/x-rice-fid');
+    if(!fid)return;
+    e.preventDefault();
+    var targetRow=e.target.closest('tr');
+    if(!targetRow)return;
+    var targetFid=targetRow.getAttribute('data-fid');
+    if(!targetFid||targetFid===fid)return;
+    var srcIdx=S.features.findIndex(function(f){return f.id===fid});
+    var dstIdx=S.features.findIndex(function(f){return f.id===targetFid});
+    if(srcIdx<0||dstIdx<0)return;
+    var item=S.features.splice(srcIdx,1)[0];
+    S.features.splice(dstIdx,0,item);
+    // disable autoSort if user manually reorders, so order is preserved
+    if(S.settings.autoSort){
+      S.settings.autoSort=false;
+      var chk=document.getElementById('autoSortChk');
+      if(chk)chk.checked=false;
+      showToast('Auto-sort disabled — manual order','success');
+    }
+    debouncedSave();
+    render();
+  });
+
+  // Track focus
+  tbody.addEventListener('focusin',function(e){
+    var t=e.target;
+    var fid=t.getAttribute('data-fid');
+    if(fid)LAST_FOCUSED_ROW=fid;
+  });
+
+  // On blur of a number/text input, do a full re-render (with FLIP) to apply sort
+  tbody.addEventListener('focusout',function(e){
+    var t=e.target;
+    if(!t||(t.tagName!=='INPUT'&&t.tagName!=='SELECT'))return;
+    // Defer to allow focus to land elsewhere first; only re-render if focus left tbody
+    setTimeout(function(){
+      if(!tbody.contains(document.activeElement)){
+        if(S.settings.autoSort)render();
+      }
+    },0);
+  });
+}
+
+function renderEmptyState(el){
+  el.innerHTML=
+    '<div class="empty">'+
+      '<div class="empty-icon"></div>'+
+      '<div class="empty-title">Score your first feature</div>'+
+      '<p class="empty-desc">Add features to compute RICE scores. Start with one of these examples or click <strong>Add row</strong> below to enter your own.</p>'+
+      '<div class="empty-examples">'+
+        '<button class="ex-pill" onclick="addExamples()">Try with examples</button>'+
+        '<button class="ex-pill" onclick="addFeature();render()">+ Blank row</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function addExamples(){
+  var examples=[
+    {id:uid(),name:'Dark mode',reach:8000,impact:1,confidence:90,effort:1.5},
+    {id:uid(),name:'Onboarding redesign',reach:12000,impact:2,confidence:70,effort:3},
+    {id:uid(),name:'Mobile app',reach:25000,impact:3,confidence:50,effort:8},
+    {id:uid(),name:'In-app search',reach:6000,impact:2,confidence:80,effort:2},
+    {id:uid(),name:'API v2',reach:1500,impact:1,confidence:90,effort:4},
+    {id:uid(),name:'Notification preferences',reach:5000,impact:0.5,confidence:95,effort:0.5}
+  ];
+  S.features=examples;
+  debouncedSave();
+  render();
+  showToast('Examples added','success');
+}
+
+// ═══════════ SCORE POPOVER ═══════════
+function showScorePopover(cell){
+  var pop=document.getElementById('scorePopover');
+  var fid=cell.getAttribute('data-fid');
+  var f=S.features.find(function(f){return f.id===fid});
+  if(!f)return;
+  var reach=Number(f.reach)||0;
+  var impact=Number(f.impact)||0;
+  var conf=Number(f.confidence)||0;
+  var effort=Math.max(0.001,Number(f.effort)||0);
+  var score=computeScore(f);
+  var w=S.weights;
+
+  var formula='';
+  if(S.framework==='rice'){
+    formula='('+fmtNum(reach)+' × '+impact+' × '+conf+'%) ÷ '+effort+' = <span class="formula">'+fmt(score)+'</span>';
+    if(w.reach!==1||w.impact!==1||w.effort!==1){
+      formula+='<br><span style="color:var(--t2);font-size:10px">weights: R×'+w.reach+', I×'+w.impact+', E^'+w.effort+'</span>';
+    }
+  }else{
+    var ease=10/effort;
+    formula=impact+' × '+conf+'% × '+fmt(ease)+' (ease) × 10 = <span class="formula">'+fmt(score)+'</span>';
+  }
+
+  pop.innerHTML='<span class="label">'+(S.framework==='rice'?'RICE':'ICE')+' formula</span>'+formula;
+  pop.classList.add('vis');
+
+  var rect=cell.getBoundingClientRect();
+  var pw=pop.offsetWidth, ph=pop.offsetHeight;
+  var top=rect.top-ph-8;
+  var left=rect.right-pw;
+  if(top<10)top=rect.bottom+8;
+  if(left<10)left=10;
+  if(left+pw>window.innerWidth-10)left=window.innerWidth-pw-10;
+  pop.style.top=top+'px';
+  pop.style.left=left+'px';
+}
+
+function hideScorePopover(){
+  document.getElementById('scorePopover').classList.remove('vis');
+}
+
+
+// ═══════════ TAB / FRAMEWORK / HORIZON / WEIGHTS ═══════════
+function setTab(tab,btn){
+  S.activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.remove('active');
+    b.setAttribute('aria-selected','false');
+  });
+  if(btn){
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
+  }
+  render();
+}
+
+function setFramework(fw,btn){
+  S.framework=fw;
+  syncFrameworkUI();
+  debouncedSave();
+  render();
+}
+
+function syncFrameworkUI(){
+  var btns=document.querySelectorAll('.sb-section .trow:first-of-type .tbtn, .sb-section [aria-labelledby="lbl-fw"] .tbtn');
+  // safer: find by id wrapper. We'll use position-based selector
+  var fwGroup=document.querySelector('[aria-labelledby="lbl-fw"]');
+  if(fwGroup){
+    var bs=fwGroup.querySelectorAll('.tbtn');
+    bs.forEach(function(b){
+      var isActive=(b.textContent.trim().toLowerCase()===S.framework);
+      b.classList.toggle('active',isActive);
+      b.setAttribute('aria-pressed',isActive?'true':'false');
+    });
+  }
+}
+
+function setHorizon(h,btn){
+  S.horizon=h;
+  var hGroup=document.querySelector('[aria-labelledby="lbl-horizon"]');
+  if(hGroup){
+    var bs=hGroup.querySelectorAll('.tbtn');
+    bs.forEach(function(b){
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed','false');
+    });
+    if(btn){btn.classList.add('active');btn.setAttribute('aria-pressed','true')}
+  }
+  debouncedSave();
+  render();
+}
+
+function updateWeights(){
+  var r=parseFloat(document.getElementById('wReach').value)||1;
+  var i=parseFloat(document.getElementById('wImpact').value)||1;
+  var e=parseFloat(document.getElementById('wEffort').value)||1;
+  S.weights={reach:Math.max(0,r),impact:Math.max(0,i),effort:clamp(e,0.5,3)};
+  debouncedSave();
+  render();
+}
+
+function syncWeightsUI(){
+  var rEl=document.getElementById('wReach');
+  var iEl=document.getElementById('wImpact');
+  var eEl=document.getElementById('wEffort');
+  if(rEl)rEl.value=S.weights.reach;
+  if(iEl)iEl.value=S.weights.impact;
+  if(eEl)eEl.value=S.weights.effort;
+  // open weights collapsible if non-default
+  var nonDefault=(S.weights.reach!==1||S.weights.impact!==1||S.weights.effort!==1);
+  if(nonDefault){
+    var c=document.getElementById('weightsCollapsible');
+    if(c)c.classList.add('open');
+  }
+}
+
+function toggleCollapsible(id){
+  var c=document.getElementById(id);
+  if(c)c.classList.toggle('open');
+}
+
+function toggleColorblind(){
+  var chk=document.getElementById('cbSafe');
+  S.settings.cbSafe=!!chk.checked;
+  document.body.classList.toggle('cb-safe',S.settings.cbSafe);
+  saveSettings();
+}
+
+function syncSettingsUI(){
+  var cb=document.getElementById('cbSafe');
+  if(cb)cb.checked=!!S.settings.cbSafe;
+  document.body.classList.toggle('cb-safe',!!S.settings.cbSafe);
+  var ca=document.getElementById('confAuditChk');
+  if(ca)ca.checked=!!S.settings.confAudit;
+  var ea=document.getElementById('effortAuditChk');
+  if(ea)ea.checked=!!S.settings.effortAudit;
+  var as=document.getElementById('autoSortChk');
+  if(as)as.checked=!!S.settings.autoSort;
+}
+
+function saveSettings(){
+  // persist S.settings cross-board
+  safeSet(STORAGE_KEYS.settings,S.settings);
+}
+function loadSettings(){
+  var s=safeGet(STORAGE_KEYS.settings);
+  if(s&&typeof s==='object'){
+    S.settings.cbSafe=!!s.cbSafe;
+    if(typeof s.confAudit==='boolean')S.settings.confAudit=s.confAudit;
+    if(typeof s.effortAudit==='boolean')S.settings.effortAudit=s.effortAudit;
+    if(typeof s.autoSort==='boolean')S.settings.autoSort=s.autoSort;
+  }
+}
+
+// hook settings checkbox onchange to also persist
+(function patchSettingsCheckboxes(){
+  document.addEventListener('change',function(e){
+    var t=e.target;
+    if(!t||t.tagName!=='INPUT'||t.type!=='checkbox')return;
+    if(t.id==='confAuditChk'){S.settings.confAudit=!!t.checked;saveSettings()}
+    else if(t.id==='effortAuditChk'){S.settings.effortAudit=!!t.checked;saveSettings()}
+    else if(t.id==='autoSortChk'){S.settings.autoSort=!!t.checked;saveSettings()}
+  });
+})();
+
+// ═══════════ SENSITIVITY TAB ═══════════
+function setSensitivity(s){
+  S.sensitivity=s;
+  render();
+}
+
+function renderSensitivity(el){
+  if(!S.features.length){
+    renderEmptyState(el);
+    return;
+  }
+
+  var baseRanked=rankedFeatures();
+
+  var scenarios=[
+    {key:'none',label:'Base case'},
+    {key:'effort2x',label:'Effort × 2'},
+    {key:'effort05x',label:'Effort × 0.5'},
+    {key:'conf05x',label:'Confidence × 0.5'},
+    {key:'reach2x',label:'Reach × 2'}
+  ];
+
+  var pillsHtml=scenarios.map(function(s){
+    var active=(S.sensitivity===s.key)?' active':'';
+    return '<button class="sens-pill'+active+'" onclick="setSensitivity(\''+s.key+'\')" aria-pressed="'+(active?'true':'false')+'">'+s.label+'</button>';
+  }).join('');
+
+  // Compute scenario rankings
+  var scenarioRanks={};
+  scenarios.forEach(function(s){
+    var sRows=computeAll(s.key==='none'?undefined:s.key);
+    sRows.forEach(function(r,i){r.origIdx=i});
+    sRows.sort(function(a,b){
+      if(b.score!==a.score)return b.score-a.score;
+      return a.origIdx-b.origIdx;
+    });
+    var byId={};
+    sRows.forEach(function(r,i){byId[r.f.id]={rank:i+1,score:r.score}});
+    scenarioRanks[s.key]=byId;
+  });
+
+  var headerCells=scenarios.map(function(s){
+    var active=(S.sensitivity===s.key)?' style="color:var(--purple)"':'';
+    return '<th class="num"'+active+'>'+escHTML(s.label)+'</th>';
+  }).join('');
+
+  // Stable rows order (base ranking)
+  var rowsHtml=baseRanked.map(function(r){
+    var f=r.f;
+    var name=escHTML(f.name||'(unnamed)');
+    var baseRank=scenarioRanks.none[f.id].rank;
+    var cells=scenarios.map(function(s){
+      var info=scenarioRanks[s.key][f.id];
+      var rank=info.rank;
+      var score=info.score;
+      var delta=baseRank-rank; // positive = moved up
+      var deltaCls='delta-same';
+      var deltaText='—';
+      if(s.key!=='none'){
+        if(delta>0){deltaCls='delta-up';deltaText='↑'+delta}
+        else if(delta<0){deltaCls='delta-down';deltaText='↓'+Math.abs(delta)}
+        else{deltaCls='delta-same';deltaText='='}
+      }
+      var rankBadge='<span class="rank-badge" style="display:inline-flex">#'+rank+'</span>';
+      var deltaHtml=s.key==='none'?'':'<span class="'+deltaCls+'" style="font-size:11px;margin-left:6px;font-weight:600">'+deltaText+'</span>';
+      return '<td class="num" style="white-space:nowrap">'+rankBadge+deltaHtml+'<div style="font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:2px">'+fmt(score)+'</div></td>';
+    }).join('');
+    return '<tr><td colspan="1" style="padding:10px 14px;font-weight:600;color:var(--t1);font-size:12.5px;min-width:180px">'+name+'</td>'+cells+'</tr>';
+  }).join('');
+
+  el.innerHTML=
+    '<div class="card">'+
+      '<div class="card-head">'+
+        '<div>'+
+          '<div class="card-head-title">Sensitivity analysis</div>'+
+          '<div class="card-head-sub">How rankings change under different assumptions</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="sens-controls">'+pillsHtml+'</div>'+
+      '<div class="rice-table-wrap">'+
+        '<table class="rice-table" style="min-width:680px">'+
+          '<thead><tr>'+
+            '<th style="min-width:180px">Feature</th>'+
+            headerCells+
+          '</tr></thead>'+
+          '<tbody>'+rowsHtml+'</tbody>'+
+        '</table>'+
+      '</div>'+
+      '<div class="insight-row">'+
+        '<div class="insight-icon">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'+
+        '</div>'+
+        '<div class="insight-text">'+
+          '<strong>How to read this:</strong> Arrows show how each feature\'s rank shifts under the scenario. If your top features stay on top across all scenarios, your prioritization is robust. Big swings mean you should validate that input before committing.'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+// ═══════════ ANALYSIS TAB ═══════════
+function renderAnalysis(el){
+  if(!S.features.length){
+    renderEmptyState(el);
+    return;
+  }
+
+  var rows=rankedFeatures();
+  var top5=rows.slice(0,5);
+  var top5Effort=totalEffort(rows,5);
+  var totalEff=totalEffort(rows);
+
+  // Audit warnings
+  var lowConf=rows.filter(function(r){return r.f.confidence<50});
+  var highEffort=rows.filter(function(r){return r.f.effort>6});
+  var unnamed=rows.filter(function(r){return !r.f.name||!r.f.name.trim()});
+
+  var insightsHtml='';
+  top5.forEach(function(r,i){
+    var f=r.f;
+    var why=[];
+    if(r.tier==='top'){
+      // Why does this rank high?
+      if(f.impact>=2)why.push('high impact ('+impactLabel(f.impact).toLowerCase()+')');
+      if(f.confidence>=80)why.push('strong confidence ('+f.confidence+'%)');
+      if(f.effort<=1)why.push('low effort ('+fmt(f.effort)+' mo)');
+      if(S.framework==='rice'&&f.reach>=5000)why.push('large reach ('+fmtNum(f.reach)+')');
+    }
+    var whyText=why.length?'Strong on '+why.join(', ')+'.':'Balanced across all factors — solid mid-table candidate.';
+    var name=escHTML(f.name||'(unnamed)');
+    insightsHtml+=
+      '<div class="insight-row">'+
+        '<div class="insight-icon">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'+
+        '</div>'+
+        '<div class="insight-text">'+
+          '<strong>#'+r.rank+' &middot; '+name+'</strong> &middot; score '+fmt(r.score)+'<br>'+
+          '<span style="color:var(--t2)">'+whyText+'</span>'+
+        '</div>'+
+      '</div>';
+  });
+
+  var auditHtml='';
+  if(lowConf.length||highEffort.length||unnamed.length){
+    var auditItems=[];
+    if(lowConf.length){
+      auditItems.push('<li><strong style="color:var(--warn)">'+lowConf.length+' low-confidence feature'+(lowConf.length>1?'s':'')+'</strong> — validate before scoring: '+lowConf.slice(0,3).map(function(r){return escHTML(r.f.name||'(unnamed)')}).join(', ')+(lowConf.length>3?'…':'')+'</li>');
+    }
+    if(highEffort.length){
+      auditItems.push('<li><strong style="color:var(--red)">'+highEffort.length+' high-effort feature'+(highEffort.length>1?'s':'')+'</strong> — consider breaking down: '+highEffort.slice(0,3).map(function(r){return escHTML(r.f.name||'(unnamed)')+' ('+fmt(r.f.effort)+'mo)'}).join(', ')+(highEffort.length>3?'…':'')+'</li>');
+    }
+    if(unnamed.length){
+      auditItems.push('<li><strong style="color:var(--t2)">'+unnamed.length+' unnamed row'+(unnamed.length>1?'s':'')+'</strong> — add a name for clarity</li>');
+    }
+    auditHtml=
+      '<div class="card padded">'+
+        '<div class="card-head-title" style="margin-bottom:10px">Audit findings</div>'+
+        '<ul style="margin-left:18px;color:var(--t1);font-size:13px;line-height:2">'+auditItems.join('')+'</ul>'+
+      '</div>';
+  }
+
+  // Summary stats
+  var avgConf=rows.reduce(function(a,r){return a+r.f.confidence},0)/rows.length;
+  var summaryHtml=
+    '<div class="card padded">'+
+      '<div class="card-head-title" style="margin-bottom:14px">Board summary</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">'+
+        '<div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px">Total features</div><div style="font-family:var(--font);font-size:24px;font-weight:800;color:var(--t0)">'+rows.length+'</div></div>'+
+        '<div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px">Top 5 effort</div><div style="font-family:var(--font);font-size:24px;font-weight:800;color:var(--pri)">'+fmt(top5Effort)+' <span style="font-size:13px;color:var(--t2);font-weight:500">mo</span></div></div>'+
+        '<div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px">Total effort</div><div style="font-family:var(--font);font-size:24px;font-weight:800;color:var(--t0)">'+fmt(totalEff)+' <span style="font-size:13px;color:var(--t2);font-weight:500">mo</span></div></div>'+
+        '<div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px">Avg confidence</div><div style="font-family:var(--font);font-size:24px;font-weight:800;color:var(--t0)">'+Math.round(avgConf)+'%</div></div>'+
+      '</div>'+
+    '</div>';
+
+  el.innerHTML=
+    summaryHtml+
+    '<div class="card">'+
+      '<div class="card-head">'+
+        '<div>'+
+          '<div class="card-head-title">Why these rank highest</div>'+
+          '<div class="card-head-sub">Auto-generated insights for top 5 features</div>'+
+        '</div>'+
+      '</div>'+
+      insightsHtml+
+    '</div>'+
+    auditHtml;
+}
+
+// ═══════════ BULK PASTE / NLP / CSV ═══════════
+function handleBulkPaste(){
+  // Triggered after onpaste; auto-parse if likely tabular
+  var ta=document.getElementById('bulkInput');
+  if(!ta||!ta.value)return;
+  var lines=ta.value.split(/\r?\n/).filter(function(l){return l.trim()});
+  if(lines.length>=2 && lines[0].indexOf('\t')>-1){
+    // Auto-parse on paste of multiline TSV
+    parseBulkInput();
+  }
+}
+
+function parseBulkInput(){
+  var ta=document.getElementById('bulkInput');
+  if(!ta)return;
+  var text=ta.value.trim();
+  if(!text){showToast('Paste some content first','error');return}
+
+  var added=parseAndAddFeatures(text);
+  if(added>0){
+    ta.value='';
+    debouncedSave();
+    render();
+    showToast('Added '+added+' feature'+(added>1?'s':''),'success');
+  }else{
+    showToast('Could not parse input — try TSV or natural language','error');
+  }
+}
+
+function parseAndAddFeatures(text){
+  var lines=text.split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
+  if(!lines.length)return 0;
+
+  // Detect TSV vs CSV vs natural language
+  var firstLine=lines[0];
+  var hasTab=firstLine.indexOf('\t')>-1;
+  var hasComma=firstLine.indexOf(',')>-1;
+
+  // Try structured parse first
+  if(hasTab||hasComma){
+    var sep=hasTab?'\t':',';
+    var rows=lines.map(function(l){return parseDelimitedLine(l,sep)});
+    // Check if first row is a header
+    var firstRow=rows[0];
+    var firstIsHeader=firstRow.some(function(c){
+      return /^(name|feature|reach|impact|confidence|conf|effort)$/i.test(c.trim());
+    });
+    var dataRows=firstIsHeader?rows.slice(1):rows;
+
+    // Determine column mapping
+    var cols={name:0,reach:1,impact:2,confidence:3,effort:4};
+    if(firstIsHeader){
+      cols={};
+      firstRow.forEach(function(h,i){
+        var k=h.trim().toLowerCase();
+        if(k==='name'||k==='feature'||k==='title')cols.name=i;
+        else if(k==='reach'||k==='users')cols.reach=i;
+        else if(k==='impact')cols.impact=i;
+        else if(k==='confidence'||k==='conf')cols.confidence=i;
+        else if(k==='effort'||k==='months')cols.effort=i;
+      });
+      // fallback to position if missing
+      if(cols.name==null)cols.name=0;
+    }
+
+    var added=0;
+    dataRows.forEach(function(r){
+      if(!r.length||(r.length===1&&!r[0]))return;
+      var name=cols.name!=null?(r[cols.name]||'').trim():'';
+      if(!name&&S.framework==='ice'){
+        // ICE doesn't need reach - first column is name
+        name=(r[0]||'').trim();
+      }
+      if(!name)return;
+      var data={
+        name:name,
+        reach:parseImpactNumber(cols.reach!=null?r[cols.reach]:''),
+        impact:parseImpactValue(cols.impact!=null?r[cols.impact]:''),
+        confidence:parseConfidence(cols.confidence!=null?r[cols.confidence]:''),
+        effort:parseEffort(cols.effort!=null?r[cols.effort]:'')
+      };
+      addFeature(data);
+      added++;
+    });
+    if(added)return added;
+  }
+
+  // Fall back to natural language: one feature per line
+  var addedNL=0;
+  lines.forEach(function(line){
+    var parsed=parseNaturalLanguage(line);
+    if(parsed&&parsed.name){
+      addFeature(parsed);
+      addedNL++;
+    }
+  });
+  return addedNL;
+}
+
+function parseDelimitedLine(line,sep){
+  if(sep==='\t')return line.split('\t');
+  // Simple CSV parser supporting quoted strings
+  var out=[];
+  var cur='';
+  var inQ=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(c==='"'){
+      if(inQ&&line[i+1]==='"'){cur+='"';i++}
+      else inQ=!inQ;
+    }else if(c===','&&!inQ){
+      out.push(cur);cur='';
+    }else cur+=c;
+  }
+  out.push(cur);
+  return out;
+}
+
+function parseImpactNumber(s){
+  if(s==null)return 0;
+  s=String(s).replace(/[,$]/g,'').trim();
+  var n=parseFloat(s);
+  return isFinite(n)?Math.max(0,n):0;
+}
+
+function parseImpactValue(s){
+  if(s==null)return 1;
+  s=String(s).trim().toLowerCase();
+  if(/^massive|huge|critical/i.test(s))return 3;
+  if(/^high|major/i.test(s))return 2;
+  if(/^med|medium|moderate/i.test(s))return 1;
+  if(/^low|minor/i.test(s))return 0.5;
+  if(/^minimal|tiny|negligible/i.test(s))return 0.25;
+  var n=parseFloat(s);
+  if(isFinite(n)){
+    // snap to nearest IMPACT value
+    var nearest=1;var minD=999;
+    IMPACTS.forEach(function(imp){
+      var d=Math.abs(imp.val-n);
+      if(d<minD){minD=d;nearest=imp.val}
+    });
+    return nearest;
+  }
+  return 1;
+}
+
+function parseConfidence(s){
+  if(s==null)return 80;
+  s=String(s).replace('%','').trim();
+  var n=parseFloat(s);
+  if(!isFinite(n))return 80;
+  if(n<=1)n=n*100; // 0.8 → 80
+  return clamp(Math.round(n),0,100);
+}
+
+function parseEffort(s){
+  if(s==null)return 1;
+  s=String(s).trim().toLowerCase();
+  // T-shirt sizes
+  if(/^xxl/.test(s))return 8;
+  if(/^xl/.test(s))return 4;
+  if(/^l\b/.test(s))return 2;
+  if(/^m\b/.test(s))return 1;
+  if(/^s\b/.test(s))return 0.5;
+  // Numeric with optional "month"/"week" suffix
+  var weekMatch=s.match(/(\d+(?:\.\d+)?)\s*w(?:eek)?/);
+  if(weekMatch)return parseFloat(weekMatch[1])/4;
+  var monthMatch=s.match(/(\d+(?:\.\d+)?)\s*m(?:o|onth)?/);
+  if(monthMatch)return parseFloat(monthMatch[1]);
+  var n=parseFloat(s);
+  return isFinite(n)?Math.max(0,n):1;
+}
+
+function parseNaturalLanguage(line){
+  // "Dark mode, 5000 users, high impact, 80%, 2 months"
+  // Extract: name (first comma-segment or before first number/keyword), reach, impact, conf, effort
+  var orig=line;
+  if(!orig||orig.length<2)return null;
+
+  var data={name:'',reach:0,impact:1,confidence:80,effort:1};
+
+  // Confidence: look for X% or "confidence X"
+  var confMatch=line.match(/(\d{1,3})\s*%/);
+  if(confMatch){data.confidence=clamp(parseInt(confMatch[1],10),0,100);line=line.replace(confMatch[0],'')}
+
+  // Effort: "X months", "X weeks", "X mo"
+  var effortMatch=line.match(/(\d+(?:\.\d+)?)\s*(months|month|mo\b|weeks|week|wk\b|w\b|m\b)/i);
+  if(effortMatch){
+    var num=parseFloat(effortMatch[1]);
+    var unit=effortMatch[2].toLowerCase();
+    if(/^w/.test(unit))num=num/4;
+    data.effort=Math.max(0.1,num);
+    line=line.replace(effortMatch[0],'');
+  }
+
+  // Impact keyword
+  var impactMatch=line.match(/\b(massive|huge|critical|high|major|medium|moderate|low|minor|minimal|tiny)\s*(impact)?/i);
+  if(impactMatch){
+    data.impact=parseImpactValue(impactMatch[1]);
+    line=line.replace(impactMatch[0],'');
+  }
+
+  // Reach: "X users" or remaining large number
+  var reachMatch=line.match(/(\d[\d,]*)\s*(users|people|customers|reach)/i);
+  if(reachMatch){
+    data.reach=parseImpactNumber(reachMatch[1]);
+    line=line.replace(reachMatch[0],'');
+  }else{
+    // Look for any leftover large number (>=100)
+    var numMatch=line.match(/\b(\d{3,}(?:,\d{3})*|\d{3,})\b/);
+    if(numMatch){
+      var n=parseImpactNumber(numMatch[1]);
+      if(n>=100){data.reach=n;line=line.replace(numMatch[0],'')}
+    }
+  }
+
+  // Name = remaining text, cleaned
+  var name=line.replace(/[,;–—]+/g,' ').replace(/\s+/g,' ').trim();
+  // Remove trailing/leading punctuation
+  name=name.replace(/^[\s,.-]+|[\s,.-]+$/g,'');
+  if(!name||name.length<2){
+    // Use first comma-segment of original as name
+    var parts=orig.split(/[,;]/);
+    name=(parts[0]||'').trim();
+  }
+  if(!name)return null;
+  data.name=name.slice(0,200);
+  return data;
+}
+
+// CSV file drop import
+function setupFileDrop(){
+  var overlay=document.getElementById('dropOverlay');
+  var dragCounter=0;
+
+  document.addEventListener('dragenter',function(e){
+    if(e.dataTransfer&&e.dataTransfer.types&&Array.prototype.indexOf.call(e.dataTransfer.types,'Files')>-1){
+      dragCounter++;
+      overlay.classList.add('active');
+    }
+  });
+  document.addEventListener('dragleave',function(e){
+    dragCounter--;
+    if(dragCounter<=0){
+      dragCounter=0;
+      overlay.classList.remove('active');
+    }
+  });
+  document.addEventListener('dragover',function(e){
+    if(e.dataTransfer&&e.dataTransfer.types&&Array.prototype.indexOf.call(e.dataTransfer.types,'Files')>-1){
+      e.preventDefault();
+      e.dataTransfer.dropEffect='copy';
+    }
+  });
+  document.addEventListener('drop',function(e){
+    if(!e.dataTransfer||!e.dataTransfer.files||!e.dataTransfer.files.length){
+      overlay.classList.remove('active');
+      dragCounter=0;
+      return;
+    }
+    e.preventDefault();
+    overlay.classList.remove('active');
+    dragCounter=0;
+    var file=e.dataTransfer.files[0];
+    var name=(file.name||'').toLowerCase();
+    if(!/\.(csv|tsv|txt)$/.test(name)){
+      showToast('Please drop a CSV, TSV, or TXT file','error');
+      return;
+    }
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var text=String(ev.target.result||'');
+      var added=parseAndAddFeatures(text);
+      if(added>0){
+        debouncedSave();
+        render();
+        showToast('Imported '+added+' feature'+(added>1?'s':'')+' from '+file.name,'success');
+      }else{
+        showToast('No features found in file','error');
+      }
+    };
+    reader.onerror=function(){showToast('Could not read file','error')};
+    reader.readAsText(file);
+  });
+}
+
+// ═══════════ MODAL HELPERS ═══════════
+function openModal(id){
+  var m=document.getElementById(id);
+  if(!m)return;
+  m.classList.add('open');
+  // focus trap: focus first input/button
+  setTimeout(function(){
+    var f=m.querySelector('input, button');
+    if(f)f.focus();
+  },50);
+}
+
+function closeModal(id){
+  var m=document.getElementById(id);
+  if(!m)return;
+  m.classList.remove('open');
+}
+
+// Click backdrop to close
+document.addEventListener('click',function(e){
+  if(e.target.classList&&e.target.classList.contains('modal-overlay')){
+    e.target.classList.remove('open');
+  }
+});
+
+// ═══════════ SHARE ═══════════
+function getShareableState(){
+  return {
+    v:1,
+    framework:S.framework,
+    horizon:S.horizon,
+    weights:S.weights,
+    features:S.features,
+    boardName:(function(){
+      var b=S.boards.find(function(b){return b.id===S.currentBoardId});
+      return b?b.name:'Untitled board';
+    })()
+  };
+}
+
+function openShare(){
+  if(!S.features.length){
+    showToast('Add features before sharing','error');
+    return;
+  }
+  try{
+    var st=getShareableState();
+    var json=JSON.stringify(st);
+    var encoded=btoa(unescape(encodeURIComponent(json)));
+    var url=window.location.origin+window.location.pathname+'?d='+encoded;
+    var input=document.getElementById('shareUrl');
+    if(input)input.value=url;
+    openModal('shareModal');
+  }catch(e){
+    showToast('Could not generate share URL','error');
+  }
+}
+
+function copyShareUrl(){
+  var input=document.getElementById('shareUrl');
+  if(!input)return;
+  input.select();
+  try{
+    var ok=document.execCommand('copy');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(input.value).then(function(){
+        showToast('URL copied to clipboard','success');
+      },function(){
+        if(ok)showToast('URL copied to clipboard','success');
+        else showToast('Could not copy — select and copy manually','error');
+      });
+    }else if(ok){
+      showToast('URL copied to clipboard','success');
+    }else{
+      showToast('Could not copy — select and copy manually','error');
+    }
+  }catch(e){
+    showToast('Could not copy — select and copy manually','error');
+  }
+}
+
+function loadFromShareUrl(){
+  var params=new URLSearchParams(window.location.search);
+  var d=params.get('d');
+  if(!d)return false;
+  try{
+    var json=decodeURIComponent(escape(atob(d)));
+    var st=JSON.parse(json);
+    if(!st||!st.features||!Array.isArray(st.features))return false;
+    if(st.framework)S.framework=st.framework;
+    if(st.horizon)S.horizon=st.horizon;
+    if(st.weights)S.weights=Object.assign({reach:1,impact:1,effort:1},st.weights);
+    S.features=st.features;
+    // Create a new board for shared content
+    var bname='Shared: '+(st.boardName||'board');
+    var bid=boardId();
+    S.boards.push({id:bid,name:bname,updatedAt:Date.now()});
+    S.currentBoardId=bid;
+    saveBoardsIndex();
+    saveCurrentBoard();
+    // Clear ?d= from URL to avoid re-importing on refresh
+    if(window.history&&window.history.replaceState){
+      window.history.replaceState({},'',window.location.pathname);
+    }
+    showToast('Shared board imported','success');
+    return true;
+  }catch(e){
+    showToast('Invalid share URL','error');
+    return false;
+  }
+}
+
+// ═══════════ EXPORT ═══════════
+function openExportMenu(){
+  if(!S.features.length){
+    showToast('Add features before exporting','error');
+    return;
+  }
+  openModal('exportModal');
+}
+
+function getCurrentBoardName(){
+  var b=S.boards.find(function(b){return b.id===S.currentBoardId});
+  return b?b.name:'rice-board';
+}
+
+function exportXLSX(){
+  if(!window.XLSX){
+    showToast('Loading export library — try again in a sec','error');
+    return;
+  }
+  try{
+    var rows=rankedFeatures();
+    var horizonLbl={month:'/ month',quarter:'/ quarter',year:'/ year'}[S.horizon];
+
+    // Sheet 1: Summary
+    var summaryData=[
+      ['RICE Calculator Export'],
+      ['Board:',getCurrentBoardName()],
+      ['Generated:',new Date().toLocaleString()],
+      ['Framework:',S.framework.toUpperCase()],
+      ['Reach window:',horizonLbl],
+      ['Reach weight:',S.weights.reach],
+      ['Impact weight:',S.weights.impact],
+      ['Effort exponent:',S.weights.effort],
+      [],
+      ['Total features:',rows.length],
+      ['Top 5 effort (mo):',totalEffort(rows,5)],
+      ['Total effort (mo):',totalEffort(rows)],
+      ['Avg confidence:',Math.round(rows.reduce(function(a,r){return a+r.f.confidence},0)/rows.length)+'%']
+    ];
+
+    // Sheet 2: Ranked List
+    var headers=S.framework==='rice'
+      ? ['Rank','Feature','Reach '+horizonLbl,'Impact','Confidence %','Effort (mo)','Score','Tier','Flags']
+      : ['Rank','Feature','Impact','Confidence %','Effort (mo)','Score','Tier','Flags'];
+    var rankedData=[headers];
+    rows.forEach(function(r){
+      var f=r.f;
+      var flags=[];
+      if(S.settings.confAudit&&f.confidence<50)flags.push('low-conf');
+      if(S.settings.effortAudit&&f.effort>6)flags.push('high-effort');
+      if(S.framework==='rice'){
+        rankedData.push([r.rank,f.name||'',f.reach,impactLabel(f.impact),f.confidence,f.effort,Number(r.score.toFixed(2)),r.tier,flags.join(', ')]);
+      }else{
+        rankedData.push([r.rank,f.name||'',impactLabel(f.impact),f.confidence,f.effort,Number(r.score.toFixed(2)),r.tier,flags.join(', ')]);
+      }
+    });
+
+    // Sheet 3: Settings
+    var settingsData=[
+      ['Setting','Value'],
+      ['Framework',S.framework.toUpperCase()],
+      ['Reach window',S.horizon],
+      ['Reach weight',S.weights.reach],
+      ['Impact weight',S.weights.impact],
+      ['Effort exponent',S.weights.effort],
+      ['Confidence audit',S.settings.confAudit?'on':'off'],
+      ['Effort audit',S.settings.effortAudit?'on':'off'],
+      ['Auto-sort',S.settings.autoSort?'on':'off'],
+      ['Color-blind safe',S.settings.cbSafe?'on':'off']
+    ];
+
+    var wb=XLSX.utils.book_new();
+    var ws1=XLSX.utils.aoa_to_sheet(summaryData);
+    ws1['!cols']=[{wch:24},{wch:30}];
+    XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+
+    var ws2=XLSX.utils.aoa_to_sheet(rankedData);
+    var colWidths=S.framework==='rice'
+      ? [{wch:6},{wch:30},{wch:14},{wch:14},{wch:13},{wch:11},{wch:10},{wch:8},{wch:18}]
+      : [{wch:6},{wch:30},{wch:14},{wch:13},{wch:11},{wch:10},{wch:8},{wch:18}];
+    ws2['!cols']=colWidths;
+    XLSX.utils.book_append_sheet(wb,ws2,'Ranked List');
+
+    var ws3=XLSX.utils.aoa_to_sheet(settingsData);
+    ws3['!cols']=[{wch:22},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Settings');
+
+    var fname=sanitizeFilename(getCurrentBoardName())+'-'+new Date().toISOString().slice(0,10)+'.xlsx';
+    XLSX.writeFile(wb,fname);
+    showToast('Excel file downloaded','success');
+    closeModal('exportModal');
+  }catch(e){
+    console.error(e);
+    showToast('Export failed','error');
+  }
+}
+
+function exportMarkdown(){
+  try{
+    var rows=rankedFeatures();
+    var horizonLbl={month:'/ month',quarter:'/ quarter',year:'/ year'}[S.horizon];
+    var lines=[];
+    lines.push('# '+getCurrentBoardName());
+    lines.push('');
+    lines.push('**Framework:** '+S.framework.toUpperCase()+(S.framework==='rice'?' &middot; **Reach window:** '+horizonLbl:''));
+    lines.push('**Generated:** '+new Date().toLocaleDateString());
+    lines.push('');
+    if(S.framework==='rice'){
+      lines.push('| # | Feature | Reach | Impact | Conf | Effort | Score |');
+      lines.push('|---|---------|-------|--------|------|--------|-------|');
+      rows.forEach(function(r){
+        var f=r.f;
+        lines.push('| '+r.rank+' | '+(f.name||'(unnamed)').replace(/\|/g,'\\|')+' | '+fmtNum(f.reach)+' | '+impactLabel(f.impact)+' | '+f.confidence+'% | '+f.effort+' mo | **'+fmt(r.score)+'** |');
+      });
+    }else{
+      lines.push('| # | Feature | Impact | Conf | Effort | Score |');
+      lines.push('|---|---------|--------|------|--------|-------|');
+      rows.forEach(function(r){
+        var f=r.f;
+        lines.push('| '+r.rank+' | '+(f.name||'(unnamed)').replace(/\|/g,'\\|')+' | '+impactLabel(f.impact)+' | '+f.confidence+'% | '+f.effort+' mo | **'+fmt(r.score)+'** |');
+      });
+    }
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+    lines.push('Total features: '+rows.length+' &middot; Top 5 effort: '+fmt(totalEffort(rows,5))+' person-months &middot; Generated by [Datapad RICE Calculator](https://datapad.in/rice-calculator)');
+
+    var md=lines.join('\n');
+    downloadText(md,sanitizeFilename(getCurrentBoardName())+'.md','text/markdown');
+    showToast('Markdown file downloaded','success');
+    closeModal('exportModal');
+  }catch(e){
+    console.error(e);
+    showToast('Export failed','error');
+  }
+}
+
+function exportCSV(){
+  try{
+    var rows=rankedFeatures();
+    var lines=[];
+    if(S.framework==='rice'){
+      lines.push('Rank,Feature,Reach,Impact,Confidence,Effort,Score,Tier');
+      rows.forEach(function(r){
+        var f=r.f;
+        lines.push([r.rank,csvEsc(f.name||''),f.reach,f.impact,f.confidence,f.effort,r.score.toFixed(2),r.tier].join(','));
+      });
+    }else{
+      lines.push('Rank,Feature,Impact,Confidence,Effort,Score,Tier');
+      rows.forEach(function(r){
+        var f=r.f;
+        lines.push([r.rank,csvEsc(f.name||''),f.impact,f.confidence,f.effort,r.score.toFixed(2),r.tier].join(','));
+      });
+    }
+    downloadText(lines.join('\n'),sanitizeFilename(getCurrentBoardName())+'.csv','text/csv');
+    showToast('CSV file downloaded','success');
+    closeModal('exportModal');
+  }catch(e){
+    showToast('Export failed','error');
+  }
+}
+
+function csvEsc(s){
+  s=String(s||'');
+  if(/[",\n]/.test(s))return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+
+function downloadText(text,filename,mime){
+  var blob=new Blob([text],{type:mime||'text/plain'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },100);
+}
+
+function sanitizeFilename(s){
+  return String(s||'rice-board').toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'rice-board';
+}
+
+// ═══════════ RESET ═══════════
+function confirmReset(){openModal('resetModal')}
+
+function doReset(){
+  // Clear all rice:* keys
+  try{
+    var ks=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('rice:')===0)ks.push(k);
+    }
+    ks.forEach(function(k){safeDel(k)});
+  }catch(e){}
+  closeModal('resetModal');
+  // Re-init fresh
+  S.boards=[];
+  S.features=[];
+  S.currentBoardId=null;
+  S.framework='rice';
+  S.horizon='quarter';
+  S.weights={reach:1,impact:1,effort:1};
+  S.settings={cbSafe:false,confAudit:true,effortAudit:true,autoSort:true};
+  // Create fresh first board
+  createBoard('Untitled board',[]);
+  syncFrameworkUI();
+  syncWeightsUI();
+  syncSettingsUI();
+  renderBoardList();
+  render();
+  showToast('All data cleared','success');
+}
+
+// ═══════════ TOAST ═══════════
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  if(!t)return;
+  t.classList.remove('success','error','show');
+  if(type)t.classList.add(type);
+  var iconSvg='';
+  if(type==='success')iconSvg='<span class="toast-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  else if(type==='error')iconSvg='<span class="toast-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>';
+  t.innerHTML=iconSvg+escHTML(msg);
+  // force reflow before adding show class
+  void t.offsetHeight;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.classList.remove('show')},2400);
+}
+
+// ═══════════ FAQ ═══════════
+function faqTog(card){
+  var open=card.classList.toggle('open');
+  card.setAttribute('aria-expanded',open?'true':'false');
+}
+function faqKey(e,card){
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();faqTog(card)}
+}
+
+// ═══════════ TOOLTIP ═══════════
+function setupTooltip(){
+  var tip=document.getElementById('globalTip');
+  if(!tip)return;
+  document.addEventListener('mouseover',function(e){
+    var t=e.target.closest('[data-tip]');
+    if(!t)return;
+    var msg=t.getAttribute('data-tip');
+    if(!msg)return;
+    tip.textContent=msg;
+    tip.classList.add('vis');
+    var rect=t.getBoundingClientRect();
+    var tw=tip.offsetWidth,th=tip.offsetHeight;
+    var top=rect.top-th-8;
+    var left=rect.left+(rect.width/2)-(tw/2);
+    if(top<10)top=rect.bottom+8;
+    if(left<10)left=10;
+    if(left+tw>window.innerWidth-10)left=window.innerWidth-tw-10;
+    tip.style.top=top+'px';
+    tip.style.left=left+'px';
+  });
+  document.addEventListener('mouseout',function(e){
+    var t=e.target.closest('[data-tip]');
+    if(t)tip.classList.remove('vis');
+  });
+  // Hide on scroll
+  document.addEventListener('scroll',function(){tip.classList.remove('vis')},{passive:true});
+}
+
+// ═══════════ KEYBOARD SHORTCUTS ═══════════
+function setupKeyboard(){
+  document.addEventListener('keydown',function(e){
+    var mod=e.metaKey||e.ctrlKey;
+    // Cmd+Enter: add row
+    if(mod&&e.key==='Enter'){
+      e.preventDefault();
+      addFeature();
+      render();
+      // focus the new row's name field
+      setTimeout(function(){
+        var rows=document.querySelectorAll('#riceTbody tr');
+        if(rows.length){
+          var last=rows[rows.length-1];
+          var input=last.querySelector('.name-input');
+          if(input)input.focus();
+        }
+      },50);
+      return;
+    }
+    // Cmd+D: duplicate focused row
+    if(mod&&e.key.toLowerCase()==='d'){
+      if(LAST_FOCUSED_ROW){
+        e.preventDefault();
+        duplicateFeature(LAST_FOCUSED_ROW);
+      }
+      return;
+    }
+    // Cmd+Backspace: delete focused row (Mac convention)
+    if(mod&&(e.key==='Backspace'||e.key==='Delete')){
+      if(LAST_FOCUSED_ROW){
+        var f=S.features.find(function(f){return f.id===LAST_FOCUSED_ROW});
+        if(f&&!f.name){
+          e.preventDefault();
+          deleteFeature(LAST_FOCUSED_ROW);
+        }
+      }
+      return;
+    }
+    // Cmd+S: share
+    if(mod&&e.key.toLowerCase()==='s'){
+      e.preventDefault();
+      openShare();
+      return;
+    }
+    // Cmd+P: print
+    if(mod&&e.key.toLowerCase()==='p'){
+      // browser handles, but we want our print stylesheet
+      return;
+    }
+    // Esc: close modals
+    if(e.key==='Escape'){
+      var open=document.querySelector('.modal-overlay.open');
+      if(open)open.classList.remove('open');
+      hideScorePopover();
+    }
+  });
+}
+
+// ═══════════ CURSOR GLOW ═══════════
+function setupCursorGlow(){
+  var g=document.getElementById('cursorGlow');
+  if(!g)return;
+  // Disable on mobile / touch devices
+  if(window.matchMedia&&window.matchMedia('(hover: none)').matches){
+    g.style.display='none';
+    return;
+  }
+  var x=0,y=0,tx=0,ty=0,raf;
+  document.addEventListener('mousemove',function(e){
+    tx=e.clientX-200;ty=e.clientY-200;
+    if(!raf)raf=requestAnimationFrame(loop);
+  });
+  function loop(){
+    x+=(tx-x)*.1;y+=(ty-y)*.1;
+    g.style.transform='translate('+x+'px,'+y+'px)';
+    if(Math.abs(tx-x)>.5||Math.abs(ty-y)>.5){
+      raf=requestAnimationFrame(loop);
+    }else raf=null;
+  }
+}
+
+// ═══════════ FAQ REVEAL ═══════════
+function setupFaqReveal(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('.faq-card').forEach(function(c){c.classList.add('revealed')});
+    return;
+  }
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e,i){
+      if(e.isIntersecting){
+        setTimeout(function(){e.target.classList.add('revealed')},i*60);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.faq-card').forEach(function(c){obs.observe(c)});
+}
+
+// ═══════════ INIT ═══════════
+function init(){
+  // 1. Load settings (cross-board)
+  loadSettings();
+
+  // 2. Load existing boards from localStorage (so a shared board can be added alongside them)
+  loadBoards();
+
+  // 3. Try share URL — this adds a new board if present
+  var fromShare=loadFromShareUrl();
+
+  if(!fromShare){
+    if(S.boards.length){
+      // Load most recently updated
+      var sorted=S.boards.slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+      loadBoardById(sorted[0].id);
+    }else{
+      // Create first board
+      createBoard('Untitled board',[]);
+    }
+  }
+
+  // 5. Sync UI
+  syncFrameworkUI();
+  syncWeightsUI();
+  syncSettingsUI();
+  renderBoardList();
+
+  // 6. Sync horizon UI
+  var hGroup=document.querySelector('[aria-labelledby="lbl-horizon"]');
+  if(hGroup){
+    hGroup.querySelectorAll('.tbtn').forEach(function(b){
+      var active=false;
+      var txt=b.textContent.trim();
+      if(S.horizon==='month'&&txt.indexOf('mo')>-1)active=true;
+      else if(S.horizon==='quarter'&&txt.indexOf('qtr')>-1)active=true;
+      else if(S.horizon==='year'&&txt.indexOf('yr')>-1)active=true;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-pressed',active?'true':'false');
+    });
+  }
+
+  // 7. Wire up DOM listeners
+  setupTooltip();
+  setupKeyboard();
+  setupCursorGlow();
+  setupFaqReveal();
+  setupFileDrop();
+
+  // 8. Initial render
+  render();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
+
+</script>
+</body>
+</html>
