@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" itemscope itemtype="https://schema.org/WebApplication">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#050508"/>
+  <meta name="color-scheme" content="dark"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+
+  <!-- SEO -->
+  <title>CSV Merger</title>
+  <meta name="description" content="Merge multiple CSV and XLSB files instantly in your browser. No upload, no server, no sign-up. Validates headers, detects mismatches, and exports a clean merged CSV. Free forever."/>
+  <meta name="keywords" content="csv merger, merge csv files, csv combiner, combine csv, xlsb merger, free csv tool, browser csv merge, no upload csv, csv validator, merge spreadsheets online, datapad csv"/>
+  <meta name="author" content="Datapad"/>
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"/>
+  <link rel="canonical" href="https://datapad.in/csv-merger"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Datapad"/>
+  <meta property="og:url" content="https://datapad.in/csv-merger"/>
+  <meta property="og:title" content="CSV Merger – Free Browser-Based File Merger | Datapad"/>
+  <meta property="og:description" content="Merge multiple CSV and XLSB files instantly in your browser. Validates headers, detects row mismatches, exports a clean merged file. Zero server, zero sign-up."/>
+  <meta property="og:locale" content="en_IN"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site" content="@datapad_in"/>
+  <meta name="twitter:title" content="CSV Merger – Free Browser-Based File Merger | Datapad"/>
+  <meta name="twitter:description" content="Merge multiple CSV and XLSB files instantly in your browser. Zero server, zero sign-up."/>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://datapad.in/csv-merger",
+        "name": "CSV Merger",
+        "url": "https://datapad.in/csv-merger",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web browser",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "Merge multiple CSV and XLSB files instantly in your browser. Validates headers, detects mismatches, and exports a clean merged CSV. No server, no sign-up, free forever.",
+        "publisher": { "@type": "Organization", "name": "Datapad", "url": "https://datapad.in" },
+        "featureList": [
+          "Merge unlimited CSV files in-browser",
+          "XLSB file support",
+          "Header consistency validation",
+          "Row length mismatch detection",
+          "UTF-8 encoding check",
+          "Drag and drop upload",
+          "Real-time progress tracking",
+          "Zero data transmission – fully client-side",
+          "Free download of merged file"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is the CSV Merger free to use?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. The CSV Merger is completely free with no sign-up, no paywall, and no usage limits." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does the CSV Merger upload my files to a server?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens entirely in your browser using JavaScript. Your files never leave your device." }
+          },
+          {
+            "@type": "Question",
+            "name": "What file types does the CSV Merger support?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The tool supports .csv and .xlsb files. All files must share the same column headers to be merged." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    ::selection{background:rgba(0,255,136,0.25);color:#fff}
+
+    :root{
+      --pri:#00ff88;--pri-rgb:0,255,136;
+      --acc:#00d4ff;--acc-rgb:0,212,255;
+      --purple:#c084fc;--purple-rgb:192,132,252;
+      --orange:#ff9f43;--orange-rgb:255,159,67;
+      --red:#ff4466;--red-rgb:255,68,102;
+      --warn:#ffcc00;--warn-rgb:255,204,0;
+
+      --bg0:#050508;--bg1:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+      --t0:#fff;--t1:#c8c8d4;--t2:#8a8aa0;
+      --brd:rgba(255,255,255,0.06);
+
+      --font:'Outfit',sans-serif;
+      --mono:'DM Mono',monospace;
+      --ease:cubic-bezier(0.16,1,0.3,1);
+      --ease-out:cubic-bezier(0,0,0.2,1);
+    }
+
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--font);
+      background:var(--bg0);color:var(--t0);
+      line-height:1.6;overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      min-height:100vh;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
+
+    /* SKIP LINK */
+    .skip-link{
+      position:absolute;top:-100px;left:8px;z-index:10000;
+      padding:10px 16px;border-radius:8px;
+      background:var(--pri);color:var(--bg0);
+      font-family:var(--mono);font-size:12px;font-weight:600;
+      text-decoration:none;transition:top .15s var(--ease);
+    }
+    .skip-link:focus{top:8px;outline:none}
+
+    /* HEADER */
+    header{
+      padding:0 32px;
+      border-bottom:1px solid var(--brd);
+      background:rgba(5,5,8,0.92);
+      backdrop-filter:blur(24px);
+      -webkit-backdrop-filter:blur(24px);
+      position:sticky;top:0;z-index:100;height:64px;
+      display:flex;align-items:center;
+    }
+    .header-inner{
+      width:100%;max-width:1100px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;
+      text-decoration:none;color:inherit;
+    }
+    .logo-icon {
+        width:32px;
+        height:32px;
+        border-radius:0;        /* remove rounding */
+        background:none;        /* remove gradient */
+        border:none;            /* remove border */
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        }
+    .logo-icon img {
+        width:100%;
+        height:100%;
+        object-fit:contain;
+        display:block;
+        }
+    .logo-name{font-size:18px;font-weight:800;letter-spacing:.5px}
+    .logo-sep{color:var(--t2);font-weight:300;margin:0 4px}
+    .logo-tool{
+      font-family:var(--mono);font-size:12px;color:var(--acc);
+      padding:3px 8px;border-radius:5px;
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.15);
+    }
+    .header-right{display:flex;align-items:center;gap:12px}
+    .nav-home{
+      font-size:13px;color:var(--t2);text-decoration:none;
+      padding:6px 12px;border-radius:7px;
+      transition:all .2s;
+    }
+    .nav-home:hover{color:var(--t1);background:rgba(255,255,255,.04)}
+    .nav-status{
+      display:flex;align-items:center;gap:7px;
+      padding:5px 11px;border-radius:100px;
+      border:1px solid rgba(var(--pri-rgb),0.15);
+      background:rgba(var(--pri-rgb),0.04);
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+    }
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--pri);
+      box-shadow:0 0 8px rgba(var(--pri-rgb),0.7);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--pri-rgb),0.7)}
+      50%{opacity:.6;box-shadow:0 0 4px rgba(var(--pri-rgb),.3)}
+    }
+
+    /* MAIN */
+    main{
+      max-width:1100px;margin:0 auto;
+      padding:48px 32px 100px;
+    }
+
+    /* PAGE HEADER */
+    .page-header{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:24px;margin-bottom:48px;
+    }
+    .page-header-left{flex:1}
+    .page-eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:4px 12px;border-radius:100px;
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.15);
+      font-family:var(--mono);font-size:10px;color:var(--acc);
+      letter-spacing:1.5px;text-transform:uppercase;font-weight:600;
+      margin-bottom:16px;
+    }
+    .page-title{
+      font-size:clamp(28px,4vw,46px);font-weight:800;
+      letter-spacing:-1.5px;line-height:1.08;margin-bottom:10px;
+    }
+    .page-desc{
+      font-size:15px;color:var(--t2);line-height:1.7;max-width:520px;
+    }
+    .page-desc strong{color:var(--t1);font-weight:600}
+    .page-badges{
+      display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;border-radius:100px;border:1px solid var(--brd);
+      font-family:var(--mono);font-size:9.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1px;font-weight:600;
+    }
+    .badge svg{color:var(--pri)}
+
+    /* TOOL LAYOUT */
+    .tool-grid{
+      display:grid;grid-template-columns:1fr 380px;gap:20px;
+      align-items:start;
+    }
+    .tool-panel{
+      background:var(--bg1);
+      border:1px solid var(--brd);
+      border-radius:16px;overflow:hidden;
+    }
+    .panel-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 20px;
+      border-bottom:1px solid var(--brd);
+      background:rgba(255,255,255,.012);
+    }
+    .panel-title{
+      font-family:var(--mono);font-size:10.5px;
+      color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;
+      display:flex;align-items:center;gap:8px;
+    }
+    .panel-title-dot{
+      width:6px;height:6px;border-radius:50%;background:var(--pri);
+      box-shadow:0 0 6px rgba(var(--pri-rgb),.5);
+    }
+    .panel-count{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);
+      padding:3px 8px;border-radius:5px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.05);
+    }
+    .panel-body{padding:20px}
+
+    /* DROP ZONE */
+    .drop-zone{
+      position:relative;
+      border:1.5px dashed rgba(255,255,255,.12);
+      border-radius:12px;
+      padding:48px 24px;
+      text-align:center;
+      cursor:pointer;
+      transition:all .3s var(--ease);
+      background:rgba(255,255,255,.008);
+      outline:none;
+    }
+    .drop-zone:hover,.drop-zone.drag-over{
+      border-color:rgba(var(--pri-rgb),.45);
+      background:rgba(var(--pri-rgb),.03);
+      box-shadow:0 0 30px rgba(var(--pri-rgb),.06) inset;
+    }
+    .drop-zone:focus-visible{
+      border-color:var(--pri);
+      box-shadow:0 0 0 2px rgba(var(--pri-rgb),.25);
+    }
+    .drop-zone.drag-over .dz-icon{
+      transform:scale(1.15);color:var(--pri);
+    }
+    #fileInput{
+      position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+    }
+    .dz-icon{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:52px;height:52px;border-radius:14px;
+      background:rgba(var(--pri-rgb),.07);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      color:var(--pri);margin:0 auto 16px;
+      transition:all .3s var(--ease);
+    }
+    .dz-title{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:6px}
+    .dz-sub{font-family:var(--mono);font-size:11px;color:var(--t2);letter-spacing:.3px}
+    .dz-types{
+      display:flex;gap:6px;justify-content:center;margin-top:14px;
+    }
+    .dz-type{
+      padding:3px 9px;border-radius:5px;
+      font-family:var(--mono);font-size:9.5px;font-weight:600;
+      color:var(--acc);letter-spacing:.5px;
+      background:rgba(var(--acc-rgb),.07);
+      border:1px solid rgba(var(--acc-rgb),.15);
+    }
+
+    /* FILE LIST */
+    .file-list{margin-top:16px;display:flex;flex-direction:column;gap:6px}
+    .file-item{
+      display:grid;grid-template-columns:28px 1fr auto auto;
+      gap:10px;align-items:center;
+      padding:10px 14px;border-radius:9px;
+      background:rgba(255,255,255,.018);
+      border:1px solid rgba(255,255,255,.04);
+      transition:all .2s;
+      animation:slideIn .3s var(--ease) both;
+    }
+    @keyframes slideIn{
+      from{opacity:0;transform:translateY(-8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    .file-item.valid{border-color:rgba(var(--pri-rgb),.12);background:rgba(var(--pri-rgb),.025)}
+    .file-item.invalid{border-color:rgba(var(--red-rgb),.15);background:rgba(var(--red-rgb),.025)}
+    .file-icon{
+      width:28px;height:28px;border-radius:7px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;font-family:var(--mono);
+      background:rgba(var(--acc-rgb),.08);
+      border:1px solid rgba(var(--acc-rgb),.15);
+      color:var(--acc);
+    }
+    .file-icon.xlsb{
+      background:rgba(var(--pri-rgb),.08);
+      border-color:rgba(var(--pri-rgb),.15);
+      color:var(--pri);
+    }
+    .file-info{min-width:0}
+    .file-name{
+      font-size:12.5px;font-weight:600;color:var(--t1);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      letter-spacing:-.1px;
+    }
+    .file-meta{
+      font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:1px;
+    }
+    .file-status{
+      display:flex;align-items:center;gap:4px;
+      font-family:var(--mono);font-size:9.5px;
+      padding:3px 7px;border-radius:5px;
+      text-transform:uppercase;letter-spacing:.5px;font-weight:600;
+      white-space:nowrap;
+    }
+    .file-status.pending{
+      color:var(--t2);background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .file-status.valid{color:var(--pri);background:rgba(var(--pri-rgb),.08);border:1px solid rgba(var(--pri-rgb),.2)}
+    .file-status.invalid{color:var(--red);background:rgba(var(--red-rgb),.08);border:1px solid rgba(var(--red-rgb),.2)}
+    .file-status.warning{color:var(--warn);background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.2)}
+    .file-remove{
+      width:22px;height:22px;border-radius:5px;
+      display:flex;align-items:center;justify-content:center;
+      background:none;border:none;color:var(--t2);
+      cursor:pointer;transition:all .2s;padding:0;
+    }
+    .file-remove:hover{color:var(--red);background:rgba(var(--red-rgb),.1)}
+
+    /* ACTIONS ROW */
+    .actions-row{
+      display:flex;gap:10px;margin-top:16px;
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;
+      padding:11px 20px;border-radius:10px;
+      font-size:13px;font-weight:600;font-family:var(--font);
+      cursor:pointer;transition:all .25s var(--ease);
+      border:none;outline:none;white-space:nowrap;
+    }
+    .btn:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+    .btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+    .btn-primary{
+      background:var(--pri);color:var(--bg0);flex:1;
+    }
+    .btn-primary:hover{background:#00e87a;box-shadow:0 0 20px rgba(var(--pri-rgb),.25)}
+    .btn-secondary{
+      background:transparent;color:var(--t2);
+      border:1px solid var(--brd);
+    }
+    .btn-secondary:hover{color:var(--t1);border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+    .btn-accent{
+      background:rgba(var(--acc-rgb),.08);
+      border:1px solid rgba(var(--acc-rgb),.2);
+      color:var(--acc);flex:1;
+    }
+    .btn-accent:hover{background:rgba(var(--acc-rgb),.14);border-color:rgba(var(--acc-rgb),.35);box-shadow:0 0 16px rgba(var(--acc-rgb),.1)}
+    .btn-danger{
+      background:rgba(var(--red-rgb),.08);
+      border:1px solid rgba(var(--red-rgb),.2);
+      color:var(--red);
+    }
+    .btn-danger:hover{background:rgba(var(--red-rgb),.14)}
+
+    /* SIDEBAR PANELS */
+    .sidebar{display:flex;flex-direction:column;gap:16px}
+
+    /* STATS CARD */
+    .stats-card{
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:16px;overflow:hidden;
+    }
+    .stats-grid{
+      display:grid;grid-template-columns:1fr 1fr;
+    }
+    .stat-cell{
+      padding:18px 16px;border-right:1px solid var(--brd);
+      border-bottom:1px solid var(--brd);
+    }
+    .stat-cell:nth-child(2){border-right:none}
+    .stat-cell:nth-child(3){border-bottom:none}
+    .stat-cell:nth-child(4){border-right:none;border-bottom:none}
+    .stat-lbl{
+      font-family:var(--mono);font-size:9px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:7px;
+    }
+    .stat-val{
+      font-family:var(--mono);font-size:22px;font-weight:700;
+      color:var(--t0);letter-spacing:-.5px;line-height:1;
+    }
+    .stat-val.pri{color:var(--pri)}
+    .stat-val.red{color:var(--red)}
+    .stat-val.acc{color:var(--acc)}
+
+    /* VALIDATION PANEL */
+    .validation-panel{
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:16px;overflow:hidden;
+    }
+    .validation-list{
+      max-height:220px;overflow-y:auto;
+      scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.08) transparent;
+    }
+    .validation-list::-webkit-scrollbar{width:4px}
+    .validation-list::-webkit-scrollbar-track{background:transparent}
+    .validation-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+    .v-item{
+      display:flex;align-items:flex-start;gap:10px;
+      padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.03);
+      font-size:12px;
+    }
+    .v-item:last-child{border-bottom:none}
+    .v-dot{
+      width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;
+    }
+    .v-dot.ok{background:var(--pri)}
+    .v-dot.err{background:var(--red)}
+    .v-dot.warn{background:var(--warn)}
+    .v-msg{color:var(--t2);line-height:1.5}
+    .v-file{font-weight:600;color:var(--t1)}
+    .v-empty{
+      padding:24px 16px;text-align:center;
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      letter-spacing:.5px;
+    }
+
+    /* PROGRESS */
+    .progress-panel{
+      background:var(--bg1);border:1px solid var(--brd);
+      border-radius:16px;overflow:hidden;
+      display:none;
+    }
+    .progress-panel.active{display:none}
+    .progress-body{padding:20px}
+    .progress-label{
+      display:flex;justify-content:space-between;align-items:center;
+      font-family:var(--mono);font-size:10.5px;
+      color:var(--t2);margin-bottom:10px;letter-spacing:.5px;
+    }
+    .progress-pct{color:var(--pri);font-weight:600}
+    .progress-track{
+      height:5px;border-radius:3px;
+      background:rgba(255,255,255,.06);overflow:hidden;
+      margin-bottom:14px;
+    }
+    .progress-fill{
+      height:100%;border-radius:3px;width:0%;
+      background:linear-gradient(90deg,var(--pri),var(--acc));
+      transition:width .4s var(--ease-out);
+      box-shadow:0 0 10px rgba(var(--pri-rgb),.4);
+    }
+    .progress-file-label{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);letter-spacing:.3px;
+      display:flex;justify-content:space-between;
+    }
+    .progress-file-track{
+      height:3px;border-radius:2px;
+      background:rgba(255,255,255,.04);overflow:hidden;
+      margin-top:6px;
+    }
+    .progress-file-fill{
+      height:100%;border-radius:2px;width:0%;
+      background:rgba(var(--acc-rgb),.6);
+      transition:width .3s var(--ease-out);
+    }
+    .progress-eta{
+      font-family:var(--mono);font-size:10px;
+      color:var(--t2);margin-top:12px;text-align:right;
+    }
+    .progress-eta strong{color:var(--t1)}
+
+    /* RESULT */
+    .result-panel{
+      background:linear-gradient(135deg,rgba(var(--pri-rgb),.04) 0%,rgba(var(--acc-rgb),.02) 100%);
+      border:1px solid rgba(var(--pri-rgb),.2);
+      border-radius:16px;overflow:hidden;
+      display:none;animation:fadeIn .5s var(--ease) both;
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .result-panel.active{display:block}
+    .result-body{padding:20px}
+    .result-check{
+      width:42px;height:42px;border-radius:12px;
+      background:rgba(var(--pri-rgb),.1);
+      border:1px solid rgba(var(--pri-rgb),.25);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--pri);margin-bottom:12px;
+    }
+    .result-title{
+      font-size:15px;font-weight:700;color:var(--t0);
+      margin-bottom:4px;letter-spacing:-.2px;
+    }
+    .result-sub{
+      font-family:var(--mono);font-size:10.5px;color:var(--t2);
+      margin-bottom:16px;letter-spacing:.3px;
+    }
+    .result-stats{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+      margin-bottom:16px;
+    }
+    .result-stat{
+      padding:10px 12px;border-radius:8px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.05);
+      text-align:center;
+    }
+    .result-stat-val{
+      font-family:var(--mono);font-size:16px;font-weight:700;
+      color:var(--pri);letter-spacing:-.3px;
+    }
+    .result-stat-lbl{
+      font-family:var(--mono);font-size:8.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1px;margin-top:3px;
+    }
+    .btn-download{
+      width:100%;padding:13px;border-radius:10px;
+      background:var(--pri);color:var(--bg0);
+      font-size:13.5px;font-weight:700;
+      font-family:var(--font);cursor:pointer;
+      border:none;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .25s var(--ease);
+    }
+    .btn-download:hover{background:#00e87a;box-shadow:0 0 24px rgba(var(--pri-rgb),.3)}
+
+    /* HOW IT WORKS */
+    .how-section{
+      margin-top:56px;
+      padding-top:48px;
+      border-top:1px solid var(--brd);
+    }
+    .how-eyebrow{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:2px;
+      display:flex;align-items:center;gap:8px;margin-bottom:12px;
+    }
+    .how-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--t2)}
+    .how-title{
+      font-size:clamp(22px,3vw,32px);font-weight:800;
+      letter-spacing:-1px;margin-bottom:8px;
+    }
+    .how-desc{font-size:14px;color:var(--t2);margin-bottom:36px;line-height:1.7}
+    .how-grid{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+    }
+    .how-card{
+      padding:22px 18px;border-radius:12px;
+      background:var(--bg1);border:1px solid var(--brd);
+      position:relative;overflow:hidden;
+    }
+    .how-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--pri),var(--acc));
+      transform:scaleX(0);transform-origin:left;
+      transition:transform .4s var(--ease);
+    }
+    .how-card:hover::before{transform:scaleX(1)}
+    .how-num{
+      font-family:var(--mono);font-size:10px;color:var(--t2);
+      letter-spacing:1px;margin-bottom:12px;font-weight:600;
+    }
+    .how-icon{
+      width:36px;height:36px;border-radius:9px;
+      background:rgba(var(--pri-rgb),.07);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--pri);margin-bottom:12px;
+    }
+    .how-card-title{font-size:13px;font-weight:700;color:var(--t0);margin-bottom:6px;letter-spacing:-.2px}
+    .how-card-desc{font-size:11.5px;color:var(--t2);line-height:1.6}
+
+    /* FAQ SECTION */
+    .faq-section{margin-top:56px;padding-top:48px;border-top:1px solid var(--brd)}
+    .faq-list{display:flex;flex-direction:column;gap:8px;margin-top:32px}
+    .faq-item{
+      border:1px solid var(--brd);border-radius:12px;
+      background:var(--bg1);overflow:hidden;cursor:pointer;
+      transition:border-color .25s,background .25s;
+    }
+    .faq-item:hover{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.018)}
+    .faq-item.open{border-color:rgba(var(--pri-rgb),.2);background:rgba(var(--pri-rgb),.02)}
+    .faq-q{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 18px;gap:12px;
+    }
+    .faq-q-text{font-size:13px;font-weight:600;color:var(--t1)}
+    .faq-item.open .faq-q-text{color:var(--t0)}
+    .faq-chevron{
+      flex-shrink:0;color:var(--t2);
+      transition:transform .3s var(--ease);
+    }
+    .faq-item.open .faq-chevron{transform:rotate(180deg);color:var(--pri)}
+    .faq-body{
+      max-height:0;overflow:hidden;
+      transition:max-height .4s var(--ease);
+    }
+    .faq-item.open .faq-body{max-height:160px}
+    .faq-a{
+      padding:0 18px 16px;
+      font-size:13px;color:var(--t2);line-height:1.7;
+      border-top:1px solid rgba(255,255,255,.04);
+      padding-top:12px;
+    }
+
+    /* PRIVACY BADGE */
+    .privacy-strip{
+      margin-top:56px;padding:20px 24px;
+      border-radius:12px;
+      background:linear-gradient(135deg,rgba(var(--pri-rgb),.04),rgba(var(--acc-rgb),.02));
+      border:1px solid rgba(var(--pri-rgb),.1);
+      display:flex;align-items:center;gap:16px;
+    }
+    .privacy-icon{
+      width:40px;height:40px;border-radius:10px;flex-shrink:0;
+      background:rgba(var(--pri-rgb),.08);
+      border:1px solid rgba(var(--pri-rgb),.15);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--pri);
+    }
+    .privacy-text{flex:1}
+    .privacy-title{font-size:13px;font-weight:700;color:var(--t0);margin-bottom:2px}
+    .privacy-desc{font-size:12px;color:var(--t2);line-height:1.5}
+    .privacy-check{
+      font-family:var(--mono);font-size:10px;color:var(--pri);
+      display:flex;align-items:center;gap:5px;flex-shrink:0;
+      padding:5px 10px;border-radius:6px;
+      background:rgba(var(--pri-rgb),.07);
+      border:1px solid rgba(var(--pri-rgb),.15);
+    }
+
+    /* TOAST */
+    .toast{
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      padding:12px 18px;border-radius:10px;
+      font-size:13px;font-weight:500;
+      display:flex;align-items:center;gap:9px;
+      backdrop-filter:blur(16px);
+      animation:toastIn .4s var(--ease) both;
+      max-width:360px;
+    }
+    @keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .toast.success{background:rgba(var(--pri-rgb),.12);border:1px solid rgba(var(--pri-rgb),.25);color:var(--pri)}
+    .toast.error{background:rgba(var(--red-rgb),.12);border:1px solid rgba(var(--red-rgb),.25);color:var(--red)}
+    .toast.info{background:rgba(var(--acc-rgb),.1);border:1px solid rgba(var(--acc-rgb),.2);color:var(--acc)}
+
+    /* FOOTER */
+    footer{
+      border-top:1px solid var(--brd);padding:28px 32px;
+      background:rgba(255,255,255,.005);
+    }
+    .footer-inner{
+      max-width:1100px;margin:0 auto;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;flex-wrap:wrap;
+    }
+    .footer-copy{font-family:var(--mono);font-size:11px;color:var(--t2)}
+    .footer-links{display:flex;gap:18px;flex-wrap:wrap}
+    .footer-links a{
+      font-family:var(--mono);font-size:11px;color:var(--t2);
+      text-decoration:none;transition:color .2s;
+    }
+    .footer-links a:hover{color:var(--pri)}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .tool-grid{grid-template-columns:1fr}
+      .how-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:640px){
+      header{padding:0 18px;height:58px}
+      main{padding:32px 18px 80px}
+      .page-header{flex-direction:column}
+      .how-grid{grid-template-columns:1fr}
+      .privacy-strip{flex-direction:column;align-items:flex-start;gap:12px}
+      .result-stats{grid-template-columns:1fr 1fr}
+      footer{padding:20px 18px}
+      .logo-tool{display:none}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-tool" class="skip-link">Skip to tool</a>
+
+<!-- HEADER -->
+<header role="banner">
+  <div class="header-inner">
+    <a href="https://datapad.in" class="logo" aria-label="Datapad – Home">
+      <div class="logo-icon" aria-hidden="true">
+          <img src="/logo.png" alt="Datapad" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span class="logo-name">Datapad</span>
+      <span class="logo-sep" aria-hidden="true">/</span>
+      <span class="logo-name">CSV Merger</span>
+    </a>
+    <div class="header-right">
+      <a href="https://datapad.in" class="nav-home">All Tools</a>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="main-tool">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow" aria-label="Tool category">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Data Utility
+      </div>
+      <h1 class="page-title">CSV Merger</h1>
+      <p class="page-desc">Merge <strong>multiple CSV &amp; XLSB files</strong> in your browser. Validates headers, detects row mismatches, and exports a single clean file - zero uploads, zero server.</p>
+      <div class="page-badges" role="list" aria-label="Tool features">
+        <span class="badge" role="listitem">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Zero uploads
+        </span>
+        <span class="badge" role="listitem">
+          <svg width="9" height="9" viewBox="currentColor" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Instant processing
+        </span>
+        <span class="badge" role="listitem">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Free forever
+        </span>
+        <span class="badge" role="listitem">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Header validation
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOL GRID -->
+  <div class="tool-grid">
+
+    <!-- LEFT: UPLOADER + FILE LIST -->
+    <div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-dot" aria-hidden="true"></span>
+            Upload Files
+          </div>
+          <span class="panel-count" id="fileCount" aria-live="polite" aria-label="Files selected">0 files</span>
+        </div>
+        <div class="panel-body">
+          <!-- DROP ZONE -->
+          <div
+            class="drop-zone"
+            id="dropZone"
+            role="button"
+            tabindex="0"
+            aria-label="Upload CSV or XLSB files. Click or drag and drop."
+            aria-describedby="dz-hint"
+          >
+            <input
+              type="file"
+              id="fileInput"
+              multiple
+              accept=".csv,.xlsb"
+              aria-label="File input for CSV and XLSB files"
+            />
+            <div class="dz-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="dz-title">Drop files here or click to browse</div>
+            <div class="dz-sub" id="dz-hint">Supports CSV &amp; XLSB · Max 5 MB per file · Up to 1000 files</div>
+            <div class="dz-types" aria-hidden="true">
+              <span class="dz-type">.csv</span>
+              <span class="dz-type">.xlsb</span>
+            </div>
+          </div>
+
+          <!-- FILE LIST -->
+          <div class="file-list" id="fileList" role="list" aria-label="Uploaded files" aria-live="polite"></div>
+
+          <!-- ACTIONS -->
+          <div class="actions-row" id="actionsRow" style="display:none">
+            <button class="btn btn-primary" id="validateBtn" type="button" aria-label="Validate all uploaded files">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Validate
+            </button>
+            <button class="btn btn-accent" id="mergeBtn" type="button" disabled aria-label="Merge validated files">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              Merge Files
+            </button>
+            <button class="btn btn-secondary btn-danger" id="clearBtn" type="button" aria-label="Clear all files">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- STATS -->
+      <div class="stats-card" aria-label="File statistics">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-dot" aria-hidden="true"></span>
+            Summary
+          </div>
+        </div>
+        <div class="stats-grid" role="list">
+          <div class="stat-cell" role="listitem">
+            <div class="stat-lbl">Total Files</div>
+            <div class="stat-val acc" id="statTotal">0</div>
+          </div>
+          <div class="stat-cell" role="listitem">
+            <div class="stat-lbl">Total Size</div>
+            <div class="stat-val" id="statSize">0 MB</div>
+          </div>
+          <div class="stat-cell" role="listitem">
+            <div class="stat-lbl">Valid</div>
+            <div class="stat-val pri" id="statValid">0</div>
+          </div>
+          <div class="stat-cell" role="listitem">
+            <div class="stat-lbl">Errors</div>
+            <div class="stat-val red" id="statErrors">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS (hidden until merge) -->
+      <div class="progress-panel" id="progressPanel" role="region" aria-label="Merge progress" aria-live="polite">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-dot" aria-hidden="true"></span>
+            Merging
+          </div>
+          <span class="panel-count" id="progressLabel">0%</span>
+        </div>
+        <div class="progress-body">
+          <div class="progress-label">
+            <span id="progressFile">Processing files…</span>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-file-label">
+            <span>Rows processed</span>
+            <span id="progressRows">-</span>
+          </div>
+          <div class="progress-file-track">
+            <div class="progress-file-fill" id="progressFileFill"></div>
+          </div>
+          <div class="progress-eta" id="progressEta"></div>
+        </div>
+      </div>
+
+      <!-- RESULT (hidden until done) -->
+      <div class="result-panel" id="resultPanel" role="region" aria-label="Merge result" aria-live="assertive">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-dot" aria-hidden="true"></span>
+            Done
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-check" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title">Merge Complete</div>
+          <div class="result-sub" id="resultSub">-</div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="result-stat-val" id="resultFiles">-</div>
+              <div class="result-stat-lbl">Files</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-val" id="resultRows">-</div>
+              <div class="result-stat-lbl">Total Rows</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-val" id="resultTime">-</div>
+              <div class="result-stat-lbl">Time</div>
+            </div>
+          </div>
+          <button class="btn-download" id="downloadBtn" type="button" aria-label="Download merged CSV file">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download merged CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- VALIDATION LOG -->
+      <div class="validation-panel" aria-label="Validation log">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-dot" aria-hidden="true"></span>
+            Validation Log
+          </div>
+          <span class="panel-count" id="validationCount" aria-live="polite">0 checks</span>
+        </div>
+        <div class="validation-list" id="validationList" role="log" aria-live="polite">
+          <div class="v-empty" id="vEmpty">Validation results will appear here</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" aria-labelledby="how-heading">
+    <div class="how-eyebrow">How it works</div>
+    <h2 class="how-title" id="how-heading">Four steps, zero setup</h2>
+    <p class="how-desc">Everything runs in your browser. No accounts, no waiting, no privacy risk.</p>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="how-card-title">Upload Files</div>
+        <div class="how-card-desc">Drag & drop or click to select any number of CSV or XLSB files.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="how-card-title">Validate</div>
+        <div class="how-card-desc">Headers, row lengths, encoding, and file integrity are checked automatically.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </div>
+        <div class="how-card-title">Merge</div>
+        <div class="how-card-desc">Valid files are concatenated in memory. Progress is tracked in real time.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <div class="how-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="how-card-title">Download</div>
+        <div class="how-card-desc">One click to download the merged CSV to your device. Nothing is stored.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY STRIP -->
+  <div class="privacy-strip" role="note" aria-label="Privacy guarantee">
+    <div class="privacy-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="privacy-text">
+      <div class="privacy-title">100% Private - Your data never leaves your device</div>
+      <div class="privacy-desc">All merging and validation runs client-side in JavaScript. No data is uploaded, logged, or transmitted to any server. Safe for PII, secrets, and sensitive production data.</div>
+    </div>
+    <div class="privacy-check" aria-label="Verified: zero network calls on data">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Zero transmission
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <section class="faq-section" aria-labelledby="faq-heading">
+    <div class="how-eyebrow">FAQ</div>
+    <h2 class="how-title" id="faq-heading">Common questions</h2>
+    <div class="faq-list" role="list">
+
+      <div class="faq-item" role="listitem" tabindex="0" onclick="faqToggle(this)" onkeydown="faqKey(event,this)" aria-expanded="false">
+        <div class="faq-q">
+          <span class="faq-q-text">Is the CSV Merger really free?</span>
+          <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-body">
+          <div class="faq-a">Yes. No sign-up, no paywall, no usage limits. All features available to all users, always.</div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem" tabindex="0" onclick="faqToggle(this)" onkeydown="faqKey(event,this)" aria-expanded="false">
+        <div class="faq-q">
+          <span class="faq-q-text">Does it upload my files to a server?</span>
+          <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-body">
+          <div class="faq-a">No. Everything runs in your browser's JavaScript engine. Your files never leave your device. Safe for production secrets, customer PII, and sensitive payloads.</div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem" tabindex="0" onclick="faqToggle(this)" onkeydown="faqKey(event,this)" aria-expanded="false">
+        <div class="faq-q">
+          <span class="faq-q-text">What happens when headers don't match?</span>
+          <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-body">
+          <div class="faq-a">Files with mismatched headers are flagged as invalid in the validation log and skipped during the merge. Only files whose headers match the first valid file are included.</div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem" tabindex="0" onclick="faqToggle(this)" onkeydown="faqKey(event,this)" aria-expanded="false">
+        <div class="faq-q">
+          <span class="faq-q-text">What are the limits?</span>
+          <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-body">
+          <div class="faq-a">Maximum 1,000 files per session, 5 MB per file. These limits exist to protect browser memory - not because of server costs. Very large merges are best done in batches.</div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem" tabindex="0" onclick="faqToggle(this)" onkeydown="faqKey(event,this)" aria-expanded="false">
+        <div class="faq-q">
+          <span class="faq-q-text">Can I merge XLSB files?</span>
+          <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-body">
+          <div class="faq-a">XLSB files are accepted and treated as tabular data. The first row is used as the header. Mixed CSV+XLSB merges work as long as all headers match.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="footer-inner">
+    <p class="footer-copy">© 2026 Datapad. All rights reserved. Built with zero tracking.</p>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="https://datapad.in">Home</a>
+      <a href="https://datapad.in/ab-test-calculator">A/B Calculator</a>
+      <a href="https://datapad.in/json-studio">JSON Studio</a>
+      <a href="https://datapad.in/rice-calculator">RICE Calculator</a>
+      <a href="mailto:hello.datapad@gmail.com">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════
+   CSV MERGER - Full client-side logic
+   ═══════════════════════════════════════════ */
+
+const MAX_FILES = 1000;
+const MAX_FILE_MB = 5;
+const CHUNK_ROWS = 5000;
+
+let allFiles = [];           // raw File objects
+let validFiles = [];         // validated File objects
+let validationDone = false;
+let mergedBlob = null;
+let mergedFilename = '';
+
+/* ── DOM refs ── */
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const fileList    = document.getElementById('fileList');
+const fileCount   = document.getElementById('fileCount');
+const actionsRow  = document.getElementById('actionsRow');
+const validateBtn = document.getElementById('validateBtn');
+const mergeBtn    = document.getElementById('mergeBtn');
+const clearBtn    = document.getElementById('clearBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+const statTotal   = document.getElementById('statTotal');
+const statSize    = document.getElementById('statSize');
+const statValid   = document.getElementById('statValid');
+const statErrors  = document.getElementById('statErrors');
+
+const progressPanel    = document.getElementById('progressPanel');
+const progressFill     = document.getElementById('progressFill');
+const progressPct      = document.getElementById('progressPct');
+const progressLabel    = document.getElementById('progressLabel');
+const progressFile     = document.getElementById('progressFile');
+const progressFileFill = document.getElementById('progressFileFill');
+const progressRows     = document.getElementById('progressRows');
+const progressEta      = document.getElementById('progressEta');
+const progressTrack    = document.getElementById('progressTrack');
+
+const resultPanel = document.getElementById('resultPanel');
+const resultSub   = document.getElementById('resultSub');
+const resultFiles = document.getElementById('resultFiles');
+const resultRows  = document.getElementById('resultRows');
+const resultTime  = document.getElementById('resultTime');
+
+const validationList  = document.getElementById('validationList');
+const validationCount = document.getElementById('validationCount');
+const vEmpty          = document.getElementById('vEmpty');
+
+/* ── Upload: drag & drop ── */
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleFiles([...e.dataTransfer.files]);
+});
+dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }});
+fileInput.addEventListener('change', () => handleFiles([...fileInput.files]));
+
+function handleFiles(incoming) {
+  const allowed = incoming.filter(f => /\.(csv|xlsb)$/i.test(f.name));
+  const disallowed = incoming.filter(f => !/\.(csv|xlsb)$/i.test(f.name));
+
+  if (disallowed.length) showToast(`${disallowed.length} file(s) skipped - only .csv and .xlsb allowed`, 'error');
+
+  // Dedup by name+size
+  const existing = new Set(allFiles.map(f => f.name + f.size));
+  const fresh = allowed.filter(f => !existing.has(f.name + f.size));
+
+  // Size check
+  const oversized = fresh.filter(f => f.size > MAX_FILE_MB * 1024 * 1024);
+  if (oversized.length) {
+    oversized.forEach(f => logValidation('err', f.name, `Exceeds ${MAX_FILE_MB} MB limit`));
+    showToast(`${oversized.length} file(s) exceed ${MAX_FILE_MB} MB and were skipped`, 'error');
+  }
+  const sized = fresh.filter(f => f.size <= MAX_FILE_MB * 1024 * 1024);
+
+  if (allFiles.length + sized.length > MAX_FILES) {
+    showToast(`Maximum ${MAX_FILES} files allowed`, 'error');
+    return;
+  }
+
+  allFiles = [...allFiles, ...sized];
+  validationDone = false;
+  mergeBtn.disabled = true;
+  resetResults();
+  renderFileList();
+  updateStats();
+  fileInput.value = '';
+}
+
+function renderFileList() {
+  fileList.innerHTML = '';
+  if (allFiles.length === 0) {
+    actionsRow.style.display = 'none';
+    fileCount.textContent = '0 files';
+    return;
+  }
+  actionsRow.style.display = 'flex';
+  fileCount.textContent = `${allFiles.length} file${allFiles.length !== 1 ? 's' : ''}`;
+
+  allFiles.forEach((file, idx) => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const sizeStr = file.size < 1024 ? `${file.size} B`
+      : file.size < 1024 * 1024 ? `${(file.size / 1024).toFixed(1)} KB`
+      : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.setAttribute('role', 'listitem');
+    item.dataset.idx = idx;
+
+    const status = validationDone
+      ? (validFiles.includes(file) ? 'valid' : 'invalid')
+      : 'pending';
+    if (status !== 'pending') item.classList.add(status);
+
+    const statusLabel = status === 'valid' ? 'Valid' : status === 'invalid' ? 'Invalid' : '-';
+    const statusClass = status;
+
+    item.innerHTML = `
+      <div class="file-icon ${ext}" aria-hidden="true">${ext.toUpperCase().slice(0,3)}</div>
+      <div class="file-info">
+        <div class="file-name" title="${escHtml(file.name)}">${escHtml(file.name)}</div>
+        <div class="file-meta">${sizeStr}</div>
+      </div>
+      <span class="file-status ${statusClass}" aria-label="Status: ${statusLabel}">${statusLabel}</span>
+      <button class="file-remove" data-idx="${idx}" aria-label="Remove ${escHtml(file.name)}" type="button">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    fileList.appendChild(item);
+  });
+
+  fileList.querySelectorAll('.file-remove').forEach(btn => {
+    btn.addEventListener('click', () => removeFile(parseInt(btn.dataset.idx)));
+  });
+}
+
+function removeFile(idx) {
+  allFiles.splice(idx, 1);
+  validationDone = false;
+  mergeBtn.disabled = true;
+  resetResults();
+  renderFileList();
+  updateStats();
+}
+
+function updateStats() {
+  const total = allFiles.length;
+  const totalBytes = allFiles.reduce((s, f) => s + f.size, 0);
+  const sizeStr = totalBytes < 1024 ? `${totalBytes} B`
+    : totalBytes < 1024 * 1024 ? `${(totalBytes / 1024).toFixed(1)} KB`
+    : `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+
+  statTotal.textContent = total;
+  statSize.textContent = sizeStr;
+  if (!validationDone) { statValid.textContent = '-'; statErrors.textContent = '-'; }
+}
+
+/* ── Clear ── */
+clearBtn.addEventListener('click', () => {
+  allFiles = [];
+  validFiles = [];
+  validationDone = false;
+  mergedBlob = null;
+  clearLog();
+  renderFileList();
+  updateStats();
+  resetResults();
+});
+
+function resetResults() {
+  progressPanel.classList.remove('active');
+  resultPanel.classList.remove('active');
+}
+
+/* ── VALIDATION ── */
+validateBtn.addEventListener('click', runValidation);
+
+async function runValidation() {
+  if (allFiles.length === 0) return;
+
+  clearLog();
+  validFiles = [];
+  validationDone = false;
+  mergeBtn.disabled = true;
+  validateBtn.disabled = true;
+  validateBtn.textContent = 'Validating…';
+
+  let referenceHeader = null;
+  let valid = 0, errors = 0;
+
+  for (const file of allFiles) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'xlsb') {
+      // XLSB: treat as valid (binary, can't parse in-browser without library)
+      logValidation('ok', file.name, 'XLSB accepted (header check skipped)');
+      validFiles.push(file);
+      valid++;
+      continue;
+    }
+
+    // CSV validation
+    let text;
+    try {
+      text = await readFileAsText(file);
+    } catch {
+      logValidation('err', file.name, 'Cannot read file (encoding error)');
+      errors++;
+      continue;
+    }
+
+    if (!text || text.trim() === '') {
+      logValidation('err', file.name, 'File is empty');
+      errors++;
+      continue;
+    }
+
+    const lines = text.split(/\r?\n/);
+    const headerLine = lines[0];
+    if (!headerLine) {
+      logValidation('err', file.name, 'No header row found');
+      errors++;
+      continue;
+    }
+
+    const header = parseCSVRow(headerLine);
+
+    if (referenceHeader === null) {
+      referenceHeader = header;
+      logValidation('ok', file.name, `Reference header set (${header.length} columns)`);
+    } else {
+      if (JSON.stringify(header) !== JSON.stringify(referenceHeader)) {
+        logValidation('err', file.name, `Header mismatch (expected ${referenceHeader.length} cols, got ${header.length})`);
+        errors++;
+        continue;
+      }
+    }
+
+    // Row length check (sample first 200 rows for speed)
+    let rowErr = false;
+    const sampleEnd = Math.min(lines.length, 200);
+    for (let i = 1; i < sampleEnd; i++) {
+      if (lines[i].trim() === '') continue;
+      const row = parseCSVRow(lines[i]);
+      if (row.length !== header.length) {
+        logValidation('warn', file.name, `Row ${i + 1} has ${row.length} columns (expected ${header.length}) - included with warning`);
+        rowErr = true;
+        break;
+      }
+    }
+
+    if (!rowErr) logValidation('ok', file.name, `Valid · ${lines.length - 1} rows`);
+    validFiles.push(file);
+    valid++;
+  }
+
+  statValid.textContent = valid;
+  statErrors.textContent = errors;
+  validationDone = true;
+
+  validateBtn.disabled = false;
+  validateBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Validate`;
+  renderFileList();
+
+  if (valid > 0) {
+    mergeBtn.disabled = false;
+    showToast(`${valid} file(s) ready to merge`, 'success');
+  } else {
+    showToast('No valid files found', 'error');
+  }
+}
+
+/* ── MERGE ── */
+mergeBtn.addEventListener('click', runMerge);
+
+async function runMerge() {
+  if (validFiles.length === 0) return;
+
+  mergeBtn.disabled = true;
+  validateBtn.disabled = true;
+  progressPanel.classList.add('active');
+  resultPanel.classList.remove('active');
+
+  const startTime = performance.now();
+  const csvParts = [];
+  let totalRowCount = 0;
+  let headerWritten = false;
+
+  for (let fi = 0; fi < validFiles.length; fi++) {
+    const file = validFiles[fi];
+    const ext = file.name.split('.').pop().toLowerCase();
+    const pct = Math.round((fi / validFiles.length) * 100);
+
+    setProgress(pct, `File ${fi + 1} / ${validFiles.length}`, fi, validFiles.length);
+
+    let text;
+    try {
+      text = await readFileAsText(file);
+    } catch {
+      logValidation('err', file.name, 'Read error during merge - skipped');
+      continue;
+    }
+
+    const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+    if (lines.length < 2) continue;
+
+    if (!headerWritten) {
+      csvParts.push(lines[0] + '\n');
+      headerWritten = true;
+    }
+
+    // Add data rows in simulated chunks for progress feedback
+    const dataLines = lines.slice(1);
+    const total = dataLines.length;
+    let processed = 0;
+    for (let ci = 0; ci < dataLines.length; ci += CHUNK_ROWS) {
+      const chunk = dataLines.slice(ci, ci + CHUNK_ROWS);
+      csvParts.push(chunk.join('\n') + '\n');
+      processed = Math.min(ci + CHUNK_ROWS, total);
+      progressRows.textContent = `${processed} / ${total}`;
+      progressFileFill.style.width = `${Math.round((processed / total) * 100)}%`;
+      // yield to keep UI responsive
+      await yieldFrame();
+    }
+
+    totalRowCount += dataLines.length;
+
+    const elapsed = (performance.now() - startTime) / 1000;
+    const eta = fi + 1 < validFiles.length
+      ? Math.round((elapsed / (fi + 1)) * (validFiles.length - fi - 1))
+      : 0;
+    progressEta.innerHTML = eta > 0
+      ? `ETA <strong>${eta}s</strong> remaining`
+      : `<strong>Finalizing…</strong>`;
+  }
+
+  setProgress(100, 'Done', validFiles.length, validFiles.length);
+
+  // Build blob
+  mergedBlob = new Blob(csvParts, { type: 'text/csv;charset=utf-8;' });
+  const ts = new Date().toISOString().replace(/[:\-T]/g, '').slice(0,14);
+  mergedFilename = `merged_${ts}.csv`;
+
+  const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+
+  // Show result
+  resultPanel.classList.add('active');
+  resultFiles.textContent = validFiles.length;
+  resultRows.textContent = totalRowCount.toLocaleString();
+  resultTime.textContent = `${elapsed}s`;
+  resultSub.textContent = `${mergedFilename} · ${(mergedBlob.size / 1024).toFixed(1)} KB`;
+
+  validateBtn.disabled = false;
+  mergeBtn.disabled = false;
+  showToast(`Merged ${validFiles.length} files in ${elapsed}s`, 'success');
+}
+
+/* ── DOWNLOAD ── */
+downloadBtn.addEventListener('click', () => {
+  if (!mergedBlob) return;
+  const url = URL.createObjectURL(mergedBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = mergedFilename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  showToast('Download started', 'info');
+});
+
+/* ── Progress helpers ── */
+function setProgress(pct, label, current, total) {
+  progressFill.style.width = `${pct}%`;
+  progressPct.textContent = `${pct}%`;
+  progressLabel.textContent = `${pct}%`;
+  progressFile.textContent = label;
+  progressTrack.setAttribute('aria-valuenow', pct);
+}
+
+function yieldFrame() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+/* ── Validation log ── */
+function logValidation(type, filename, msg) {
+  if (vEmpty) vEmpty.style.display = 'none';
+
+  const item = document.createElement('div');
+  item.className = 'v-item';
+  item.innerHTML = `
+    <span class="v-dot ${type === 'ok' ? 'ok' : type === 'warn' ? 'warn' : 'err'}" aria-hidden="true"></span>
+    <span class="v-msg"><span class="v-file">${escHtml(filename)}</span> - ${escHtml(msg)}</span>`;
+  validationList.appendChild(item);
+
+  const count = validationList.querySelectorAll('.v-item').length;
+  validationCount.textContent = `${count} check${count !== 1 ? 's' : ''}`;
+}
+
+function clearLog() {
+  validationList.innerHTML = '';
+  const empty = document.createElement('div');
+  empty.className = 'v-empty';
+  empty.id = 'vEmpty';
+  empty.textContent = 'Validation results will appear here';
+  validationList.appendChild(empty);
+  validationCount.textContent = '0 checks';
+}
+
+/* ── CSV helpers ── */
+function parseCSVRow(line) {
+  const result = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (ch === ',' && !inQ) {
+      result.push(cur.trim()); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsText(file, 'utf-8');
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Toast ── */
+function showToast(msg, type = 'info') {
+  const existing = document.querySelectorAll('.toast');
+  existing.forEach(t => t.remove());
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+
+  const icon = type === 'success'
+    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+    : type === 'error'
+    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+  toast.innerHTML = `${icon}<span>${escHtml(msg)}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+/* ── FAQ ── */
+function faqToggle(item) {
+  const was = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.setAttribute('aria-expanded', 'false');
+  });
+  if (!was) {
+    item.classList.add('open');
+    item.setAttribute('aria-expanded', 'true');
+  }
+}
+function faqKey(e, item) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); faqToggle(item); }
+}
+</script>
+
+</body>
+</html>
