@@ -1580,9 +1580,9 @@
     <div class="header-left">
       <a href="/glimpse" class="brand" aria-label="Glimpse">
         <div class="brand-mark" aria-hidden="true"></div>
-        <span class="brand-name">Glimpse</span>
+        <span class="brand-name">Datapad</span>
         <span class="brand-divider">/</span>
-        <a href="/" class="brand-parent">Datapad</a>
+        <a href="/" class="brand-parent">Glimpse</a>
       </a>
     </div>
     <div class="header-right">
@@ -1654,3 +1654,2270 @@
 
 <!-- Hidden file input -->
 <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none" aria-hidden="true"/>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════════════
+   GLIMPSE — Core Engine
+   Senior-grade: defensive parsing, pure compute fns, single state
+   ═══════════════════════════════════════════════════════════════════ */
+
+// ─── CONSTANTS ────────────────────────────────────────────────────
+var DB_NAME    = 'glimpse-v1';
+var DB_VERSION = 1;
+var STORE_DS   = 'datasets';
+var STORE_DASH = 'dashboards';
+var MAX_FILE_MB = 50;
+var WARN_FILE_MB = 10;
+var MAX_ROWS_DEFAULT = 100000;
+var SAMPLE_ROWS = 500; // rows to profile for type detection
+var TOP_N_CATS  = 15;  // max categories in bar chart
+
+var CHART_COLORS = [
+  'rgba(0,212,255,0.85)', 'rgba(167,139,250,0.85)',
+  'rgba(52,211,153,0.85)', 'rgba(251,191,36,0.85)',
+  'rgba(248,113,113,0.85)', 'rgba(96,165,250,0.85)',
+  'rgba(244,114,182,0.85)', 'rgba(148,163,184,0.85)'
+];
+var CHART_COLORS_BORDER = CHART_COLORS.map(function(c){
+  return c.replace('0.85','1');
+});
+
+// ─── STATE ────────────────────────────────────────────────────────
+var App = {
+  step: 'upload',          // 'upload' | 'schema' | 'dashboard'
+  db: null,
+  datasets: [],            // [{id, name, rows, schema, rowCount, colCount, createdAt, sampleMode}]
+  dashboards: {},          // {[datasetId]: [{id, type, title, xField, yField, agg, span, insight}]}
+  activeDatasetId: null,
+  filters: [],             // [{field, op, value}]
+  charts: {},              // {[chartId]: Chart.js instance}
+  pendingFile: null,
+  drawerField: null,
+  isDirty: false           // unsaved changes guard
+};
+
+function activeDataset() {
+  return App.datasets.find(function(d){ return d.id === App.activeDatasetId; }) || null;
+}
+function activeDashboard() {
+  return App.dashboards[App.activeDatasetId] || [];
+}
+
+// ─── ID GEN ───────────────────────────────────────────────────────
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ─── INDEXEDDB ────────────────────────────────────────────────────
+function dbOpen() {
+  return new Promise(function(resolve, reject) {
+    if (!window.indexedDB) { reject(new Error('IndexedDB not supported')); return; }
+    var req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_DS)) {
+        db.createObjectStore(STORE_DS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_DASH)) {
+        db.createObjectStore(STORE_DASH, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror   = function(e) { reject(e.target.error); };
+  });
+}
+
+function dbPut(store, obj) {
+  return new Promise(function(resolve, reject) {
+    if (!App.db) { resolve(); return; }
+    try {
+      var tx  = App.db.transaction(store, 'readwrite');
+      var req = tx.objectStore(store).put(obj);
+      req.onsuccess = function() { resolve(); };
+      req.onerror   = function(e) { reject(e.target.error); };
+    } catch(e) { reject(e); }
+  });
+}
+
+function dbGetAll(store) {
+  return new Promise(function(resolve, reject) {
+    if (!App.db) { resolve([]); return; }
+    try {
+      var tx  = App.db.transaction(store, 'readonly');
+      var req = tx.objectStore(store).getAll();
+      req.onsuccess = function(e) { resolve(e.target.result || []); };
+      req.onerror   = function(e) { reject(e.target.error); };
+    } catch(e) { reject(e); }
+  });
+}
+
+function dbDelete(store, id) {
+  return new Promise(function(resolve, reject) {
+    if (!App.db) { resolve(); return; }
+    try {
+      var tx  = App.db.transaction(store, 'readwrite');
+      var req = tx.objectStore(store).delete(id);
+      req.onsuccess = function() { resolve(); };
+      req.onerror   = function(e) { reject(e.target.error); };
+    } catch(e) { reject(e); }
+  });
+}
+
+function dbClearAll() {
+  return new Promise(function(resolve) {
+    if (!App.db) { resolve(); return; }
+    try {
+      var tx = App.db.transaction([STORE_DS, STORE_DASH], 'readwrite');
+      tx.objectStore(STORE_DS).clear();
+      tx.objectStore(STORE_DASH).clear();
+      tx.oncomplete = resolve;
+      tx.onerror    = resolve; // best-effort
+    } catch(e) { resolve(); }
+  });
+}
+
+// ─── TYPE DETECTION ───────────────────────────────────────────────
+var TYPE_ORDER = ['empty','boolean','integer','decimal','date','datetime','categorical','identifier','text'];
+
+var BOOL_VALUES = new Set(['true','false','yes','no','y','n','1','0','on','off']);
+
+// ISO date patterns
+var RE_ISO_DATE     = /^\d{4}-\d{2}-\d{2}$/;
+var RE_ISO_DATETIME = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/;
+// Common date formats: DD/MM/YYYY, MM/DD/YYYY, DD-MM-YYYY, YYYY/MM/DD
+var RE_DATE_SLASH   = /^(\d{1,4})[\/\-](\d{1,2})[\/\-](\d{2,4})$/;
+// Numeric with optional thousands separator (both . and , as decimal)
+var RE_NUMERIC      = /^-?[\d,\s]*\.?\d+$|^-?\d+[,]\d+$/;
+
+function safeDate(v) {
+  // Try parsing various date strings defensively
+  if (!v || typeof v !== 'string') return null;
+  v = v.trim();
+  if (!v) return null;
+  if (RE_ISO_DATE.test(v) || RE_ISO_DATETIME.test(v)) {
+    var d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (RE_DATE_SLASH.test(v)) {
+    var d2 = new Date(v);
+    return isNaN(d2.getTime()) ? null : d2;
+  }
+  return null;
+}
+
+function safeNumber(v) {
+  if (v === null || v === undefined || v === '') return null;
+  var s = String(v).trim();
+  // Remove thousands separators (comma in EN, period in EU locales)
+  // Heuristic: if string has both . and , treat rightmost as decimal
+  var commas = (s.match(/,/g)||[]).length;
+  var dots   = (s.match(/\./g)||[]).length;
+  if (commas > 0 && dots === 0) {
+    // Could be EU decimal "1,5" or thousands "1,000"
+    if (commas === 1 && /,\d{1,2}$/.test(s)) {
+      s = s.replace(',', '.'); // EU decimal
+    } else {
+      s = s.replace(/,/g, ''); // thousands
+    }
+  } else if (commas > 0 && dots > 0) {
+    // e.g. "1,234.56" or "1.234,56"
+    var commaPos = s.lastIndexOf(',');
+    var dotPos   = s.lastIndexOf('.');
+    if (commaPos > dotPos) {
+      s = s.replace(/\./g, '').replace(',', '.'); // EU: "1.234,56"
+    } else {
+      s = s.replace(/,/g, ''); // EN: "1,234.56"
+    }
+  }
+  var n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function detectColumnType(values) {
+  // values: raw string array (already excluding null/empty for counting)
+  var total   = values.length;
+  if (total === 0) return { type: 'empty', confidence: 1, reason: 'All values are empty' };
+
+  var nonEmpty = values.filter(function(v) {
+    return v !== null && v !== undefined && String(v).trim() !== '';
+  });
+  var nonEmptyCount = nonEmpty.length;
+  if (nonEmptyCount === 0) return { type: 'empty', confidence: 1, reason: 'All values are empty' };
+
+  var sample = nonEmpty.slice(0, SAMPLE_ROWS);
+  var n      = sample.length;
+
+  // Count booleans
+  var boolHits = sample.filter(function(v) {
+    return BOOL_VALUES.has(String(v).trim().toLowerCase());
+  }).length;
+
+  // Count datetimes / dates
+  var dtHits   = 0, dateHits = 0;
+  sample.forEach(function(v) {
+    var s = String(v).trim();
+    if (RE_ISO_DATETIME.test(s)) { dtHits++; return; }
+    if (safeDate(s)) dateHits++;
+  });
+
+  // Count numerics
+  var numHits = sample.filter(function(v) {
+    return safeNumber(String(v).trim()) !== null;
+  }).length;
+
+  // Count unique values (for cardinality check)
+  var unique  = new Set(sample.map(function(v){ return String(v).trim().toLowerCase(); })).size;
+  var ratio   = unique / n;
+
+  var threshold = 0.85;
+
+  // Boolean
+  if (boolHits / n >= threshold) {
+    return {
+      type: 'boolean', confidence: Math.round(boolHits / n * 100),
+      reason: boolHits + '/' + n + ' values match boolean (true/false/yes/no/1/0)',
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Datetime
+  if (dtHits / n >= threshold) {
+    return {
+      type: 'datetime', confidence: Math.round(dtHits / n * 100),
+      reason: dtHits + '/' + n + ' values are ISO datetimes',
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Date
+  if ((dateHits + dtHits) / n >= threshold) {
+    return {
+      type: 'date', confidence: Math.round((dateHits + dtHits) / n * 100),
+      reason: (dateHits + dtHits) + '/' + n + ' values parse as dates',
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Numeric
+  if (numHits / n >= threshold) {
+    var nums     = sample.map(function(v){ return safeNumber(String(v)); }).filter(function(x){ return x !== null; });
+    var isInt    = nums.every(function(v){ return Number.isFinite(v) && Math.floor(v) === v; });
+    return {
+      type: isInt ? 'integer' : 'decimal',
+      confidence: Math.round(numHits / n * 100),
+      reason: numHits + '/' + n + ' values are numeric (' + (isInt ? 'integer' : 'decimal') + ')',
+      min: Math.min.apply(null, nums), max: Math.max.apply(null, nums),
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Identifier (high-cardinality text — email, UUID, SKU)
+  if (ratio > 0.95 && n > 20) {
+    return {
+      type: 'identifier', confidence: 70,
+      reason: '~' + Math.round(ratio * 100) + '% unique values — likely ID/key/email',
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Categorical (low-cardinality text)
+  if (ratio <= 0.35 && unique <= 50) {
+    return {
+      type: 'categorical', confidence: Math.round((1 - ratio) * 70 + 30),
+      reason: unique + ' unique values out of ' + n + ' (' + Math.round(ratio * 100) + '% cardinality)',
+      samples: sample.slice(0, 5).map(function(v){ return String(v); })
+    };
+  }
+  // Default: free text
+  return {
+    type: 'text', confidence: 50,
+    reason: 'High cardinality text (' + unique + ' unique values)',
+    samples: sample.slice(0, 5).map(function(v){ return String(v); })
+  };
+}
+
+function profileDataset(rows, headers) {
+  // Build schema from first SAMPLE_ROWS rows
+  return headers.map(function(header, colIdx) {
+    var values = rows.map(function(row) { return row[colIdx]; });
+    var detection = detectColumnType(values);
+    return {
+      index:      colIdx,
+      rawName:    header,
+      label:      header,
+      type:       detection.type,
+      confidence: detection.confidence,
+      reason:     detection.reason,
+      samples:    detection.samples || [],
+      min:        detection.min,
+      max:        detection.max,
+      nullCount:  values.filter(function(v){ return v === null || v === undefined || String(v).trim() === ''; }).length,
+      totalCount: values.length,
+      included:   detection.type !== 'empty' && detection.type !== 'identifier',
+      qClass:     isQuantitative(detection.type) ? 'quantitative' : 'qualitative'
+    };
+  });
+}
+
+function isQuantitative(type) {
+  return type === 'integer' || type === 'decimal' || type === 'date' || type === 'datetime';
+}
+
+// ─── CHART HEURISTICS ─────────────────────────────────────────────
+function suggestCharts(schema) {
+  var included  = schema.filter(function(f){ return f.included; });
+  var nums      = included.filter(function(f){ return f.type === 'integer' || f.type === 'decimal'; });
+  var cats      = included.filter(function(f){ return f.type === 'categorical' || f.type === 'boolean'; });
+  var dates     = included.filter(function(f){ return f.type === 'date' || f.type === 'datetime'; });
+
+  var charts = [];
+  var used   = {};
+
+  // Rule 1: date + numeric → time series (most insightful first)
+  if (dates.length && nums.length) {
+    var dateF = dates[0], numF = nums[0];
+    charts.push({
+      id: genId(), type: 'line',
+      title: numF.label + ' over time',
+      xField: dateF.index, yField: numF.index, agg: 'sum',
+      span: 12,
+      insight: 'Shows how ' + numF.label + ' changes over time. Look for trends, seasonality, or sudden spikes.'
+    });
+    used[dateF.index] = true;
+    used[numF.index]  = true;
+  }
+
+  // Rule 2: each numeric column → histogram (distribution)
+  nums.slice(0, 2).forEach(function(numF) {
+    charts.push({
+      id: genId(), type: 'histogram',
+      title: 'Distribution of ' + numF.label,
+      xField: numF.index, yField: null, agg: null,
+      span: 6,
+      insight: 'Shows the shape of ' + numF.label + '. A long right tail means outliers are pulling the average up.'
+    });
+  });
+
+  // Rule 3: categorical + numeric → bar chart (aggregated)
+  if (cats.length && nums.length) {
+    var catF = cats[0];
+    var numF2 = nums.find(function(n){ return !used[n.index]; }) || nums[0];
+    charts.push({
+      id: genId(), type: 'bar',
+      title: numF2.label + ' by ' + catF.label,
+      xField: catF.index, yField: numF2.index, agg: 'sum',
+      span: 6,
+      insight: 'Compares total ' + numF2.label + ' across categories. Switch aggregation to Average to compare rates instead of totals.'
+    });
+  }
+
+  // Rule 4: categorical → horizontal bar of counts
+  cats.slice(0, 1).forEach(function(catF) {
+    charts.push({
+      id: genId(), type: 'hbar',
+      title: catF.label + ' — count breakdown',
+      xField: catF.index, yField: null, agg: 'count',
+      span: 6,
+      insight: 'Shows how records are distributed across ' + catF.label + ' categories. Useful for spotting imbalances.'
+    });
+  });
+
+  // Rule 5: two numerics → scatter (correlation)
+  if (nums.length >= 2) {
+    charts.push({
+      id: genId(), type: 'scatter',
+      title: nums[0].label + ' vs ' + nums[1].label,
+      xField: nums[0].index, yField: nums[1].index, agg: null,
+      span: 6,
+      insight: 'Each dot is a row. Tight diagonal clustering = strong correlation. Spread = weak relationship.'
+    });
+  }
+
+  // Limit to 5, prioritise by span (wide charts first for visual hierarchy)
+  return charts.slice(0, 5);
+}
+
+// ─── DATA AGGREGATION ─────────────────────────────────────────────
+function aggRows(rows, schema, xIdx, yIdx, aggFn) {
+  // Returns [{label, value}] sorted desc by value
+  var groups = {};
+  rows.forEach(function(row) {
+    var key = row[xIdx];
+    if (key === null || key === undefined) key = '(blank)';
+    key = String(key).trim() || '(blank)';
+    if (!groups[key]) groups[key] = [];
+    if (yIdx !== null && yIdx !== undefined) {
+      var v = safeNumber(String(row[yIdx] !== null && row[yIdx] !== undefined ? row[yIdx] : ''));
+      if (v !== null) groups[key].push(v);
+    } else {
+      groups[key].push(1); // count
+    }
+  });
+
+  var result = Object.keys(groups).map(function(key) {
+    var vals = groups[key];
+    var value;
+    switch (aggFn) {
+      case 'avg':    value = vals.length ? vals.reduce(function(a,b){return a+b;},0) / vals.length : 0; break;
+      case 'count':  value = groups[key].length; break;
+      case 'min':    value = vals.length ? Math.min.apply(null, vals) : 0; break;
+      case 'max':    value = vals.length ? Math.max.apply(null, vals) : 0; break;
+      default:       value = vals.reduce(function(a,b){return a+b;}, 0); // sum
+    }
+    return { label: key, value: value };
+  });
+
+  result.sort(function(a, b) { return b.value - a.value; });
+  return result;
+}
+
+function aggTimeSeries(rows, schema, xIdx, yIdx, aggFn) {
+  // Group by date (by day) sorted chronologically
+  var groups = {};
+  var field   = schema[xIdx];
+
+  rows.forEach(function(row) {
+    var raw = row[xIdx];
+    if (!raw) return;
+    var d = safeDate(String(raw).trim());
+    if (!d) return;
+    // Normalise to YYYY-MM-DD
+    var key = d.toISOString().slice(0, 10);
+    if (!groups[key]) groups[key] = [];
+    if (yIdx !== null && yIdx !== undefined) {
+      var v = safeNumber(String(row[yIdx] !== null ? row[yIdx] : ''));
+      if (v !== null) groups[key].push(v);
+    } else {
+      groups[key].push(1);
+    }
+  });
+
+  var keys = Object.keys(groups).sort();
+  return keys.map(function(key) {
+    var vals = groups[key];
+    var value;
+    switch (aggFn) {
+      case 'avg':   value = vals.reduce(function(a,b){return a+b;},0) / vals.length; break;
+      case 'count': value = vals.length; break;
+      default:      value = vals.reduce(function(a,b){return a+b;},0);
+    }
+    return { x: key, y: value };
+  });
+}
+
+function buildHistogram(rows, colIdx, bins) {
+  bins = bins || 20;
+  var nums = rows.map(function(r) {
+    return safeNumber(String(r[colIdx] !== null && r[colIdx] !== undefined ? r[colIdx] : ''));
+  }).filter(function(v){ return v !== null && isFinite(v); });
+
+  if (!nums.length) return { labels: [], data: [] };
+
+  var minV = Math.min.apply(null, nums);
+  var maxV = Math.max.apply(null, nums);
+  if (minV === maxV) { return { labels: [String(minV)], data: [nums.length] }; }
+
+  var step  = (maxV - minV) / bins;
+  var counts = new Array(bins).fill(0);
+  var labels = [];
+
+  for (var i = 0; i < bins; i++) {
+    var lo = minV + i * step;
+    var hi = minV + (i + 1) * step;
+    labels.push(fmtNum(lo));
+    nums.forEach(function(v) {
+      if (v >= lo && (v < hi || (i === bins - 1 && v <= hi))) counts[i]++;
+    });
+  }
+  return { labels: labels, data: counts };
+}
+
+// ─── FILTERS ──────────────────────────────────────────────────────
+function applyFilters(rows, schema) {
+  if (!App.filters.length) return rows;
+  return rows.filter(function(row) {
+    return App.filters.every(function(f) {
+      var raw = row[f.field];
+      var v   = raw === null || raw === undefined ? '' : String(raw).trim().toLowerCase();
+      var fv  = String(f.value).trim().toLowerCase();
+      switch (f.op) {
+        case 'eq':       return v === fv;
+        case 'neq':      return v !== fv;
+        case 'contains': return v.includes(fv);
+        case 'gt':       return safeNumber(v) > safeNumber(fv);
+        case 'lt':       return safeNumber(v) < safeNumber(fv);
+        default:         return true;
+      }
+    });
+  });
+}
+
+// ─── FORMATTERS ───────────────────────────────────────────────────
+function fmtNum(v, decimals) {
+  if (v === null || v === undefined || !isFinite(v)) return '—';
+  var d = decimals !== undefined ? decimals : (Math.abs(v) < 10 ? 2 : Math.abs(v) < 1000 ? 1 : 0);
+  return v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: d });
+}
+
+function fmtBytes(bytes) {
+  if (bytes < 1024)       return bytes + ' B';
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function fmtDate(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ─── CHART THEME ──────────────────────────────────────────────────
+var chartDefaults = {
+  font: { family: "'Inter', -apple-system, sans-serif", size: 12 },
+  color: '#8b93a3'
+};
+
+function applyChartDefaults() {
+  if (!window.Chart) return;
+  Chart.defaults.font.family = chartDefaults.font.family;
+  Chart.defaults.font.size   = chartDefaults.font.size;
+  Chart.defaults.color       = chartDefaults.color;
+
+  Chart.defaults.plugins.legend.labels.color  = '#c1c7d0';
+  Chart.defaults.plugins.legend.labels.boxWidth = 12;
+  Chart.defaults.plugins.legend.labels.padding  = 16;
+
+  Chart.defaults.plugins.tooltip.backgroundColor = '#1d2230';
+  Chart.defaults.plugins.tooltip.borderColor      = 'rgba(255,255,255,0.1)';
+  Chart.defaults.plugins.tooltip.borderWidth      = 1;
+  Chart.defaults.plugins.tooltip.titleColor       = '#f5f7fa';
+  Chart.defaults.plugins.tooltip.bodyColor        = '#c1c7d0';
+  Chart.defaults.plugins.tooltip.padding          = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius     = 8;
+  Chart.defaults.plugins.tooltip.displayColors    = true;
+  Chart.defaults.plugins.tooltip.boxPadding       = 4;
+
+  Chart.defaults.scale.grid.color          = 'rgba(255,255,255,0.04)';
+  Chart.defaults.scale.grid.drawBorder     = false;
+  Chart.defaults.scale.ticks.color         = '#5d6677';
+  Chart.defaults.scale.border             = { display: false };
+}
+
+// ─── RENDER CHART ─────────────────────────────────────────────────
+function destroyChart(chartId) {
+  if (App.charts[chartId]) {
+    try { App.charts[chartId].destroy(); } catch(e) {}
+    delete App.charts[chartId];
+  }
+}
+
+function renderChart(canvasId, chartDef, ds) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  destroyChart(chartDef.id);
+
+  var rows    = applyFilters(ds.rows, ds.schema);
+  var schema  = ds.schema;
+  var xField  = schema[chartDef.xField];
+  var yField  = chartDef.yField !== null && chartDef.yField !== undefined ? schema[chartDef.yField] : null;
+  var agg     = chartDef.agg || 'sum';
+
+  var config;
+
+  try {
+    switch (chartDef.type) {
+
+      case 'line': {
+        var tsData = aggTimeSeries(rows, schema, chartDef.xField, chartDef.yField, agg);
+        if (!tsData.length) { showChartEmpty(canvas, 'No parseable dates in this column'); return; }
+        config = {
+          type: 'line',
+          data: {
+            datasets: [{
+              label: yField ? yField.label : 'Count',
+              data: tsData,
+              borderColor: CHART_COLORS_BORDER[0],
+              backgroundColor: 'rgba(0,212,255,0.08)',
+              borderWidth: 2,
+              pointRadius: tsData.length > 60 ? 0 : 3,
+              pointHoverRadius: 5,
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                type: 'time',
+                time: { tooltipFormat: 'MMM d, yyyy' },
+                grid: { display: false },
+                ticks: { maxTicksLimit: 8, maxRotation: 0 }
+              },
+              y: {
+                ticks: {
+                  callback: function(v){ return fmtNum(v); },
+                  maxTicksLimit: 6
+                }
+              }
+            }
+          }
+        };
+        break;
+      }
+
+      case 'bar': {
+        var aggData = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg);
+        var top     = aggData.slice(0, TOP_N_CATS);
+        var hasOther = aggData.length > TOP_N_CATS;
+        if (hasOther) {
+          var otherSum = aggData.slice(TOP_N_CATS).reduce(function(s,r){return s+r.value;},0);
+          top.push({ label: 'Other', value: otherSum });
+        }
+        if (!top.length) { showChartEmpty(canvas, 'No data to display'); return; }
+        config = {
+          type: 'bar',
+          data: {
+            labels: top.map(function(r){ return r.label; }),
+            datasets: [{
+              label: yField ? capitalize(agg) + ' of ' + yField.label : 'Count',
+              data: top.map(function(r){ return r.value; }),
+              backgroundColor: top.map(function(_, i){ return CHART_COLORS[i % CHART_COLORS.length]; }),
+              borderRadius: 5,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { maxRotation: 35 } },
+              y: { ticks: { callback: function(v){ return fmtNum(v); }, maxTicksLimit: 5 } }
+            }
+          }
+        };
+        break;
+      }
+
+      case 'hbar': {
+        var aggData2 = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg);
+        var topH     = aggData2.slice(0, TOP_N_CATS).reverse(); // reversed for horizontal
+        if (!topH.length) { showChartEmpty(canvas, 'No data to display'); return; }
+        config = {
+          type: 'bar',
+          data: {
+            labels: topH.map(function(r){ return r.label; }),
+            datasets: [{
+              label: 'Count',
+              data: topH.map(function(r){ return r.value; }),
+              backgroundColor: 'rgba(0,212,255,0.75)',
+              borderRadius: 4,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { callback: function(v){ return fmtNum(v); }, maxTicksLimit: 5 } },
+              y: { grid: { display: false } }
+            }
+          }
+        };
+        break;
+      }
+
+      case 'histogram': {
+        var histData = buildHistogram(rows, chartDef.xField, 20);
+        if (!histData.data.length) { showChartEmpty(canvas, 'No numeric values found'); return; }
+        config = {
+          type: 'bar',
+          data: {
+            labels: histData.labels,
+            datasets: [{
+              label: 'Frequency',
+              data: histData.data,
+              backgroundColor: 'rgba(167,139,250,0.75)',
+              borderRadius: 3,
+              borderSkipped: false,
+              categoryPercentage: 0.98,
+              barPercentage: 0.98
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { maxTicksLimit: 8, maxRotation: 35 } },
+              y: { ticks: { callback: function(v){ return fmtNum(v,0); }, maxTicksLimit: 5 } }
+            }
+          }
+        };
+        break;
+      }
+
+      case 'scatter': {
+        var scatterPts = [];
+        var xF = schema[chartDef.xField], yF = schema[chartDef.yField];
+        rows.forEach(function(row) {
+          var xv = safeNumber(String(row[chartDef.xField] !== null ? row[chartDef.xField] : ''));
+          var yv = safeNumber(String(row[chartDef.yField] !== null ? row[chartDef.yField] : ''));
+          if (xv !== null && yv !== null) scatterPts.push({ x: xv, y: yv });
+        });
+        // Downsample to 2000 points for performance
+        if (scatterPts.length > 2000) {
+          var step2 = Math.floor(scatterPts.length / 2000);
+          scatterPts = scatterPts.filter(function(_, i){ return i % step2 === 0; });
+        }
+        if (!scatterPts.length) { showChartEmpty(canvas, 'No valid numeric pairs found'); return; }
+        // Compute r² (Pearson)
+        var pearson = computePearson(scatterPts);
+        canvas._pearson = pearson;
+        config = {
+          type: 'scatter',
+          data: {
+            datasets: [{
+              label: xField.label + ' vs ' + yField.label,
+              data: scatterPts,
+              backgroundColor: 'rgba(52,211,153,0.55)',
+              pointRadius: scatterPts.length > 500 ? 2 : 4,
+              pointHoverRadius: 6
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    return xField.label + ': ' + fmtNum(ctx.raw.x) + '  ' + yField.label + ': ' + fmtNum(ctx.raw.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: xField ? xField.label : '', color: '#5d6677' },
+                ticks: { callback: function(v){ return fmtNum(v); }, maxTicksLimit: 6 }
+              },
+              y: {
+                title: { display: true, text: yField ? yField.label : '', color: '#5d6677' },
+                ticks: { callback: function(v){ return fmtNum(v); }, maxTicksLimit: 6 }
+              }
+            }
+          }
+        };
+        break;
+      }
+
+      case 'pie':
+      case 'doughnut': {
+        var pieData = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg).slice(0, 8);
+        if (!pieData.length) { showChartEmpty(canvas, 'No data to display'); return; }
+        config = {
+          type: chartDef.type,
+          data: {
+            labels: pieData.map(function(r){ return r.label; }),
+            datasets: [{
+              data: pieData.map(function(r){ return r.value; }),
+              backgroundColor: CHART_COLORS.slice(0, pieData.length),
+              borderColor: '#161a22',
+              borderWidth: 2,
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            cutout: chartDef.type === 'doughnut' ? '60%' : 0,
+            plugins: {
+              legend: { position: 'right', labels: { padding: 12 } }
+            }
+          }
+        };
+        break;
+      }
+
+      default:
+        showChartEmpty(canvas, 'Unknown chart type: ' + chartDef.type);
+        return;
+    }
+
+    App.charts[chartDef.id] = new Chart(canvas, config);
+
+  } catch(err) {
+    console.error('Chart render error:', err);
+    showChartEmpty(canvas, 'Failed to render chart');
+  }
+}
+
+function showChartEmpty(canvas, msg) {
+  var wrap = canvas.parentElement;
+  if (!wrap) return;
+  canvas.style.display = 'none';
+  var el = wrap.querySelector('.chart-empty');
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'chart-empty';
+    wrap.appendChild(el);
+  }
+  el.textContent = msg || 'No data';
+}
+
+function computePearson(pts) {
+  var n  = pts.length;
+  if (n < 2) return 0;
+  var sx = 0, sy = 0, sx2 = 0, sy2 = 0, sxy = 0;
+  pts.forEach(function(p) { sx += p.x; sy += p.y; sx2 += p.x * p.x; sy2 += p.y * p.y; sxy += p.x * p.y; });
+  var num = n * sxy - sx * sy;
+  var den = Math.sqrt((n * sx2 - sx * sx) * (n * sy2 - sy * sy));
+  return den === 0 ? 0 : Math.round((num / den) * 100) / 100;
+}
+
+// ─── COLUMN STATS (for preview drawer) ───────────────────────────
+function columnStats(rows, colIdx, field) {
+  var values = rows.map(function(r){ return r[colIdx]; });
+  var nonNull = values.filter(function(v){ return v !== null && v !== undefined && String(v).trim() !== ''; });
+  var nullCt  = values.length - nonNull.length;
+  var stats   = {
+    total: values.length, nonNull: nonNull.length,
+    nullCount: nullCt, nullPct: Math.round(nullCt / values.length * 100)
+  };
+
+  if (isQuantitative(field.type)) {
+    var nums = nonNull.map(function(v){ return safeNumber(String(v)); }).filter(function(v){ return v !== null; });
+    if (nums.length) {
+      nums.sort(function(a,b){return a-b;});
+      var sum = nums.reduce(function(a,b){return a+b;},0);
+      stats.min  = nums[0];
+      stats.max  = nums[nums.length - 1];
+      stats.mean = sum / nums.length;
+      stats.median = nums[Math.floor(nums.length / 2)];
+      var variance = nums.reduce(function(acc,v){ return acc + Math.pow(v - stats.mean, 2); }, 0) / nums.length;
+      stats.stddev = Math.sqrt(variance);
+      stats.sum    = sum;
+    }
+  } else {
+    var freq = {};
+    nonNull.forEach(function(v) {
+      var k = String(v).trim();
+      freq[k] = (freq[k] || 0) + 1;
+    });
+    var sorted = Object.keys(freq).sort(function(a,b){ return freq[b] - freq[a]; });
+    stats.unique     = sorted.length;
+    stats.topValues  = sorted.slice(0, 10).map(function(k){ return { value: k, count: freq[k] }; });
+    stats.mode       = sorted[0] || '—';
+  }
+
+  return stats;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function escHTML(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+var TYPE_META = {
+  integer:     { label: 'Integer',     color: '#2dd4bf', icon: '123' },
+  decimal:     { label: 'Decimal',     color: '#2dd4bf', icon: '#.#' },
+  date:        { label: 'Date',        color: '#a78bfa', icon: '📅' },
+  datetime:    { label: 'DateTime',    color: '#a78bfa', icon: '🕐' },
+  boolean:     { label: 'Boolean',     color: '#fbbf24', icon: 'T/F' },
+  categorical: { label: 'Category',    color: '#60a5fa', icon: 'Aβ' },
+  text:        { label: 'Text',        color: '#94a3b8', icon: 'Aa' },
+  identifier:  { label: 'ID / Key',    color: '#f472b6', icon: '#id' },
+  empty:       { label: 'Empty',       color: '#5d6677', icon: '—' }
+};
+
+// ─── TOAST ────────────────────────────────────────────────────────
+var toastTimer;
+function toast(msg, type, duration) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  clearTimeout(toastTimer);
+  el.className = 'toast ' + (type || '');
+  el.innerHTML = (type === 'success' ? '✓ ' : type === 'error' ? '✗ ' : 'ℹ ') + escHTML(msg);
+  el.classList.add('show');
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, duration || 2800);
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────────────
+function openModal(html) {
+  var el = document.getElementById('modal');
+  var content = document.getElementById('modalContent');
+  if (!el || !content) return;
+  content.innerHTML = html;
+  el.classList.add('show');
+}
+function closeModal() {
+  var el = document.getElementById('modal');
+  if (el) el.classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  var el = document.getElementById('modal');
+  if (el && e.target === el) closeModal();
+});
+
+// ─── SAMPLE DATASETS ──────────────────────────────────────────────
+var SAMPLES = [
+  {
+    icon: '📊',
+    name: 'Monthly Sales',
+    desc: '12 months · Revenue, units, region',
+    generate: function() {
+      var months = ['2024-01-01','2024-02-01','2024-03-01','2024-04-01','2024-05-01','2024-06-01',
+                    '2024-07-01','2024-08-01','2024-09-01','2024-10-01','2024-11-01','2024-12-01'];
+      var regions = ['North','South','East','West'];
+      var rows = [], id = 1;
+      months.forEach(function(m) {
+        regions.forEach(function(r) {
+          var base = Math.random() * 50000 + 10000;
+          rows.push([id++, m, r, Math.round(base), Math.round(Math.random()*200+50), parseFloat((Math.random()*0.3+0.05).toFixed(3))]);
+        });
+      });
+      return { headers: ['id','date','region','revenue','units','conversion_rate'], rows: rows };
+    }
+  },
+  {
+    icon: '⭐',
+    name: 'NPS Survey',
+    desc: '500 responses · Score, segment, comment',
+    generate: function() {
+      var segs = ['Enterprise','SMB','Startup','Individual'];
+      var sentiments = ['Great product!','Could be better','Love it','Works as expected','Needs improvement','Amazing support','Too expensive','Easy to use','Missing features','Highly recommend'];
+      var rows = [];
+      for (var i = 1; i <= 500; i++) {
+        var score = Math.floor(Math.random() * 11);
+        var seg   = segs[Math.floor(Math.random() * segs.length)];
+        rows.push([i, score, seg, sentiments[Math.floor(Math.random()*sentiments.length)], '2024-' + String(Math.floor(Math.random()*12+1)).padStart(2,'0') + '-' + String(Math.floor(Math.random()*28+1)).padStart(2,'0')]);
+      }
+      return { headers: ['id','nps_score','segment','comment','date'], rows: rows };
+    }
+  },
+  {
+    icon: '🌐',
+    name: 'Web Traffic',
+    desc: '90 days · Sessions, bounce, conversions',
+    generate: function() {
+      var channels = ['Organic','Paid','Direct','Referral','Social'];
+      var rows = [], id = 1;
+      var base = new Date('2024-01-01');
+      for (var day = 0; day < 90; day++) {
+        var d = new Date(base); d.setDate(d.getDate() + day);
+        var ds = d.toISOString().slice(0,10);
+        channels.forEach(function(ch) {
+          var sessions = Math.floor(Math.random() * 2000 + 100);
+          var bounce   = parseFloat((Math.random() * 0.4 + 0.3).toFixed(3));
+          var cvr      = parseFloat((Math.random() * 0.05 + 0.01).toFixed(4));
+          rows.push([id++, ds, ch, sessions, Math.round(sessions * bounce), Math.round(sessions * cvr), parseFloat((Math.random() * 3 + 1).toFixed(1))]);
+        });
+      }
+      return { headers: ['id','date','channel','sessions','bounces','conversions','avg_pages'], rows: rows };
+    }
+  },
+  {
+    icon: '👥',
+    name: 'HR Headcount',
+    desc: '200 employees · Dept, tenure, salary',
+    generate: function() {
+      var depts  = ['Engineering','Product','Design','Sales','Marketing','Customer Success','Finance','HR'];
+      var levels = ['Junior','Mid','Senior','Staff','Lead','Manager'];
+      var rows   = [];
+      for (var i = 1; i <= 200; i++) {
+        var dept    = depts[Math.floor(Math.random() * depts.length)];
+        var level   = levels[Math.floor(Math.random() * levels.length)];
+        var tenure  = parseFloat((Math.random() * 8 + 0.5).toFixed(1));
+        var salary  = Math.round((Math.random() * 80000 + 60000) * (1 + levels.indexOf(level) * 0.2));
+        var joined  = new Date(Date.now() - tenure * 365.25 * 86400000);
+        rows.push([i, dept, level, tenure, salary, joined.toISOString().slice(0,10), Math.random() > 0.8 ? 'Yes' : 'No']);
+      }
+      return { headers: ['id','department','level','tenure_years','salary','join_date','remote'], rows: rows };
+    }
+  }
+];
+
+// ─── INDEXEDDB PERSISTENCE ────────────────────────────────────────
+function saveDataset(ds) {
+  return dbPut(STORE_DS, {
+    id: ds.id, name: ds.name, schema: ds.schema,
+    rowCount: ds.rowCount, colCount: ds.colCount,
+    createdAt: ds.createdAt, sampleMode: ds.sampleMode,
+    fileSizeBytes: ds.fileSizeBytes,
+    rows: ds.rows
+  }).catch(function(e) {
+    console.warn('IndexedDB write failed, running in-memory only:', e);
+  });
+}
+
+function saveDashboard(datasetId, charts) {
+  return dbPut(STORE_DASH, { id: datasetId, charts: charts })
+    .catch(function(e) { console.warn('Dashboard save failed:', e); });
+}
+
+// ─── RENDERING LAYER ──────────────────────────────────────────────
+function setStep(step) {
+  App.step = step;
+  render();
+}
+
+function render() {
+  var main = document.getElementById('mainInner');
+  if (!main) return;
+
+  // Destroy all existing Chart.js instances before re-rendering
+  Object.keys(App.charts).forEach(destroyChart);
+
+  switch (App.step) {
+    case 'upload':    main.innerHTML = renderUpload();    bindUpload();    break;
+    case 'schema':    main.innerHTML = renderSchema();    bindSchema();    break;
+    case 'dashboard': main.innerHTML = renderDashboard(); bindDashboard(); break;
+  }
+
+  renderSidebar();
+  updateHeaderButtons();
+}
+
+function updateHeaderButtons() {
+  var hasDash = App.step === 'dashboard';
+  var expPng  = document.getElementById('exportPngBtn');
+  var expCsv  = document.getElementById('exportCsvBtn');
+  if (expPng) expPng.disabled = !hasDash;
+  if (expCsv) expCsv.disabled = !App.activeDatasetId;
+}
+
+// ─── UPLOAD RENDER ────────────────────────────────────────────────
+function renderUpload() {
+  var samplesHtml = SAMPLES.map(function(s, i) {
+    return '<div class="sample-card" data-sample="' + i + '" role="button" tabindex="0" aria-label="Load ' + escHTML(s.name) + ' sample">' +
+      '<div class="sample-icon">' + s.icon + '</div>' +
+      '<div class="sample-name">' + escHTML(s.name) + '</div>' +
+      '<div class="sample-desc">' + escHTML(s.desc) + '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="upload-page" id="uploadPage">' +
+    '<div class="upload-hero">' +
+      '<h1>See what your data<br/>says — in seconds.</h1>' +
+      '<p>Drop a CSV file or choose a sample dataset below. Glimpse auto-detects your columns and builds charts instantly. No account. No uploads.</p>' +
+    '</div>' +
+    '<div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload CSV file by clicking or dropping">' +
+      '<div class="upload-icon">' +
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
+      '</div>' +
+      '<div class="upload-title">Drop your CSV here</div>' +
+      '<div class="upload-sub">or click to browse — CSV, TSV, or TXT</div>' +
+      '<button class="btn btn-primary" style="margin-bottom:var(--space-5)" onclick="event.stopPropagation();triggerFileInput()">Browse files</button>' +
+      '<div class="upload-info">' +
+        '<span class="upload-info-item">Up to 50 MB</span>' +
+        '<span class="upload-info-item">Up to 100K rows</span>' +
+        '<span class="upload-info-item">CSV · TSV · TXT</span>' +
+        '<span class="upload-info-item">100% private</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="samples">' +
+      '<div class="samples-label">Or try a sample dataset</div>' +
+      '<div class="samples-grid">' + samplesHtml + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindUpload() {
+  var zone  = document.getElementById('uploadZone');
+  var input = document.getElementById('fileInput');
+  if (!zone) return;
+
+  // Click to open file picker
+  zone.addEventListener('click', function(e) {
+    if (e.target.tagName !== 'BUTTON') triggerFileInput();
+  });
+  zone.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerFileInput(); }
+  });
+
+  // Drag events on the zone
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('drag-active'); });
+  zone.addEventListener('dragleave', function(e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-active'); });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('drag-active');
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+    else toast('No file detected', 'error');
+  });
+
+  // Global drag-over for body
+  document.body.addEventListener('dragover', function(e) { e.preventDefault(); });
+  document.body.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && App.step === 'upload') handleFile(file);
+  });
+
+  // Sample cards
+  document.querySelectorAll('.sample-card').forEach(function(card) {
+    card.addEventListener('click', function() { loadSample(parseInt(card.dataset.sample, 10)); });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadSample(parseInt(card.dataset.sample, 10)); }
+    });
+  });
+}
+
+function triggerFileInput() {
+  var input = document.getElementById('fileInput');
+  if (input) { input.value = ''; input.click(); }
+}
+
+// ─── FILE HANDLING ────────────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+
+  // Validate extension
+  var ext = (file.name || '').split('.').pop().toLowerCase();
+  if (!['csv','tsv','txt'].includes(ext)) {
+    toast('Unsupported file type. Please use CSV, TSV, or TXT.', 'error', 4000);
+    return;
+  }
+
+  // Size check
+  var sizeMB = file.size / 1048576;
+  if (sizeMB > MAX_FILE_MB) {
+    toast('File exceeds ' + MAX_FILE_MB + ' MB limit (' + fmtBytes(file.size) + '). Please use a smaller file.', 'error', 5000);
+    return;
+  }
+
+  if (sizeMB > WARN_FILE_MB) {
+    // Show warning + confirm
+    openModal(
+      '<button class="modal-close" onclick="closeModal()">✕</button>' +
+      '<h2>Large file detected</h2>' +
+      '<p>This file is ' + fmtBytes(file.size) + '. Glimpse will load up to 100,000 rows. The rest will be profiled for type detection but not stored.</p>' +
+      '<div class="modal-actions">' +
+        '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+        '<button class="btn btn-primary" onclick="closeModal();proceedWithFile()">Continue</button>' +
+      '</div>'
+    );
+    App.pendingFile = file;
+    return;
+  }
+
+  App.pendingFile = file;
+  proceedWithFile();
+}
+
+function proceedWithFile() {
+  var file = App.pendingFile;
+  if (!file) return;
+  parseFile(file);
+}
+
+function parseFile(file) {
+  showParseOverlay('Reading your file…', 'Detecting delimiter and encoding');
+
+  // Detect delimiter from extension + sniff
+  var ext  = (file.name || '').split('.').pop().toLowerCase();
+  var delim = ext === 'tsv' ? '\t' : undefined; // undefined = PapaParse auto-detect
+
+  // BOM-aware reading
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var text = e.target.result;
+    // Strip UTF-8 BOM if present
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    parseCSVText(text, file.name, file.size, delim);
+  };
+  reader.onerror = function() {
+    hideParseOverlay();
+    toast('Failed to read file. It may be corrupted or in an unsupported encoding.', 'error', 5000);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVText(text, filename, sizeBytes, delim) {
+  updateParseOverlay('Parsing rows…', 'This may take a moment for large files');
+
+  // Use setTimeout to let the UI update before blocking parse
+  setTimeout(function() {
+    var result;
+    try {
+      result = Papa.parse(text, {
+        header: false,
+        skipEmptyLines: 'greedy',
+        delimiter: delim || '',
+        dynamicTyping: false, // keep as strings so we control parsing
+        comments: '#',
+        transformHeader: undefined
+      });
+    } catch(e) {
+      hideParseOverlay();
+      toast('Parse error: ' + e.message, 'error');
+      return;
+    }
+
+    if (!result || !result.data || result.data.length < 1) {
+      hideParseOverlay();
+      toast('File appears to be empty or has no parseable rows.', 'error');
+      return;
+    }
+
+    // First row = headers
+    var rawHeaders = result.data[0].map(function(h, i) {
+      return String(h || '').trim() || ('Column ' + (i + 1));
+    });
+
+    // Deduplicate headers
+    var seen = {};
+    var headers = rawHeaders.map(function(h) {
+      if (seen[h] !== undefined) { seen[h]++; return h + '_' + seen[h]; }
+      seen[h] = 0; return h;
+    });
+
+    var rawRows = result.data.slice(1);
+    var totalRows = rawRows.length;
+    var sampleMode = totalRows > MAX_ROWS_DEFAULT;
+
+    // Trim to max rows
+    var rows = rawRows.slice(0, MAX_ROWS_DEFAULT).map(function(row) {
+      // Ensure every row has all columns, pad with null
+      return headers.map(function(_, i) {
+        var v = row[i];
+        if (v === undefined || v === null || v === '') return null;
+        return String(v).trim();
+      });
+    });
+
+    // Validation: warn on ragged rows
+    var raggedCount = rawRows.slice(0, 100).filter(function(r){ return r.length !== headers.length; }).length;
+    if (raggedCount > 5) {
+      console.warn('Ragged CSV: ' + raggedCount + '/100 sample rows have wrong column count');
+    }
+
+    updateParseOverlay('Detecting field types…', 'Sampling ' + Math.min(rows.length, SAMPLE_ROWS) + ' rows per column');
+
+    // Profile asynchronously to not block UI
+    setTimeout(function() {
+      var schema = profileDataset(rows, headers);
+      var name   = (filename || 'Dataset').replace(/\.(csv|tsv|txt)$/i, '');
+      var ds     = {
+        id:            genId(),
+        name:          name,
+        rows:          rows,
+        schema:        schema,
+        rowCount:      rows.length,
+        colCount:      headers.length,
+        totalRows:     totalRows,
+        sampleMode:    sampleMode,
+        createdAt:     Date.now(),
+        fileSizeBytes: sizeBytes || 0
+      };
+
+      App.datasets.push(ds);
+      App.activeDatasetId = ds.id;
+      App.dashboards[ds.id] = suggestCharts(schema);
+      App.filters = [];
+
+      saveDataset(ds).then(function() {
+        saveDashboard(ds.id, App.dashboards[ds.id]);
+      });
+
+      hideParseOverlay();
+      setStep('schema');
+
+      if (sampleMode) {
+        toast('Large file: showing first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + totalRows.toLocaleString() + ' rows', 'warn', 5000);
+      }
+    }, 60);
+  }, 20);
+}
+
+function loadSample(index) {
+  var sample = SAMPLES[index];
+  if (!sample) return;
+  showParseOverlay('Loading sample…', sample.name);
+
+  setTimeout(function() {
+    var data   = sample.generate();
+    var schema = profileDataset(data.rows, data.headers);
+    var ds     = {
+      id:            genId(),
+      name:          sample.name,
+      rows:          data.rows,
+      schema:        schema,
+      rowCount:      data.rows.length,
+      colCount:      data.headers.length,
+      totalRows:     data.rows.length,
+      sampleMode:    false,
+      createdAt:     Date.now(),
+      fileSizeBytes: 0
+    };
+
+    App.datasets.push(ds);
+    App.activeDatasetId = ds.id;
+    App.dashboards[ds.id] = suggestCharts(schema);
+    App.filters = [];
+
+    saveDataset(ds).then(function() {
+      saveDashboard(ds.id, App.dashboards[ds.id]);
+    });
+
+    hideParseOverlay();
+    setStep('schema');
+  }, 120);
+}
+
+// ─── PARSE OVERLAY ────────────────────────────────────────────────
+function showParseOverlay(title, sub) {
+  var el = document.getElementById('parseOverlay');
+  if (el) el.classList.add('show');
+  updateParseOverlay(title, sub);
+}
+function updateParseOverlay(title, sub) {
+  var t = document.getElementById('parseTitle');
+  var s = document.getElementById('parseSub');
+  if (t) t.textContent = title || '';
+  if (s) s.textContent = sub   || '';
+}
+function hideParseOverlay() {
+  var el = document.getElementById('parseOverlay');
+  if (el) el.classList.remove('show');
+}
+
+// ─── SCHEMA RENDER ────────────────────────────────────────────────
+function renderSchema() {
+  var ds = activeDataset();
+  if (!ds) return '<p style="color:var(--text-3);padding:var(--space-8)">No dataset loaded.</p>';
+
+  var quantCount = ds.schema.filter(function(f){ return isQuantitative(f.type); }).length;
+  var qualCount  = ds.schema.filter(function(f){ return !isQuantitative(f.type) && f.type !== 'empty'; }).length;
+  var nullFields = ds.schema.filter(function(f){ return f.nullCount > 0; }).length;
+
+  var summaryHtml =
+    '<div class="schema-summary">' +
+      summCard('Rows', ds.rowCount.toLocaleString(), ds.sampleMode ? 'Sample mode (file had ' + ds.totalRows.toLocaleString() + ')' : 'All rows loaded') +
+      summCard('Columns', ds.colCount, '') +
+      summCard('Quantitative', quantCount, 'Numeric & date fields') +
+      summCard('Qualitative', qualCount, 'Text & category fields') +
+      summCard('With nulls', nullFields, nullFields ? 'columns have missing values' : 'No missing data') +
+    '</div>';
+
+  var rowsHtml = ds.schema.map(function(field, i) {
+    var tm       = TYPE_META[field.type] || TYPE_META.text;
+    var confPct  = field.confidence;
+    var confCls  = confPct >= 85 ? 'conf-high' : confPct >= 60 ? 'conf-mid' : 'conf-low';
+    var typeOpts = Object.keys(TYPE_META).map(function(k) {
+      return '<option value="' + k + '"' + (k === field.type ? ' selected' : '') + '>' + TYPE_META[k].label + '</option>';
+    }).join('');
+
+    return '<div class="schema-row' + (field.included ? '' : ' excluded') + '" id="srow-' + i + '">' +
+      // Toggle
+      '<div class="schema-toggle' + (field.included ? ' on' : '') + '" ' +
+        'onclick="toggleField(' + i + ')" title="Include/exclude this column" ' +
+        'role="switch" aria-checked="' + (field.included ? 'true' : 'false') + '" tabindex="0" ' +
+        'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleField(' + i + ')}">' +
+      '</div>' +
+      // Name
+      '<input class="schema-name-input" type="text" value="' + escHTML(field.label) + '" ' +
+        'onchange="renameField(' + i + ',this.value)" ' +
+        'placeholder="Column name" aria-label="Column display name"/>' +
+      // Detected type
+      '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span style="font-size:10px;font-weight:600;color:' + tm.color + ';font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em">' + escHTML(tm.label) + '</span>' +
+        '<span style="font-size:10px;color:var(--text-4);font-family:var(--font-mono)">' + escHTML(field.qClass) + '</span>' +
+      '</div>' +
+      // Type override
+      '<select class="schema-type-select" onchange="overrideType(' + i + ',this.value)" aria-label="Set column type">' +
+        typeOpts +
+      '</select>' +
+      // Confidence
+      '<div class="schema-confidence">' +
+        '<div class="confidence-bar"><div class="confidence-bar-fill ' + confCls + '" style="width:' + confPct + '%"></div></div>' +
+        '<span>' + confPct + '%</span>' +
+      '</div>' +
+      // Preview
+      '<button class="schema-preview-btn" onclick="openPreviewDrawer(' + i + ')" title="Inspect column" aria-label="Inspect ' + escHTML(field.label) + '">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+      '</button>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="schema-page">' +
+    '<div class="stepper">' + stepperHTML(1) + '</div>' +
+    '<div class="page-header">' +
+      '<div>' +
+        '<div class="page-title">' + escHTML(ds.name) + '</div>' +
+        '<div class="page-sub">Review detected field types. Toggle off columns you don\'t need. Click 🔍 to inspect a column.</div>' +
+      '</div>' +
+      '<div class="page-actions">' +
+        '<button class="btn btn-ghost" onclick="setStep(\'upload\')">← Back</button>' +
+        '<button class="btn btn-primary" onclick="goToDashboard()">Build Dashboard →</button>' +
+      '</div>' +
+    '</div>' +
+    summaryHtml +
+    '<div class="schema-table">' +
+      '<div class="schema-table-head">' +
+        '<span></span><span>Column</span><span>Detected type</span>' +
+        '<span>Override</span><span>Confidence</span><span></span>' +
+      '</div>' +
+      rowsHtml +
+    '</div>' +
+  '</div>';
+}
+
+function summCard(label, value, sub) {
+  return '<div class="summary-card">' +
+    '<div class="summary-card-label">' + escHTML(label) + '</div>' +
+    '<div class="summary-card-value">' + escHTML(String(value)) + '</div>' +
+    (sub ? '<div class="summary-card-sub">' + escHTML(sub) + '</div>' : '') +
+  '</div>';
+}
+
+function stepperHTML(active) {
+  var steps = [
+    { n: 1, label: 'Upload' },
+    { n: 2, label: 'Configure' },
+    { n: 3, label: 'Dashboard' }
+  ];
+  return steps.map(function(s, i) {
+    var cls = s.n === active ? 'active' : s.n < active ? 'done' : '';
+    return (i > 0 ? '<span class="step-arrow" aria-hidden="true">›</span>' : '') +
+      '<div class="step ' + cls + '">' +
+        '<div class="step-num">' + (cls === 'done' ? '✓' : s.n) + '</div>' +
+        '<span>' + s.label + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function bindSchema() {
+  // nothing extra — all wired via inline onclick
+}
+
+function toggleField(i) {
+  var ds = activeDataset();
+  if (!ds) return;
+  ds.schema[i].included = !ds.schema[i].included;
+  ds.schema[i].qClass   = isQuantitative(ds.schema[i].type) ? 'quantitative' : 'qualitative';
+  var row = document.getElementById('srow-' + i);
+  if (row) {
+    row.classList.toggle('excluded', !ds.schema[i].included);
+    var tog = row.querySelector('.schema-toggle');
+    if (tog) { tog.classList.toggle('on', ds.schema[i].included); tog.setAttribute('aria-checked', String(ds.schema[i].included)); }
+  }
+  saveDataset(ds);
+}
+
+function renameField(i, newName) {
+  var ds = activeDataset();
+  if (!ds) return;
+  ds.schema[i].label = (newName || '').trim() || ds.schema[i].rawName;
+  saveDataset(ds);
+}
+
+function overrideType(i, newType) {
+  var ds = activeDataset();
+  if (!ds) return;
+  ds.schema[i].type   = newType;
+  ds.schema[i].qClass = isQuantitative(newType) ? 'quantitative' : 'qualitative';
+  // Update confidence display
+  var row = document.getElementById('srow-' + i);
+  if (row) {
+    var confBar = row.querySelector('.confidence-bar-fill');
+    if (confBar) {
+      confBar.className = 'confidence-bar-fill conf-mid';
+      confBar.style.width = '75%';
+    }
+    var typeCell = row.querySelector('[style*="text-transform:uppercase"]');
+    if (typeCell) {
+      var tm = TYPE_META[newType] || TYPE_META.text;
+      typeCell.textContent = tm.label;
+      typeCell.style.color = tm.color;
+    }
+  }
+  saveDataset(ds);
+}
+
+function goToDashboard() {
+  var ds = activeDataset();
+  if (!ds) return;
+  // Refresh chart suggestions based on current (possibly modified) schema
+  if (!App.dashboards[ds.id] || !App.dashboards[ds.id].length) {
+    App.dashboards[ds.id] = suggestCharts(ds.schema);
+  }
+  saveDashboard(ds.id, App.dashboards[ds.id]);
+  setStep('dashboard');
+}
+
+// ─── COLUMN PREVIEW DRAWER ────────────────────────────────────────
+function openPreviewDrawer(colIdx) {
+  var ds    = activeDataset();
+  var field = ds && ds.schema[colIdx];
+  if (!ds || !field) return;
+
+  var stats  = columnStats(ds.rows, colIdx, field);
+  var tm     = TYPE_META[field.type] || TYPE_META.text;
+  var drawer = document.getElementById('previewDrawer');
+  if (!drawer) return;
+
+  var statsHtml;
+  if (isQuantitative(field.type) && stats.mean !== undefined) {
+    statsHtml =
+      '<div class="preview-stat-grid">' +
+        previewStat('Min',    fmtNum(stats.min)) +
+        previewStat('Max',    fmtNum(stats.max)) +
+        previewStat('Mean',   fmtNum(stats.mean)) +
+        previewStat('Median', fmtNum(stats.median)) +
+        previewStat('Std dev',fmtNum(stats.stddev)) +
+        previewStat('Sum',    fmtNum(stats.sum)) +
+      '</div>';
+  } else {
+    var topHtml = (stats.topValues || []).map(function(tv) {
+      return '<li><span>' + escHTML(tv.value) + '</span><span>' + tv.count.toLocaleString() + '</span></li>';
+    }).join('');
+    statsHtml =
+      '<div class="preview-stat-grid">' +
+        previewStat('Unique', (stats.unique || 0).toLocaleString()) +
+        previewStat('Mode',   escHTML(String(stats.mode || '—'))) +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:8px">Top values</div>' +
+      '<ul class="preview-list">' + topHtml + '</ul>';
+  }
+
+  drawer.innerHTML =
+    '<div class="preview-head">' +
+      '<h3>' + escHTML(field.label) + '</h3>' +
+      '<button class="btn btn-icon" onclick="closePreviewDrawer()" aria-label="Close">✕</button>' +
+    '</div>' +
+    '<div class="preview-body">' +
+      '<div style="display:flex;gap:8px;margin-bottom:var(--space-5);flex-wrap:wrap">' +
+        '<span style="font-size:11px;font-weight:600;color:' + tm.color + ';background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:3px 10px;border-radius:20px;font-family:var(--font-mono);text-transform:uppercase">' + escHTML(tm.label) + '</span>' +
+        '<span style="font-size:11px;color:var(--text-3);padding:3px 10px;border-radius:20px;background:var(--surface-2)">' + escHTML(field.qClass) + '</span>' +
+      '</div>' +
+      '<div class="preview-stat-grid">' +
+        previewStat('Total rows', stats.total.toLocaleString()) +
+        previewStat('Non-null',   stats.nonNull.toLocaleString()) +
+        previewStat('Null count', stats.nullCount.toLocaleString()) +
+        previewStat('Null %',     stats.nullPct + '%') +
+      '</div>' +
+      '<hr style="border:none;border-top:1px solid var(--border-1);margin:var(--space-4) 0"/>' +
+      statsHtml +
+      '<div style="margin-top:var(--space-4);font-size:11px;color:var(--text-3);font-family:var(--font-mono);line-height:1.6">' +
+        '<strong style="color:var(--text-2)">Detected:</strong> ' + escHTML(field.reason || '') +
+        '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">' +
+          (field.samples || []).map(function(s){ return '<span style="padding:2px 8px;background:var(--surface-3);border-radius:4px;font-size:10.5px">' + escHTML(s) + '</span>'; }).join('') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  drawer.classList.add('open');
+  App.drawerField = colIdx;
+}
+
+function previewStat(label, value) {
+  return '<div class="preview-stat"><div class="preview-stat-label">' + label + '</div><div class="preview-stat-value">' + value + '</div></div>';
+}
+
+function closePreviewDrawer() {
+  var drawer = document.getElementById('previewDrawer');
+  if (drawer) drawer.classList.remove('open');
+  App.drawerField = null;
+}
+
+// ─── DASHBOARD RENDER ─────────────────────────────────────────────
+function renderDashboard() {
+  var ds      = activeDataset();
+  if (!ds) return '<p style="color:var(--text-3);padding:var(--space-8)">No dataset loaded.</p>';
+  var charts  = activeDashboard();
+  var schema  = ds.schema;
+
+  var filterBarHtml = renderFilterBar(schema);
+  var chartsHtml    = charts.map(function(ch) { return renderChartCard(ch, schema); }).join('');
+
+  var addCardHtml =
+    '<div class="add-chart-card" id="addChartCard" onclick="openAddChartModal()" role="button" tabindex="0" ' +
+        'aria-label="Add a new chart" onkeydown="if(event.key===\'Enter\')openAddChartModal()">' +
+      '<div class="add-chart-icon">' +
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      '</div>' +
+      '<span style="font-size:13px;font-weight:500">Add chart</span>' +
+    '</div>';
+
+  var statsBar = renderDashStats(ds, charts);
+
+  return '<div>' +
+    '<div class="stepper" style="margin-bottom:var(--space-5)">' + stepperHTML(3) + '</div>' +
+    '<div class="page-header">' +
+      '<div>' +
+        '<div class="page-title">' + escHTML(ds.name) + '</div>' +
+        '<div class="page-sub">' + ds.rowCount.toLocaleString() + ' rows · ' + ds.colCount + ' columns' +
+          (ds.sampleMode ? ' · <span style="color:var(--warn)">Sample mode</span>' : '') + '</div>' +
+      '</div>' +
+      '<div class="page-actions">' +
+        '<button class="btn btn-ghost" onclick="setStep(\'schema\')">← Configure</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="refreshAllCharts()" title="Re-render all charts">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+          'Refresh' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    statsBar +
+    filterBarHtml +
+    '<div class="dashboard" id="dashboard">' +
+      chartsHtml + addCardHtml +
+    '</div>' +
+  '</div>';
+}
+
+function renderDashStats(ds, charts) {
+  var schema = ds.schema;
+  var nums   = schema.filter(function(f){ return f.included && (f.type === 'integer' || f.type === 'decimal'); });
+  if (!nums.length) return '';
+
+  var rows = applyFilters(ds.rows, schema);
+  var statsHtml = nums.slice(0, 4).map(function(f) {
+    var vals = rows.map(function(r){ return safeNumber(String(r[f.index] !== null && r[f.index] !== undefined ? r[f.index] : '')); }).filter(function(v){ return v !== null; });
+    var sum  = vals.reduce(function(a,b){return a+b;},0);
+    var avg  = vals.length ? sum / vals.length : 0;
+    return '<div style="flex:1;min-width:140px;padding:var(--space-4) var(--space-5);background:var(--surface-1);border:1px solid var(--border-1);border-radius:var(--r-lg)">' +
+      '<div style="font-size:10.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:4px;font-family:var(--font-mono)">' + escHTML(f.label) + '</div>' +
+      '<div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;font-family:var(--font-mono);margin-bottom:2px">' + fmtNum(sum) + '</div>' +
+      '<div style="font-size:11px;color:var(--text-4)">avg ' + fmtNum(avg) + ' · ' + vals.length.toLocaleString() + ' values</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div style="display:flex;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-4)">' + statsHtml + '</div>';
+}
+
+function renderFilterBar(schema) {
+  var catFields = schema.filter(function(f){ return f.included && (f.type === 'categorical' || f.type === 'boolean' || f.type === 'integer'); });
+  var pillsHtml = App.filters.map(function(f, i) {
+    var field = schema[f.field];
+    return '<span class="filter-pill">' +
+      escHTML((field ? field.label : 'Field') + ' ' + f.op + ' ' + f.value) +
+      '<button class="filter-pill-x" onclick="removeFilter(' + i + ')" aria-label="Remove filter">×</button>' +
+    '</span>';
+  }).join('');
+
+  var addHtml = catFields.length ?
+    '<button class="filter-add-btn" onclick="openFilterModal()" aria-label="Add filter">' +
+      '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+      'Filter' +
+    '</button>' : '';
+
+  return '<div class="filter-bar">' +
+    '<span class="filter-bar-label">Filters</span>' +
+    pillsHtml +
+    addHtml +
+    (!App.filters.length ? '<span style="font-size:12px;color:var(--text-4)">No filters active — showing all ' + (activeDataset() ? activeDataset().rowCount.toLocaleString() : '') + ' rows</span>' : '') +
+  '</div>';
+}
+
+function renderChartCard(ch, schema) {
+  var xField = schema[ch.xField];
+  var yField = ch.yField !== null && ch.yField !== undefined ? schema[ch.yField] : null;
+  var spanClass = ch.span === 12 ? 'span-12' : ch.span === 4 ? 'span-4' : ch.span === 8 ? 'span-8' : '';
+  var chartTypeLabel = {line:'Line', bar:'Bar', hbar:'Horiz. Bar', histogram:'Histogram', scatter:'Scatter', pie:'Pie', doughnut:'Donut'}[ch.type] || ch.type;
+
+  return '<div class="chart-card ' + spanClass + '" id="card-' + ch.id + '">' +
+    '<div class="chart-card-head">' +
+      '<div class="chart-card-title-area">' +
+        '<div class="chart-card-title">' + escHTML(ch.title) + '</div>' +
+        '<div class="chart-card-sub">' + chartTypeLabel +
+          (xField ? ' · ' + escHTML(xField.label) : '') +
+          (yField ? ' · ' + escHTML(yField.label) : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="chart-card-actions">' +
+        '<button class="chart-action-btn" onclick="openEditChartModal(\'' + ch.id + '\')" title="Edit chart" aria-label="Edit chart">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        '</button>' +
+        '<button class="chart-action-btn" onclick="exportChartPng(\'' + ch.id + '\')" title="Export as PNG" aria-label="Export chart">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+        '</button>' +
+        '<button class="chart-action-btn danger" onclick="removeChart(\'' + ch.id + '\')" title="Remove chart" aria-label="Remove chart">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="chart-card-body">' +
+      '<div class="chart-canvas-wrap"><canvas id="canvas-' + ch.id + '" aria-label="' + escHTML(ch.title) + '"></canvas></div>' +
+    '</div>' +
+    '<div class="chart-card-foot">' +
+      '<svg class="chart-card-foot-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
+      escHTML(ch.insight || '') +
+    '</div>' +
+  '</div>';
+}
+
+function bindDashboard() {
+  // Render all charts after DOM is ready
+  setTimeout(renderAllCharts, 50);
+}
+
+function renderAllCharts() {
+  var ds = activeDataset();
+  if (!ds) return;
+  var charts = activeDashboard();
+  charts.forEach(function(ch) {
+    renderChart('canvas-' + ch.id, ch, ds);
+  });
+}
+
+function refreshAllCharts() {
+  renderAllCharts();
+  toast('Charts refreshed', 'success');
+}
+
+// ─── FILTER MODAL ─────────────────────────────────────────────────
+function openFilterModal() {
+  var ds = activeDataset();
+  if (!ds) return;
+  var included = ds.schema.filter(function(f){ return f.included; });
+  var fieldOpts = included.map(function(f) {
+    return '<option value="' + f.index + '">' + escHTML(f.label) + '</option>';
+  }).join('');
+
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Add filter</h2>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Column</label>' +
+      '<select class="modal-field-select" id="filterField">' + fieldOpts + '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Condition</label>' +
+      '<select class="modal-field-select" id="filterOp">' +
+        '<option value="eq">equals</option>' +
+        '<option value="neq">not equals</option>' +
+        '<option value="contains">contains</option>' +
+        '<option value="gt">greater than</option>' +
+        '<option value="lt">less than</option>' +
+      '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Value</label>' +
+      '<input class="modal-field-input" type="text" id="filterValue" placeholder="Enter value…"/>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" onclick="applyFilter()">Apply filter</button>' +
+    '</div>'
+  );
+}
+
+function applyFilter() {
+  var field = document.getElementById('filterField');
+  var op    = document.getElementById('filterOp');
+  var value = document.getElementById('filterValue');
+  if (!field || !op || !value || !value.value.trim()) {
+    toast('Enter a filter value', 'warn'); return;
+  }
+  App.filters.push({ field: parseInt(field.value, 10), op: op.value, value: value.value.trim() });
+  closeModal();
+  setStep('dashboard');
+}
+
+function removeFilter(i) {
+  App.filters.splice(i, 1);
+  setStep('dashboard');
+}
+
+// ─── ADD / EDIT CHART MODALS ──────────────────────────────────────
+function openAddChartModal() {
+  var ds = activeDataset();
+  if (!ds) return;
+  var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
+  var fieldOpts = '<option value="">— none —</option>' + included.map(function(f) {
+    return '<option value="' + f.index + '">' + escHTML(f.label) + ' (' + f.type + ')</option>';
+  }).join('');
+
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Add chart</h2>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Chart type</label>' +
+      '<select class="modal-field-select" id="newChartType">' +
+        '<option value="bar">Bar chart</option>' +
+        '<option value="hbar">Horizontal bar</option>' +
+        '<option value="line">Line chart (time series)</option>' +
+        '<option value="histogram">Histogram</option>' +
+        '<option value="scatter">Scatter plot</option>' +
+        '<option value="pie">Pie chart</option>' +
+        '<option value="doughnut">Donut chart</option>' +
+      '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">X axis / primary field</label>' +
+      '<select class="modal-field-select" id="newChartX">' + fieldOpts + '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Y axis / measure (optional)</label>' +
+      '<select class="modal-field-select" id="newChartY">' + fieldOpts + '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Aggregation</label>' +
+      '<select class="modal-field-select" id="newChartAgg">' +
+        '<option value="sum">Sum</option>' +
+        '<option value="avg">Average</option>' +
+        '<option value="count">Count</option>' +
+        '<option value="min">Min</option>' +
+        '<option value="max">Max</option>' +
+      '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Title</label>' +
+      '<input class="modal-field-input" type="text" id="newChartTitle" placeholder="Chart title…"/>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" onclick="addChart()">Add chart</button>' +
+    '</div>'
+  );
+}
+
+function addChart() {
+  var type  = document.getElementById('newChartType');
+  var xEl   = document.getElementById('newChartX');
+  var yEl   = document.getElementById('newChartY');
+  var agg   = document.getElementById('newChartAgg');
+  var title = document.getElementById('newChartTitle');
+  if (!type || !xEl) return;
+
+  var xVal = xEl.value !== '' ? parseInt(xEl.value, 10) : null;
+  var yVal = yEl && yEl.value !== '' ? parseInt(yEl.value, 10) : null;
+  if (xVal === null) { toast('Select an X axis field', 'warn'); return; }
+
+  var ds     = activeDataset();
+  var xField = ds && ds.schema[xVal];
+  var yField = ds && yVal !== null ? ds.schema[yVal] : null;
+  var autoTitle = (yField ? yField.label + ' by ' : '') + (xField ? xField.label : '');
+
+  var ch = {
+    id:     genId(),
+    type:   type.value,
+    title:  (title && title.value.trim()) || autoTitle,
+    xField: xVal,
+    yField: yVal,
+    agg:    agg ? agg.value : 'sum',
+    span:   6,
+    insight: 'Custom chart'
+  };
+
+  App.dashboards[App.activeDatasetId].push(ch);
+  saveDashboard(App.activeDatasetId, App.dashboards[App.activeDatasetId]);
+  closeModal();
+  setStep('dashboard');
+}
+
+function openEditChartModal(chartId) {
+  var charts = activeDashboard();
+  var ch     = charts.find(function(c){ return c.id === chartId; });
+  var ds     = activeDataset();
+  if (!ch || !ds) return;
+
+  var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
+  function fieldOpts(selectedIdx) {
+    return '<option value="">— none —</option>' + included.map(function(f) {
+      return '<option value="' + f.index + '"' + (f.index === selectedIdx ? ' selected' : '') + '>' + escHTML(f.label) + ' (' + f.type + ')</option>';
+    }).join('');
+  }
+
+  function typeOpts(sel) {
+    return ['bar','hbar','line','histogram','scatter','pie','doughnut'].map(function(t) {
+      return '<option value="' + t + '"' + (t === sel ? ' selected' : '') + '>' + capitalize(t) + '</option>';
+    }).join('');
+  }
+
+  function aggOpts(sel) {
+    return ['sum','avg','count','min','max'].map(function(a) {
+      return '<option value="' + a + '"' + (a === sel ? ' selected' : '') + '>' + capitalize(a) + '</option>';
+    }).join('');
+  }
+
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Edit chart</h2>' +
+    '<div class="modal-field"><label class="modal-field-label">Title</label>' +
+      '<input class="modal-field-input" id="editTitle" value="' + escHTML(ch.title) + '"/></div>' +
+    '<div class="modal-field"><label class="modal-field-label">Chart type</label>' +
+      '<select class="modal-field-select" id="editType">' + typeOpts(ch.type) + '</select></div>' +
+    '<div class="modal-field"><label class="modal-field-label">X axis / primary field</label>' +
+      '<select class="modal-field-select" id="editX">' + fieldOpts(ch.xField) + '</select></div>' +
+    '<div class="modal-field"><label class="modal-field-label">Y axis / measure</label>' +
+      '<select class="modal-field-select" id="editY">' + fieldOpts(ch.yField) + '</select></div>' +
+    '<div class="modal-field"><label class="modal-field-label">Aggregation</label>' +
+      '<select class="modal-field-select" id="editAgg">' + aggOpts(ch.agg) + '</select></div>' +
+    '<div class="modal-field"><label class="modal-field-label">Width</label>' +
+      '<select class="modal-field-select" id="editSpan">' +
+        ['4','6','8','12'].map(function(s){ return '<option value="' + s + '"' + (String(ch.span) === s ? ' selected' : '') + '>' + ({4:'Narrow (4/12)',6:'Half (6/12)',8:'Wide (8/12)',12:'Full (12/12)'}[s]) + '</option>'; }).join('') +
+      '</select></div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" onclick="saveChartEdit(\'' + chartId + '\')">Save</button>' +
+    '</div>'
+  );
+}
+
+function saveChartEdit(chartId) {
+  var charts = activeDashboard();
+  var ch     = charts.find(function(c){ return c.id === chartId; });
+  if (!ch) return;
+
+  var titleEl = document.getElementById('editTitle');
+  var typeEl  = document.getElementById('editType');
+  var xEl     = document.getElementById('editX');
+  var yEl     = document.getElementById('editY');
+  var aggEl   = document.getElementById('editAgg');
+  var spanEl  = document.getElementById('editSpan');
+
+  if (titleEl) ch.title  = titleEl.value.trim() || ch.title;
+  if (typeEl)  ch.type   = typeEl.value;
+  if (xEl && xEl.value !== '') ch.xField = parseInt(xEl.value, 10);
+  if (yEl)  ch.yField = yEl.value !== '' ? parseInt(yEl.value, 10) : null;
+  if (aggEl)   ch.agg    = aggEl.value;
+  if (spanEl)  ch.span   = parseInt(spanEl.value, 10);
+
+  saveDashboard(App.activeDatasetId, App.dashboards[App.activeDatasetId]);
+  closeModal();
+  setStep('dashboard');
+}
+
+function removeChart(chartId) {
+  var charts = activeDashboard();
+  var idx    = charts.findIndex(function(c){ return c.id === chartId; });
+  if (idx === -1) return;
+  destroyChart(chartId);
+  charts.splice(idx, 1);
+  saveDashboard(App.activeDatasetId, charts);
+
+  // Just remove the card from DOM without full re-render
+  var card = document.getElementById('card-' + chartId);
+  if (card) {
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    card.style.transition = 'all 0.2s ease';
+    setTimeout(function(){ if (card.parentNode) card.parentNode.removeChild(card); }, 220);
+  }
+  toast('Chart removed', 'success');
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────
+function exportChartPng(chartId) {
+  var chartInst = App.charts[chartId];
+  if (!chartInst) { toast('Chart not ready', 'error'); return; }
+  try {
+    var dash   = activeDashboard();
+    var ch     = dash.find(function(c){ return c.id === chartId; });
+    var name   = (ch ? ch.title : 'chart').replace(/[^a-z0-9\s-]/gi,'').replace(/\s+/g,'-').toLowerCase();
+    var url    = chartInst.toBase64Image('image/png', 1);
+    var a      = document.createElement('a');
+    a.href     = url;
+    a.download = name + '.png';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); }, 100);
+    toast('Chart exported as PNG', 'success');
+  } catch(e) {
+    toast('Export failed: ' + e.message, 'error');
+  }
+}
+
+function exportDashboardPng() {
+  // Create a composite canvas from all visible charts
+  var charts  = activeDashboard();
+  var ds      = activeDataset();
+  if (!charts.length || !ds) { toast('No charts to export', 'warn'); return; }
+
+  // Try html2canvas-style approach: draw each chart canvas onto composite
+  var cols   = 2;
+  var W      = 1600, pad = 32, gap = 16;
+  var cardW  = (W - pad * 2 - gap) / 2;
+  var cardH  = 300;
+
+  var rows   = Math.ceil(charts.length / cols);
+  var H      = pad + 48 + rows * (cardH + gap) + pad;
+
+  var comp   = document.createElement('canvas');
+  comp.width  = W;
+  comp.height = H;
+  var ctx    = comp.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0b0d10';
+  ctx.fillRect(0, 0, W, H);
+
+  // Title
+  ctx.fillStyle = '#f5f7fa';
+  ctx.font      = 'bold 22px Inter, sans-serif';
+  ctx.fillText(ds.name + ' — Dashboard', pad, pad + 24);
+
+  charts.forEach(function(ch, i) {
+    var col  = i % cols;
+    var row  = Math.floor(i / cols);
+    var x    = pad + col * (cardW + gap);
+    var y    = pad + 48 + row * (cardH + gap);
+
+    // Card background
+    ctx.fillStyle   = '#11141a';
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth   = 1;
+    roundRect(ctx, x, y, cardW, cardH, 8);
+    ctx.fill(); ctx.stroke();
+
+    // Title
+    ctx.fillStyle = '#c1c7d0';
+    ctx.font      = '600 13px Inter, sans-serif';
+    ctx.fillText(ch.title, x + 14, y + 22);
+
+    // Chart image
+    var chartInst = App.charts[ch.id];
+    if (chartInst) {
+      try {
+        var img = new Image();
+        img.src = chartInst.toBase64Image('image/png', 1);
+        ctx.drawImage(img, x + 10, y + 34, cardW - 20, cardH - 50);
+      } catch(e) {}
+    }
+  });
+
+  try {
+    var url    = comp.toDataURL('image/png');
+    var a      = document.createElement('a');
+    a.href     = url;
+    a.download = (ds.name || 'dashboard').replace(/\s+/g,'-').toLowerCase() + '-dashboard.png';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); }, 100);
+    toast('Dashboard exported as PNG', 'success');
+  } catch(e) {
+    toast('Export failed. Try exporting charts individually.', 'error');
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function exportDataCsv() {
+  var ds = activeDataset();
+  if (!ds) return;
+  var rows    = applyFilters(ds.rows, ds.schema);
+  var headers = ds.schema.filter(function(f){ return f.included; }).map(function(f){ return f.label; });
+  var indices = ds.schema.filter(function(f){ return f.included; }).map(function(f){ return f.index; });
+
+  var lines = [headers.map(function(h){ return csvCell(h); }).join(',')];
+  rows.forEach(function(row) {
+    lines.push(indices.map(function(i){ return csvCell(row[i]); }).join(','));
+  });
+
+  var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = (ds.name || 'data').replace(/\s+/g,'-').toLowerCase() + '-cleaned.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+  toast('CSV exported (' + rows.length.toLocaleString() + ' rows)', 'success');
+}
+
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  var s = String(v);
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────
+function renderSidebar() {
+  var list  = document.getElementById('datasetList');
+  var count = document.getElementById('datasetCount');
+  if (!list) return;
+  if (count) count.textContent = App.datasets.length;
+
+  if (!App.datasets.length) {
+    list.innerHTML = '<div class="sidebar-empty">No datasets yet.<br/>Upload a CSV to get started.</div>';
+    return;
+  }
+
+  list.innerHTML = App.datasets.map(function(ds) {
+    var active = ds.id === App.activeDatasetId;
+    return '<div class="dataset-item' + (active ? ' active' : '') + '" ' +
+        'onclick="switchDataset(\'' + ds.id + '\')" role="listitem" tabindex="0" ' +
+        'onkeydown="if(event.key===\'Enter\')switchDataset(\'' + ds.id + '\')" ' +
+        'aria-label="' + escHTML(ds.name) + (active ? ' (active)' : '') + '">' +
+      '<div class="dataset-icon">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' +
+      '</div>' +
+      '<div class="dataset-info">' +
+        '<div class="dataset-name">' + escHTML(ds.name) + '</div>' +
+        '<div class="dataset-meta">' + ds.rowCount.toLocaleString() + ' rows · ' + fmtDate(ds.createdAt) + '</div>' +
+      '</div>' +
+      '<button class="dataset-action btn-danger" onclick="event.stopPropagation();deleteDataset(\'' + ds.id + '\')" title="Delete dataset" aria-label="Delete ' + escHTML(ds.name) + '">' +
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+      '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function switchDataset(id) {
+  if (id === App.activeDatasetId) {
+    // Already active — go to dashboard if we have charts
+    if (App.dashboards[id] && App.dashboards[id].length) setStep('dashboard');
+    return;
+  }
+  App.activeDatasetId = id;
+  App.filters = [];
+  var ds = activeDataset();
+  if (!ds) return;
+  if (!App.dashboards[id]) App.dashboards[id] = suggestCharts(ds.schema);
+  setStep('dashboard');
+}
+
+function deleteDataset(id) {
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Delete dataset?</h2>' +
+    '<p>This will remove the dataset and all its charts from your browser. This cannot be undone.</p>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-danger" onclick="confirmDeleteDataset(\'' + id + '\')">Delete</button>' +
+    '</div>'
+  );
+}
+
+function confirmDeleteDataset(id) {
+  closeModal();
+  var idx = App.datasets.findIndex(function(d){ return d.id === id; });
+  if (idx > -1) App.datasets.splice(idx, 1);
+  delete App.dashboards[id];
+  dbDelete(STORE_DS,   id);
+  dbDelete(STORE_DASH, id);
+
+  if (App.activeDatasetId === id) {
+    App.activeDatasetId = App.datasets.length ? App.datasets[0].id : null;
+    App.filters = [];
+    if (App.activeDatasetId) {
+      setStep('dashboard');
+    } else {
+      setStep('upload');
+    }
+  } else {
+    renderSidebar();
+  }
+  toast('Dataset deleted', 'success');
+}
+
+function resetAll() {
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Clear all data?</h2>' +
+    '<p>This permanently deletes all datasets, dashboards, and stored data from your browser. Cannot be undone.</p>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-danger" onclick="confirmResetAll()">Clear everything</button>' +
+    '</div>'
+  );
+}
+
+function confirmResetAll() {
+  closeModal();
+  Object.keys(App.charts).forEach(destroyChart);
+  App.datasets = [];
+  App.dashboards = {};
+  App.activeDatasetId = null;
+  App.filters = [];
+  dbClearAll().then(function(){ toast('All data cleared', 'success'); });
+  setStep('upload');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+function init() {
+  // Open IndexedDB
+  dbOpen().then(function(db) {
+    App.db = db;
+
+    // Load persisted datasets
+    return Promise.all([
+      dbGetAll(STORE_DS),
+      dbGetAll(STORE_DASH)
+    ]);
+  }).then(function(results) {
+    var datasets   = results[0] || [];
+    var dashboards = results[1] || [];
+
+    App.datasets = datasets.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+    dashboards.forEach(function(d){ App.dashboards[d.id] = d.charts || []; });
+
+    if (App.datasets.length) {
+      App.activeDatasetId = App.datasets[0].id;
+      if (!App.dashboards[App.activeDatasetId] || !App.dashboards[App.activeDatasetId].length) {
+        var ds = activeDataset();
+        if (ds) App.dashboards[App.activeDatasetId] = suggestCharts(ds.schema);
+      }
+      setStep('dashboard');
+    } else {
+      setStep('upload');
+    }
+  }).catch(function(err) {
+    console.warn('IndexedDB unavailable, running in-memory only:', err);
+    App.db = null;
+    setStep('upload');
+  });
+
+  // Wire up global controls
+  var fileInput = document.getElementById('fileInput');
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      var file = e.target.files && e.target.files[0];
+      if (file) handleFile(file);
+    });
+  }
+
+  var newBtn = document.getElementById('newDatasetBtn');
+  if (newBtn) newBtn.addEventListener('click', function() { setStep('upload'); });
+
+  var expPng = document.getElementById('exportPngBtn');
+  if (expPng) expPng.addEventListener('click', exportDashboardPng);
+
+  var expCsv = document.getElementById('exportCsvBtn');
+  if (expCsv) expCsv.addEventListener('click', exportDataCsv);
+
+  var resetBtn = document.getElementById('resetAllBtn');
+  if (resetBtn) resetBtn.addEventListener('click', resetAll);
+
+  // Keyboard shortcut: Esc closes drawer
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closePreviewDrawer();
+      closeModal();
+    }
+  });
+
+  // Apply Chart.js global defaults (retry until library is ready)
+  var chartRetry = 0;
+  function tryApplyChartDefaults() {
+    if (window.Chart) { applyChartDefaults(); return; }
+    if (++chartRetry < 20) setTimeout(tryApplyChartDefaults, 200);
+  }
+  tryApplyChartDefaults();
+}
+
+// Start when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
