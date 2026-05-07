@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b0d10"/>
   <meta name="color-scheme" content="dark"/>
 
-  <title>Glimpse — See what your data says, in seconds | Datapad</title>
+  <title>Glimpse - See what your data says, in seconds | Datapad</title>
   <meta name="description" content="Free browser-based dashboard builder. Upload a CSV, get instant auto-detected charts and a clean dashboard. No sign-up. 100% client-side. Your data never leaves your browser."/>
   <meta name="keywords" content="csv dashboard, data visualization, csv to chart, data exploration, instant dashboard, free analytics, browser-based BI, CSV viewer, chart maker"/>
   <meta name="author" content="Datapad"/>
@@ -14,7 +14,7 @@
   <link rel="canonical" href="https://datapad.in/glimpse"/>
 
   <meta property="og:type" content="website"/>
-  <meta property="og:title" content="Glimpse — Instant CSV Dashboards"/>
+  <meta property="og:title" content="Glimpse - Instant CSV Dashboards"/>
   <meta property="og:description" content="Drop a CSV. Get a dashboard. 100% in your browser, free forever."/>
   <meta property="og:url" content="https://datapad.in/glimpse"/>
 
@@ -34,7 +34,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js" defer></script>
   <style>
     /* ════════════════════════════════════════════
-       GLIMPSE — Design System
+       GLIMPSE - Design System
        Aesthetic: Modern, calm, data-tool feel.
        Inspired by Linear, Vercel dashboards, Stripe.
        Color: Cyan accent (info/data), neutral grays.
@@ -44,7 +44,7 @@
     ::selection{background:rgba(0,212,255,0.25);color:#fff}
 
     :root{
-      /* Surface scale — cool dark, not pure black */
+      /* Surface scale - cool dark, not pure black */
       --bg:        #0b0d10;
       --surface-1: #11141a;
       --surface-2: #161a22;
@@ -75,7 +75,7 @@
       --error: #ef4444;
       --error-rgb: 239,68,68;
 
-      /* Categorical palette (for charts) — colorblind-aware */
+      /* Categorical palette (for charts) - colorblind-aware */
       --c1: #00d4ff; /* cyan */
       --c2: #a78bfa; /* purple */
       --c3: #34d399; /* emerald */
@@ -147,7 +147,7 @@
       overflow-x: hidden;
     }
 
-    /* Subtle grid background — almost imperceptible */
+    /* Subtle grid background - almost imperceptible */
     body::before{
       content: '';
       position: fixed;
@@ -214,7 +214,7 @@
     ::-webkit-scrollbar-thumb:hover{background: rgba(255,255,255,0.12)}
 
     /* ═══════════════════════════════════════════════
-       LAYOUT — App shell
+       LAYOUT - App shell
        ═══════════════════════════════════════════════ */
     .app{
       display: grid;
@@ -1478,7 +1478,7 @@
     }
 
     /* ═══════════════════════════════════════════════
-       MOBILE — graceful fallback
+       MOBILE - graceful fallback
        ═══════════════════════════════════════════════ */
     .mobile-warning{
       display: none;
@@ -1559,7 +1559,7 @@
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
   </div>
   <h1>Best on desktop</h1>
-  <p>Glimpse is designed for screens 768px and wider — you'll get the full dashboard experience there. Open this URL on a laptop or desktop to continue.</p>
+  <p>Glimpse is designed for screens 768px and wider - you'll get the full dashboard experience there. Open this URL on a laptop or desktop to continue.</p>
   <a href="/" style="font-size:13px;color:var(--accent)">← Back to Datapad</a>
 </div>
 
@@ -1658,7 +1658,7 @@
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════════════
-   GLIMPSE — Core Engine
+   GLIMPSE - Core Engine
    Senior-grade: defensive parsing, pure compute fns, single state
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -1908,11 +1908,11 @@ function detectColumnType(values) {
       samples: sample.slice(0, 5).map(function(v){ return String(v); })
     };
   }
-  // Identifier (high-cardinality text — email, UUID, SKU)
+  // Identifier (high-cardinality text - email, UUID, SKU)
   if (ratio > 0.95 && n > 20) {
     return {
       type: 'identifier', confidence: 70,
-      reason: '~' + Math.round(ratio * 100) + '% unique values — likely ID/key/email',
+      reason: '~' + Math.round(ratio * 100) + '% unique values - likely ID/key/email',
       samples: sample.slice(0, 5).map(function(v){ return String(v); })
     };
   }
@@ -2011,7 +2011,7 @@ function suggestCharts(schema) {
   cats.slice(0, 1).forEach(function(catF) {
     charts.push({
       id: genId(), type: 'hbar',
-      title: catF.label + ' — count breakdown',
+      title: catF.label + ' - count breakdown',
       xField: catF.index, yField: null, agg: 'count',
       span: 6,
       insight: 'Shows how records are distributed across ' + catF.label + ' categories. Useful for spotting imbalances.'
@@ -2150,7 +2150,7 @@ function applyFilters(rows, schema) {
 
 // ─── FORMATTERS ───────────────────────────────────────────────────
 function fmtNum(v, decimals) {
-  if (v === null || v === undefined || !isFinite(v)) return '—';
+  if (v === null || v === undefined || !isFinite(v)) return '-';
   var d = decimals !== undefined ? decimals : (Math.abs(v) < 10 ? 2 : Math.abs(v) < 1000 ? 1 : 0);
   return v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: d });
 }
@@ -2505,7 +2505,7 @@ function columnStats(rows, colIdx, field) {
     var sorted = Object.keys(freq).sort(function(a,b){ return freq[b] - freq[a]; });
     stats.unique     = sorted.length;
     stats.topValues  = sorted.slice(0, 10).map(function(k){ return { value: k, count: freq[k] }; });
-    stats.mode       = sorted[0] || '—';
+    stats.mode       = sorted[0] || '-';
   }
 
   return stats;
@@ -2528,7 +2528,7 @@ var TYPE_META = {
   categorical: { label: 'Category',    color: '#60a5fa', icon: 'Aβ' },
   text:        { label: 'Text',        color: '#94a3b8', icon: 'Aa' },
   identifier:  { label: 'ID / Key',    color: '#f472b6', icon: '#id' },
-  empty:       { label: 'Empty',       color: '#5d6677', icon: '—' }
+  empty:       { label: 'Empty',       color: '#5d6677', icon: '-' }
 };
 
 // ─── TOAST ────────────────────────────────────────────────────────
@@ -2699,7 +2699,7 @@ function renderUpload() {
 
   return '<div class="upload-page" id="uploadPage">' +
     '<div class="upload-hero">' +
-      '<h1>See what your data<br/>says — in seconds.</h1>' +
+      '<h1>See what your data<br/>says - in seconds.</h1>' +
       '<p>Drop a CSV file or choose a sample dataset below. Glimpse auto-detects your columns and builds charts instantly. No account. No uploads.</p>' +
     '</div>' +
     '<div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload CSV file by clicking or dropping">' +
@@ -2707,7 +2707,7 @@ function renderUpload() {
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
       '</div>' +
       '<div class="upload-title">Drop your CSV here</div>' +
-      '<div class="upload-sub">or click to browse — CSV, TSV, or TXT</div>' +
+      '<div class="upload-sub">or click to browse - CSV, TSV, or TXT</div>' +
       '<button class="btn btn-primary" style="margin-bottom:var(--space-5)" onclick="event.stopPropagation();triggerFileInput()">Browse files</button>' +
       '<div class="upload-info">' +
         '<span class="upload-info-item">Up to 50 MB</span>' +
@@ -3089,7 +3089,7 @@ function stepperHTML(active) {
 }
 
 function bindSchema() {
-  // nothing extra — all wired via inline onclick
+  // nothing extra - all wired via inline onclick
 }
 
 function toggleField(i) {
@@ -3176,7 +3176,7 @@ function openPreviewDrawer(colIdx) {
     statsHtml =
       '<div class="preview-stat-grid">' +
         previewStat('Unique', (stats.unique || 0).toLocaleString()) +
-        previewStat('Mode',   escHTML(String(stats.mode || '—'))) +
+        previewStat('Mode',   escHTML(String(stats.mode || '-'))) +
       '</div>' +
       '<div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:8px">Top values</div>' +
       '<ul class="preview-list">' + topHtml + '</ul>';
@@ -3307,7 +3307,7 @@ function renderFilterBar(schema) {
     '<span class="filter-bar-label">Filters</span>' +
     pillsHtml +
     addHtml +
-    (!App.filters.length ? '<span style="font-size:12px;color:var(--text-4)">No filters active — showing all ' + (activeDataset() ? activeDataset().rowCount.toLocaleString() : '') + ' rows</span>' : '') +
+    (!App.filters.length ? '<span style="font-size:12px;color:var(--text-4)">No filters active - showing all ' + (activeDataset() ? activeDataset().rowCount.toLocaleString() : '') + ' rows</span>' : '') +
   '</div>';
 }
 
@@ -3426,7 +3426,7 @@ function openAddChartModal() {
   var ds = activeDataset();
   if (!ds) return;
   var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
-  var fieldOpts = '<option value="">— none —</option>' + included.map(function(f) {
+  var fieldOpts = '<option value="">- none -</option>' + included.map(function(f) {
     return '<option value="' + f.index + '">' + escHTML(f.label) + ' (' + f.type + ')</option>';
   }).join('');
 
@@ -3516,7 +3516,7 @@ function openEditChartModal(chartId) {
 
   var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
   function fieldOpts(selectedIdx) {
-    return '<option value="">— none —</option>' + included.map(function(f) {
+    return '<option value="">- none -</option>' + included.map(function(f) {
       return '<option value="' + f.index + '"' + (f.index === selectedIdx ? ' selected' : '') + '>' + escHTML(f.label) + ' (' + f.type + ')</option>';
     }).join('');
   }
@@ -3648,7 +3648,7 @@ function exportDashboardPng() {
   // Title
   ctx.fillStyle = '#f5f7fa';
   ctx.font      = 'bold 22px Inter, sans-serif';
-  ctx.fillText(ds.name + ' — Dashboard', pad, pad + 24);
+  ctx.fillText(ds.name + ' - Dashboard', pad, pad + 24);
 
   charts.forEach(function(ch, i) {
     var col  = i % cols;
@@ -3771,7 +3771,7 @@ function renderSidebar() {
 
 function switchDataset(id) {
   if (id === App.activeDatasetId) {
-    // Already active — go to dashboard if we have charts
+    // Already active - go to dashboard if we have charts
     if (App.dashboards[id] && App.dashboards[id].length) setStep('dashboard');
     return;
   }
