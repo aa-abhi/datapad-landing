@@ -734,6 +734,57 @@
       border-radius: 50%;
       background: var(--success);
     }
+    .upload-alt-card{
+      width: 100%;
+      margin-top: var(--space-5);
+      padding: var(--space-5);
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-lg);
+    }
+    .upload-alt-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .upload-alt-title{
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+    .upload-alt-sub{
+      font-size: 12px;
+      color: var(--text-4);
+      line-height: 1.5;
+    }
+    .upload-inline-form{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-2);
+      align-items: center;
+    }
+    .source-badge{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      background: rgba(var(--accent-rgb), 0.08);
+      border: 1px solid rgba(var(--accent-rgb), 0.16);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .source-badge.sheet{
+      background: rgba(34,197,94,0.08);
+      border-color: rgba(34,197,94,0.18);
+      color: #15803d;
+    }
 
     /* Sample data section */
     .samples{
@@ -1776,7 +1827,7 @@
           Clear all data
         </button>
         <p style="font-size:10.5px;color:var(--text-4);text-align:center;margin-top:var(--space-3);line-height:1.5;font-family:var(--font-mono);letter-spacing:0.02em">
-          Files stay on your device.<br/>Nothing is uploaded.
+          Files stay on your device.<br/>Sheet URLs are fetched directly from Google.
         </p>
       </div>
     </aside>
@@ -1830,6 +1881,9 @@ var WARN_FILE_MB = 25;
 var MAX_ROWS_DEFAULT = 1000000;
 var SAMPLE_ROWS = 500; // rows to profile for type detection
 var TOP_N_CATS  = 15;  // max categories in bar chart
+var AUTO_REFRESH_OFF = 'off';
+var AUTO_REFRESH_5M = '5m';
+var AUTO_REFRESH_MS = 5 * 60 * 1000;
 
 var CHART_COLORS = [
   'rgba(15,159,184,0.85)', 'rgba(167,139,250,0.85)',
@@ -1856,7 +1910,9 @@ var App = {
   drawerField: null,
   isDirty: false,          // unsaved changes guard
   isEditMode: true,
-  renderObserver: null
+  renderObserver: null,
+  refreshTimer: null,
+  refreshInFlight: false
 };
 
 function activeDataset() {
@@ -2340,6 +2396,10 @@ function fmtBytes(bytes) {
 function fmtDate(ts) {
   if (!ts) return '';
   return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function fmtDateTime(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
 // ─── CHART THEME ──────────────────────────────────────────────────
@@ -3342,6 +3402,12 @@ function saveDataset(ds) {
     rowCount: ds.rowCount, colCount: ds.colCount,
     createdAt: ds.createdAt, sampleMode: ds.sampleMode,
     fileSizeBytes: ds.fileSizeBytes,
+    totalRows: ds.totalRows,
+    sourceType: ds.sourceType || 'file',
+    sourceUrl: ds.sourceUrl || '',
+    sourceMeta: ds.sourceMeta || null,
+    refreshMode: ds.refreshMode || AUTO_REFRESH_OFF,
+    lastRefreshedAt: ds.lastRefreshedAt || ds.createdAt,
     rows: ds.rows
   }).catch(function(e) {
     console.warn('IndexedDB write failed, running in-memory only:', e);
@@ -3376,6 +3442,7 @@ function render() {
   renderSidebar();
   updateHeaderButtons();
   syncModeUI();
+  syncDatasetRefreshTimer();
 }
 
 function updateHeaderButtons() {
@@ -3402,6 +3469,80 @@ function toggleMode() {
   syncModeUI();
   if (App.step === 'dashboard') setStep('dashboard');
 }
+function clearDatasetRefreshTimer() {
+  if (App.refreshTimer) {
+    clearTimeout(App.refreshTimer);
+    App.refreshTimer = null;
+  }
+}
+function shouldAutoRefreshDataset(ds) {
+  return !!(ds &&
+    ds.sourceType === 'google_sheet' &&
+    ds.refreshMode === AUTO_REFRESH_5M &&
+    App.step === 'dashboard' &&
+    App.activeDatasetId === ds.id &&
+    document.visibilityState === 'visible');
+}
+function syncDatasetRefreshTimer() {
+  clearDatasetRefreshTimer();
+  var ds = activeDataset();
+  if (!shouldAutoRefreshDataset(ds) || App.refreshInFlight) return;
+  App.refreshTimer = setTimeout(function() {
+    refreshActiveSheetDataset(true);
+  }, AUTO_REFRESH_MS);
+}
+function openRefreshSettingsModal() {
+  var ds = activeDataset();
+  if (!ds || ds.sourceType !== 'google_sheet') return;
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Auto refresh</h2>' +
+    '<p>Choose whether Glimpse should refresh this Google Sheet every 5 minutes while you are actively viewing the dashboard.</p>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Refresh mode</label>' +
+      '<select class="modal-field-select" id="refreshModeSelect">' +
+        '<option value="' + AUTO_REFRESH_OFF + '"' + (ds.refreshMode !== AUTO_REFRESH_5M ? ' selected' : '') + '>Do not refresh</option>' +
+        '<option value="' + AUTO_REFRESH_5M + '"' + (ds.refreshMode === AUTO_REFRESH_5M ? ' selected' : '') + '>Auto refresh every 5 minutes</option>' +
+      '</select>' +
+      '<div class="modal-field-hint">Refresh only runs while this dashboard tab is open and visible.</div>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" onclick="saveRefreshSettings()">Save</button>' +
+    '</div>'
+  );
+}
+function saveRefreshSettings() {
+  var ds = activeDataset();
+  var select = document.getElementById('refreshModeSelect');
+  if (!ds || !select) return;
+  ds.refreshMode = select.value === AUTO_REFRESH_5M ? AUTO_REFRESH_5M : AUTO_REFRESH_OFF;
+  ds.lastRefreshedAt = ds.lastRefreshedAt || Date.now();
+  saveDataset(ds);
+  closeModal();
+  setStep('dashboard');
+  toast(ds.refreshMode === AUTO_REFRESH_5M ? 'Auto refresh enabled' : 'Auto refresh disabled', 'success');
+}
+function refreshActiveSheetDataset(silent) {
+  var ds = activeDataset();
+  if (!ds || ds.sourceType !== 'google_sheet' || !ds.sourceUrl) return;
+  if (silent && !shouldAutoRefreshDataset(ds)) { syncDatasetRefreshTimer(); return; }
+  if (App.step !== 'dashboard') { syncDatasetRefreshTimer(); return; }
+  if (App.refreshInFlight) return;
+  App.refreshInFlight = true;
+  clearDatasetRefreshTimer();
+  importGoogleSheetUrl(ds.sourceUrl, {
+    existingDatasetId: ds.id,
+    name: ds.name,
+    preserveName: true,
+    isRefresh: true,
+    silent: !!silent,
+    refreshMode: ds.refreshMode || AUTO_REFRESH_OFF
+  }).finally(function() {
+    App.refreshInFlight = false;
+    syncDatasetRefreshTimer();
+  });
+}
 
 // ─── UPLOAD RENDER ────────────────────────────────────────────────
 function renderUpload() {
@@ -3416,7 +3557,7 @@ function renderUpload() {
   return '<div class="upload-page" id="uploadPage">' +
     '<div class="upload-hero">' +
       '<h1>See what your data<br/>says - in seconds.</h1>' +
-      '<p>Drop a CSV file or choose a sample dataset below. Glimpse auto-detects your columns and builds charts instantly. No account. No uploads.</p>' +
+      '<p>Drop a CSV file, paste a public Google Sheet URL, or choose a sample dataset below. Glimpse auto-detects your columns and builds charts instantly. No account. Browser-first.</p>' +
     '</div>' +
     '<div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload CSV file by clicking or dropping">' +
       '<div class="upload-icon">' +
@@ -3429,8 +3570,22 @@ function renderUpload() {
         '<span class="upload-info-item">Up to 250 MB</span>' +
         '<span class="upload-info-item">Up to 1M rows</span>' +
         '<span class="upload-info-item">CSV · TSV · TXT</span>' +
-        '<span class="upload-info-item">100% private</span>' +
+        '<span class="upload-info-item">Browser-side import</span>' +
       '</div>' +
+    '</div>' +
+    '<div class="upload-alt-card">' +
+      '<div class="upload-alt-head">' +
+        '<div>' +
+          '<div class="upload-alt-title">Import from Google Sheets</div>' +
+          '<div class="upload-alt-sub">Paste a public or link-viewable Google Sheet URL. Glimpse will fetch its CSV export directly in your browser.</div>' +
+        '</div>' +
+        '<span class="source-badge sheet">Google Sheet</span>' +
+      '</div>' +
+      '<div class="upload-inline-form">' +
+        '<input class="modal-field-input" id="sheetUrlInput" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."/>' +
+        '<button class="btn btn-primary" id="sheetImportBtn">Import sheet</button>' +
+      '</div>' +
+      '<div class="modal-field-hint">Supported: standard Google Sheets URLs with an optional <code>gid</code>. Private sheets that require sign-in will not import.</div>' +
     '</div>' +
     '<div class="samples">' +
       '<div class="samples-label">Or try a sample dataset</div>' +
@@ -3442,6 +3597,8 @@ function renderUpload() {
 function bindUpload() {
   var zone  = document.getElementById('uploadZone');
   var input = document.getElementById('fileInput');
+  var sheetInput = document.getElementById('sheetUrlInput');
+  var sheetBtn = document.getElementById('sheetImportBtn');
   if (!zone) return;
 
   // Click to open file picker
@@ -3471,6 +3628,20 @@ function bindUpload() {
     if (file && App.step === 'upload') handleFile(file);
   });
 
+  if (sheetBtn) {
+    sheetBtn.addEventListener('click', function() {
+      importGoogleSheetFromInput();
+    });
+  }
+  if (sheetInput) {
+    sheetInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        importGoogleSheetFromInput();
+      }
+    });
+  }
+
   // Sample cards
   document.querySelectorAll('.sample-card').forEach(function(card) {
     card.addEventListener('click', function() { loadSample(parseInt(card.dataset.sample, 10)); });
@@ -3483,6 +3654,87 @@ function bindUpload() {
 function triggerFileInput() {
   var input = document.getElementById('fileInput');
   if (input) { input.value = ''; input.click(); }
+}
+function inferSheetDatasetName(meta) {
+  var shortId = meta && meta.spreadsheetId ? meta.spreadsheetId.slice(0, 6) : 'sheet';
+  return 'Google Sheet ' + shortId;
+}
+function parseGoogleSheetUrl(rawUrl) {
+  if (!rawUrl) return null;
+  var url;
+  try {
+    url = new URL(rawUrl.trim());
+  } catch(e) {
+    return null;
+  }
+  if (!/docs\.google\.com$/i.test(url.hostname)) return null;
+  var gid = url.searchParams.get('gid') || (url.hash.match(/gid=(\d+)/) || [])[1] || '';
+  var publishedMatch = url.pathname.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)/);
+  var standardMatch = url.pathname.match(/\/spreadsheets\/(?:u\/\d+\/)?d\/([a-zA-Z0-9-_]+)/);
+  if (!publishedMatch && !standardMatch) return null;
+  var spreadsheetId = publishedMatch ? publishedMatch[1] : standardMatch[1];
+  var csvUrl = publishedMatch
+    ? 'https://docs.google.com/spreadsheets/d/e/' + spreadsheetId + '/pub?output=csv'
+    : 'https://docs.google.com/spreadsheets/d/' + spreadsheetId + '/export?format=csv';
+  if (gid) csvUrl += '&gid=' + encodeURIComponent(gid);
+  return {
+    spreadsheetId: spreadsheetId,
+    gid: gid || '',
+    normalizedUrl: url.toString(),
+    csvUrl: csvUrl,
+    published: !!publishedMatch,
+    nameHint: inferSheetDatasetName({ spreadsheetId: spreadsheetId })
+  };
+}
+function importGoogleSheetFromInput() {
+  var input = document.getElementById('sheetUrlInput');
+  if (!input) return;
+  var url = (input.value || '').trim();
+  if (!url) {
+    toast('Paste a Google Sheet URL first', 'warn');
+    return;
+  }
+  importGoogleSheetUrl(url);
+}
+async function importGoogleSheetUrl(rawUrl, options) {
+  options = options || {};
+  var parsed = parseGoogleSheetUrl(rawUrl);
+  if (!parsed) {
+    toast('Enter a valid Google Sheets URL', 'error', 4000);
+    return;
+  }
+  if (!options.silent) {
+    showParseOverlay(options.isRefresh ? 'Refreshing Google Sheet…' : 'Fetching Google Sheet…', options.isRefresh ? 'Loading latest rows from the sheet' : 'Reading published CSV export');
+  }
+  try {
+    var response = await fetch(parsed.csvUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Google returned ' + response.status);
+    var text = await response.text();
+    if (!text || /^\s*$/.test(text)) throw new Error('The sheet returned no CSV data');
+    if (/^\s*</.test(text.slice(0, 120))) {
+      throw new Error('This sheet is not publicly accessible. Share it for viewing first.');
+    }
+    return parseCSVText(text, (options.name || parsed.nameHint) + '.csv', 0, ',', {
+      sourceType: 'google_sheet',
+      sourceUrl: parsed.normalizedUrl,
+      sourceMeta: {
+        spreadsheetId: parsed.spreadsheetId,
+        gid: parsed.gid,
+        published: !!parsed.published,
+        csvUrl: parsed.csvUrl
+      },
+      refreshMode: options.refreshMode || AUTO_REFRESH_OFF,
+      existingDatasetId: options.existingDatasetId || null,
+      preserveName: !!options.preserveName,
+      isRefresh: !!options.isRefresh
+    }).catch(function() {
+      return null;
+    });
+  } catch(err) {
+    hideParseOverlay();
+    toast((options.isRefresh ? 'Refresh failed: ' : 'Import failed: ') + err.message, 'error', 5000);
+    if (options.isRefresh) syncDatasetRefreshTimer();
+  }
 }
 
 // ─── FILE HANDLING ────────────────────────────────────────────────
@@ -3541,7 +3793,7 @@ function parseFile(file) {
     var text = e.target.result;
     // Strip UTF-8 BOM if present
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-    parseCSVText(text, file.name, file.size, delim);
+    parseCSVText(text, file.name, file.size, delim).catch(function() {});
   };
   reader.onerror = function() {
     hideParseOverlay();
@@ -3550,101 +3802,173 @@ function parseFile(file) {
   reader.readAsText(file, 'UTF-8');
 }
 
-function parseCSVText(text, filename, sizeBytes, delim) {
+function normalizeDatasetRecord(ds) {
+  if (!ds) return ds;
+  ds.totalRows = ds.totalRows || ds.rowCount || 0;
+  ds.sourceType = ds.sourceType || 'file';
+  ds.sourceUrl = ds.sourceUrl || '';
+  ds.sourceMeta = ds.sourceMeta || null;
+  ds.refreshMode = ds.refreshMode || AUTO_REFRESH_OFF;
+  ds.lastRefreshedAt = ds.lastRefreshedAt || ds.createdAt || Date.now();
+  return ds;
+}
+function buildDatasetRecord(rows, headers, options) {
+  options = options || {};
+  var totalRows = options.totalRows || rows.length;
+  var sampleMode = !!options.sampleMode;
+  var schema = profileDataset(rows, headers);
+  var now = Date.now();
+  var existing = options.existingDatasetId ? App.datasets.find(function(item) { return item.id === options.existingDatasetId; }) : null;
+  if (existing) {
+    existing.rows = rows;
+    existing.schema = schema;
+    existing.rowCount = rows.length;
+    existing.colCount = headers.length;
+    existing.totalRows = totalRows;
+    existing.sampleMode = sampleMode;
+    existing.fileSizeBytes = options.sizeBytes || existing.fileSizeBytes || 0;
+    existing.sourceType = options.sourceType || existing.sourceType || 'file';
+    existing.sourceUrl = options.sourceUrl || existing.sourceUrl || '';
+    existing.sourceMeta = options.sourceMeta || existing.sourceMeta || null;
+    existing.refreshMode = options.refreshMode || existing.refreshMode || AUTO_REFRESH_OFF;
+    existing.lastRefreshedAt = now;
+    if (!options.preserveName && options.name) existing.name = options.name;
+    return normalizeDatasetRecord(existing);
+  }
+  return normalizeDatasetRecord({
+    id: genId(),
+    name: options.name || 'Dataset',
+    rows: rows,
+    schema: schema,
+    rowCount: rows.length,
+    colCount: headers.length,
+    totalRows: totalRows,
+    sampleMode: sampleMode,
+    createdAt: now,
+    fileSizeBytes: options.sizeBytes || 0,
+    sourceType: options.sourceType || 'file',
+    sourceUrl: options.sourceUrl || '',
+    sourceMeta: options.sourceMeta || null,
+    refreshMode: options.refreshMode || AUTO_REFRESH_OFF,
+    lastRefreshedAt: now
+  });
+}
+function commitDatasetRecord(ds, options) {
+  options = options || {};
+  var existingIndex = App.datasets.findIndex(function(item) { return item.id === ds.id; });
+  if (existingIndex === -1) {
+    App.datasets.push(ds);
+  } else {
+    App.datasets[existingIndex] = ds;
+  }
+  App.activeDatasetId = ds.id;
+  if (!options.isRefresh) App.filters = [];
+  if (!App.dashboards[ds.id] || !App.dashboards[ds.id].length) {
+    App.dashboards[ds.id] = suggestCharts(ds.schema);
+  }
+  return saveDataset(ds).then(function() {
+    return saveDashboard(ds.id, App.dashboards[ds.id]);
+  }).then(function() {
+    hideParseOverlay();
+    if (options.isRefresh) {
+      if (App.activeDatasetId === ds.id && App.step === 'dashboard') setStep('dashboard');
+      if (!options.silent) toast('Google Sheet refreshed', 'success');
+    } else {
+      setStep('schema');
+      if (ds.sampleMode) {
+        toast('Large file: showing first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + ds.totalRows.toLocaleString() + ' rows', 'warn', 5000);
+      } else if (ds.sourceType === 'google_sheet') {
+        toast('Google Sheet imported', 'success');
+      }
+    }
+    return ds;
+  }).finally(function() {
+    syncDatasetRefreshTimer();
+  });
+}
+function parseCSVText(text, filename, sizeBytes, delim, options) {
+  options = options || {};
   updateParseOverlay('Parsing rows…', 'This may take a moment for large files');
 
   // Use setTimeout to let the UI update before blocking parse
-  setTimeout(function() {
-    var result;
-    try {
-      result = Papa.parse(text, {
-        header: false,
-        skipEmptyLines: 'greedy',
-        delimiter: delim || '',
-        dynamicTyping: false, // keep as strings so we control parsing
-        comments: '#',
-        transformHeader: undefined
-      });
-    } catch(e) {
-      hideParseOverlay();
-      toast('Parse error: ' + e.message, 'error');
-      return;
-    }
-
-    if (!result || !result.data || result.data.length < 1) {
-      hideParseOverlay();
-      toast('File appears to be empty or has no parseable rows.', 'error');
-      return;
-    }
-
-    // First row = headers
-    var rawHeaders = result.data[0].map(function(h, i) {
-      return String(h || '').trim() || ('Column ' + (i + 1));
-    });
-
-    // Deduplicate headers
-    var seen = {};
-    var headers = rawHeaders.map(function(h) {
-      if (seen[h] !== undefined) { seen[h]++; return h + '_' + seen[h]; }
-      seen[h] = 0; return h;
-    });
-
-    var rawRows = result.data.slice(1);
-    var totalRows = rawRows.length;
-    var sampleMode = totalRows > MAX_ROWS_DEFAULT;
-
-    // Trim to max rows
-    var rows = rawRows.slice(0, MAX_ROWS_DEFAULT).map(function(row) {
-      // Ensure every row has all columns, pad with null
-      return headers.map(function(_, i) {
-        var v = row[i];
-        if (v === undefined || v === null || v === '') return null;
-        return String(v).trim();
-      });
-    });
-
-    // Validation: warn on ragged rows
-    var raggedCount = rawRows.slice(0, 100).filter(function(r){ return r.length !== headers.length; }).length;
-    if (raggedCount > 5) {
-      console.warn('Ragged CSV: ' + raggedCount + '/100 sample rows have wrong column count');
-    }
-
-    updateParseOverlay('Detecting field types…', 'Sampling ' + Math.min(rows.length, SAMPLE_ROWS) + ' rows per column');
-
-    // Profile asynchronously to not block UI
+  return new Promise(function(resolve, reject) {
     setTimeout(function() {
-      var schema = profileDataset(rows, headers);
-      var name   = (filename || 'Dataset').replace(/\.(csv|tsv|txt)$/i, '');
-      var ds     = {
-        id:            genId(),
-        name:          name,
-        rows:          rows,
-        schema:        schema,
-        rowCount:      rows.length,
-        colCount:      headers.length,
-        totalRows:     totalRows,
-        sampleMode:    sampleMode,
-        createdAt:     Date.now(),
-        fileSizeBytes: sizeBytes || 0
-      };
+      var result;
+      try {
+        result = Papa.parse(text, {
+          header: false,
+          skipEmptyLines: 'greedy',
+          delimiter: delim || '',
+          dynamicTyping: false,
+          comments: '#',
+          transformHeader: undefined
+        });
+      } catch(e) {
+        hideParseOverlay();
+        toast('Parse error: ' + e.message, 'error');
+        reject(e);
+        return;
+      }
 
-      App.datasets.push(ds);
-      App.activeDatasetId = ds.id;
-      App.dashboards[ds.id] = suggestCharts(schema);
-      App.filters = [];
+      if (!result || !result.data || result.data.length < 1) {
+        hideParseOverlay();
+        var emptyErr = new Error('File appears to be empty or has no parseable rows.');
+        toast(emptyErr.message, 'error');
+        reject(emptyErr);
+        return;
+      }
 
-      saveDataset(ds).then(function() {
-        saveDashboard(ds.id, App.dashboards[ds.id]);
+      var rawHeaders = result.data[0].map(function(h, i) {
+        return String(h || '').trim() || ('Column ' + (i + 1));
+      });
+      var seen = {};
+      var headers = rawHeaders.map(function(h) {
+        if (seen[h] !== undefined) { seen[h]++; return h + '_' + seen[h]; }
+        seen[h] = 0; return h;
       });
 
-      hideParseOverlay();
-      setStep('schema');
+      var rawRows = result.data.slice(1);
+      var totalRows = rawRows.length;
+      var sampleMode = totalRows > MAX_ROWS_DEFAULT;
+      var rows = rawRows.slice(0, MAX_ROWS_DEFAULT).map(function(row) {
+        return headers.map(function(_, i) {
+          var v = row[i];
+          if (v === undefined || v === null || v === '') return null;
+          return String(v).trim();
+        });
+      });
 
-      if (sampleMode) {
-        toast('Large file: showing first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + totalRows.toLocaleString() + ' rows', 'warn', 5000);
-      }
-    }, 60);
-  }, 20);
+      var raggedCount = rawRows.slice(0, 100).filter(function(r){ return r.length !== headers.length; }).length;
+      if (raggedCount > 5) console.warn('Ragged CSV: ' + raggedCount + '/100 sample rows have wrong column count');
+
+      updateParseOverlay('Detecting field types…', 'Sampling ' + Math.min(rows.length, SAMPLE_ROWS) + ' rows per column');
+
+      setTimeout(function() {
+        try {
+          var ds = buildDatasetRecord(rows, headers, {
+            existingDatasetId: options.existingDatasetId || null,
+            name: options.name || (filename || 'Dataset').replace(/\.(csv|tsv|txt)$/i, ''),
+            sizeBytes: sizeBytes || 0,
+            totalRows: totalRows,
+            sampleMode: sampleMode,
+            sourceType: options.sourceType || 'file',
+            sourceUrl: options.sourceUrl || '',
+            sourceMeta: options.sourceMeta || null,
+            refreshMode: options.refreshMode || AUTO_REFRESH_OFF,
+            preserveName: !!options.preserveName
+          });
+          commitDatasetRecord(ds, {
+            isRefresh: !!options.isRefresh,
+            silent: !!options.silent
+          }).then(resolve).catch(reject);
+        } catch(err) {
+          hideParseOverlay();
+          toast('Failed to process dataset: ' + err.message, 'error');
+          reject(err);
+        }
+      }, 60);
+    }, 20);
+  });
 }
 
 function loadSample(index) {
@@ -3665,7 +3989,12 @@ function loadSample(index) {
       totalRows:     data.rows.length,
       sampleMode:    false,
       createdAt:     Date.now(),
-      fileSizeBytes: 0
+      fileSizeBytes: 0,
+      sourceType:    'sample',
+      sourceUrl:     '',
+      sourceMeta:    null,
+      refreshMode:   AUTO_REFRESH_OFF,
+      lastRefreshedAt: Date.now()
     };
 
     App.datasets.push(ds);
@@ -3944,6 +4273,9 @@ function renderDashboard() {
   if (!ds) return '<p style="color:var(--text-3);padding:var(--space-8)">No dataset loaded.</p>';
   var charts  = activeDashboard();
   var schema  = ds.schema;
+  var sourceBadge = ds.sourceType === 'google_sheet' ? '<span class="source-badge sheet">Google Sheet</span>' : ds.sourceType === 'sample' ? '<span class="source-badge">Sample</span>' : '<span class="source-badge">CSV</span>';
+  var refreshText = ds.refreshMode === AUTO_REFRESH_5M ? 'Auto refresh: 5 min' : 'Auto refresh: Off';
+  var lastRefreshText = ds.sourceType === 'google_sheet' && ds.lastRefreshedAt ? ' · updated ' + escHTML(fmtDateTime(ds.lastRefreshedAt)) : '';
 
   var filterBarHtml = renderFilterBar(schema);
   var chartsHtml    = charts.map(function(ch) { return renderChartCard(ch, schema); }).join('');
@@ -3968,10 +4300,16 @@ function renderDashboard() {
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
         '</button>' +
         '<div class="page-sub">' + ds.rowCount.toLocaleString() + ' rows · ' + ds.colCount + ' columns' +
-          (ds.sampleMode ? ' · <span style="color:var(--warn)">Sample mode</span>' : '') + '</div>' +
+          (ds.sampleMode ? ' · <span style="color:var(--warn)">Sample mode</span>' : '') +
+          ' · ' + sourceBadge + lastRefreshText + '</div>' +
       '</div>' +
       '<div class="page-actions">' +
         '<button class="btn btn-ghost" onclick="setStep(\'schema\')">← Configure</button>' +
+        (ds.sourceType === 'google_sheet' ? '<button class="btn btn-ghost btn-sm" onclick="refreshActiveSheetDataset(false)" title="Fetch latest rows from Google Sheets">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+          'Refresh data' +
+        '</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="openRefreshSettingsModal()" title="Choose auto refresh mode">' + escHTML(refreshText) + '</button>' : '') +
         '<button class="btn btn-ghost btn-sm edit-only" onclick="refreshAllCharts()" title="Re-render all charts">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
           'Refresh' +
@@ -4685,12 +5023,13 @@ function renderSidebar() {
   if (count) count.textContent = App.datasets.length;
 
   if (!App.datasets.length) {
-    list.innerHTML = '<div class="sidebar-empty">No datasets yet.<br/>Upload a CSV to get started.</div>';
+    list.innerHTML = '<div class="sidebar-empty">No datasets yet.<br/>Upload a CSV or import a Google Sheet to get started.</div>';
     return;
   }
 
   list.innerHTML = App.datasets.map(function(ds) {
     var active = ds.id === App.activeDatasetId;
+    var sourceLabel = ds.sourceType === 'google_sheet' ? 'Google Sheet' : ds.sourceType === 'sample' ? 'Sample' : 'CSV';
     return '<div class="dataset-item' + (active ? ' active' : '') + '" ' +
         'onclick="switchDataset(\'' + ds.id + '\')" role="listitem" tabindex="0" ' +
         'onkeydown="if(event.key===\'Enter\')switchDataset(\'' + ds.id + '\')" ' +
@@ -4700,7 +5039,7 @@ function renderSidebar() {
       '</div>' +
       '<div class="dataset-info">' +
         '<div class="dataset-name">' + escHTML(ds.name) + '</div>' +
-        '<div class="dataset-meta">' + ds.rowCount.toLocaleString() + ' rows · ' + fmtDate(ds.createdAt) + '</div>' +
+        '<div class="dataset-meta">' + ds.rowCount.toLocaleString() + ' rows · ' + escHTML(sourceLabel) + ' · ' + fmtDate(ds.createdAt) + '</div>' +
       '</div>' +
       '<button class="dataset-action btn-danger" onclick="event.stopPropagation();deleteDataset(\'' + ds.id + '\')" title="Delete dataset" aria-label="Delete ' + escHTML(ds.name) + '">' +
         '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
@@ -4796,7 +5135,7 @@ function init() {
     var datasets   = results[0] || [];
     var dashboards = results[1] || [];
 
-    App.datasets = datasets.sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+    App.datasets = datasets.map(normalizeDatasetRecord).sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
     dashboards.forEach(function(d){ App.dashboards[d.id] = d.charts || []; });
 
     if (App.datasets.length) {
@@ -4846,6 +5185,7 @@ function init() {
       closeModal();
     }
   });
+  document.addEventListener('visibilitychange', syncDatasetRefreshTimer);
 
   // Apply Chart.js global defaults (retry until library is ready)
   var chartRetry = 0;
