@@ -1214,6 +1214,61 @@
       height: 100%;
       min-height: 240px;
     }
+    .data-grid-wrap{
+      width: 100%;
+      height: 100%;
+      min-height: 240px;
+      overflow: auto;
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      background: var(--surface-1);
+    }
+    .data-grid-table{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      color: var(--text-2);
+    }
+    .data-grid-table thead th{
+      position: sticky;
+      top: 0;
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-2);
+      white-space: nowrap;
+    }
+    .data-grid-table tbody td{
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border-1);
+      vertical-align: top;
+      white-space: nowrap;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-grid-table tbody tr:nth-child(even) td{
+      background: rgba(29,39,52,0.02);
+    }
+    .data-grid-table .num{
+      text-align: right;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .data-grid-table .rownum{
+      width: 1%;
+      text-align: right;
+      color: var(--text-4);
+      font-family: var(--font-mono);
+    }
+    .data-grid-note{
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-4);
+      font-family: var(--font-mono);
+    }
 
     /* Empty / placeholder chart */
     .chart-empty{
@@ -1431,6 +1486,24 @@
       font-size: 11px;
       color: var(--text-4);
       line-height: 1.5;
+    }
+    .field-checklist{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      max-height: 180px;
+      overflow: auto;
+      padding: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+    }
+    .field-check{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-2);
     }
 
     /* ═══════════════════════════════════════════════
@@ -1671,6 +1744,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export PNG
       </button>
+      <button class="btn btn-ghost btn-sm" id="printBtn" disabled title="Print dashboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
       <button class="btn btn-ghost btn-sm" id="exportCsvBtn" disabled title="Download cleaned data as CSV">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Data CSV
@@ -1748,9 +1825,9 @@ var DB_NAME    = 'glimpse-v1';
 var DB_VERSION = 1;
 var STORE_DS   = 'datasets';
 var STORE_DASH = 'dashboards';
-var MAX_FILE_MB = 50;
-var WARN_FILE_MB = 10;
-var MAX_ROWS_DEFAULT = 100000;
+var MAX_FILE_MB = 250;
+var WARN_FILE_MB = 25;
+var MAX_ROWS_DEFAULT = 1000000;
 var SAMPLE_ROWS = 500; // rows to profile for type detection
 var TOP_N_CATS  = 15;  // max categories in bar chart
 
@@ -1763,6 +1840,8 @@ var CHART_COLORS = [
 var CHART_COLORS_BORDER = CHART_COLORS.map(function(c){
   return c.replace('0.85','1');
 });
+var SINGLE_CHART_COLOR = 'rgba(15,159,184,0.82)';
+var SINGLE_CHART_COLOR_BORDER = 'rgba(15,159,184,1)';
 
 // ─── STATE ────────────────────────────────────────────────────────
 var App = {
@@ -1776,7 +1855,8 @@ var App = {
   pendingFile: null,
   drawerField: null,
   isDirty: false,          // unsaved changes guard
-  isEditMode: true
+  isEditMode: true,
+  renderObserver: null
 };
 
 function activeDataset() {
@@ -2361,24 +2441,38 @@ function destroyChart(chartId) {
   }
 }
 
-function renderChart(canvasId, chartDef, ds) {
+function renderChart(canvasId, chartDef, ds, filteredRows) {
   var canvas = document.getElementById(canvasId);
   if (!canvas) return;
   destroyChart(chartDef.id);
   canvas.style.display = '';
   var oldEmpty = canvas.parentElement && canvas.parentElement.querySelector('.chart-empty');
   if (oldEmpty) oldEmpty.remove();
+  var oldGrid = canvas.parentElement && canvas.parentElement.querySelector('.data-grid-wrap');
+  if (oldGrid) oldGrid.remove();
 
-  var rows    = applyFilters(ds.rows, ds.schema);
+  var rows    = filteredRows || applyFilters(ds.rows, ds.schema);
   var schema  = ds.schema;
   var xField  = schema[chartDef.xField];
   var yField  = chartDef.yField !== null && chartDef.yField !== undefined ? schema[chartDef.yField] : null;
   var agg     = chartDef.agg || 'sum';
+  var sortDir = chartDef.sortDir || 'desc';
+  var colorMode = chartDef.colorMode || 'multi';
+  var validationError = validateChartDefinition(chartDef, schema);
+  if (validationError) { showChartEmpty(canvas, validationError); return; }
 
   var config;
 
   try {
     switch (chartDef.type) {
+      case 'table': {
+        renderDataGrid(canvas, buildTableModel(rows, schema, chartDef));
+        return;
+      }
+      case 'pivot': {
+        renderDataGrid(canvas, buildPivotModel(rows, schema, chartDef));
+        return;
+      }
 
       case 'line': {
         var tsData = aggTimeSeries(rows, schema, chartDef.xField, chartDef.yField, agg);
@@ -2423,7 +2517,7 @@ function renderChart(canvasId, chartDef, ds) {
       }
 
       case 'bar': {
-        var aggData = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg);
+        var aggData = sortAggData(aggRows(rows, schema, chartDef.xField, chartDef.yField, agg), sortDir);
         var top     = aggData.slice(0, TOP_N_CATS);
         var hasOther = aggData.length > TOP_N_CATS;
         if (hasOther) {
@@ -2438,7 +2532,9 @@ function renderChart(canvasId, chartDef, ds) {
             datasets: [{
               label: yField ? aggDisplayLabel(agg) + ' of ' + yField.label : 'Count',
               data: top.map(function(r){ return r.value; }),
-              backgroundColor: top.map(function(_, i){ return CHART_COLORS[i % CHART_COLORS.length]; }),
+              backgroundColor: chartColorsFor(top.length, colorMode, false),
+              borderColor: chartColorsFor(top.length, colorMode, true),
+              borderWidth: 1,
               borderRadius: 5,
               borderSkipped: false,
             }]
@@ -2456,8 +2552,8 @@ function renderChart(canvasId, chartDef, ds) {
       }
 
       case 'hbar': {
-        var aggData2 = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg);
-        var topH     = aggData2.slice(0, TOP_N_CATS).reverse(); // reversed for horizontal
+        var aggData2 = sortAggData(aggRows(rows, schema, chartDef.xField, chartDef.yField, agg), sortDir);
+        var topH     = aggData2.slice(0, TOP_N_CATS);
         if (!topH.length) { showChartEmpty(canvas, 'No data to display'); return; }
         config = {
           type: 'bar',
@@ -2466,7 +2562,9 @@ function renderChart(canvasId, chartDef, ds) {
             datasets: [{
               label: yField ? aggDisplayLabel(agg) + ' of ' + yField.label : 'Count',
               data: topH.map(function(r){ return r.value; }),
-              backgroundColor: 'rgba(15,159,184,0.75)',
+              backgroundColor: chartColorsFor(topH.length, colorMode, false),
+              borderColor: chartColorsFor(topH.length, colorMode, true),
+              borderWidth: 1,
               borderRadius: 4,
               borderSkipped: false
             }]
@@ -2494,7 +2592,9 @@ function renderChart(canvasId, chartDef, ds) {
             datasets: [{
               label: 'Frequency',
               data: histData.data,
-              backgroundColor: 'rgba(167,139,250,0.75)',
+              backgroundColor: chartColorsFor(histData.data.length, colorMode, false),
+              borderColor: chartColorsFor(histData.data.length, colorMode, true),
+              borderWidth: 1,
               borderRadius: 3,
               borderSkipped: false,
               categoryPercentage: 0.98,
@@ -2570,7 +2670,7 @@ function renderChart(canvasId, chartDef, ds) {
 
       case 'pie':
       case 'doughnut': {
-        var pieData = aggRows(rows, schema, chartDef.xField, chartDef.yField, agg).slice(0, 8);
+        var pieData = sortAggData(aggRows(rows, schema, chartDef.xField, chartDef.yField, agg), sortDir).slice(0, 8);
         if (!pieData.length) { showChartEmpty(canvas, 'No data to display'); return; }
         config = {
           type: chartDef.type,
@@ -2578,7 +2678,7 @@ function renderChart(canvasId, chartDef, ds) {
             labels: pieData.map(function(r){ return r.label; }),
             datasets: [{
               data: pieData.map(function(r){ return r.value; }),
-              backgroundColor: CHART_COLORS.slice(0, pieData.length),
+              backgroundColor: chartColorsFor(pieData.length, colorMode, false),
               borderColor: '#f5f3ee',
               borderWidth: 2,
               hoverOffset: 4
@@ -2684,6 +2784,431 @@ function aggDisplayLabel(agg) {
     min: 'Min',
     max: 'Max'
   }[agg]) || capitalize(agg);
+}
+function fieldByIndex(schema, idx) {
+  return schema.find(function(field) { return field.index === idx; }) || schema[idx] || null;
+}
+function compareFieldValues(a, b, field, dir) {
+  var direction = dir === 'asc' ? 1 : -1;
+  var av = a, bv = b;
+  if (field && (field.type === 'integer' || field.type === 'decimal')) {
+    av = safeNumber(a);
+    bv = safeNumber(b);
+    if (av === null) av = dir === 'asc' ? Infinity : -Infinity;
+    if (bv === null) bv = dir === 'asc' ? Infinity : -Infinity;
+  } else if (field && (field.type === 'date' || field.type === 'datetime')) {
+    av = safeDate(String(a || ''));
+    bv = safeDate(String(b || ''));
+    av = av ? av.getTime() : (dir === 'asc' ? Infinity : -Infinity);
+    bv = bv ? bv.getTime() : (dir === 'asc' ? Infinity : -Infinity);
+  } else {
+    av = String(a === null || a === undefined ? '' : a).toLowerCase();
+    bv = String(b === null || b === undefined ? '' : b).toLowerCase();
+  }
+  if (av < bv) return -1 * direction;
+  if (av > bv) return 1 * direction;
+  return 0;
+}
+function sortAggData(items, dir) {
+  var out = items.slice();
+  out.sort(function(a, b) {
+    return dir === 'asc' ? a.value - b.value : b.value - a.value;
+  });
+  return out;
+}
+function coerceTableCell(value, field) {
+  if (value === null || value === undefined || value === '') return '—';
+  if (field && (field.type === 'integer' || field.type === 'decimal')) {
+    var num = safeNumber(value);
+    return num === null ? String(value) : fmtNum(num);
+  }
+  return String(value);
+}
+function chartColorsFor(count, mode, border) {
+  var source = border ? CHART_COLORS_BORDER : CHART_COLORS;
+  var single = border ? SINGLE_CHART_COLOR_BORDER : SINGLE_CHART_COLOR;
+  if (mode === 'single') return new Array(count).fill(single);
+  return new Array(count).fill(null).map(function(_, index) {
+    return source[index % source.length];
+  });
+}
+function exportScaleFor(width, height) {
+  var area = width * height;
+  var dpr = Math.max(1, Math.ceil(window.devicePixelRatio || 1));
+  if (area < 2500000) return Math.min(4, dpr + 1);
+  if (area < 6000000) return Math.min(3, dpr + 1);
+  return Math.max(2, dpr);
+}
+function nextFrame() {
+  return new Promise(function(resolve) {
+    requestAnimationFrame(function() { resolve(); });
+  });
+}
+function aggregateValues(values, aggFn) {
+  if (!values.length) return 0;
+  switch (aggFn) {
+    case 'countd': return new Set(values.map(function(v){ return String(v).toLowerCase(); })).size;
+    case 'count': return values.length;
+    case 'avg':
+      var avgNums = values.map(safeNumber).filter(function(v){ return v !== null; });
+      return avgNums.length ? avgNums.reduce(function(a,b){ return a+b; }, 0) / avgNums.length : 0;
+    case 'min':
+      var minNums = values.map(safeNumber).filter(function(v){ return v !== null; });
+      return minNums.length ? Math.min.apply(null, minNums) : 0;
+    case 'max':
+      var maxNums = values.map(safeNumber).filter(function(v){ return v !== null; });
+      return maxNums.length ? Math.max.apply(null, maxNums) : 0;
+    default:
+      var sumNums = values.map(safeNumber).filter(function(v){ return v !== null; });
+      return sumNums.reduce(function(a,b){ return a+b; }, 0);
+  }
+}
+function buildTableModel(rows, schema, chartDef) {
+  var indices = (chartDef.displayFields && chartDef.displayFields.length ? chartDef.displayFields : [chartDef.xField, chartDef.yField, chartDef.seriesField]).filter(function(idx, pos, arr) {
+    return idx !== null && idx !== undefined && arr.indexOf(idx) === pos;
+  });
+  if (!indices.length) return { headers: [], rows: [], note: 'Pick at least one column.' };
+  var sortedRows = rows.slice();
+  if (chartDef.xField !== null && chartDef.xField !== undefined) {
+    var sortField = fieldByIndex(schema, chartDef.xField);
+    sortedRows.sort(function(a, b) {
+      return compareFieldValues(a[chartDef.xField], b[chartDef.xField], sortField, chartDef.sortDir || 'desc');
+    });
+  }
+  var limitedRows = sortedRows.slice(0, chartDef.limit || 20);
+  var headers = indices.map(function(idx) { return fieldByIndex(schema, idx); });
+  if (chartDef.showRowNumbers) headers.unshift({ label: '#' });
+  return {
+    headers: headers,
+    rows: limitedRows.map(function(row, rowIndex) {
+      var cells = indices.map(function(idx) {
+        var field = fieldByIndex(schema, idx);
+        return { text: coerceTableCell(row[idx], field), raw: row[idx], field: field, className: field && (field.type === 'integer' || field.type === 'decimal') ? 'num' : '' };
+      });
+      if (chartDef.showRowNumbers) cells.unshift({ text: String(rowIndex + 1), className: 'rownum' });
+      return cells;
+    }),
+    note: sortedRows.length > limitedRows.length ? 'Showing first ' + limitedRows.length + ' of ' + sortedRows.length.toLocaleString() + ' rows' : sortedRows.length.toLocaleString() + ' rows'
+  };
+}
+function buildPivotModel(rows, schema, chartDef) {
+  var rowField = fieldByIndex(schema, chartDef.xField);
+  var colField = fieldByIndex(schema, chartDef.seriesField);
+  var valueField = chartDef.yField !== null && chartDef.yField !== undefined ? fieldByIndex(schema, chartDef.yField) : null;
+  if (!rowField || !colField) return { headers: [], rows: [], note: 'Choose a row field and a pivot column field.' };
+
+  var matrix = {};
+  var columnKeys = [];
+  rows.forEach(function(row) {
+    var rowKey = row[chartDef.xField] === null || row[chartDef.xField] === undefined || row[chartDef.xField] === '' ? '(blank)' : String(row[chartDef.xField]);
+    var colKey = row[chartDef.seriesField] === null || row[chartDef.seriesField] === undefined || row[chartDef.seriesField] === '' ? '(blank)' : String(row[chartDef.seriesField]);
+    if (!matrix[rowKey]) matrix[rowKey] = {};
+    if (!matrix[rowKey][colKey]) matrix[rowKey][colKey] = [];
+    if (chartDef.agg === 'count') {
+      matrix[rowKey][colKey].push(1);
+    } else if (chartDef.agg === 'countd') {
+      var distinctVal = valueField ? row[chartDef.yField] : row[chartDef.seriesField];
+      matrix[rowKey][colKey].push(distinctVal === null || distinctVal === undefined ? '(blank)' : String(distinctVal));
+    } else if (valueField) {
+      matrix[rowKey][colKey].push(row[chartDef.yField]);
+    }
+    if (columnKeys.indexOf(colKey) === -1) columnKeys.push(colKey);
+  });
+
+  columnKeys.sort(function(a, b) { return String(a).localeCompare(String(b)); });
+  var dataRows = Object.keys(matrix).map(function(rowKey) {
+    var out = { rowKey: rowKey, cells: [], total: 0 };
+    columnKeys.forEach(function(colKey) {
+      var value = aggregateValues(matrix[rowKey][colKey] || [], chartDef.agg || 'sum');
+      out.cells.push(value);
+      out.total += typeof value === 'number' ? value : 0;
+    });
+    return out;
+  });
+  dataRows.sort(function(a, b) {
+    return chartDef.sortDir === 'asc' ? a.total - b.total : b.total - a.total;
+  });
+  dataRows = dataRows.slice(0, chartDef.limit || 50);
+
+  var headers = [rowField.label].concat(columnKeys).concat(['Total']);
+  if (chartDef.showRowNumbers) headers.unshift('#');
+  return {
+    headers: headers,
+    rows: dataRows.map(function(row, rowIndex) {
+      var rowTotal = row.total;
+      var cells = [{ text: row.rowKey, field: rowField }];
+      row.cells.forEach(function(value) {
+        var pct = rowTotal ? Math.round((value / rowTotal) * 1000) / 10 : 0;
+        var text = chartDef.showPercent ? fmtNum(value) + ' (' + pct + '%)' : fmtNum(value);
+        cells.push({ text: text, raw: value, field: valueField, className: 'num' });
+      });
+      cells.push({
+        text: chartDef.showPercent ? fmtNum(rowTotal) + ' (' + (rowTotal ? '100' : '0') + '%)' : fmtNum(rowTotal),
+        raw: rowTotal,
+        field: valueField,
+        className: 'num'
+      });
+      if (chartDef.showRowNumbers) cells.unshift({ text: String(rowIndex + 1), className: 'rownum' });
+      return cells;
+    }),
+    note: dataRows.length + ' row groups · ' + columnKeys.length + ' pivot columns' + (chartDef.showPercent ? ' · percentages are share of each row total' : '')
+  };
+}
+function renderDataGrid(canvas, model) {
+  var wrap = canvas.parentElement;
+  if (!wrap) return;
+  canvas.style.display = 'none';
+  var oldGrid = wrap.querySelector('.data-grid-wrap');
+  if (oldGrid) oldGrid.remove();
+  var grid = document.createElement('div');
+  grid.className = 'data-grid-wrap';
+  if (!model.headers.length) {
+    grid.innerHTML = '<div class="chart-empty">No table data to display</div>';
+    wrap.appendChild(grid);
+    return;
+  }
+  var thead = '<thead><tr>' + model.headers.map(function(header) {
+    return '<th>' + escHTML(header.label || String(header)) + '</th>';
+  }).join('') + '</tr></thead>';
+  var tbody = '<tbody>' + model.rows.map(function(row) {
+    return '<tr>' + row.map(function(cell) {
+      var cls = cell.className ? ' class="' + escHTML(cell.className) + '"' : cell.field && (cell.field.type === 'integer' || cell.field.type === 'decimal') ? ' class="num"' : '';
+      return '<td' + cls + '>' + escHTML(cell.text) + '</td>';
+    }).join('') + '</tr>';
+  }).join('') + '</tbody>';
+  grid.innerHTML = '<table class="data-grid-table">' + thead + tbody + '</table>' +
+    '<div class="data-grid-note">' + escHTML(model.note || '') + '</div>';
+  wrap.appendChild(grid);
+}
+function drawGridForExport(ctx, grid, x, y, w, h) {
+  var headers = Array.prototype.slice.call(grid.querySelectorAll('thead th')).map(function(th) { return th.textContent; });
+  var rows = Array.prototype.slice.call(grid.querySelectorAll('tbody tr')).map(function(tr) {
+    return Array.prototype.slice.call(tr.querySelectorAll('td')).map(function(td) { return td.textContent; });
+  });
+  var note = grid.querySelector('.data-grid-note');
+  if (!headers.length) return;
+  var cols = headers.length;
+  var innerX = x + 12;
+  var innerY = y + 36;
+  var innerW = w - 24;
+  var colW = innerW / cols;
+  var rowH = 20;
+  var maxRows = Math.max(1, Math.floor((h - 84) / rowH));
+
+  ctx.fillStyle = '#f2eee6';
+  ctx.fillRect(innerX, innerY, innerW, rowH);
+  ctx.strokeStyle = 'rgba(29,39,52,0.08)';
+  ctx.lineWidth = 1;
+  ctx.font = '600 11px Inter, sans-serif';
+  ctx.fillStyle = '#465366';
+  headers.forEach(function(header, colIndex) {
+    ctx.fillText(header, innerX + colIndex * colW + 6, innerY + 13);
+  });
+
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = '#465366';
+  rows.slice(0, maxRows).forEach(function(row, rowIndex) {
+    var rowY = innerY + rowH + rowIndex * rowH;
+    if (rowY + rowH > y + h - 8) return;
+    ctx.beginPath();
+    ctx.moveTo(innerX, rowY);
+    ctx.lineTo(innerX + innerW, rowY);
+    ctx.stroke();
+    row.forEach(function(cell, colIndex) {
+      ctx.fillText(String(cell).slice(0, 18), innerX + colIndex * colW + 6, rowY + 13);
+    });
+  });
+  if (note) {
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillStyle = '#738094';
+    ctx.fillText(note.textContent.slice(0, 120), innerX, y + h - 12);
+  }
+}
+var ChartFormState = { new: null, edit: null };
+function includedChartFields(schema) {
+  return schema.filter(function(field) { return field.included && field.type !== 'empty'; });
+}
+function fieldsForKind(schema, kind) {
+  return includedChartFields(schema).filter(function(field) {
+    if (kind === 'temporal') return field.type === 'date' || field.type === 'datetime';
+    if (kind === 'numeric') return field.type === 'integer' || field.type === 'decimal';
+    return true;
+  });
+}
+function chartTypeSpec(type) {
+  switch (type) {
+    case 'line':
+      return { x: { label: 'Date / time field', kind: 'temporal', required: true }, y: { label: 'Measure field', kind: 'any', required: false }, agg: true, sort: false, series: false, displayFields: false, limit: false, values: true, rowNumbers: false, pivotPercent: false, colorMode: false };
+    case 'histogram':
+      return { x: { label: 'Numeric field', kind: 'numeric', required: true }, y: false, agg: false, sort: false, series: false, displayFields: false, limit: false, values: true, rowNumbers: false, pivotPercent: false, colorMode: true };
+    case 'scatter':
+      return { x: { label: 'X axis field', kind: 'numeric', required: true }, y: { label: 'Y axis field', kind: 'numeric', required: true }, agg: false, sort: false, series: false, displayFields: false, limit: false, values: false, rowNumbers: false, pivotPercent: false, colorMode: false };
+    case 'table':
+      return { x: { label: 'Sort by field', kind: 'any', required: false }, y: false, agg: false, sort: true, series: false, displayFields: true, limit: true, values: false, rowNumbers: true, pivotPercent: false, colorMode: false };
+    case 'pivot':
+      return { x: { label: 'Rows', kind: 'any', required: true }, y: { label: 'Measure / distinct field', kind: 'any', required: false }, agg: true, sort: true, series: { label: 'Columns', kind: 'any', required: true }, displayFields: false, limit: true, values: false, rowNumbers: true, pivotPercent: true, colorMode: false };
+    case 'pie':
+    case 'doughnut':
+    case 'bar':
+    case 'hbar':
+    default:
+      return { x: { label: type === 'hbar' ? 'Category field' : 'Group by field', kind: 'any', required: true }, y: { label: 'Measure / distinct field', kind: 'any', required: false }, agg: true, sort: true, series: false, displayFields: false, limit: false, values: true, rowNumbers: false, pivotPercent: false, colorMode: true };
+  }
+}
+function yFieldKindFor(type, agg) {
+  if (type === 'scatter') return 'numeric';
+  if (type === 'histogram' || type === 'table') return 'any';
+  if (agg === 'sum' || agg === 'avg' || agg === 'min' || agg === 'max') return 'numeric';
+  return 'any';
+}
+function fieldOptionsHTML(fields, selected, allowNone) {
+  var html = allowNone ? '<option value="">- none -</option>' : '';
+  html += fields.map(function(field) {
+    return '<option value="' + field.index + '"' + (field.index === selected ? ' selected' : '') + '>' + escHTML(field.label) + ' (' + field.type + ')</option>';
+  }).join('');
+  return html;
+}
+function checkboxListHTML(fields, selected) {
+  var chosen = Array.isArray(selected) ? selected : [];
+  return fields.map(function(field) {
+    return '<label class="field-check"><input type="checkbox" data-display-field value="' + field.index + '"' + (chosen.indexOf(field.index) > -1 ? ' checked' : '') + '/><span>' + escHTML(field.label) + ' <span style="color:var(--text-4)">(' + escHTML(field.type) + ')</span></span></label>';
+  }).join('');
+}
+function defaultDisplayFields(schema) {
+  return includedChartFields(schema).slice(0, 4).map(function(field) { return field.index; });
+}
+function captureChartFormState(mode) {
+  var state = ChartFormState[mode];
+  if (!state) return;
+  var prefix = mode === 'new' ? 'newChart' : 'edit';
+  function maybeInt(id) {
+    var el = document.getElementById(prefix + id);
+    if (!el || el.value === '') return null;
+    return parseInt(el.value, 10);
+  }
+  function maybeText(id) {
+    var el = document.getElementById(prefix + id);
+    return el ? el.value : '';
+  }
+  state.type = maybeText('Type') || state.type;
+  state.title = maybeText('Title') || state.title;
+  state.xField = maybeInt('X');
+  state.yField = maybeInt('Y');
+  state.seriesField = maybeInt('Series');
+  state.agg = maybeText('Agg') || state.agg;
+  state.sortDir = maybeText('Sort') || state.sortDir;
+  state.limit = parseInt(maybeText('Limit') || state.limit || 20, 10);
+  var showEl = document.getElementById(prefix + 'ShowValues');
+  if (showEl) state.showValues = showEl.value === 'on';
+  var spanEl = document.getElementById(prefix + 'Span');
+  if (spanEl) state.span = parseInt(spanEl.value, 10);
+  var rowNumberEl = document.getElementById(prefix + 'RowNumbers');
+  if (rowNumberEl) state.showRowNumbers = rowNumberEl.value === 'on';
+  var percentEl = document.getElementById(prefix + 'Percent');
+  if (percentEl) state.showPercent = percentEl.value === 'on';
+  var colorEl = document.getElementById(prefix + 'ColorMode');
+  if (colorEl) state.colorMode = colorEl.value || state.colorMode;
+  var selectedFields = Array.prototype.slice.call(document.querySelectorAll('[data-display-field]:checked')).map(function(input) {
+    return parseInt(input.value, 10);
+  });
+  if (document.querySelector('[data-display-field]')) state.displayFields = selectedFields;
+}
+function syncChartForm(mode) {
+  captureChartFormState(mode);
+  var state = ChartFormState[mode];
+  var ds = activeDataset();
+  if (!state || !ds) return;
+  var prefix = mode === 'new' ? 'newChart' : 'edit';
+  var spec = chartTypeSpec(state.type);
+  var schema = ds.schema;
+  var dynamic = document.getElementById(mode === 'new' ? 'newChartDynamic' : 'editChartDynamic');
+  if (!dynamic) return;
+
+  var xFields = spec.x ? fieldsForKind(schema, spec.x.kind) : [];
+  var yFields = spec.y ? fieldsForKind(schema, yFieldKindFor(state.type, state.agg || 'sum')) : [];
+  var seriesFields = spec.series ? fieldsForKind(schema, spec.series.kind) : [];
+  var anyFields = fieldsForKind(schema, 'any');
+  if (!Array.isArray(state.displayFields) || !state.displayFields.length) state.displayFields = defaultDisplayFields(schema);
+  if (spec.limit && (!state.limit || !isFinite(state.limit))) state.limit = 20;
+
+  var html = '';
+  if (spec.x) {
+    html += '<div class="modal-field"><label class="modal-field-label">' + spec.x.label + '</label><select class="modal-field-select" id="' + prefix + 'X">' + fieldOptionsHTML(xFields, state.xField, !spec.x.required) + '</select></div>';
+  }
+  if (spec.y) {
+    html += '<div class="modal-field"><label class="modal-field-label">' + spec.y.label + '</label><select class="modal-field-select" id="' + prefix + 'Y">' + fieldOptionsHTML(yFields, state.yField, !spec.y.required) + '</select></div>';
+  }
+  if (spec.series) {
+    html += '<div class="modal-field"><label class="modal-field-label">' + spec.series.label + '</label><select class="modal-field-select" id="' + prefix + 'Series">' + fieldOptionsHTML(seriesFields, state.seriesField, !spec.series.required) + '</select></div>';
+  }
+  if (spec.displayFields) {
+    html += '<div class="modal-field"><label class="modal-field-label">Columns to display</label><div class="field-checklist">' + checkboxListHTML(anyFields, state.displayFields) + '</div><div class="modal-field-hint">Pick the fields you want in the table.</div></div>';
+  }
+  if (spec.agg) {
+    html += '<div class="modal-field"><label class="modal-field-label">Aggregation</label><select class="modal-field-select" id="' + prefix + 'Agg" onchange="syncChartForm(\'' + mode + '\')">' +
+      ['sum','avg','count','countd','min','max'].map(function(a) {
+        return '<option value="' + a + '"' + ((state.agg || 'sum') === a ? ' selected' : '') + '>' + aggDisplayLabel(a) + '</option>';
+      }).join('') +
+      '</select></div>';
+  }
+  if (spec.sort) {
+    html += '<div class="modal-field"><label class="modal-field-label">Sort order</label><select class="modal-field-select" id="' + prefix + 'Sort"><option value="desc"' + ((state.sortDir || 'desc') === 'desc' ? ' selected' : '') + '>Descending</option><option value="asc"' + (state.sortDir === 'asc' ? ' selected' : '') + '>Ascending</option></select></div>';
+  }
+  if (spec.limit) {
+    html += '<div class="modal-field"><label class="modal-field-label">' + (state.type === 'table' ? 'Rows to show' : 'Row groups to show') + '</label><input class="modal-field-input" id="' + prefix + 'Limit" type="number" min="5" max="200" value="' + escHTML(String(state.limit || 20)) + '"/><div class="modal-field-hint">Keep this small so the card stays readable.</div></div>';
+  }
+  if (spec.rowNumbers) {
+    html += '<div class="modal-field"><label class="modal-field-label">Row numbers</label><select class="modal-field-select" id="' + prefix + 'RowNumbers"><option value="off"' + (!state.showRowNumbers ? ' selected' : '') + '>Hidden</option><option value="on"' + (state.showRowNumbers ? ' selected' : '') + '>Shown</option></select></div>';
+  }
+  if (spec.pivotPercent) {
+    html += '<div class="modal-field"><label class="modal-field-label">Percentages</label><select class="modal-field-select" id="' + prefix + 'Percent"><option value="off"' + (!state.showPercent ? ' selected' : '') + '>Values only</option><option value="on"' + (state.showPercent ? ' selected' : '') + '>Value + row %</option></select><div class="modal-field-hint">Percentages are calculated within each row group.</div></div>';
+  }
+  if (spec.colorMode) {
+    html += '<div class="modal-field"><label class="modal-field-label">Color mode</label><select class="modal-field-select" id="' + prefix + 'ColorMode"><option value="multi"' + ((state.colorMode || 'multi') === 'multi' ? ' selected' : '') + '>Multiple colors</option><option value="single"' + (state.colorMode === 'single' ? ' selected' : '') + '>Single color</option></select></div>';
+  }
+  dynamic.innerHTML = html;
+}
+function validateChartDefinition(def, schema) {
+  var xField = def.xField !== null && def.xField !== undefined ? fieldByIndex(schema, def.xField) : null;
+  var yField = def.yField !== null && def.yField !== undefined ? fieldByIndex(schema, def.yField) : null;
+  var seriesField = def.seriesField !== null && def.seriesField !== undefined ? fieldByIndex(schema, def.seriesField) : null;
+  var numericAgg = ['sum','avg','min','max'].indexOf(def.agg) > -1;
+
+  switch (def.type) {
+    case 'line':
+      if (!xField || (xField.type !== 'date' && xField.type !== 'datetime')) return 'Line chart requires a date or datetime X field.';
+      if (numericAgg && (!yField || (yField.type !== 'integer' && yField.type !== 'decimal'))) return 'Line chart with ' + aggDisplayLabel(def.agg) + ' requires a numeric measure field.';
+      if (def.agg === 'countd' && !yField) return 'Count unique requires a field to count.';
+      return null;
+    case 'histogram':
+      if (!xField || (xField.type !== 'integer' && xField.type !== 'decimal')) return 'Histogram requires a numeric field.';
+      return null;
+    case 'scatter':
+      if (!xField || (xField.type !== 'integer' && xField.type !== 'decimal')) return 'Scatter plot requires a numeric X field.';
+      if (!yField || (yField.type !== 'integer' && yField.type !== 'decimal')) return 'Scatter plot requires a numeric Y field.';
+      return null;
+    case 'table':
+      if (!Array.isArray(def.displayFields) || !def.displayFields.length) return 'Table view requires at least one display column.';
+      if (def.limit && (def.limit < 1 || def.limit > 200)) return 'Rows to show must be between 1 and 200.';
+      return null;
+    case 'pivot':
+      if (!xField) return 'Pivot table requires a row field.';
+      if (!seriesField) return 'Pivot table requires a pivot column field.';
+      if (numericAgg && (!yField || (yField.type !== 'integer' && yField.type !== 'decimal'))) return 'Pivot table with ' + aggDisplayLabel(def.agg) + ' requires a numeric measure field.';
+      if (def.agg === 'countd' && !yField) return 'Count unique requires a field to count.';
+      if (def.limit && (def.limit < 1 || def.limit > 200)) return 'Row groups to show must be between 1 and 200.';
+      return null;
+    case 'bar':
+    case 'hbar':
+    case 'pie':
+    case 'doughnut':
+      if (!xField) return 'This chart requires a group field.';
+      if (numericAgg && (!yField || (yField.type !== 'integer' && yField.type !== 'decimal'))) return aggDisplayLabel(def.agg) + ' requires a numeric measure field.';
+      if (def.agg === 'countd' && !yField) return 'Count unique requires a field to count.';
+      return null;
+    default:
+      return null;
+  }
 }
 function escHTML(s) {
   return String(s)
@@ -2839,6 +3364,7 @@ function render() {
   if (!main) return;
 
   // Destroy all existing Chart.js instances before re-rendering
+  disconnectRenderObserver();
   Object.keys(App.charts).forEach(destroyChart);
 
   switch (App.step) {
@@ -2855,8 +3381,10 @@ function render() {
 function updateHeaderButtons() {
   var hasDash = App.step === 'dashboard';
   var expPng  = document.getElementById('exportPngBtn');
+  var printBtn = document.getElementById('printBtn');
   var expCsv  = document.getElementById('exportCsvBtn');
   if (expPng) expPng.disabled = !hasDash;
+  if (printBtn) printBtn.disabled = !hasDash;
   if (expCsv) expCsv.disabled = !App.activeDatasetId;
 }
 
@@ -2898,8 +3426,8 @@ function renderUpload() {
       '<div class="upload-sub">or click to browse - CSV, TSV, or TXT</div>' +
       '<button class="btn btn-primary" style="margin-bottom:var(--space-5)" onclick="event.stopPropagation();triggerFileInput()">Browse files</button>' +
       '<div class="upload-info">' +
-        '<span class="upload-info-item">Up to 50 MB</span>' +
-        '<span class="upload-info-item">Up to 100K rows</span>' +
+        '<span class="upload-info-item">Up to 250 MB</span>' +
+        '<span class="upload-info-item">Up to 1M rows</span>' +
         '<span class="upload-info-item">CSV · TSV · TXT</span>' +
         '<span class="upload-info-item">100% private</span>' +
       '</div>' +
@@ -2980,7 +3508,7 @@ function handleFile(file) {
     openModal(
       '<button class="modal-close" onclick="closeModal()">✕</button>' +
       '<h2>Large file detected</h2>' +
-      '<p>This file is ' + fmtBytes(file.size) + '. Glimpse will load up to 100,000 rows. The rest will be profiled for type detection but not stored.</p>' +
+      '<p>This file is ' + fmtBytes(file.size) + '. Glimpse will load up to ' + MAX_ROWS_DEFAULT.toLocaleString() + ' rows. Very large files may still be limited by your browser memory.</p>' +
       '<div class="modal-actions">' +
         '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
         '<button class="btn btn-primary" onclick="closeModal();proceedWithFile()">Continue</button>' +
@@ -3505,8 +4033,10 @@ function renderFilterBar(schema) {
 function renderChartCard(ch, schema) {
   var xField = schema[ch.xField];
   var yField = ch.yField !== null && ch.yField !== undefined ? schema[ch.yField] : null;
+  var seriesField = ch.seriesField !== null && ch.seriesField !== undefined ? schema[ch.seriesField] : null;
   var spanClass = ch.span === 12 ? 'span-12' : ch.span === 8 ? 'span-8' : ch.span === 4 ? 'span-4' : 'span-6';
-  var chartTypeLabel = {line:'Line', bar:'Bar', hbar:'Horiz. Bar', histogram:'Histogram', scatter:'Scatter', pie:'Pie', doughnut:'Donut'}[ch.type] || ch.type;
+  var chartTypeLabel = {line:'Line', bar:'Bar', hbar:'Horiz. Bar', histogram:'Histogram', scatter:'Scatter', pie:'Pie', doughnut:'Donut', table:'Table', pivot:'Pivot'}[ch.type] || ch.type;
+  var canToggleValues = ch.type !== 'table' && ch.type !== 'pivot';
 
   return '<div class="chart-card ' + spanClass + '" id="card-' + ch.id + '" data-id="' + ch.id + '">' +
     '<div class="chart-card-head">' +
@@ -3519,6 +4049,7 @@ function renderChartCard(ch, schema) {
           '<div class="chart-card-sub">' + chartTypeLabel +
             (xField ? ' · ' + escHTML(xField.label) : '') +
             (yField ? ' · ' + escHTML(yField.label) : '') +
+            (seriesField ? ' · ' + escHTML(seriesField.label) : '') +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -3526,9 +4057,9 @@ function renderChartCard(ch, schema) {
         '<button class="chart-action-btn edit-only" onclick="openEditChartModal(\'' + ch.id + '\')" title="Edit chart" aria-label="Edit chart">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
         '</button>' +
-        '<button class="chart-action-btn" onclick="toggleChartValues(\'' + ch.id + '\')" title="' + (ch.showValues ? 'Hide values' : 'Show values') + '" aria-label="Toggle chart values" aria-pressed="' + (!!ch.showValues) + '">' +
+        (canToggleValues ? '<button class="chart-action-btn" onclick="toggleChartValues(\'' + ch.id + '\')" title="' + (ch.showValues ? 'Hide values' : 'Show values') + '" aria-label="Toggle chart values" aria-pressed="' + (!!ch.showValues) + '">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h18"/><path d="M7 17V7"/><path d="M12 17V11"/><path d="M17 17V4"/></svg>' +
-        '</button>' +
+        '</button>' : '') +
         '<button class="chart-action-btn" onclick="exportChartPng(\'' + ch.id + '\')" title="Export as PNG" aria-label="Export chart">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
         '</button>' +
@@ -3544,25 +4075,81 @@ function renderChartCard(ch, schema) {
 }
 
 function bindDashboard() {
-  // Render all charts after DOM is ready
-  setTimeout(function() {
-    renderAllCharts();
-    bindDashboardDrag();
-  }, 50);
+  renderAllCharts(false);
+  bindDashboardDrag();
 }
 
-function renderAllCharts() {
-  var ds = activeDataset();
-  if (!ds) return;
-  var charts = activeDashboard();
-  charts.forEach(function(ch) {
-    renderChart('canvas-' + ch.id, ch, ds);
+function disconnectRenderObserver() {
+  if (App.renderObserver) {
+    App.renderObserver.disconnect();
+    App.renderObserver = null;
+  }
+}
+function renderCardNode(card, chartMap, ds, filteredRows, force) {
+  if (!card) return;
+  if (!force && card.dataset.rendered === '1') return;
+  var chartDef = chartMap[card.dataset.id];
+  if (!chartDef) return;
+  renderChart('canvas-' + chartDef.id, chartDef, ds, filteredRows);
+  card.dataset.rendered = '1';
+}
+function renderCardsInBatches(cards, chartMap, ds, filteredRows, batchSize) {
+  return new Promise(function(resolve) {
+    var index = 0;
+    function step() {
+      var end = Math.min(index + batchSize, cards.length);
+      for (; index < end; index++) {
+        renderCardNode(cards[index], chartMap, ds, filteredRows, true);
+      }
+      if (index < cards.length) {
+        requestAnimationFrame(step);
+      } else {
+        resolve();
+      }
+    }
+    if (!cards.length) { resolve(); return; }
+    requestAnimationFrame(step);
   });
+}
+function renderAllCharts(forceAll) {
+  var ds = activeDataset();
+  if (!ds) return Promise.resolve();
+  var charts = activeDashboard();
+  var filteredRows = applyFilters(ds.rows, ds.schema);
+  var chartMap = {};
+  var cards = charts.map(function(ch) {
+    chartMap[ch.id] = ch;
+    return document.getElementById('card-' + ch.id);
+  }).filter(Boolean);
+  disconnectRenderObserver();
+  cards.forEach(function(card) { card.dataset.rendered = ''; });
+
+  if (forceAll) return renderCardsInBatches(cards, chartMap, ds, filteredRows, 3);
+
+  cards.slice(0, 3).forEach(function(card) {
+    renderCardNode(card, chartMap, ds, filteredRows, true);
+  });
+  var deferredCards = cards.slice(3);
+  if (!deferredCards.length) return Promise.resolve();
+  if (!window.IntersectionObserver) return renderCardsInBatches(deferredCards, chartMap, ds, filteredRows, 2);
+
+  App.renderObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      renderCardNode(entry.target, chartMap, ds, filteredRows, false);
+      if (App.renderObserver) App.renderObserver.unobserve(entry.target);
+    });
+  }, { rootMargin: '280px 0px' });
+  deferredCards.forEach(function(card) {
+    if (App.renderObserver) App.renderObserver.observe(card);
+  });
+  return Promise.resolve();
 }
 
 function refreshAllCharts() {
-  renderAllCharts();
-  toast('Charts refreshed', 'success');
+  renderAllCharts(true).then(function() {
+    toast('Charts refreshed', 'success');
+  });
 }
 
 function openDashboardNameModal() {
@@ -3713,17 +4300,28 @@ function removeFilter(i) {
 function openAddChartModal() {
   var ds = activeDataset();
   if (!ds) return;
-  var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
-  var fieldOpts = '<option value="">- none -</option>' + included.map(function(f) {
-    return '<option value="' + f.index + '">' + escHTML(f.label) + ' (' + f.type + ')</option>';
-  }).join('');
-
+  ChartFormState.new = {
+    type: 'bar',
+    title: '',
+    xField: null,
+    yField: null,
+    seriesField: null,
+    agg: 'sum',
+    sortDir: 'desc',
+    span: 6,
+    showValues: false,
+    showRowNumbers: false,
+    showPercent: false,
+    colorMode: 'multi',
+    limit: 20,
+    displayFields: defaultDisplayFields(ds.schema)
+  };
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<h2>Add chart</h2>' +
     '<div class="modal-field">' +
       '<label class="modal-field-label">Chart type</label>' +
-      '<select class="modal-field-select" id="newChartType">' +
+      '<select class="modal-field-select" id="newChartType" onchange="syncChartForm(\'new\')">' +
         '<option value="bar">Bar chart</option>' +
         '<option value="hbar">Horizontal bar</option>' +
         '<option value="line">Line chart (time series)</option>' +
@@ -3731,27 +4329,11 @@ function openAddChartModal() {
         '<option value="scatter">Scatter plot</option>' +
         '<option value="pie">Pie chart</option>' +
         '<option value="doughnut">Donut chart</option>' +
+        '<option value="table">Table</option>' +
+        '<option value="pivot">Pivot table</option>' +
       '</select>' +
     '</div>' +
-    '<div class="modal-field">' +
-      '<label class="modal-field-label">X axis / primary field</label>' +
-      '<select class="modal-field-select" id="newChartX">' + fieldOpts + '</select>' +
-    '</div>' +
-    '<div class="modal-field">' +
-      '<label class="modal-field-label">Y axis / measure (optional)</label>' +
-      '<select class="modal-field-select" id="newChartY">' + fieldOpts + '</select>' +
-    '</div>' +
-    '<div class="modal-field">' +
-      '<label class="modal-field-label">Aggregation</label>' +
-      '<select class="modal-field-select" id="newChartAgg">' +
-        '<option value="sum">Sum</option>' +
-        '<option value="avg">Average</option>' +
-        '<option value="count">Count</option>' +
-        '<option value="countd">Count unique</option>' +
-        '<option value="min">Min</option>' +
-        '<option value="max">Max</option>' +
-      '</select>' +
-    '</div>' +
+    '<div id="newChartDynamic"></div>' +
     '<div class="modal-field">' +
       '<label class="modal-field-label">Title</label>' +
       '<input class="modal-field-input" type="text" id="newChartTitle" placeholder="Chart title…"/>' +
@@ -3761,35 +4343,40 @@ function openAddChartModal() {
       '<button class="btn btn-primary" onclick="addChart()">Add chart</button>' +
     '</div>'
   );
+  syncChartForm('new');
 }
 
 function addChart() {
+  captureChartFormState('new');
+  var state = ChartFormState.new || {};
   var type  = document.getElementById('newChartType');
-  var xEl   = document.getElementById('newChartX');
-  var yEl   = document.getElementById('newChartY');
-  var agg   = document.getElementById('newChartAgg');
   var title = document.getElementById('newChartTitle');
-  if (!type || !xEl) return;
-
-  var xVal = xEl.value !== '' ? parseInt(xEl.value, 10) : null;
-  var yVal = yEl && yEl.value !== '' ? parseInt(yEl.value, 10) : null;
-  if (xVal === null) { toast('Select an X axis field', 'warn'); return; }
+  if (!type) return;
 
   var ds     = activeDataset();
-  var xField = ds && ds.schema[xVal];
-  var yField = ds && yVal !== null ? ds.schema[yVal] : null;
+  var xField = ds && state.xField !== null ? fieldByIndex(ds.schema, state.xField) : null;
+  var yField = ds && state.yField !== null ? fieldByIndex(ds.schema, state.yField) : null;
   var autoTitle = (yField ? yField.label + ' by ' : '') + (xField ? xField.label : '');
 
   var ch = {
     id:     genId(),
     type:   type.value,
     title:  (title && title.value.trim()) || autoTitle,
-    xField: xVal,
-    yField: yVal,
-    agg:    agg ? agg.value : 'sum',
+    xField: state.xField,
+    yField: state.yField,
+    seriesField: state.seriesField,
+    displayFields: state.displayFields,
+    agg:    state.agg || 'sum',
     span:   6,
-    showValues: false
+    sortDir: state.sortDir || 'desc',
+    showValues: false,
+    showRowNumbers: !!state.showRowNumbers,
+    showPercent: !!state.showPercent,
+    colorMode: state.colorMode || 'multi',
+    limit: state.limit || (type.value === 'pivot' ? 20 : 20)
   };
+  var validationError = validateChartDefinition(ch, ds.schema);
+  if (validationError) { toast(validationError, 'warn', 3500); return; }
 
   App.dashboards[App.activeDatasetId].push(ch);
   saveDashboard(App.activeDatasetId, App.dashboards[App.activeDatasetId]);
@@ -3803,31 +4390,27 @@ function openEditChartModal(chartId) {
   var ds     = activeDataset();
   if (!ch || !ds) return;
 
-  var included = ds.schema.filter(function(f){ return f.included && f.type !== 'empty'; });
-  function fieldOpts(selectedIdx) {
-    return '<option value="">- none -</option>' + included.map(function(f) {
-      return '<option value="' + f.index + '"' + (f.index === selectedIdx ? ' selected' : '') + '>' + escHTML(f.label) + ' (' + f.type + ')</option>';
-    }).join('');
-  }
-
   function typeOpts(sel) {
-    return ['bar','hbar','line','histogram','scatter','pie','doughnut'].map(function(t) {
-      return '<option value="' + t + '"' + (t === sel ? ' selected' : '') + '>' + capitalize(t) + '</option>';
+    return ['bar','hbar','line','histogram','scatter','pie','doughnut','table','pivot'].map(function(t) {
+      return '<option value="' + t + '"' + (t === sel ? ' selected' : '') + '>' + ({hbar:'Horizontal bar',doughnut:'Donut',table:'Table',pivot:'Pivot table'}[t] || capitalize(t)) + '</option>';
     }).join('');
   }
-
-  function aggOpts(sel) {
-    return ['sum','avg','count','countd','min','max'].map(function(a) {
-      return '<option value="' + a + '"' + (a === sel ? ' selected' : '') + '>' + ({
-        sum: 'Sum',
-        avg: 'Average',
-        count: 'Count',
-        countd: 'Count unique',
-        min: 'Min',
-        max: 'Max'
-      }[a]) + '</option>';
-    }).join('');
-  }
+  ChartFormState.edit = {
+    type: ch.type,
+    title: ch.title,
+    xField: ch.xField !== undefined ? ch.xField : null,
+    yField: ch.yField !== undefined ? ch.yField : null,
+    seriesField: ch.seriesField !== undefined ? ch.seriesField : null,
+    displayFields: Array.isArray(ch.displayFields) ? ch.displayFields.slice() : defaultDisplayFields(ds.schema),
+    agg: ch.agg || 'sum',
+    sortDir: ch.sortDir || 'desc',
+    span: ch.span || 6,
+    showValues: !!ch.showValues,
+    showRowNumbers: !!ch.showRowNumbers,
+    showPercent: !!ch.showPercent,
+    colorMode: ch.colorMode || 'multi',
+    limit: ch.limit || 20
+  };
 
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
@@ -3835,13 +4418,8 @@ function openEditChartModal(chartId) {
     '<div class="modal-field"><label class="modal-field-label">Title</label>' +
       '<input class="modal-field-input" id="editTitle" value="' + escHTML(ch.title) + '"/></div>' +
     '<div class="modal-field"><label class="modal-field-label">Chart type</label>' +
-      '<select class="modal-field-select" id="editType">' + typeOpts(ch.type) + '</select></div>' +
-    '<div class="modal-field"><label class="modal-field-label">X axis / primary field</label>' +
-      '<select class="modal-field-select" id="editX">' + fieldOpts(ch.xField) + '</select></div>' +
-    '<div class="modal-field"><label class="modal-field-label">Y axis / measure</label>' +
-      '<select class="modal-field-select" id="editY">' + fieldOpts(ch.yField) + '</select></div>' +
-    '<div class="modal-field"><label class="modal-field-label">Aggregation</label>' +
-      '<select class="modal-field-select" id="editAgg">' + aggOpts(ch.agg) + '</select></div>' +
+      '<select class="modal-field-select" id="editType" onchange="syncChartForm(\'edit\')">' + typeOpts(ch.type) + '</select></div>' +
+    '<div id="editChartDynamic"></div>' +
     '<div class="modal-field"><label class="modal-field-label">Value labels</label>' +
       '<select class="modal-field-select" id="editShowValues">' +
         '<option value="off"' + (!ch.showValues ? ' selected' : '') + '>Hidden</option>' +
@@ -3856,28 +4434,37 @@ function openEditChartModal(chartId) {
       '<button class="btn btn-primary" onclick="saveChartEdit(\'' + chartId + '\')">Save</button>' +
     '</div>'
   );
+  syncChartForm('edit');
 }
 
 function saveChartEdit(chartId) {
   var charts = activeDashboard();
   var ch     = charts.find(function(c){ return c.id === chartId; });
   if (!ch) return;
+  captureChartFormState('edit');
+  var state = ChartFormState.edit || {};
 
   var titleEl = document.getElementById('editTitle');
   var typeEl  = document.getElementById('editType');
-  var xEl     = document.getElementById('editX');
-  var yEl     = document.getElementById('editY');
-  var aggEl   = document.getElementById('editAgg');
   var showEl  = document.getElementById('editShowValues');
   var spanEl  = document.getElementById('editSpan');
 
   if (titleEl) ch.title  = titleEl.value.trim() || ch.title;
   if (typeEl)  ch.type   = typeEl.value;
-  if (xEl && xEl.value !== '') ch.xField = parseInt(xEl.value, 10);
-  if (yEl)  ch.yField = yEl.value !== '' ? parseInt(yEl.value, 10) : null;
-  if (aggEl)   ch.agg    = aggEl.value;
+  ch.xField = state.xField;
+  ch.yField = state.yField;
+  ch.seriesField = state.seriesField;
+  ch.displayFields = state.displayFields;
+  ch.agg = state.agg || 'sum';
+  ch.sortDir = state.sortDir || 'desc';
+  ch.limit = state.limit || 20;
+  ch.showRowNumbers = !!state.showRowNumbers;
+  ch.showPercent = !!state.showPercent;
+  ch.colorMode = state.colorMode || 'multi';
   if (showEl)  ch.showValues = showEl.value === 'on';
   if (spanEl)  ch.span   = parseInt(spanEl.value, 10);
+  var validationError = validateChartDefinition(ch, activeDataset().schema);
+  if (validationError) { toast(validationError, 'warn', 3500); return; }
 
   saveDashboard(App.activeDatasetId, App.dashboards[App.activeDatasetId]);
   closeModal();
@@ -3904,22 +4491,46 @@ function removeChart(chartId) {
 }
 
 // ─── EXPORT ───────────────────────────────────────────────────────
-function exportChartPng(chartId) {
-  var chartInst = App.charts[chartId];
-  if (!chartInst) { toast('Chart not ready', 'error'); return; }
+async function exportChartPng(chartId) {
+  var ds = activeDataset();
+  var dash = activeDashboard();
+  var ch = dash.find(function(c){ return c.id === chartId; });
+  if (!ds || !ch) { toast('Chart not found', 'error'); return; }
   try {
-    var dash   = activeDashboard();
-    var ch     = dash.find(function(c){ return c.id === chartId; });
+    var filteredRows = applyFilters(ds.rows, ds.schema);
+    renderChart('canvas-' + chartId, ch, ds, filteredRows);
+    await nextFrame();
+    var chartInst = App.charts[chartId];
     var name   = (ch ? ch.title : 'chart').replace(/[^a-z0-9\s-]/gi,'').replace(/\s+/g,'-').toLowerCase();
-    var srcCanvas = chartInst.canvas;
     var outCanvas = document.createElement('canvas');
-    outCanvas.width = srcCanvas.width * 2;
-    outCanvas.height = srcCanvas.height * 2;
     var outCtx = outCanvas.getContext('2d');
-    outCtx.scale(2, 2);
+    var card = document.getElementById('card-' + chartId);
+    if (!card) { toast('Chart not ready', 'error'); return; }
+    var cardW = card.offsetWidth || 720;
+    var cardH = card.offsetHeight || 420;
+    var scale = exportScaleFor(cardW, cardH);
+    outCanvas.width = cardW * scale;
+    outCanvas.height = cardH * scale;
+    outCtx.scale(scale, scale);
+    outCtx.imageSmoothingEnabled = true;
+    outCtx.imageSmoothingQuality = 'high';
     outCtx.fillStyle = '#ffffff';
-    outCtx.fillRect(0, 0, srcCanvas.width, srcCanvas.height);
-    outCtx.drawImage(srcCanvas, 0, 0);
+    outCtx.fillRect(0, 0, cardW, cardH);
+    outCtx.strokeStyle = 'rgba(29,39,52,0.10)';
+    outCtx.lineWidth = 1;
+    roundRect(outCtx, 0.5, 0.5, cardW - 1, cardH - 1, 12);
+    outCtx.stroke();
+    outCtx.fillStyle = '#1d2734';
+    outCtx.font = '600 14px Inter, sans-serif';
+    outCtx.fillText(ch ? ch.title : 'Chart', 16, 24);
+    if (chartInst && chartInst.canvas) {
+      var srcCanvas = chartInst.canvas;
+      outCtx.drawImage(srcCanvas, 10, 36, cardW - 20, cardH - 48);
+    } else {
+      var grid = card.querySelector('.data-grid-wrap');
+      if (!grid) { toast('Chart not ready', 'error'); return; }
+      drawGridForExport(outCtx, grid, 0, 0, cardW, cardH);
+    }
     var url    = outCanvas.toDataURL('image/png');
     var a      = document.createElement('a');
     a.href     = url;
@@ -3933,26 +4544,37 @@ function exportChartPng(chartId) {
   }
 }
 
-function exportDashboardPng() {
+async function exportDashboardPng() {
   var charts  = activeDashboard();
   var ds      = activeDataset();
   if (!charts.length || !ds) { toast('No charts to export', 'warn'); return; }
   var dashboard = document.getElementById('dashboard');
   if (!dashboard) { toast('Dashboard not ready', 'error'); return; }
+  await renderAllCharts(true);
+  await nextFrame();
+  await nextFrame();
   var cardEls = charts.map(function(ch) { return document.getElementById('card-' + ch.id); }).filter(Boolean);
   if (!cardEls.length) { toast('No charts rendered yet', 'warn'); return; }
 
   var pad = 28;
   var titleH = 56;
-  var scale = 2;
-  var width = dashboard.scrollWidth + pad * 2;
-  var height = dashboard.scrollHeight + titleH + pad * 2;
+  var maxRight = 0;
+  var maxBottom = 0;
+  cardEls.forEach(function(card) {
+    maxRight = Math.max(maxRight, card.offsetLeft + card.offsetWidth);
+    maxBottom = Math.max(maxBottom, card.offsetTop + card.offsetHeight);
+  });
+  var width = Math.max(dashboard.clientWidth, maxRight) + pad * 2;
+  var height = maxBottom + titleH + pad * 2;
+  var scale = exportScaleFor(width, height);
 
   var comp = document.createElement('canvas');
   comp.width = width * scale;
   comp.height = height * scale;
   var ctx = comp.getContext('2d');
   ctx.scale(scale, scale);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.fillStyle = '#f5f3ee';
   ctx.fillRect(0, 0, width, height);
 
@@ -3969,7 +4591,8 @@ function exportDashboardPng() {
     var cardY = pad + titleH + card.offsetTop;
     var cardW = card.offsetWidth;
     var cardH = card.offsetHeight;
-    var canvas = card.querySelector('canvas');
+    var canvas = App.charts[ch && ch.id] ? card.querySelector('canvas') : null;
+    var grid = card.querySelector('.data-grid-wrap');
 
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = 'rgba(29,39,52,0.10)';
@@ -3984,6 +4607,8 @@ function exportDashboardPng() {
 
     if (canvas) {
       ctx.drawImage(canvas, cardX + 10, cardY + 36, cardW - 20, cardH - 48);
+    } else if (grid) {
+      drawGridForExport(ctx, grid, cardX, cardY, cardW, cardH);
     }
   });
 
@@ -3999,6 +4624,13 @@ function exportDashboardPng() {
   } catch(e) {
     toast('Export failed. Try exporting charts individually.', 'error');
   }
+}
+function printDashboard() {
+  var ds = activeDataset();
+  if (!ds || !activeDashboard().length) { toast('No dashboard to print', 'warn'); return; }
+  renderAllCharts(true).then(function() {
+    setTimeout(function() { window.print(); }, 80);
+  });
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -4197,6 +4829,9 @@ function init() {
 
   var expPng = document.getElementById('exportPngBtn');
   if (expPng) expPng.addEventListener('click', exportDashboardPng);
+
+  var printBtn = document.getElementById('printBtn');
+  if (printBtn) printBtn.addEventListener('click', printDashboard);
 
   var expCsv = document.getElementById('exportCsvBtn');
   if (expCsv) expCsv.addEventListener('click', exportDataCsv);
