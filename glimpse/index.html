@@ -1748,6 +1748,99 @@
       .chart-card{break-inside: avoid; border-color: #ccc !important}
       .chart-card-title{color: black !important}
     }
+
+    /* ═══════════════════════════════════════════════
+       IMPORT TABS
+       ═══════════════════════════════════════════════ */
+    .import-tabs{
+      display: flex;
+      gap: 2px;
+      background: var(--surface-3);
+      border-radius: var(--r-md);
+      padding: 3px;
+      margin-bottom: var(--space-4);
+    }
+    .import-tab{
+      flex: 1;
+      padding: 7px 14px;
+      border-radius: var(--r-sm);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-3);
+      transition: all var(--duration-fast);
+      text-align: center;
+    }
+    .import-tab:hover{color: var(--text-2)}
+    .import-tab.active{
+      background: var(--surface-1);
+      color: var(--text-1);
+      box-shadow: var(--shadow-sm);
+      font-weight: 600;
+    }
+    .import-tab-pane{display: none}
+    .import-tab-pane.active{display: block}
+
+    /* ═══════════════════════════════════════════════
+       ACKO AUTH STEPS
+       ═══════════════════════════════════════════════ */
+    .acko-auth-step{
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      margin-bottom: var(--space-3);
+    }
+    .acko-step-num{
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--surface-4);
+      color: var(--text-3);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--duration-fast);
+    }
+    .acko-step-num.done{background: rgba(var(--success-rgb),0.15); color: var(--success)}
+    .acko-step-num.active{background: var(--accent); color: #fff}
+    .acko-step-body{flex: 1; min-width: 0}
+    .acko-step-title{font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 2px}
+    .acko-step-sub{font-size: 12px; color: var(--text-3); line-height: 1.4}
+
+    /* ═══════════════════════════════════════════════
+       LIVE SYNC STATUS
+       ═══════════════════════════════════════════════ */
+    .sync-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: var(--text-3);
+      font-family: var(--font-mono);
+    }
+    .sync-dot{
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+      transition: background var(--duration-fast);
+    }
+    .sync-dot.syncing{
+      background: var(--accent);
+      animation: syncPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes syncPulse{
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:0.4;transform:scale(0.8)}
+    }
+    .btn-spinning svg{animation: spin 0.85s linear infinite}
   </style>
 </head>
 <body class="edit-mode">
@@ -1882,8 +1975,15 @@ var MAX_ROWS_DEFAULT = 1000000;
 var SAMPLE_ROWS = 500; // rows to profile for type detection
 var TOP_N_CATS  = 15;  // max categories in bar chart
 var AUTO_REFRESH_OFF = 'off';
-var AUTO_REFRESH_5M = '5m';
-var AUTO_REFRESH_MS = 5 * 60 * 1000;
+var AUTO_REFRESH_1M  = '1m';
+var AUTO_REFRESH_5M  = '5m';
+var AUTO_REFRESH_15M = '15m';
+var AUTO_REFRESH_30M = '30m';
+var AUTO_REFRESH_MS  = 5 * 60 * 1000; // legacy fallback
+
+// Set this to your deployed Acko Apps Script URL
+// e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+var ACKO_APPS_SCRIPT_URL = '';
 
 var CHART_COLORS = [
   'rgba(15,159,184,0.85)', 'rgba(167,139,250,0.85)',
@@ -1912,7 +2012,9 @@ var App = {
   isEditMode: true,
   renderObserver: null,
   refreshTimer: null,
-  refreshInFlight: false
+  refreshInFlight: false,
+  ackoAuthWin: null,    // reference to auth popup window
+  syncTickTimer: null   // interval for live "last synced" text
 };
 
 function activeDataset() {
@@ -3422,7 +3524,13 @@ function saveDashboard(datasetId, charts) {
 // ─── RENDERING LAYER ──────────────────────────────────────────────
 function setStep(step) {
   App.step = step;
+  if (step === 'dashboard') {
+    startSyncTicker();
+  } else {
+    stopSyncTicker();
+  }
   render();
+  syncDatasetRefreshTimer();
 }
 
 function render() {
@@ -3469,6 +3577,50 @@ function toggleMode() {
   syncModeUI();
   if (App.step === 'dashboard') setStep('dashboard');
 }
+// ─── REFRESH INTERVAL HELPERS ────────────────────────────────────────
+function getRefreshIntervalMs(mode) {
+  if (mode === AUTO_REFRESH_1M)  return 1  * 60 * 1000;
+  if (mode === AUTO_REFRESH_5M)  return 5  * 60 * 1000;
+  if (mode === AUTO_REFRESH_15M) return 15 * 60 * 1000;
+  if (mode === AUTO_REFRESH_30M) return 30 * 60 * 1000;
+  return 0;
+}
+function refreshIntervalLabel(mode) {
+  if (mode === AUTO_REFRESH_1M)  return 'Every 1 min';
+  if (mode === AUTO_REFRESH_5M)  return 'Every 5 min';
+  if (mode === AUTO_REFRESH_15M) return 'Every 15 min';
+  if (mode === AUTO_REFRESH_30M) return 'Every 30 min';
+  return 'Off';
+}
+
+// ─── RELATIVE TIME ────────────────────────────────────────────────────
+function timeSince(ts) {
+  if (!ts) return 'never';
+  var sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 10)  return 'just now';
+  if (sec < 60)  return sec + 's ago';
+  var min = Math.floor(sec / 60);
+  if (min < 60)  return min + 'm ago';
+  var hr = Math.floor(min / 60);
+  if (hr < 24)   return hr + 'h ago';
+  return Math.floor(hr / 24) + 'd ago';
+}
+
+// ─── SYNC TICKER ──────────────────────────────────────────────────────
+function startSyncTicker() {
+  stopSyncTicker();
+  App.syncTickTimer = setInterval(function() {
+    var el = document.getElementById('syncStatusText');
+    if (!el) return;
+    var ds = activeDataset();
+    if (!ds || !['google_sheet','acko_sheet'].includes(ds.sourceType)) return;
+    el.textContent = timeSince(ds.lastRefreshedAt);
+  }, 15000);
+}
+function stopSyncTicker() {
+  if (App.syncTickTimer) { clearInterval(App.syncTickTimer); App.syncTickTimer = null; }
+}
+
 function clearDatasetRefreshTimer() {
   if (App.refreshTimer) {
     clearTimeout(App.refreshTimer);
@@ -3477,8 +3629,8 @@ function clearDatasetRefreshTimer() {
 }
 function shouldAutoRefreshDataset(ds) {
   return !!(ds &&
-    ds.sourceType === 'google_sheet' &&
-    ds.refreshMode === AUTO_REFRESH_5M &&
+    ['google_sheet','acko_sheet'].includes(ds.sourceType) &&
+    getRefreshIntervalMs(ds.refreshMode) > 0 &&
     App.step === 'dashboard' &&
     App.activeDatasetId === ds.id &&
     document.visibilityState === 'visible');
@@ -3487,24 +3639,31 @@ function syncDatasetRefreshTimer() {
   clearDatasetRefreshTimer();
   var ds = activeDataset();
   if (!shouldAutoRefreshDataset(ds) || App.refreshInFlight) return;
+  var intervalMs = getRefreshIntervalMs(ds.refreshMode);
   App.refreshTimer = setTimeout(function() {
     refreshActiveSheetDataset(true);
-  }, AUTO_REFRESH_MS);
+  }, intervalMs);
 }
 function openRefreshSettingsModal() {
   var ds = activeDataset();
-  if (!ds || ds.sourceType !== 'google_sheet') return;
+  if (!ds || !['google_sheet','acko_sheet'].includes(ds.sourceType)) return;
+  var mode = ds.refreshMode || AUTO_REFRESH_OFF;
+  var lastSyncedText = ds.lastRefreshedAt ? 'Last synced ' + timeSince(ds.lastRefreshedAt) : 'Never synced';
+  var isAcko = ds.sourceType === 'acko_sheet';
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<h2>Auto refresh</h2>' +
-    '<p>Choose whether Glimpse should refresh this Google Sheet every 5 minutes while you are actively viewing the dashboard.</p>' +
+    '<h2>Sync settings</h2>' +
+    '<p style="color:var(--text-3);font-size:13px;margin-bottom:var(--space-4)">' + escHTML(lastSyncedText) + '</p>' +
     '<div class="modal-field">' +
-      '<label class="modal-field-label">Refresh mode</label>' +
+      '<label class="modal-field-label">Auto-sync interval</label>' +
       '<select class="modal-field-select" id="refreshModeSelect">' +
-        '<option value="' + AUTO_REFRESH_OFF + '"' + (ds.refreshMode !== AUTO_REFRESH_5M ? ' selected' : '') + '>Do not refresh</option>' +
-        '<option value="' + AUTO_REFRESH_5M + '"' + (ds.refreshMode === AUTO_REFRESH_5M ? ' selected' : '') + '>Auto refresh every 5 minutes</option>' +
+        '<option value="' + AUTO_REFRESH_OFF + '"' + (mode === AUTO_REFRESH_OFF ? ' selected' : '') + '>Off – do not auto-sync</option>' +
+        '<option value="' + AUTO_REFRESH_1M  + '"' + (mode === AUTO_REFRESH_1M  ? ' selected' : '') + '>Every 1 minute</option>' +
+        '<option value="' + AUTO_REFRESH_5M  + '"' + (mode === AUTO_REFRESH_5M  ? ' selected' : '') + '>Every 5 minutes</option>' +
+        '<option value="' + AUTO_REFRESH_15M + '"' + (mode === AUTO_REFRESH_15M ? ' selected' : '') + '>Every 15 minutes</option>' +
+        '<option value="' + AUTO_REFRESH_30M + '"' + (mode === AUTO_REFRESH_30M ? ' selected' : '') + '>Every 30 minutes</option>' +
       '</select>' +
-      '<div class="modal-field-hint">Refresh only runs while this dashboard tab is open and visible.</div>' +
+      '<div class="modal-field-hint">Auto-sync runs while this tab is open and visible.' + (isAcko ? ' Acko internal sheets sync via the Acko data proxy.' : '') + '</div>' +
     '</div>' +
     '<div class="modal-actions">' +
       '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
@@ -3516,22 +3675,31 @@ function saveRefreshSettings() {
   var ds = activeDataset();
   var select = document.getElementById('refreshModeSelect');
   if (!ds || !select) return;
-  ds.refreshMode = select.value === AUTO_REFRESH_5M ? AUTO_REFRESH_5M : AUTO_REFRESH_OFF;
+  var validModes = [AUTO_REFRESH_OFF, AUTO_REFRESH_1M, AUTO_REFRESH_5M, AUTO_REFRESH_15M, AUTO_REFRESH_30M];
+  ds.refreshMode = validModes.includes(select.value) ? select.value : AUTO_REFRESH_OFF;
   ds.lastRefreshedAt = ds.lastRefreshedAt || Date.now();
   saveDataset(ds);
   closeModal();
   setStep('dashboard');
-  toast(ds.refreshMode === AUTO_REFRESH_5M ? 'Auto refresh enabled' : 'Auto refresh disabled', 'success');
+  var label = refreshIntervalLabel(ds.refreshMode);
+  toast(ds.refreshMode !== AUTO_REFRESH_OFF ? 'Auto-sync: ' + label : 'Auto-sync disabled', 'success');
+  syncDatasetRefreshTimer();
 }
 function refreshActiveSheetDataset(silent) {
   var ds = activeDataset();
-  if (!ds || ds.sourceType !== 'google_sheet' || !ds.sourceUrl) return;
+  if (!ds || !['google_sheet','acko_sheet'].includes(ds.sourceType) || !ds.sourceUrl) return;
   if (silent && !shouldAutoRefreshDataset(ds)) { syncDatasetRefreshTimer(); return; }
   if (App.step !== 'dashboard') { syncDatasetRefreshTimer(); return; }
   if (App.refreshInFlight) return;
   App.refreshInFlight = true;
   clearDatasetRefreshTimer();
-  importGoogleSheetUrl(ds.sourceUrl, {
+  // Show syncing state in UI
+  var syncDot = document.getElementById('syncDot');
+  var refreshBtn = document.getElementById('refreshDataBtn');
+  if (syncDot) syncDot.classList.add('syncing');
+  if (refreshBtn) refreshBtn.classList.add('btn-spinning');
+  var importFn = ds.sourceType === 'acko_sheet' ? importAckoSheetUrl : importGoogleSheetUrl;
+  importFn(ds.sourceUrl, {
     existingDatasetId: ds.id,
     name: ds.name,
     preserveName: true,
@@ -3540,8 +3708,134 @@ function refreshActiveSheetDataset(silent) {
     refreshMode: ds.refreshMode || AUTO_REFRESH_OFF
   }).finally(function() {
     App.refreshInFlight = false;
+    if (syncDot) syncDot.classList.remove('syncing');
+    if (refreshBtn) refreshBtn.classList.remove('btn-spinning');
     syncDatasetRefreshTimer();
   });
+}
+
+// ─── ACKO INTERNAL SHEET ─────────────────────────────────────────────
+function openAckoAuthPopup() {
+  if (!ACKO_APPS_SCRIPT_URL) {
+    toast('Acko proxy URL is not configured.', 'error');
+    return;
+  }
+  closeAckoAuthWin();
+  var authUrl = ACKO_APPS_SCRIPT_URL + '?authorize=1';
+  App.ackoAuthWin = window.open(authUrl, 'acko_auth', 'width=540,height=440,left=200,top=100,resizable=yes,scrollbars=yes');
+  if (!App.ackoAuthWin) {
+    toast('Pop-up blocked — allow pop-ups for this site and try again.', 'error', 5000);
+    return;
+  }
+  // Visually advance the step indicator
+  var step1 = document.getElementById('ackoStepNum1');
+  var step2 = document.getElementById('ackoStepNum2');
+  if (step1) { step1.classList.remove('active'); step1.classList.add('done'); step1.textContent = '✓'; }
+  if (step2) step2.classList.add('active');
+  // Focus the URL input so user can paste immediately after signing in
+  setTimeout(function() {
+    var urlInput = document.getElementById('ackoSheetUrlInput');
+    if (urlInput) urlInput.focus();
+  }, 400);
+  toast('Sign-in window opened. After authorising, paste the sheet URL and click Import.', 'success', 6000);
+}
+
+function closeAckoAuthWin() {
+  if (App.ackoAuthWin && !App.ackoAuthWin.closed) {
+    try { App.ackoAuthWin.close(); } catch(e) {}
+  }
+  App.ackoAuthWin = null;
+}
+
+function fetchViaAppsScript(spreadsheetId, gid) {
+  return new Promise(function(resolve, reject) {
+    if (!ACKO_APPS_SCRIPT_URL) { reject(new Error('Acko proxy URL not configured')); return; }
+    var cbName = '_glimpseAcko_' + genId();
+    var script = document.createElement('script');
+    var timer = setTimeout(function() {
+      cleanup();
+      reject(new Error('Request timed out. Make sure you are signed in with your Acko Google account.'));
+    }, 30000);
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    var url = ACKO_APPS_SCRIPT_URL +
+      '?callback=' + encodeURIComponent(cbName) +
+      '&spreadsheetId=' + encodeURIComponent(spreadsheetId) +
+      (gid ? '&gid=' + encodeURIComponent(gid) : '');
+    script.src = url;
+    script.onerror = function() {
+      cleanup();
+      reject(new Error('Could not reach the Acko data proxy. Check your connection.'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function importAckoSheetFromInput() {
+  var input = document.getElementById('ackoSheetUrlInput');
+  if (!input) return;
+  var url = (input.value || '').trim();
+  if (!url) { toast('Paste an Acko Google Sheet URL first', 'warn'); return; }
+  closeAckoAuthWin(); // always close the auth popup before proceeding
+  importAckoSheetUrl(url);
+}
+
+async function importAckoSheetUrl(rawUrl, options) {
+  options = options || {};
+  var parsed = parseGoogleSheetUrl(rawUrl);
+  if (!parsed) { toast('Enter a valid Google Sheets URL', 'error', 4000); return; }
+  closeAckoAuthWin(); // ensure popup is closed if called from refresh path
+  if (!options.silent) {
+    showParseOverlay(
+      options.isRefresh ? 'Syncing Acko sheet…' : 'Fetching Acko sheet…',
+      'Connecting via Acko data proxy…'
+    );
+  }
+  try {
+    var data = await fetchViaAppsScript(parsed.spreadsheetId, parsed.gid);
+    if (!data || !data.ok) {
+      var errMsg = (data && data.error) ? data.error : 'Unknown error from proxy';
+      if (/unauthorized/i.test(errMsg)) {
+        throw new Error('Access denied. Sign in with an @acko.tech Google account first.');
+      }
+      throw new Error(errMsg);
+    }
+    var headers = data.headers || [];
+    var rows    = data.rows    || [];
+    var csvLines = [headers.map(csvCell).join(',')].concat(rows.map(function(r) {
+      return r.map(csvCell).join(',');
+    }));
+    return parseCSVText(csvLines.join('\n'), (options.name || data.name || parsed.nameHint) + '.csv', 0, ',', {
+      sourceType: 'acko_sheet',
+      sourceUrl: parsed.normalizedUrl,
+      sourceMeta: { spreadsheetId: parsed.spreadsheetId, gid: parsed.gid, viaProxy: true },
+      refreshMode: options.refreshMode || AUTO_REFRESH_OFF,
+      existingDatasetId: options.existingDatasetId || null,
+      preserveName: !!options.preserveName,
+      isRefresh: !!options.isRefresh
+    }).catch(function() { return null; });
+  } catch(err) {
+    hideParseOverlay();
+    toast((options.isRefresh ? 'Sync failed: ' : 'Import failed: ') + err.message, 'error', 5000);
+    if (options.isRefresh) syncDatasetRefreshTimer();
+  }
+}
+
+function switchImportTab(tab) {
+  var tabPublic  = document.getElementById('tabPublic');
+  var tabAcko    = document.getElementById('tabAcko');
+  var panePublic = document.getElementById('panePublic');
+  var paneAcko   = document.getElementById('paneAcko');
+  if (!tabPublic) return;
+  var isPublic = tab === 'public';
+  tabPublic.classList.toggle('active',  isPublic);
+  if (tabAcko)    tabAcko.classList.toggle('active',   !isPublic);
+  if (panePublic) panePublic.classList.toggle('active', isPublic);
+  if (paneAcko)   paneAcko.classList.toggle('active',  !isPublic);
 }
 
 // ─── UPLOAD RENDER ────────────────────────────────────────────────
@@ -3554,38 +3848,76 @@ function renderUpload() {
     '</div>';
   }).join('');
 
+  var ackoEnabled = !!ACKO_APPS_SCRIPT_URL;
+
+  // Acko pane – only rendered when proxy URL is configured
+  var ackoPaneHtml = ackoEnabled ? (
+    '<div class="import-tab-pane" id="paneAcko">' +
+      '<div class="upload-alt-sub" style="margin-bottom:var(--space-4)">Import private Acko sheets via the Acko data proxy. Requires an <strong>@acko.tech</strong> Google account.</div>' +
+      // Step 1 – Authenticate
+      '<div class="acko-auth-step">' +
+        '<div class="acko-step-num active" id="ackoStepNum1">1</div>' +
+        '<div class="acko-step-body">' +
+          '<div class="acko-step-title">Authenticate with Acko</div>' +
+          '<div class="acko-step-sub">Opens a sign-in window. After authorising with your @acko.tech account the window closes and you can continue.</div>' +
+          '<button class="btn btn-ghost btn-sm" style="margin-top:var(--space-3)" onclick="openAckoAuthPopup()" id="ackoAuthBtn">Open sign-in window</button>' +
+        '</div>' +
+      '</div>' +
+      // Step 2 – Import
+      '<div class="acko-auth-step">' +
+        '<div class="acko-step-num" id="ackoStepNum2">2</div>' +
+        '<div class="acko-step-body">' +
+          '<div class="acko-step-title">Paste sheet URL &amp; import</div>' +
+          '<div class="acko-step-sub">After signing in, paste the Acko sheet URL below and click Import.</div>' +
+          '<div class="upload-inline-form" style="margin-top:var(--space-3)">' +
+            '<input class="modal-field-input" id="ackoSheetUrlInput" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."/>' +
+            '<button class="btn btn-primary" id="ackoImportBtn">Import</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  ) : '';
+
   return '<div class="upload-page" id="uploadPage">' +
     '<div class="upload-hero">' +
       '<h1>See what your data<br/>says - in seconds.</h1>' +
-      '<p>Drop a CSV file, paste a public Google Sheet URL, or choose a sample dataset below. Glimpse auto-detects your columns and builds charts instantly. No account. Browser-first.</p>' +
+      '<p>Drop a CSV file, paste a Google Sheet URL, or pick a sample dataset. Glimpse auto-detects columns and builds charts instantly — no account, 100% in your browser.</p>' +
     '</div>' +
     '<div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload CSV file by clicking or dropping">' +
       '<div class="upload-icon">' +
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
       '</div>' +
       '<div class="upload-title">Drop your CSV here</div>' +
-      '<div class="upload-sub">or click to browse - CSV, TSV, or TXT</div>' +
+      '<div class="upload-sub">or click to browse — CSV, TSV, or TXT</div>' +
       '<button class="btn btn-primary" style="margin-bottom:var(--space-5)" onclick="event.stopPropagation();triggerFileInput()">Browse files</button>' +
       '<div class="upload-info">' +
         '<span class="upload-info-item">Up to 250 MB</span>' +
         '<span class="upload-info-item">Up to 1M rows</span>' +
         '<span class="upload-info-item">CSV · TSV · TXT</span>' +
-        '<span class="upload-info-item">Browser-side import</span>' +
+        '<span class="upload-info-item">Browser-side only</span>' +
       '</div>' +
     '</div>' +
     '<div class="upload-alt-card">' +
       '<div class="upload-alt-head">' +
-        '<div>' +
-          '<div class="upload-alt-title">Import from Google Sheets</div>' +
-          '<div class="upload-alt-sub">Paste a public or link-viewable Google Sheet URL. Glimpse will fetch its CSV export directly in your browser.</div>' +
-        '</div>' +
+        '<div class="upload-alt-title">Import from Google Sheets</div>' +
         '<span class="source-badge sheet">Google Sheet</span>' +
       '</div>' +
-      '<div class="upload-inline-form">' +
-        '<input class="modal-field-input" id="sheetUrlInput" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."/>' +
-        '<button class="btn btn-primary" id="sheetImportBtn">Import sheet</button>' +
+      // Tab switcher – only shown when Acko proxy is configured
+      (ackoEnabled ?
+        '<div class="import-tabs">' +
+          '<button class="import-tab active" id="tabPublic" onclick="switchImportTab(\'public\')">Public / Shared</button>' +
+          '<button class="import-tab" id="tabAcko" onclick="switchImportTab(\'acko\')">Acko Internal</button>' +
+        '</div>' : '') +
+      // Public sheet pane
+      '<div class="import-tab-pane active" id="panePublic">' +
+        '<div class="upload-alt-sub" style="margin-bottom:var(--space-3)">Paste a public or link-viewable Google Sheet URL. Data is fetched directly in your browser — nothing is sent to any server.</div>' +
+        '<div class="upload-inline-form">' +
+          '<input class="modal-field-input" id="sheetUrlInput" type="url" placeholder="https://docs.google.com/spreadsheets/d/..."/>' +
+          '<button class="btn btn-primary" id="sheetImportBtn">Import</button>' +
+        '</div>' +
+        '<div class="modal-field-hint">Supports standard sheet URLs with an optional <code>gid</code> tab parameter. Sheet must be shared as "Anyone with the link can view".</div>' +
       '</div>' +
-      '<div class="modal-field-hint">Supported: standard Google Sheets URLs with an optional <code>gid</code>. Private sheets that require sign-in will not import.</div>' +
+      ackoPaneHtml +
     '</div>' +
     '<div class="samples">' +
       '<div class="samples-label">Or try a sample dataset</div>' +
@@ -3639,6 +3971,17 @@ function bindUpload() {
         e.preventDefault();
         importGoogleSheetFromInput();
       }
+    });
+  }
+
+  var ackoInput = document.getElementById('ackoSheetUrlInput');
+  var ackoBtn   = document.getElementById('ackoImportBtn');
+  if (ackoBtn) {
+    ackoBtn.addEventListener('click', importAckoSheetFromInput);
+  }
+  if (ackoInput) {
+    ackoInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); importAckoSheetFromInput(); }
     });
   }
 
@@ -3712,7 +4055,10 @@ async function importGoogleSheetUrl(rawUrl, options) {
     var text = await response.text();
     if (!text || /^\s*$/.test(text)) throw new Error('The sheet returned no CSV data');
     if (/^\s*</.test(text.slice(0, 120))) {
-      throw new Error('This sheet is not publicly accessible. Share it for viewing first.');
+      var privateMsg = ACKO_APPS_SCRIPT_URL
+        ? 'This sheet requires sign-in. Use the "Acko Internal" tab to import private sheets.'
+        : 'This sheet is not publicly accessible. Share it for viewing first (Anyone with the link → Viewer).';
+      throw new Error(privateMsg);
     }
     return parseCSVText(text, (options.name || parsed.nameHint) + '.csv', 0, ',', {
       sourceType: 'google_sheet',
@@ -3872,13 +4218,18 @@ function commitDatasetRecord(ds, options) {
     hideParseOverlay();
     if (options.isRefresh) {
       if (App.activeDatasetId === ds.id && App.step === 'dashboard') setStep('dashboard');
-      if (!options.silent) toast('Google Sheet refreshed', 'success');
+      if (!options.silent) {
+        var syncLabel = ds.sourceType === 'acko_sheet' ? 'Acko sheet synced' : 'Google Sheet synced';
+        toast(syncLabel, 'success');
+      }
     } else {
       setStep('schema');
       if (ds.sampleMode) {
         toast('Large file: showing first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + ds.totalRows.toLocaleString() + ' rows', 'warn', 5000);
       } else if (ds.sourceType === 'google_sheet') {
         toast('Google Sheet imported', 'success');
+      } else if (ds.sourceType === 'acko_sheet') {
+        toast('Acko sheet imported', 'success');
       }
     }
     return ds;
@@ -4273,9 +4624,28 @@ function renderDashboard() {
   if (!ds) return '<p style="color:var(--text-3);padding:var(--space-8)">No dataset loaded.</p>';
   var charts  = activeDashboard();
   var schema  = ds.schema;
-  var sourceBadge = ds.sourceType === 'google_sheet' ? '<span class="source-badge sheet">Google Sheet</span>' : ds.sourceType === 'sample' ? '<span class="source-badge">Sample</span>' : '<span class="source-badge">CSV</span>';
-  var refreshText = ds.refreshMode === AUTO_REFRESH_5M ? 'Auto refresh: 5 min' : 'Auto refresh: Off';
-  var lastRefreshText = ds.sourceType === 'google_sheet' && ds.lastRefreshedAt ? ' · updated ' + escHTML(fmtDateTime(ds.lastRefreshedAt)) : '';
+  var isSheet = ds.sourceType === 'google_sheet' || ds.sourceType === 'acko_sheet';
+  var sourceBadge =
+    ds.sourceType === 'google_sheet' ? '<span class="source-badge sheet">Google Sheet</span>' :
+    ds.sourceType === 'acko_sheet'   ? '<span class="source-badge" style="background:rgba(207,90,73,0.08);border-color:rgba(207,90,73,0.2);color:#cf5a49">Acko Internal</span>' :
+    ds.sourceType === 'sample'       ? '<span class="source-badge">Sample</span>' :
+    '<span class="source-badge">CSV</span>';
+  var syncStatusHtml = isSheet
+    ? ' · <span class="sync-status"><span class="sync-dot" id="syncDot"></span><span id="syncStatusText">' +
+        escHTML(ds.lastRefreshedAt ? timeSince(ds.lastRefreshedAt) : 'never synced') +
+      '</span></span>'
+    : '';
+  var refreshLabel = refreshIntervalLabel(ds.refreshMode);
+  var refreshBtnsHtml = isSheet
+    ? '<button class="btn btn-ghost btn-sm" id="refreshDataBtn" onclick="refreshActiveSheetDataset(false)" title="Fetch latest data from source">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+        'Sync now' +
+      '</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openRefreshSettingsModal()" title="Auto-sync settings">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> ' +
+        escHTML(ds.refreshMode !== AUTO_REFRESH_OFF ? refreshLabel : 'Auto-sync') +
+      '</button>'
+    : '';
 
   var filterBarHtml = renderFilterBar(schema);
   var chartsHtml    = charts.map(function(ch) { return renderChartCard(ch, schema); }).join('');
@@ -4301,18 +4671,14 @@ function renderDashboard() {
         '</button>' +
         '<div class="page-sub">' + ds.rowCount.toLocaleString() + ' rows · ' + ds.colCount + ' columns' +
           (ds.sampleMode ? ' · <span style="color:var(--warn)">Sample mode</span>' : '') +
-          ' · ' + sourceBadge + lastRefreshText + '</div>' +
+          ' · ' + sourceBadge + syncStatusHtml + '</div>' +
       '</div>' +
       '<div class="page-actions">' +
         '<button class="btn btn-ghost" onclick="setStep(\'schema\')">← Configure</button>' +
-        (ds.sourceType === 'google_sheet' ? '<button class="btn btn-ghost btn-sm" onclick="refreshActiveSheetDataset(false)" title="Fetch latest rows from Google Sheets">' +
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
-          'Refresh data' +
-        '</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="openRefreshSettingsModal()" title="Choose auto refresh mode">' + escHTML(refreshText) + '</button>' : '') +
+        refreshBtnsHtml +
         '<button class="btn btn-ghost btn-sm edit-only" onclick="refreshAllCharts()" title="Re-render all charts">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
-          'Refresh' +
+          'Redraw' +
         '</button>' +
       '</div>' +
     '</div>' +
@@ -5185,7 +5551,14 @@ function init() {
       closeModal();
     }
   });
-  document.addEventListener('visibilitychange', syncDatasetRefreshTimer);
+  document.addEventListener('visibilitychange', function() {
+    syncDatasetRefreshTimer();
+    if (document.visibilityState === 'hidden') {
+      stopSyncTicker();
+    } else if (App.step === 'dashboard') {
+      startSyncTicker();
+    }
+  });
 
   // Apply Chart.js global defaults (retry until library is ready)
   var chartRetry = 0;
