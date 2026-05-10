@@ -385,6 +385,81 @@
     .dropdown-item-text{ flex: 1; min-width: 0; }
     .dropdown-item-label{ font-size: 13px; font-weight: 500; }
     .dropdown-item-sub{ font-size: 11px; color: var(--text-3); margin-top: 1px; }
+    .dropdown-divider{ height: 1px; background: var(--border-1); margin: 4px 6px; }
+    .dropdown-item.is-disabled{
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .dropdown-item.is-disabled .dropdown-item-sub{ color: var(--warn); }
+
+    /* Share modal */
+    .share-modal-loading{
+      padding: 28px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13px;
+    }
+    .share-modal-error{
+      padding: 14px 16px;
+      color: var(--error);
+      background: rgba(var(--error-rgb), 0.06);
+      border-radius: var(--r-md);
+      font-size: 13px;
+    }
+    .share-card{
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      padding: 14px 16px;
+      margin-bottom: var(--space-3);
+    }
+    .share-card:last-child{ margin-bottom: 0; }
+    .share-card--link{
+      border-color: rgba(var(--accent-rgb), 0.35);
+      background: rgba(var(--accent-rgb), 0.04);
+    }
+    .share-card--link .share-card-head svg{ color: var(--accent); }
+    .share-card--disabled{
+      border-style: dashed;
+      border-color: var(--warn);
+      background: rgba(var(--warn-rgb), 0.05);
+    }
+    .share-card--disabled .share-card-head svg{ color: var(--warn); }
+    .share-card-head{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .share-card-head svg{ color: var(--text-3); flex-shrink: 0; }
+    .share-card-title{ font-size: 14px; font-weight: 600; color: var(--text-1); }
+    .share-card-sub{ font-size: 11.5px; color: var(--text-3); margin-top: 1px; }
+    .share-card-help{
+      font-size: 12.5px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+    .share-card-actions{
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .share-card-hint{ font-size: 11.5px; color: var(--text-3); }
+    .share-link-row{
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .share-link-input{
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-2);
+      cursor: text;
+    }
+    .share-copy-btn{ flex-shrink: 0; }
     .download-choice-grid{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -979,6 +1054,231 @@
       color: var(--text-4);
       font-size: 11px;
       margin: 0 var(--space-1);
+    }
+
+    /* ═══════════════════════════════════════════════
+       HOME / LANDING
+       ═══════════════════════════════════════════════ */
+    .home-page{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: var(--space-10) var(--space-6) var(--space-12);
+    }
+    .home-hero{
+      text-align: center;
+      margin-bottom: var(--space-10);
+      padding: var(--space-12) var(--space-4) var(--space-8);
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(var(--accent-rgb),0.10), transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(167,139,250,0.06), transparent 70%);
+      border-radius: var(--r-xl);
+    }
+    .home-hero-eyebrow{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      box-shadow: var(--shadow-sm);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-2);
+      margin-bottom: var(--space-5);
+    }
+    .home-hero-dot{
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.18);
+    }
+    .home-hero-title{
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      color: var(--text-1);
+      margin-bottom: var(--space-4);
+    }
+    .home-hero-title br{ display: block; }
+    .home-hero-sub{
+      max-width: 560px;
+      margin: 0 auto;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-2);
+    }
+
+    .home-actions{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-10);
+    }
+    .home-action{
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-lg);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+    }
+    .home-action:hover{
+      border-color: var(--border-2);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .home-action-icon{
+      width: 40px; height: 40px;
+      border-radius: var(--r-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .home-action-icon--accent{ background: rgba(var(--accent-rgb),0.10); color: var(--accent); }
+    .home-action-icon--green{  background: rgba(var(--success-rgb),0.10); color: var(--success); }
+    .home-action-icon--purple{ background: rgba(167,139,250,0.16); color: #7c3aed; }
+    .home-action-text{ min-width: 0; }
+    .home-action-title{ font-size: 14px; font-weight: 600; color: var(--text-1); }
+    .home-action-sub{ font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+
+    .home-section{ margin-bottom: var(--space-10); }
+    .home-section-head{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+    .home-section-head h2{
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -0.2px;
+    }
+    .home-grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--space-4);
+    }
+    .home-card{
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-lg);
+      padding: var(--space-4);
+      cursor: pointer;
+      transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .home-card:hover{
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .home-card-head{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .home-card-icon{
+      width: 26px; height: 26px;
+      border-radius: var(--r-sm);
+      background: rgba(var(--accent-rgb),0.10);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .home-card-source{
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-3);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .home-card-folder{
+      font-size: 10.5px;
+      color: var(--accent);
+      background: rgba(var(--accent-rgb),0.08);
+      padding: 1px 7px;
+      border-radius: 999px;
+      margin-left: auto;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .home-card-title{
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-1);
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .home-card-meta{
+      font-size: 11.5px;
+      color: var(--text-3);
+    }
+
+    .home-folder-row{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .home-folder-pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-1);
+      cursor: pointer;
+      transition: border-color var(--duration-fast), background var(--duration-fast);
+    }
+    .home-folder-pill:hover{
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb),0.04);
+    }
+    .home-folder-pill svg{ color: var(--text-3); }
+    .home-folder-count{
+      background: var(--surface-3);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--text-3);
+      font-family: var(--font-mono);
+    }
+
+    .home-empty-cta{
+      padding: var(--space-6);
+      text-align: center;
+      background: var(--surface-1);
+      border: 1px dashed var(--border-2);
+      border-radius: var(--r-lg);
+      color: var(--text-2);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 700px){
+      .home-hero-title{ font-size: 30px; }
+      .home-actions{ grid-template-columns: 1fr; }
     }
 
     /* ═══════════════════════════════════════════════
@@ -2427,10 +2727,10 @@
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Hide sidebar" aria-label="Toggle sidebar" aria-expanded="true">
         <svg id="sidebarToggleIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
       </button>
-      <a href="/glimpse" class="brand-home" aria-label="Glimpse home">
+      <button type="button" class="brand-home" onclick="setStep('home')" aria-label="Glimpse home">
         <div class="brand-mark" aria-hidden="true"></div>
         <span class="brand-name">Glimpse</span>
-      </a>
+      </button>
       <span class="header-crumb-sep" id="headerCrumbSep" hidden>›</span>
       <button class="header-crumb" id="headerCrumb" hidden onclick="openDashboardNameModal()" title="Rename dataset">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
@@ -2459,8 +2759,20 @@
               <div class="dropdown-item-sub">Underlying rows, with header overrides</div>
             </div>
           </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" type="button" role="menuitem" onclick="exportProjectFile();closeDownloadMenu()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13l-2 2 2 2M14 13l2 2-2 2"/></svg>
+            <div class="dropdown-item-text">
+              <div class="dropdown-item-label">Export project file</div>
+              <div class="dropdown-item-sub">Single .glimpse.json — share via Slack / email / Drive</div>
+            </div>
+          </button>
         </div>
       </div>
+      <button class="btn btn-ghost btn-sm" id="shareBtn" hidden type="button" onclick="openShareModal()" title="Share this project">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
       <button class="btn btn-primary btn-sm" id="newDatasetBtn" title="Upload new file">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New
@@ -5329,15 +5641,16 @@ function render() {
 
   try {
     switch (App.step) {
+      case 'home':      main.innerHTML = renderHome();      bindHome();      break;
       case 'upload':    main.innerHTML = renderUpload();    bindUpload();    break;
       case 'schema':    main.innerHTML = renderSchema();    bindSchema();    break;
       case 'dashboard': main.innerHTML = renderDashboard(); bindDashboard(); break;
-      default:          main.innerHTML = renderUpload();    bindUpload();
+      default:          main.innerHTML = renderHome();      bindHome();
     }
   } catch (err) {
     console.error('[Glimpse] render failed for step "' + App.step + '":', err);
-    App.step = 'upload';
-    try { main.innerHTML = renderUpload(); bindUpload(); } catch (e) {
+    App.step = 'home';
+    try { main.innerHTML = renderHome(); bindHome(); } catch (e) {
       main.innerHTML = '<div style="padding:32px;color:var(--text-2)">Something went wrong rendering this page. Reload to recover.</div>';
     }
   }
@@ -5353,6 +5666,9 @@ function updateHeaderButtons() {
   // Download dropdown is only useful when on dashboard.
   var downloadDropdown = document.getElementById('downloadDropdown');
   if (downloadDropdown) downloadDropdown.hidden = !hasDash;
+  // Share button: any time the user has at least one dataset, sharing makes sense.
+  var shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) shareBtn.hidden = !App.datasets.length;
   // Crumb shows the active dataset name once one is loaded.
   var crumb = document.getElementById('headerCrumb');
   var crumbSep = document.getElementById('headerCrumbSep');
@@ -5410,7 +5726,10 @@ function bindGlobalDropAndPaste() {
     dragCounter = 0;
     document.body.classList.remove('is-dragging');
     var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (!file) return;
+    // Project files take priority over CSV import.
+    if (tryHandleProjectFile(file)) return;
+    handleFile(file);
   });
   // Paste-from-clipboard: detect tabular text.
   document.addEventListener('paste', function(e) {
@@ -5440,6 +5759,9 @@ function toggleDownloadMenu(e) {
   if (!dd) return;
   var open = dd.classList.toggle('open');
   if (trigger) trigger.setAttribute('aria-expanded', String(open));
+  // Re-encode the project on every open so the displayed size is accurate
+  // for the current state. Cheap when nothing changed (signature cache hits).
+  if (open) refreshShareLinkSize();
 }
 function closeDownloadMenu() {
   var dd = document.getElementById('downloadDropdown');
@@ -5480,6 +5802,7 @@ function clearDatasetRefreshTimer() {
     clearTimeout(App.refreshTimer);
     App.refreshTimer = null;
   }
+  App.refreshTimerKey = null;
 }
 function shouldAutoRefreshDataset(ds) {
   if (!ds || ds.sourceType !== 'google_sheet') return false;
@@ -5489,12 +5812,25 @@ function shouldAutoRefreshDataset(ds) {
   var ms = refreshIntervalMs(ds.refreshMode);
   return !!(ms && ms > 0);
 }
+// Reschedules the auto-refresh timer ONLY when something material changed
+// (dataset id or interval). Without this preservation, every setStep() call
+// (sort a column, switch chart, edit anything) restarts the countdown from
+// zero, so a 5-minute timer would never finish on an active user.
 function syncDatasetRefreshTimer() {
-  clearDatasetRefreshTimer();
   var ds = activeDataset();
-  if (!shouldAutoRefreshDataset(ds) || App.refreshInFlight) return;
+  var shouldRun = shouldAutoRefreshDataset(ds) && !App.refreshInFlight;
+  if (!shouldRun) {
+    clearDatasetRefreshTimer();
+    return;
+  }
   var ms = refreshIntervalMs(ds.refreshMode);
-  if (!ms) return;
+  if (!ms) { clearDatasetRefreshTimer(); return; }
+  var key = ds.id + ':' + ds.refreshMode;
+  // Already running for the same dataset+interval — leave the existing
+  // countdown intact so it actually reaches its scheduled time.
+  if (App.refreshTimer && App.refreshTimerKey === key) return;
+  clearDatasetRefreshTimer();
+  App.refreshTimerKey = key;
   App.refreshTimer = setTimeout(function() {
     refreshActiveSheetDataset(true);
   }, ms);
@@ -5563,6 +5899,129 @@ function refreshActiveSheetDataset(silent) {
 }
 
 // ─── UPLOAD RENDER ────────────────────────────────────────────────
+// ─── HOME / LANDING PAGE ─────────────────────────────────────────
+function renderHome() {
+  var hasData = App.datasets.length > 0;
+  var foldersForGrid = App.folders.slice().sort(function(a, b){ return String(a.name).localeCompare(String(b.name)); });
+  // Show the 6 most recently touched datasets as cards.
+  var recentDatasets = App.datasets.slice()
+    .sort(function(a, b){ return (b.lastRefreshedAt || b.createdAt || 0) - (a.lastRefreshedAt || a.createdAt || 0); })
+    .slice(0, 6);
+
+  var datasetCardsHtml = recentDatasets.map(function(ds) {
+    var charts = App.dashboards[ds.id] || [];
+    var sourceLabel = ds.sourceType === 'google_sheet' ? 'Google Sheet' : ds.sourceType === 'sample' ? 'Sample' : 'CSV';
+    var folder = ds.folderId ? findFolder(ds.folderId) : null;
+    return '<div class="home-card" role="button" tabindex="0" onclick="switchDataset(\'' + ds.id + '\')" onkeydown="if(event.key===\'Enter\')switchDataset(\'' + ds.id + '\')" aria-label="Open ' + escHTML(ds.name) + '">' +
+      '<div class="home-card-head">' +
+        '<div class="home-card-icon">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' +
+        '</div>' +
+        '<span class="home-card-source">' + escHTML(sourceLabel) + '</span>' +
+        (folder ? '<span class="home-card-folder">' + escHTML(folder.name) + '</span>' : '') +
+      '</div>' +
+      '<div class="home-card-title">' + escHTML(ds.name) + '</div>' +
+      '<div class="home-card-meta">' +
+        ds.rowCount.toLocaleString() + ' rows · ' + charts.length + ' chart' + (charts.length === 1 ? '' : 's') + ' · ' +
+        fmtDate(ds.lastRefreshedAt || ds.createdAt) +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var folderRowHtml = foldersForGrid.map(function(folder) {
+    var count = App.datasets.filter(function(d){ return d.folderId === folder.id; }).length;
+    return '<button type="button" class="home-folder-pill" onclick="openFolderFromHome(\'' + folder.id + '\')" title="Open ' + escHTML(folder.name) + '">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' +
+      escHTML(folder.name) +
+      '<span class="home-folder-count">' + count + '</span>' +
+    '</button>';
+  }).join('');
+
+  var quickActionsHtml =
+    '<div class="home-actions">' +
+      '<button type="button" class="home-action" onclick="setStep(\'upload\')">' +
+        '<div class="home-action-icon home-action-icon--accent">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
+        '</div>' +
+        '<div class="home-action-text">' +
+          '<div class="home-action-title">Upload a CSV</div>' +
+          '<div class="home-action-sub">Drag, drop, or browse — works with .csv, .tsv, .txt</div>' +
+        '</div>' +
+      '</button>' +
+      '<button type="button" class="home-action" onclick="setStep(\'upload\')">' +
+        '<div class="home-action-icon home-action-icon--green">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' +
+        '</div>' +
+        '<div class="home-action-text">' +
+          '<div class="home-action-title">Import from Google Sheets</div>' +
+          '<div class="home-action-sub">Public sheets or Acko internal via secure bridge</div>' +
+        '</div>' +
+      '</button>' +
+      '<button type="button" class="home-action" onclick="setStep(\'upload\')">' +
+        '<div class="home-action-icon home-action-icon--purple">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+        '</div>' +
+        '<div class="home-action-text">' +
+          '<div class="home-action-title">Try a sample dataset</div>' +
+          '<div class="home-action-sub">Web traffic, sales, customer data — explore the chart types</div>' +
+        '</div>' +
+      '</button>' +
+    '</div>';
+
+  return '<div class="home-page">' +
+    '<section class="home-hero">' +
+      '<div class="home-hero-eyebrow">' +
+        '<span class="home-hero-dot"></span>' +
+        '<span>Glimpse · by Datapad</span>' +
+      '</div>' +
+      '<h1 class="home-hero-title">Glimpse is reading<br/>between the rows.</h1>' +
+      '<p class="home-hero-sub">A browser-side dashboard for your CSVs, sheets, and pasted data. No accounts. No servers. No setup. Drop a file and you have a dashboard before the kettle boils.</p>' +
+    '</section>' +
+    quickActionsHtml +
+    (hasData
+      ? ('<section class="home-section">' +
+          '<div class="home-section-head">' +
+            '<h2>Recent dashboards</h2>' +
+            '<button class="btn btn-ghost btn-sm" onclick="setStep(\'upload\')">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+              'New dataset' +
+            '</button>' +
+          '</div>' +
+          '<div class="home-grid">' + datasetCardsHtml + '</div>' +
+        '</section>')
+      : '') +
+    (foldersForGrid.length
+      ? ('<section class="home-section">' +
+          '<div class="home-section-head"><h2>Folders</h2></div>' +
+          '<div class="home-folder-row">' + folderRowHtml + '</div>' +
+        '</section>')
+      : '') +
+    (!hasData
+      ? ('<section class="home-empty-cta">' +
+          '<div>Drop a CSV anywhere on this page or paste a Google Sheets table to get started. Your data never leaves your browser.</div>' +
+        '</section>')
+      : '') +
+  '</div>';
+}
+
+function bindHome() {
+  // The home page is fully declarative — its onclick handlers wire it up.
+  // Nothing to do here, but keep this for symmetry with the other steps.
+}
+
+function openFolderFromHome(folderId) {
+  // Expand the target folder in the sidebar, then jump to the first dataset
+  // inside it so the user immediately sees its dashboard.
+  App.expandedFolders[folderId] = true;
+  try { localStorage.setItem('glimpse:expandedFolders', JSON.stringify(App.expandedFolders)); } catch (e) {}
+  var first = App.datasets.find(function(d){ return d.folderId === folderId; });
+  if (first) {
+    switchDataset(first.id);
+  } else {
+    renderSidebar();
+  }
+}
+
 function renderUpload() {
   var samplesHtml = SAMPLES.map(function(s, i) {
     return '<div class="sample-card" data-sample="' + i + '" role="button" tabindex="0" aria-label="Load ' + escHTML(s.name) + ' sample">' +
@@ -5650,13 +6109,10 @@ function bindUpload() {
     else toast('No file detected', 'error');
   });
 
-  // Global drag-over for body
-  document.body.addEventListener('dragover', function(e) { e.preventDefault(); });
-  document.body.addEventListener('drop', function(e) {
-    e.preventDefault();
-    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (file && App.step === 'upload') handleFile(file);
-  });
+  // Global drag handling is wired once in init() via bindGlobalDropAndPaste(),
+  // so we deliberately skip adding document.body listeners here. Adding them on
+  // every render of the upload page used to leak duplicates, causing drop
+  // events to be processed multiple times.
 
   if (sheetBtn) {
     sheetBtn.addEventListener('click', function() {
@@ -6278,19 +6734,29 @@ function deleteFolder(id) {
 function confirmDeleteFolder(id) {
   var idx = App.folders.findIndex(function(f){ return f.id === id; });
   if (idx === -1) { closeModal(); return; }
-  // Move children to root and persist them.
-  App.datasets.forEach(function(ds) {
-    if (ds.folderId === id) {
-      ds.folderId = null;
-      saveDataset(ds);
-    }
-  });
+  // Stash the original record so we can roll the in-memory state back if the
+  // IndexedDB delete fails — otherwise the folder reappears after reload.
+  var deletedFolder = App.folders[idx];
+  var movedChildren = App.datasets.filter(function(ds){ return ds.folderId === id; });
+  movedChildren.forEach(function(ds) { ds.folderId = null; });
   App.folders.splice(idx, 1);
+  var wasExpanded = App.expandedFolders[id];
   delete App.expandedFolders[id];
-  dbDelete(STORE_FOLDER, id);
   closeModal();
   renderSidebar();
-  toast('Folder deleted', 'success', 1800);
+
+  Promise.all([dbDelete(STORE_FOLDER, id)].concat(
+    movedChildren.map(function(ds){ return saveDataset(ds); })
+  )).then(function() {
+    toast('Folder deleted', 'success', 1800);
+  }).catch(function(err) {
+    console.error('[Glimpse] folder delete failed, rolling back:', err);
+    App.folders.splice(idx, 0, deletedFolder);
+    movedChildren.forEach(function(ds){ ds.folderId = id; });
+    if (wasExpanded !== undefined) App.expandedFolders[id] = wasExpanded;
+    renderSidebar();
+    toast('Could not delete folder — restored.', 'error', 5000);
+  });
 }
 
 function moveDatasetToFolder(datasetId) {
@@ -6881,16 +7347,50 @@ function deleteCalculatedField(index) {
 function confirmDeleteCalculatedField(index) {
   var ds = activeDataset();
   if (!ds || !ds.schema[index] || !ds.schema[index].calculated) { closeModal(); return; }
-  // Remove the schema entry. Computed cells beyond schema.length remain in the row but
-  // are inaccessible (no schema entry). To stay tidy, also splice them out.
+  // Walk every chart that referenced a column index >= the deleted one and shift
+  // it left by 1. References that pointed at the deleted column become null.
+  var charts = App.dashboards[ds.id] || [];
+  charts.forEach(function(ch) {
+    ['xField','yField','seriesField'].forEach(function(prop) {
+      if (typeof ch[prop] === 'number') {
+        if (ch[prop] === index) ch[prop] = null;
+        else if (ch[prop] > index) ch[prop] = ch[prop] - 1;
+      }
+    });
+    if (Array.isArray(ch.displayFields)) {
+      ch.displayFields = ch.displayFields
+        .filter(function(i){ return i !== index; })
+        .map(function(i){ return i > index ? i - 1 : i; });
+    }
+    // tableSort encodes a column index in the "field:N" sortKey — reset if it points
+    // at the deleted column or shift if it points beyond.
+    if (ch.tableSort && ch.tableSort.key && ch.tableSort.key.indexOf('field:') === 0) {
+      var sortIdx = parseInt(ch.tableSort.key.slice(6), 10);
+      if (sortIdx === index) ch.tableSort = null;
+      else if (sortIdx > index) ch.tableSort = { key: 'field:' + (sortIdx - 1), dir: ch.tableSort.dir };
+    }
+  });
+
+  // Now mutate the schema and rows.
   ds.schema.splice(index, 1);
   ds.rows.forEach(function(row) { if (row.length > index) row.splice(index, 1); });
-  // Rewrite indices to match new positions.
   ds.schema.forEach(function(f, i) { f.index = i; });
+
+  // Other calculated fields may have referenced this one — recompute them all
+  // and surface any that now error (their `calcError` will be set on the field).
+  applyCalculatedFields(ds);
+
   saveDataset(ds);
+  saveDashboard(ds.id, charts);
   closeModal();
   setStep('schema');
-  toast('Calculated field removed', 'success');
+  // Warn if any other calc field broke as a result of this delete.
+  var brokenCalcs = ds.schema.filter(function(f){ return f.calculated && f.calcError; });
+  if (brokenCalcs.length) {
+    toast('Removed. ' + brokenCalcs.length + ' other calc field' + (brokenCalcs.length === 1 ? '' : 's') + ' now reference a missing column — edit to fix.', 'warn', 6000);
+  } else {
+    toast('Calculated field removed', 'success');
+  }
 }
 
 function summCard(label, value, sub) {
@@ -8191,23 +8691,40 @@ function deleteDataset(id) {
 function confirmDeleteDataset(id) {
   closeModal();
   var idx = App.datasets.findIndex(function(d){ return d.id === id; });
-  if (idx > -1) App.datasets.splice(idx, 1);
-  delete App.dashboards[id];
-  dbDelete(STORE_DS,   id);
-  dbDelete(STORE_DASH, id);
+  if (idx === -1) return;
+  // Snapshot for rollback if persistence fails.
+  var deletedDs = App.datasets[idx];
+  var deletedDash = App.dashboards[id] ? App.dashboards[id].slice() : null;
+  var wasActive = App.activeDatasetId === id;
+  var prevFilters = App.filters.slice();
 
-  if (App.activeDatasetId === id) {
+  App.datasets.splice(idx, 1);
+  delete App.dashboards[id];
+
+  if (wasActive) {
     App.activeDatasetId = App.datasets.length ? App.datasets[0].id : null;
     App.filters = [];
-    if (App.activeDatasetId) {
-      setStep('dashboard');
-    } else {
-      setStep('upload');
-    }
+    if (App.activeDatasetId) setStep('dashboard');
+    else setStep('home');
   } else {
     renderSidebar();
   }
-  toast('Dataset deleted', 'success');
+
+  Promise.all([dbDelete(STORE_DS, id), dbDelete(STORE_DASH, id)]).then(function() {
+    toast('Dataset deleted', 'success');
+  }).catch(function(err) {
+    console.error('[Glimpse] dataset delete failed, rolling back:', err);
+    App.datasets.splice(idx, 0, deletedDs);
+    if (deletedDash) App.dashboards[id] = deletedDash;
+    if (wasActive) {
+      App.activeDatasetId = id;
+      App.filters = prevFilters;
+      setStep('dashboard');
+    } else {
+      renderSidebar();
+    }
+    toast('Could not delete dataset — restored.', 'error', 5000);
+  });
 }
 
 function resetAll() {
@@ -8234,6 +8751,476 @@ function confirmResetAll() {
   try { localStorage.removeItem('glimpse:expandedFolders'); } catch(e) {}
   dbClearAll().then(function(){ toast('All data cleared', 'success'); });
   setStep('upload');
+}
+
+// ─── PROJECT EXPORT / IMPORT (file + share link) ─────────────────
+// Bundle shape stays simple and forward-compatible: bump `version` if the
+// schema changes and add a migration in applyProjectBundle().
+var PROJECT_BUNDLE_VERSION = 1;
+// Threshold above which we hide the share link option. Slack truncates ~10k,
+// most browsers cope until ~32k, but multi-line URLs in chat are user-hostile
+// long before then. 25k characters of base64 is roughly 17KB compressed payload.
+var SHARE_URL_MAX_CHARS = 25000;
+
+function buildProjectBundle() {
+  return {
+    version: PROJECT_BUNDLE_VERSION,
+    name: deriveProjectName(),
+    exportedAt: Date.now(),
+    activeDatasetId: App.activeDatasetId || null,
+    folders: (App.folders || []).map(function(f){ return { id: f.id, name: f.name, createdAt: f.createdAt }; }),
+    datasets: (App.datasets || []).map(serializeDataset),
+    dashboards: Object.keys(App.dashboards || {}).reduce(function(out, k) {
+      out[k] = (App.dashboards[k] || []).slice();
+      return out;
+    }, {})
+  };
+}
+
+function deriveProjectName() {
+  if (App.activeDatasetId) {
+    var ds = App.datasets.find(function(d){ return d.id === App.activeDatasetId; });
+    if (ds) return ds.name + ' project';
+  }
+  if (App.datasets.length === 1) return App.datasets[0].name + ' project';
+  if (App.datasets.length > 1) return 'Glimpse project (' + App.datasets.length + ' datasets)';
+  return 'Glimpse project';
+}
+
+// Shape sent over the wire — same fields saveDataset persists, no DOM refs.
+function serializeDataset(ds) {
+  return {
+    id: ds.id,
+    name: ds.name,
+    rows: ds.rows,
+    schema: ds.schema,
+    rowCount: ds.rowCount,
+    colCount: ds.colCount,
+    totalRows: ds.totalRows,
+    sampleMode: !!ds.sampleMode,
+    createdAt: ds.createdAt,
+    fileSizeBytes: ds.fileSizeBytes || 0,
+    sourceType: ds.sourceType || 'file',
+    sourceUrl: ds.sourceUrl || '',
+    sourceMeta: ds.sourceMeta || null,
+    refreshMode: ds.refreshMode || AUTO_REFRESH_OFF,
+    lastRefreshedAt: ds.lastRefreshedAt || ds.createdAt,
+    folderId: ds.folderId === undefined ? null : ds.folderId
+  };
+}
+
+// ─── File export ──────────────────────────────────────────────────
+function exportProjectFile() {
+  if (!App.datasets.length) {
+    toast('Nothing to export — add a dataset first', 'warn');
+    return;
+  }
+  var bundle = buildProjectBundle();
+  var json = JSON.stringify(bundle);
+  var safeName = (bundle.name || 'glimpse-project').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
+  var blob = new Blob([json], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = safeName + '.glimpse.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() {
+    if (a.parentNode) a.parentNode.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 200);
+  toast('Project exported (' + fmtBytes(blob.size) + ')', 'success', 2200);
+}
+
+// ─── Share link (URL fragment) ────────────────────────────────────
+// Browser-native gzip + base64-url. No third-party server involved — the
+// payload travels in `location.hash`, which is never sent to any HTTP server.
+async function gzipToBase64Url(text) {
+  if (typeof CompressionStream === 'undefined') {
+    throw new Error('Your browser does not support compression for share links — use the file export instead.');
+  }
+  var inputStream = new Blob([text]).stream();
+  var compressedStream = inputStream.pipeThrough(new CompressionStream('gzip'));
+  var ab = await new Response(compressedStream).arrayBuffer();
+  return bytesToBase64Url(new Uint8Array(ab));
+}
+async function base64UrlToText(b64url) {
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error('Your browser does not support decompression — open the project file instead.');
+  }
+  var bytes = base64UrlToBytes(b64url);
+  var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(stream).text();
+}
+function bytesToBase64Url(bytes) {
+  // Chunked apply to avoid stack-overflow on big arrays (~512KB+).
+  var CHUNK = 0x8000;
+  var parts = [];
+  for (var i = 0; i < bytes.length; i += CHUNK) {
+    parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK)));
+  }
+  return btoa(parts.join('')).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function base64UrlToBytes(b64url) {
+  var b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  var binary = atob(b64);
+  var out = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+// Cached size estimate so we don't re-encode on every dropdown render.
+var _shareSizeCache = { signature: null, chars: 0, payload: null, name: '' };
+
+function projectSignature() {
+  // Cheap fingerprint — total dataset + dashboard counts and the most recent
+  // touch time. Enough to invalidate the cache on any meaningful change.
+  var lastTouched = (App.datasets || []).reduce(function(m, d){ return Math.max(m, d.lastRefreshedAt || d.createdAt || 0); }, 0);
+  var dashTouched = Object.keys(App.dashboards || {}).reduce(function(m, k){ return m + (App.dashboards[k] || []).length; }, 0);
+  return (App.datasets || []).length + ':' + (App.folders || []).length + ':' + dashTouched + ':' + lastTouched + ':' + (App.activeDatasetId || '');
+}
+
+async function refreshShareLinkSize() {
+  var sub = document.getElementById('copyShareLinkSub');
+  var item = document.getElementById('copyShareLinkItem');
+  if (!sub || !item) return;
+  if (!App.datasets.length) {
+    sub.textContent = 'Add a dataset first';
+    item.classList.add('is-disabled');
+    return;
+  }
+  var sig = projectSignature();
+  if (_shareSizeCache.signature === sig && _shareSizeCache.payload) {
+    applyShareSizeUI(_shareSizeCache.chars);
+    return;
+  }
+  try {
+    var bundle = buildProjectBundle();
+    var json = JSON.stringify(bundle);
+    var encoded = await gzipToBase64Url(json);
+    _shareSizeCache = { signature: sig, chars: encoded.length, payload: encoded, name: bundle.name };
+    applyShareSizeUI(encoded.length);
+  } catch (err) {
+    sub.textContent = err && err.message ? err.message : 'Cannot encode share link';
+    item.classList.add('is-disabled');
+  }
+}
+function applyShareSizeUI(chars) {
+  var sub = document.getElementById('copyShareLinkSub');
+  var item = document.getElementById('copyShareLinkItem');
+  if (!sub || !item) return;
+  if (chars > SHARE_URL_MAX_CHARS) {
+    sub.textContent = 'Too large for a link (' + fmtCompactBytes(chars) + ') — use file export';
+    item.classList.add('is-disabled');
+  } else {
+    sub.textContent = 'Self-contained URL (' + fmtCompactBytes(chars) + ', ~' + Math.ceil(chars / 1024) + ' KB)';
+    item.classList.remove('is-disabled');
+  }
+}
+function fmtCompactBytes(chars) {
+  if (chars < 1024) return chars + ' chars';
+  return (chars / 1024).toFixed(1) + ' KB';
+}
+
+async function openShareModal() {
+  if (!App.datasets.length) { toast('Nothing to share — add a dataset first', 'warn'); return; }
+  // Open the modal with a loading state, then encode in the background.
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Share this project</h2>' +
+    '<p style="color:var(--text-3);font-size:13px;line-height:1.6;margin-bottom:var(--space-5)">' +
+      'Anyone who opens the link will see the same datasets, dashboards, and folders. ' +
+      'The data travels inside the URL — nothing is uploaded to any server.' +
+    '</p>' +
+    '<div class="share-modal-body" id="shareModalBody">' +
+      '<div class="share-modal-loading">Encoding project…</div>' +
+    '</div>'
+  );
+  try {
+    var bundle = buildProjectBundle();
+    var json = JSON.stringify(bundle);
+    var encoded = await gzipToBase64Url(json);
+    _shareSizeCache = { signature: projectSignature(), chars: encoded.length, payload: encoded, name: bundle.name };
+    renderShareModalBody(bundle, encoded);
+  } catch (err) {
+    var body = document.getElementById('shareModalBody');
+    if (body) body.innerHTML = '<div class="share-modal-error">' + escHTML(err && err.message ? err.message : 'Could not encode project') + '</div>';
+  }
+}
+
+function renderShareModalBody(bundle, encoded) {
+  var body = document.getElementById('shareModalBody');
+  if (!body) return;
+  var fits = encoded.length <= SHARE_URL_MAX_CHARS;
+  var url  = location.origin + location.pathname + location.search + '#p=' + encoded;
+  var sizeLabel = fmtCompactBytes(encoded.length);
+  var bytesNote = '~' + Math.ceil(encoded.length / 1024) + ' KB compressed';
+
+  if (fits) {
+    body.innerHTML =
+      '<div class="share-card share-card--link">' +
+        '<div class="share-card-head">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+          '<div><div class="share-card-title">Share via link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' · ' + escHTML(bytesNote) + '</div></div>' +
+        '</div>' +
+        '<div class="share-link-row">' +
+          '<input class="modal-field-input share-link-input" id="shareLinkUrl" type="text" readonly value="' + escHTML(url) + '" onclick="this.select()"/>' +
+          '<button class="btn btn-primary share-copy-btn" type="button" onclick="copyShareLinkFromModal()">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            'Copy' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      renderShareFileSection(bundle);
+  } else {
+    body.innerHTML =
+      '<div class="share-card share-card--disabled">' +
+        '<div class="share-card-head">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>' +
+          '<div><div class="share-card-title">Project too large for a link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' — links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
+        '</div>' +
+        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Use the file export below instead — it has no size limit.</div>' +
+      '</div>' +
+      renderShareFileSection(bundle);
+  }
+}
+
+function renderShareFileSection(bundle) {
+  var dsCount = (bundle && bundle.datasets || []).length;
+  var dashCount = bundle && bundle.dashboards ? Object.keys(bundle.dashboards).length : 0;
+  return '<div class="share-card share-card--file">' +
+    '<div class="share-card-head">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+      '<div><div class="share-card-title">Download project file</div><div class="share-card-sub">' + dsCount + ' dataset' + (dsCount === 1 ? '' : 's') + ' · ' + dashCount + ' dashboard' + (dashCount === 1 ? '' : 's') + ' · works for any size</div></div>' +
+    '</div>' +
+    '<div class="share-card-actions">' +
+      '<button class="btn btn-ghost btn-sm" type="button" onclick="exportProjectFile()">Download .glimpse.json</button>' +
+      '<span class="share-card-hint">Recipients drop the file onto Glimpse to open it.</span>' +
+    '</div>' +
+  '</div>';
+}
+
+async function copyShareLinkFromModal() {
+  var input = document.getElementById('shareLinkUrl');
+  if (!input) return;
+  var url = input.value;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      input.select();
+      document.execCommand('copy');
+    }
+    toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2200);
+  } catch (err) {
+    toast('Could not copy — select the URL and copy manually', 'warn', 4000);
+  }
+}
+
+async function copyShareLink() {
+  if (!App.datasets.length) { toast('Nothing to share — add a dataset first', 'warn'); return; }
+  try {
+    if (!_shareSizeCache.payload || _shareSizeCache.signature !== projectSignature()) {
+      await refreshShareLinkSize();
+    }
+    if (!_shareSizeCache.payload) throw new Error('Could not build share payload');
+    if (_shareSizeCache.chars > SHARE_URL_MAX_CHARS) {
+      toast('Project too large for a share link — use Export project file instead', 'warn', 5000);
+      return;
+    }
+    var base = location.origin + location.pathname + location.search;
+    var url  = base + '#p=' + _shareSizeCache.payload;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2500);
+    } else {
+      // Fallback — show in a modal so the user can copy manually.
+      openModal(
+        '<button class="modal-close" onclick="closeModal()">✕</button>' +
+        '<h2>Share link</h2>' +
+        '<p>Copy this URL and paste it anywhere — recipients open it to see the same project.</p>' +
+        '<textarea class="modal-field-input" rows="6" readonly onclick="this.select()">' + escHTML(url) + '</textarea>' +
+        '<div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">Done</button></div>'
+      );
+    }
+  } catch (err) {
+    console.error('[Glimpse] share link failed:', err);
+    toast(err && err.message ? err.message : 'Could not build share link', 'error', 5000);
+  }
+}
+
+// ─── Importing a project bundle (from file OR fragment) ──────────
+function importProjectFromText(text, sourceLabel) {
+  var bundle;
+  try {
+    bundle = JSON.parse(text);
+  } catch (e) {
+    toast('Invalid project file — could not parse JSON', 'error', 5000);
+    return;
+  }
+  if (!bundle || typeof bundle !== 'object' || !bundle.version || !Array.isArray(bundle.datasets)) {
+    toast('That file is not a Glimpse project', 'error', 5000);
+    return;
+  }
+  if (bundle.version > PROJECT_BUNDLE_VERSION) {
+    toast('Project was exported from a newer Glimpse — try refreshing this tab', 'warn', 5000);
+    // Continue anyway: we may still understand it.
+  }
+  promptProjectImportConflicts(bundle, sourceLabel || 'project file');
+}
+
+function promptProjectImportConflicts(bundle, sourceLabel) {
+  var existingDsIds = {};
+  App.datasets.forEach(function(d){ existingDsIds[d.id] = d.name; });
+  var conflicts = (bundle.datasets || []).filter(function(d){ return existingDsIds[d.id]; });
+  var foldersInBundle = (bundle.folders || []).length;
+  var dsCount = (bundle.datasets || []).length;
+  var dashCount = Object.keys(bundle.dashboards || {}).length;
+
+  var conflictHtml = conflicts.length
+    ? ('<div class="modal-field-hint" style="color:var(--warn);margin-top:8px"><strong>' + conflicts.length + '</strong> dataset' + (conflicts.length === 1 ? '' : 's') + ' already exist with the same id (' + escHTML(conflicts.slice(0, 3).map(function(c){ return c.name; }).join(', ')) + (conflicts.length > 3 ? '…' : '') + ').</div>')
+    : '';
+  var bundleNameHtml = '<strong>' + escHTML(bundle.name || 'project') + '</strong>';
+  var bodyHtml = '<p>' + sourceLabel + ' contains ' + bundleNameHtml + ': <strong>' + dsCount + '</strong> dataset' + (dsCount === 1 ? '' : 's') + ', <strong>' + dashCount + '</strong> dashboard' + (dashCount === 1 ? '' : 's') + (foldersInBundle ? ', <strong>' + foldersInBundle + '</strong> folder' + (foldersInBundle === 1 ? '' : 's') : '') + '.</p>' + conflictHtml;
+
+  var actionsHtml = '<div class="modal-actions">' +
+    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+    (conflicts.length
+      ? ('<button class="btn btn-ghost" onclick="finishProjectImport(\'keep\')">Keep both</button>' +
+         '<button class="btn btn-primary" onclick="finishProjectImport(\'replace\')">Replace existing</button>')
+      : '<button class="btn btn-primary" onclick="finishProjectImport(\'merge\')">Open project</button>') +
+  '</div>';
+
+  // Stash on App so the action handler can read it without ferrying through onclick attrs.
+  App.pendingProjectImport = bundle;
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Import project</h2>' +
+    bodyHtml +
+    actionsHtml
+  );
+}
+
+function finishProjectImport(mode) {
+  var bundle = App.pendingProjectImport;
+  App.pendingProjectImport = null;
+  if (!bundle) { closeModal(); return; }
+  applyProjectBundle(bundle, mode).then(function(applied) {
+    closeModal();
+    if (!applied) return;
+    // Land the user on the bundle's active dashboard if one was specified, else
+    // the first dataset, else the home page.
+    if (bundle.activeDatasetId && App.datasets.find(function(d){ return d.id === bundle.activeDatasetId; })) {
+      App.activeDatasetId = bundle.activeDatasetId;
+      setStep('dashboard');
+    } else if (App.datasets.length) {
+      App.activeDatasetId = App.datasets[0].id;
+      setStep('dashboard');
+    } else {
+      setStep('home');
+    }
+    toast('Project imported (' + (bundle.datasets || []).length + ' dataset' + ((bundle.datasets || []).length === 1 ? '' : 's') + ')', 'success');
+  }).catch(function(err) {
+    console.error('[Glimpse] project import failed:', err);
+    toast('Import failed: ' + (err && err.message ? err.message : err), 'error', 6000);
+  });
+}
+
+async function applyProjectBundle(bundle, mode) {
+  // mode: 'merge' (no conflicts), 'replace' (overwrite same-id), 'keep' (renumber incoming ids)
+  var idRemap = {};        // old dataset id  -> new dataset id (only set when keep-both)
+  var folderRemap = {};    // old folder id   -> new folder id
+
+  // ---- folders ----
+  var existingFolderIds = {};
+  App.folders.forEach(function(f){ existingFolderIds[f.id] = true; });
+  (bundle.folders || []).forEach(function(f) {
+    if (existingFolderIds[f.id]) {
+      // Always keep both for folders — never destroy an existing folder.
+      var newId = genId();
+      folderRemap[f.id] = newId;
+      App.folders.push({ id: newId, name: f.name + ' (imported)', createdAt: f.createdAt || Date.now() });
+    } else {
+      App.folders.push({ id: f.id, name: f.name, createdAt: f.createdAt || Date.now() });
+    }
+  });
+
+  // ---- datasets ----
+  for (var i = 0; i < (bundle.datasets || []).length; i++) {
+    var ds = bundle.datasets[i];
+    var existingIdx = App.datasets.findIndex(function(d){ return d.id === ds.id; });
+    var targetDs;
+    if (existingIdx > -1) {
+      if (mode === 'replace') {
+        targetDs = ds;
+      } else if (mode === 'keep') {
+        var newId = genId();
+        idRemap[ds.id] = newId;
+        targetDs = Object.assign({}, ds, { id: newId, name: ds.name + ' (imported)' });
+      } else {
+        targetDs = ds; // 'merge' shouldn't happen with conflicts, but be safe
+      }
+    } else {
+      targetDs = ds;
+    }
+    // Remap folderId if the bundle's folder was renumbered.
+    if (targetDs.folderId && folderRemap[targetDs.folderId]) targetDs.folderId = folderRemap[targetDs.folderId];
+    targetDs = normalizeDatasetRecord(targetDs);
+
+    if (existingIdx > -1 && mode === 'replace') {
+      App.datasets[existingIdx] = targetDs;
+    } else {
+      App.datasets.push(targetDs);
+    }
+    await saveDataset(targetDs);
+  }
+
+  // ---- dashboards ----
+  var dashMap = bundle.dashboards || {};
+  var dashKeys = Object.keys(dashMap);
+  for (var k = 0; k < dashKeys.length; k++) {
+    var oldDsId = dashKeys[k];
+    var charts = dashMap[oldDsId] || [];
+    var newDsId = idRemap[oldDsId] || oldDsId;
+    // Skip dashboards whose dataset wasn't actually imported.
+    if (!App.datasets.find(function(d){ return d.id === newDsId; })) continue;
+    App.dashboards[newDsId] = charts.slice();
+    await saveDashboard(newDsId, charts);
+  }
+
+  return true;
+}
+
+// Hook the file-drop / paste-handler so .glimpse.json files route here.
+function tryHandleProjectFile(file) {
+  if (!file) return false;
+  var name = (file.name || '').toLowerCase();
+  if (name.indexOf('.glimpse.json') === -1 && name.indexOf('.glimpse') === -1) return false;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    importProjectFromText(String(e.target.result || ''), file.name);
+  };
+  reader.onerror = function() { toast('Could not read project file', 'error', 4000); };
+  reader.readAsText(file);
+  return true;
+}
+
+// Read location.hash on init — if it carries a #p=… payload, decode + prompt.
+async function tryConsumeShareLinkFromUrl() {
+  var hash = location.hash || '';
+  if (hash.indexOf('#p=') !== 0) return false;
+  var payload = hash.slice(3);
+  // Strip the fragment from the URL bar so reloads don't re-prompt.
+  history.replaceState(null, '', location.pathname + location.search);
+  try {
+    var json = await base64UrlToText(payload);
+    importProjectFromText(json, 'shared link');
+  } catch (err) {
+    console.error('[Glimpse] could not decode share link:', err);
+    toast('Could not decode shared link — it may be malformed.', 'error', 5000);
+  }
+  return true;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────
@@ -8270,10 +9257,12 @@ function init() {
   restoreSidebarState();
   loadExpandedFoldersPref();
 
-  // Render the upload page IMMEDIATELY so the user is never staring at a blank
-  // main area while IndexedDB does its (sometimes slow) open + migration dance.
-  // We'll switch to the dashboard step once the persisted state actually loads.
-  setStep('upload');
+  // Render the home/landing page IMMEDIATELY so the user is never staring at a
+  // blank main area while IndexedDB does its (sometimes slow) open + migration
+  // dance. The home page works fine with zero data — it just shows the hero +
+  // empty-state quick actions. Once persisted state loads we re-render to fill
+  // in the recent-dashboards section.
+  setStep('home');
 
   // App.dbPromise was started at the top of the script (see just below the App
   // declaration). Here we just chain off it to load persisted state.
@@ -8294,18 +9283,17 @@ function init() {
     App.datasets = datasets.map(normalizeDatasetRecord).sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
     dashboards.forEach(function(d){ App.dashboards[d.id] = d.charts || []; });
 
-    if (App.datasets.length) {
+    // Pre-warm activeDatasetId so opening any dataset from the home page is fast.
+    if (App.datasets.length && !App.activeDatasetId) {
       App.activeDatasetId = App.datasets[0].id;
-      if (!App.dashboards[App.activeDatasetId] || !App.dashboards[App.activeDatasetId].length) {
-        var ds = activeDataset();
-        if (ds) App.dashboards[App.activeDatasetId] = suggestCharts(ds.schema);
-      }
-      setStep('dashboard');
-    } else {
-      // Already on upload from the eager render above; just refresh the sidebar
-      // now that folders have loaded.
-      renderSidebar();
     }
+    // Stay on the home/landing page; just re-render now that data has loaded
+    // so the recent-dashboards grid and sidebar populate.
+    if (App.step === 'home') setStep('home');
+    else renderSidebar();
+    // If the URL carries a #p=… payload, decode it now that local state is loaded
+    // (so the conflict-resolution modal can compare against existing datasets).
+    tryConsumeShareLinkFromUrl();
   }).catch(function(err) {
     console.error('[Glimpse] post-open load failed:', err);
   });
