@@ -841,6 +841,120 @@
       font-family:var(--mono);letter-spacing:.3px;
     }
 
+    /* ════════════ Time to Target card ════════════ */
+    .ttt-card{ position:relative; }
+    .ttt-controls{
+      display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .ttt-input-wrap{ display:flex; flex-direction:column; gap:6px; flex:1; min-width:180px; max-width:280px; }
+    .ttt-input-lbl{
+      font-size:10.5px; font-weight:700; color:var(--t2);
+      text-transform:uppercase; letter-spacing:1.2px;
+      font-family:var(--mono);
+    }
+    .ttt-mde-input{
+      font-family:var(--mono);
+      font-size:15px;
+      font-weight:600;
+      letter-spacing:-0.2px;
+      max-width:160px;
+    }
+    .ttt-empty{
+      font-size:13px; line-height:1.7; color:var(--t2);
+      margin-top:10px;
+      padding:14px 16px;
+      background:rgba(255,255,255,0.02);
+      border:1px dashed var(--brd);
+      border-radius:10px;
+    }
+    .ttt-empty--warn{ color:var(--warn); border-color:rgba(255,170,0,0.3); }
+
+    .ttt-stat-row{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:10px;
+      margin-bottom:18px;
+    }
+    @media (max-width: 720px){ .ttt-stat-row{ grid-template-columns: repeat(2, 1fr); } }
+    .ttt-stat{
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--brd);
+      border-radius:10px;
+      padding:12px 14px;
+      display:flex; flex-direction:column; gap:3px;
+      min-width:0;
+    }
+    .ttt-stat-lbl{
+      font-size:10px; font-weight:700; color:var(--t2);
+      text-transform:uppercase; letter-spacing:1.1px;
+      font-family:var(--mono);
+    }
+    .ttt-stat-val{
+      font-size:22px; font-weight:700; color:var(--t0);
+      font-family:var(--mono); letter-spacing:-0.4px; line-height:1.1;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .ttt-stat-val--status{ font-size:14.5px; font-family:var(--font); letter-spacing:-0.1px; }
+    .ttt-stat-sub{ font-size:11px; color:var(--t2); line-height:1.45; }
+
+    /* Status word styles (live in the 4th cell) */
+    .ttt-status-done    { color:var(--pri); }
+    .ttt-status-near    { color:var(--acc); }
+    .ttt-status-pending { color:var(--warn); }
+    .ttt-status-warn    { color:var(--red); }
+
+    /* Progress bar - label sits OUTSIDE so it's always readable */
+    .ttt-progress-row{ margin-bottom:14px; }
+    .ttt-progress{
+      position:relative;
+      height:10px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid var(--brd);
+      border-radius:99px;
+      overflow:hidden;
+    }
+    .ttt-progress-fill{
+      height:100%;
+      width:0;
+      transition:width 0.35s var(--ease, ease);
+      background:linear-gradient(90deg, var(--acc), rgba(0,212,255,0.6));
+      border-radius:99px;
+    }
+    .ttt-progress-fill.is-done{
+      background:linear-gradient(90deg, var(--pri), rgba(0,255,136,0.55));
+    }
+    .ttt-progress-meta{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:8px;
+      font-family:var(--mono);
+      font-size:11px;
+      color:var(--t2);
+    }
+    .ttt-progress-pct{
+      font-size:13px;
+      font-weight:700;
+      color:var(--t0);
+      letter-spacing:-0.2px;
+    }
+    .ttt-progress-frac{ color:var(--t2); }
+
+    .ttt-verdict{
+      font-size:13px; line-height:1.65; color:var(--t1);
+      padding:10px 14px;
+      background:rgba(0,212,255,0.05);
+      border:1px solid rgba(0,212,255,0.15);
+      border-radius:10px;
+    }
+    .ttt-verdict.is-done{
+      background:rgba(0,255,136,0.05);
+      border-color:rgba(0,255,136,0.18);
+      color:var(--t0);
+    }
+
     /* ════════════ FAQ (matches landing) ════════════ */
     .faq-section{
       padding:80px 32px;
@@ -1335,6 +1449,11 @@
           <button class="tbtn" onclick="setHypothesis('one',this)" aria-pressed="false">One-sided</button>
         </div>
         <div class="hyp-box" id="hypExplain" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="ig">
+        <label class="il" for="daysInput">Days running <button class="ibtn" data-tip="How many days the test has been live so far. Used together with the visitor totals you've entered to compute your average daily traffic per variant - and from there, the days you still need to detect a target effect." aria-label="About days running">i</button></label>
+        <input id="daysInput" class="ifield" type="number" inputmode="numeric" min="1" max="365" step="1" value="7" oninput="setDaysCollected(this.value)" placeholder="7" aria-label="Days the test has been collecting data" />
       </div>
     </div>
 
@@ -1852,6 +1971,8 @@
 var S={
   mode:'conversion',numVariants:2,confidence:95,hypothesis:'two',activeTab:'results',
   simResult:null,simCacheKey:'',
+  daysCollected:7,           // how long current visitors were accumulated over
+  targetMdePct:'',           // user-typed target MDE in percentage points (absolute); '' = use observed
   variants:[
     {name:'Control (A)',customName:'',visitors:10000,conversions:450,revenue:22500},
     {name:'Variant B',customName:'',visitors:10000,conversions:520,revenue:28600},
@@ -1957,6 +2078,54 @@ function setVariants(n,el){S.numVariants=n;actToggle(el);buildInputs();compute()
 function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;var r=document.getElementById('confRange');if(r)r.setAttribute('aria-valuenow',v);compute()}
 function setHypothesis(h,el){S.hypothesis=h;actToggle(el);updateHyp();compute()}
 function setTab(t,el){S.activeTab=t;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false')});el.classList.add('active');el.setAttribute('aria-selected','true');render()}
+function setDaysCollected(v){var n=Math.max(1,Math.min(365,Math.floor(Number(v)||1)));S.daysCollected=n;compute()}
+// Partial update only - never re-render the whole card on each keystroke,
+// otherwise the input element is destroyed and the cursor jumps to the end
+// every time the user types a digit.
+function setTargetMde(v){var raw=String(v||'').trim();S.targetMdePct=raw===''?'':Math.max(0,Number(raw));updateTttCells()}
+function useObservedMde(){
+  var v=R&&R.variantResults&&R.variantResults[0];
+  S.targetMdePct=v?+(v.mde*100).toFixed(2):'';
+  var input=document.getElementById('targetMdeInput');
+  if(input)input.value=String(S.targetMdePct);
+  updateTttCells();
+}
+
+// Build a duration projection for a given target MDE.
+// Returns {dailyRate, requiredN, currentN, additionalN, daysNeeded, additionalDays, progressPct, verdict}.
+// "verdict" is a short string the UI can show next to the numbers.
+function projectTimeToTarget(targetMdeAbs) {
+  if (!R || !R.variantResults || !R.variantResults.length) return null;
+  var v0      = R.variantResults[0];
+  var current = +R.ctrl.visitors || 0;
+  var days    = Math.max(1, S.daysCollected || 1);
+  var dailyRate = current / days; // per-variant daily rate (control bucket)
+  // Guard against meaningless inputs.
+  if (!isFinite(targetMdeAbs) || targetMdeAbs <= 0) return null;
+  var requiredN = calcSampleSize(R.baseRate, targetMdeAbs, R.alphaAdj);
+  if (!isFinite(requiredN)) return { invalid: true };
+  var additionalN  = Math.max(0, requiredN - current);
+  var additionalDays = dailyRate > 0 ? Math.ceil(additionalN / dailyRate) : Infinity;
+  var daysNeeded     = dailyRate > 0 ? Math.ceil(requiredN / dailyRate) : Infinity;
+  var progressPct = requiredN > 0 ? Math.min(100, (current / requiredN) * 100) : 0;
+  var verdict;
+  if (additionalN === 0) {
+    verdict = 'You already have enough data - ship if the result is significant.';
+  } else if (!isFinite(additionalDays)) {
+    verdict = 'Need more visitors. Daily rate is 0 - increase the days field or get more traffic.';
+  } else if (additionalDays === 0) {
+    verdict = 'About a day away from the target sample.';
+  } else {
+    verdict = 'Need ~' + additionalDays + ' more day' + (additionalDays === 1 ? '' : 's') +
+              ' at your current pace of ~' + Math.round(dailyRate).toLocaleString() +
+              ' visitors/day per variant.';
+  }
+  return {
+    dailyRate: dailyRate, requiredN: requiredN, currentN: current,
+    additionalN: additionalN, daysNeeded: daysNeeded, additionalDays: additionalDays,
+    progressPct: progressPct, verdict: verdict
+  };
+}
 function toggleGuide(){var m=document.getElementById('guideModal'),b=document.getElementById('guideBtn'),open=m.classList.toggle('open');b.setAttribute('aria-expanded',open?'true':'false')}
 function updateHyp(){var el=document.getElementById('hypExplain');el.innerHTML=S.hypothesis==='two'?'<strong>Two-sided</strong> - Tests if variant differs in either direction. Safer default.':'<strong>One-sided</strong> - Tests only if variant is <em>better</em>. Only use when harm is impossible.'}
 
@@ -2120,9 +2289,109 @@ function renderPower(el){
     var n=calcSampleSize(R.baseRate,mde/100,R.alphaAdj),pw=calcPower(n,R.baseRate,n,R.baseRate+mde/100)*100,cur=v0&&Math.abs(v0.absDiff*100)>=mde-0.01;
     rows+='<tr'+(cur?' style="background:rgba(0,255,136,0.04)"':'')+'><td>'+mde+'%</td><td>'+(isFinite(n)?n.toLocaleString():'∞')+'</td><td>'+(isFinite(n)?(n*S.numVariants).toLocaleString():'∞')+'</td><td style="color:'+(pw>=80?'var(--pri)':'var(--warn)')+'">'+fmtRaw(pw,1)+'</td></tr>';
   });
-  el.innerHTML='<div class="card"><div class="card-head"><div><div class="card-head-title">Power Curve</div><div class="card-head-sub">Detection probability vs effect size</div></div></div>'+powerCurveSVG(R.baseRate,+R.ctrl.visitors,n2)+'</div>'+
+  el.innerHTML=
+    renderTimeToTargetCard(v0)+
+    '<div class="card"><div class="card-head"><div><div class="card-head-title">Power Curve</div><div class="card-head-sub">Detection probability vs effect size</div></div></div>'+powerCurveSVG(R.baseRate,+R.ctrl.visitors,n2)+'</div>'+
     '<div class="card"><div class="card-head"><div><div class="card-head-title">Sample Size Table</div><div class="card-head-sub">Visitors per variant for 80% power at '+S.confidence+'% confidence</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>MDE</th><th>Per Variant</th><th>Total</th><th>Power at current n</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
     '<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><p style="font-size:13px;color:var(--t1);line-height:1.85">Currently testing with <strong style="color:var(--t0);font-family:var(--mono)">'+fmtNum(+R.ctrl.visitors)+'</strong> visitors/variant at baseline <strong style="color:var(--pri);font-family:var(--mono)">'+fmtPct(R.baseRate)+'</strong>. Your current MDE is <strong style="color:var(--acc);font-family:var(--mono)">'+(v0?fmtPct(v0.mde):'-')+'</strong>.</p></div>';
+  // Now that the card shell is in the DOM, fill in its body. Subsequent
+  // keystrokes on the input call updateTttCells() directly (no innerHTML reset
+  // on the input itself), so the cursor stays put while the user types.
+  updateTttCells();
+}
+
+// Time-to-target sample size card. The user picks a target MDE (defaulting
+// to the currently observed MDE); the calc tells them how many more days
+// they need at their actual collection rate (visitors / days running).
+//
+// The card markup is built once; subsequent input changes call updateTttCells()
+// which mutates only the dependent <span>/<div> innerText, leaving the input
+// element (and its cursor) untouched.
+function renderTimeToTargetCard(v0) {
+  var observedMdePct = v0 ? +(v0.mde * 100).toFixed(2) : 1.5;
+  var displayedTarget = (S.targetMdePct === '' || S.targetMdePct == null) ? observedMdePct : +S.targetMdePct;
+
+  return '<div class="card ttt-card">' +
+    '<div class="card-head">' +
+      '<div><div class="card-head-title">Time to Target MDE</div>' +
+      '<div class="card-head-sub">Tell us how many days you have been running &amp; the effect you want to detect - we project the days remaining</div></div>' +
+    '</div>' +
+    '<div class="ttt-controls">' +
+      '<div class="ttt-input-wrap">' +
+        '<label class="ttt-input-lbl" for="targetMdeInput">Target MDE (% absolute)</label>' +
+        '<input id="targetMdeInput" class="ifield ttt-mde-input" type="number" inputmode="decimal" step="0.05" min="0.05" max="50" value="' + displayedTarget + '" oninput="setTargetMde(this.value)" placeholder="' + observedMdePct + '" autocomplete="off" />' +
+      '</div>' +
+      '<button type="button" class="hbtn" id="useObservedBtn" onclick="useObservedMde()">Use observed (' + fmtPct(observedMdePct/100) + ')</button>' +
+    '</div>' +
+    '<div id="tttBody"></div>' +
+  '</div>';
+}
+
+// Mutates only the inner stat values - never the input element. Called both
+// after the card is first rendered and on every target-MDE keystroke.
+function updateTttCells() {
+  var host = document.getElementById('tttBody');
+  if (!host) return;
+  var v0 = R && R.variantResults && R.variantResults[0];
+  var observedMdePct = v0 ? +(v0.mde * 100).toFixed(2) : 1.5;
+  var displayedTarget = (S.targetMdePct === '' || S.targetMdePct == null) ? observedMdePct : +S.targetMdePct;
+  var p = projectTimeToTarget(displayedTarget / 100);
+
+  if (!p) {
+    host.innerHTML = '<p class="ttt-empty">Enter visitors and conversions for the control to see a duration estimate.</p>';
+    return;
+  }
+  if (p.invalid) {
+    host.innerHTML = '<p class="ttt-empty ttt-empty--warn">Target is too small to compute a finite sample size. Pick a larger MDE.</p>';
+    return;
+  }
+
+  var done = p.additionalN === 0;
+  var fillW = Math.min(100, p.progressPct).toFixed(1);
+
+  // Status cell adapts to the situation rather than always showing the same shape.
+  var statusValHtml, statusSub;
+  if (done) {
+    statusValHtml = '<span class="ttt-status-done">✓ Sample reached</span>';
+    statusSub = 'ship if the result is significant';
+  } else if (!isFinite(p.additionalDays)) {
+    statusValHtml = '<span class="ttt-status-warn">Increase traffic</span>';
+    statusSub = 'no daily rate detected';
+  } else if (p.additionalDays === 0) {
+    statusValHtml = '<span class="ttt-status-near">Almost there</span>';
+    statusSub = 'less than a day to go';
+  } else {
+    statusValHtml = '<span class="ttt-status-pending">~' + p.additionalDays + ' more day' + (p.additionalDays === 1 ? '' : 's') + '</span>';
+    statusSub = 'at current pace';
+  }
+
+  // Days cell shows a different breakdown depending on whether we're done.
+  var daysVal, daysSub;
+  if (done) {
+    daysVal = S.daysCollected.toLocaleString();
+    daysSub = 'days complete · 0 more needed';
+  } else if (!isFinite(p.daysNeeded)) {
+    daysVal = '∞';
+    daysSub = 'cannot reach at current rate';
+  } else {
+    daysVal = p.daysNeeded.toLocaleString();
+    daysSub = S.daysCollected + ' done · ' + p.additionalDays + ' to go';
+  }
+
+  host.innerHTML =
+    '<div class="ttt-stat-row">' +
+      '<div class="ttt-stat"><div class="ttt-stat-lbl">Daily traffic</div><div class="ttt-stat-val">' + fmtNum(p.dailyRate) + '</div><div class="ttt-stat-sub">visitors/day · per variant</div></div>' +
+      '<div class="ttt-stat"><div class="ttt-stat-lbl">Required sample</div><div class="ttt-stat-val">' + fmtNum(p.requiredN) + '</div><div class="ttt-stat-sub">per variant · 80% power</div></div>' +
+      '<div class="ttt-stat"><div class="ttt-stat-lbl">Days needed</div><div class="ttt-stat-val">' + daysVal + '</div><div class="ttt-stat-sub">' + daysSub + '</div></div>' +
+      '<div class="ttt-stat"><div class="ttt-stat-lbl">Status</div><div class="ttt-stat-val ttt-stat-val--status">' + statusValHtml + '</div><div class="ttt-stat-sub">' + statusSub + '</div></div>' +
+    '</div>' +
+    '<div class="ttt-progress-row">' +
+      '<div class="ttt-progress" aria-label="Sample collection progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(p.progressPct) + '">' +
+        '<div class="ttt-progress-fill ' + (done ? 'is-done' : '') + '" style="width:' + fillW + '%"></div>' +
+      '</div>' +
+      '<div class="ttt-progress-meta"><span class="ttt-progress-pct">' + fmtRaw(p.progressPct, 0) + '</span><span class="ttt-progress-frac">' + fmtNum(p.currentN) + ' / ' + fmtNum(p.requiredN) + ' visitors</span></div>' +
+    '</div>' +
+    '<p class="ttt-verdict ' + (done ? 'is-done' : '') + '">' + p.verdict + '</p>';
 }
 
 function renderSim(el){
@@ -2160,8 +2429,13 @@ function renderInsights(el){
     if(winner){var proj=isFinite(v.lift)?Math.round(100000*Math.abs(v.lift)).toLocaleString():'significant';
       advice='<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p><p>'+v.name+' shows a significant <strong>'+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+'</strong> improvement (p = '+fmt(v.pValue,4)+', power = '+fmtRaw(v.power)+'). Wilson CI: ['+fmtPct(v.ci[0])+' – '+fmtPct(v.ci[1])+'].'+(R.numComparisons>1?' Bonferroni-adjusted α = '+fmt(R.alphaAdj,4)+'.':'')+'</p><p style="margin-top:10px;color:var(--t2)">📈 If baseline yields 100,000 conversions/year, this lift adds ~<strong style="color:var(--t1)">+'+proj+'</strong> conversions annually.</p>';}
     else if(loser){advice='<p><strong style="color:var(--red)">❌ Do NOT deploy.</strong></p><p>'+v.name+' is significantly worse (<strong>'+fmtRaw(v.lift*100,2)+'</strong>, p = '+fmt(v.pValue,4)+'). Revert to control and investigate why.</p>';}
-    else if(!v.isSignificant&&lowPow){var periods=v.sampleNeeded>0&&isFinite(v.sampleNeeded)?Math.ceil(v.sampleNeeded/(+R.ctrl.visitors||1)):'?';
-      advice='<p><strong style="color:var(--warn)">⏳ Continue collecting data.</strong></p><p>Not significant (p = '+fmt(v.pValue,4)+') and power is only '+fmtRaw(v.power)+' (below 80%). Need ~<strong>'+(isFinite(v.sampleNeeded)?v.sampleNeeded.toLocaleString():'∞')+'</strong> visitors/variant (~'+periods+' more collection periods).</p>';}
+    else if(!v.isSignificant&&lowPow){
+      var current=+R.ctrl.visitors||0;
+      var dailyRate=current/Math.max(1,S.daysCollected||1);
+      var moreDays=(dailyRate>0&&isFinite(v.sampleNeeded))?Math.max(0,Math.ceil((v.sampleNeeded-current)/dailyRate)):'?';
+      advice='<p><strong style="color:var(--warn)">⏳ Continue collecting data.</strong></p>'+
+        '<p>Not significant (p = '+fmt(v.pValue,4)+') and power is only '+fmtRaw(v.power)+' (below 80%). Need ~<strong>'+(isFinite(v.sampleNeeded)?v.sampleNeeded.toLocaleString():'∞')+'</strong> visitors/variant - about <strong>'+moreDays+'</strong> more day'+(moreDays===1?'':'s')+' at your current pace of ~'+Math.round(dailyRate).toLocaleString()+' visitors/day per variant.</p>';
+    }
     else{advice='<p><strong style="color:var(--acc)">🔄 No meaningful difference detected.</strong></p><p>Sufficient power ('+fmtRaw(v.power)+') but no significant result. True effect likely smaller than MDE of '+fmtPct(v.mde)+'. Consider if that small effect is business-relevant.</p>';}
     h+='<article class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;position:relative;z-index:1"><span style="font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:-.3px">'+v.name+'</span><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div><div style="font-size:13px;color:var(--t1);line-height:2;position:relative;z-index:1">'+advice+'</div></article>';
   });

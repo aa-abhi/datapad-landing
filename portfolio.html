@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abhishek Pratap Singh — Builder & Maker</title>
+<meta name="description" content="Builder portfolio - Abhishek Pratap Singh. Founder of Datapad, shipping free browser-based tools for developers, analysts, and product managers." />
+
+<!-- Favicon — same SVG monogram used for the on-page avatar -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a1814'/%3E%3Cstop offset='100%25' stop-color='%232c1f15'/%3E%3C/linearGradient%3E%3CradialGradient id='g' cx='30%25' cy='30%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23f0a052'/%3E%3Cstop offset='65%25' stop-color='%23e8813a' stop-opacity='0.25'/%3E%3Cstop offset='100%25' stop-color='%23e8813a' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23b)'/%3E%3Ccircle cx='42' cy='40' r='34' fill='url(%23g)' opacity='0.85'/%3E%3Ctext x='50' y='65' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='34' font-weight='700' fill='%23fdf7ee' letter-spacing='-1'%3EAS%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ────────────────────────────────────────────────────────────
+     Theme tokens — auto via OS preference. Topmate-inspired:
+     soft warm cream in light mode, gentle charcoal in dark.
+  ─────────────────────────────────────────────────────────────── */
+  :root {
+    --bg:        #faf7f2;
+    --surface:   #ffffff;
+    --surface-2: #f5f2ec;
+    --hairline:  rgba(17, 17, 16, 0.08);
+    --hairline-2: rgba(17, 17, 16, 0.16);
+    --text-1:    #1a1a18;
+    --text-2:    #5e5d56;
+    --text-3:    #8e8d86;
+    --accent:    #e8813a;
+    --accent-rgb: 232, 129, 58;
+    --available: #16a34a;
+    --avail-rgb: 22, 163, 74;
+
+    --shadow-xs: 0 1px 2px rgba(17,17,16,0.04);
+    --shadow-sm: 0 2px 6px rgba(17,17,16,0.06);
+    --shadow-md: 0 8px 24px -8px rgba(17,17,16,0.10);
+    --shadow-lg: 0 16px 36px -12px rgba(17,17,16,0.16);
+
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
+
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'DM Mono', ui-monospace, monospace;
+
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --t:    180ms;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #0f0f0d;
+      --surface:   #18181a;
+      --surface-2: #1f1f22;
+      --hairline:  rgba(255, 255, 255, 0.07);
+      --hairline-2: rgba(255, 255, 255, 0.16);
+      --text-1:    #f4f3ee;
+      --text-2:    #a3a29a;
+      --text-3:    #6c6b65;
+      --available: #22c55e;
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.30);
+      --shadow-sm: 0 2px 6px rgba(0,0,0,0.40);
+      --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.55);
+      --shadow-lg: 0 16px 36px -12px rgba(0,0,0,0.75);
+    }
+  }
+
+  /* Explicit theme overrides — set when the user clicks the toggle.
+     Win out over the auto OS preference. */
+  :root[data-theme="light"] {
+    --bg:        #faf7f2;
+    --surface:   #ffffff;
+    --surface-2: #f5f2ec;
+    --hairline:  rgba(17, 17, 16, 0.08);
+    --hairline-2: rgba(17, 17, 16, 0.16);
+    --text-1:    #1a1a18;
+    --text-2:    #5e5d56;
+    --text-3:    #8e8d86;
+    --available: #16a34a;
+    --shadow-xs: 0 1px 2px rgba(17,17,16,0.04);
+    --shadow-sm: 0 2px 6px rgba(17,17,16,0.06);
+    --shadow-md: 0 8px 24px -8px rgba(17,17,16,0.10);
+    --shadow-lg: 0 16px 36px -12px rgba(17,17,16,0.16);
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0f0f0d;
+    --surface:   #18181a;
+    --surface-2: #1f1f22;
+    --hairline:  rgba(255, 255, 255, 0.07);
+    --hairline-2: rgba(255, 255, 255, 0.16);
+    --text-1:    #f4f3ee;
+    --text-2:    #a3a29a;
+    --text-3:    #6c6b65;
+    --available: #22c55e;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.30);
+    --shadow-sm: 0 2px 6px rgba(0,0,0,0.40);
+    --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.55);
+    --shadow-lg: 0 16px 36px -12px rgba(0,0,0,0.75);
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-1);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background var(--t) var(--ease), color var(--t) var(--ease);
+    position: relative;
+  }
+  ::selection { background: rgba(var(--accent-rgb), 0.18); color: var(--text-1); }
+  a { color: inherit; text-decoration: none; }
+
+  /* ─── Aurora background — two soft warm orbs that drift slowly.
+     Subtle on light, even softer on dark. The wrapper is z-index:1
+     so content always reads cleanly above the orbs. */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    width: 720px;
+    height: 720px;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+  }
+  body::before {
+    top: -240px;
+    left: -240px;
+    background: radial-gradient(circle, rgba(232, 129, 58, 0.42), transparent 65%);
+    animation: drift1 52s ease-in-out infinite;
+  }
+  body::after {
+    bottom: -280px;
+    right: -260px;
+    background: radial-gradient(circle, rgba(245, 200, 66, 0.28), transparent 65%);
+    animation: drift2 64s ease-in-out infinite;
+  }
+  @media (prefers-color-scheme: dark) {
+    body::before { background: radial-gradient(circle, rgba(232, 129, 58, 0.20), transparent 65%); }
+    body::after  { background: radial-gradient(circle, rgba(167, 139, 250, 0.14), transparent 65%); }
+  }
+  :root[data-theme="light"] body::before { background: radial-gradient(circle, rgba(232, 129, 58, 0.42), transparent 65%); }
+  :root[data-theme="light"] body::after  { background: radial-gradient(circle, rgba(245, 200, 66, 0.28), transparent 65%); }
+  :root[data-theme="dark"] body::before  { background: radial-gradient(circle, rgba(232, 129, 58, 0.20), transparent 65%); }
+  :root[data-theme="dark"] body::after   { background: radial-gradient(circle, rgba(167, 139, 250, 0.14), transparent 65%); }
+
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(60px, 90px); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(-70px, -60px); }
+  }
+
+  /* Make every layout child sit above the aurora */
+  .wrapper, .theme-toggle { position: relative; z-index: 1; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 22px;
+    right: 24px;
+    z-index: 50;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--text-2);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--t) var(--ease), border-color var(--t), color var(--t), box-shadow var(--t);
+  }
+  .theme-toggle:hover {
+    transform: rotate(15deg);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: var(--shadow-md);
+  }
+  .theme-toggle:active { transform: rotate(15deg) scale(0.92); }
+
+  /* ────────────────────────────────────────────────────────────
+     Two-column shell (sidebar + main)
+  ─────────────────────────────────────────────────────────────── */
+  .wrapper {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+    align-items: start;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     SIDEBAR — profile + connect links (sticky)
+  ─────────────────────────────────────────────────────────────── */
+  .sidebar {
+    position: sticky;
+    top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: 28px 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+
+  /* Avatar — SVG monogram (matching the favicon). Slightly rounded square,
+     dark warm gradient base, soft warm orb glow off-center, "AS" cream text.
+     Looks like a real branded mark, not a generic initials chip. */
+  .avatar {
+    width: 92px;
+    height: 92px;
+    border-radius: 22px;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px rgba(var(--accent-rgb), 0.28),
+                0 14px 28px -14px rgba(232, 129, 58, 0.45);
+    user-select: none;
+    position: relative;
+    transition: transform var(--t) var(--ease);
+  }
+  .avatar:hover { transform: rotate(-3deg) scale(1.04); }
+  .avatar svg { display: block; width: 100%; height: 100%; }
+
+  .available-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(var(--avail-rgb), 0.10);
+    border: 1px solid rgba(var(--avail-rgb), 0.25);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--available);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .available-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--available);
+    box-shadow: 0 0 0 3px rgba(var(--avail-rgb), 0.18);
+  }
+
+  .profile-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    color: var(--text-1);
+  }
+  .profile-handle {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: -8px;
+  }
+
+  .profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-2);
+  }
+  .profile-meta svg { color: var(--text-3); }
+
+  .profile-bio {
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.6;
+    max-width: 240px;
+  }
+
+  /* Primary CTA — full-width Connect button (topmate signature) */
+  .cta-primary {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    background: var(--text-1);
+    color: var(--bg);
+    border: 1px solid var(--text-1);
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--t), border-color var(--t), transform var(--t);
+    margin-top: 4px;
+  }
+  .cta-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  /* Secondary outline CTA — sits directly under the primary one. */
+  .cta-secondary {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--text-2);
+    border: 1px dashed var(--hairline-2);
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--t), color var(--t), border-color var(--t);
+    margin-top: 4px;
+  }
+  .cta-secondary:hover {
+    background: var(--surface-2);
+    color: var(--accent);
+    border-color: var(--accent);
+    border-style: solid;
+  }
+
+  /* Connect / socials card */
+  .connect-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-xs);
+  }
+  .connect-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .connect-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .connect-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--r-sm);
+    color: var(--text-2);
+    transition: background var(--t), color var(--t);
+    font-size: 13px;
+  }
+  .connect-row:hover {
+    background: var(--surface-2);
+    color: var(--text-1);
+  }
+  .connect-row .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    flex-shrink: 0;
+  }
+  .connect-row:hover .icon { background: rgba(var(--accent-rgb), 0.10); color: var(--accent); }
+  .connect-row .label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .connect-row .arrow {
+    width: 12px;
+    height: 12px;
+    color: var(--text-3);
+    opacity: 0;
+    transition: opacity var(--t), transform var(--t);
+  }
+  .connect-row:hover .arrow { opacity: 1; transform: translateX(2px); color: var(--accent); }
+
+  /* ────────────────────────────────────────────────────────────
+     MAIN — products grid
+  ─────────────────────────────────────────────────────────────── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .main-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 4px 4px 14px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .main-title {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .main-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  /* Tiles grid */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-xs);
+    color: inherit;
+    overflow: hidden;
+    transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease), border-color var(--t);
+  }
+  .tile::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--tile-color, var(--accent));
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--hairline-2);
+  }
+  .tile:hover .tile-arrow {
+    transform: translate(2px, -2px);
+    color: var(--tile-color, var(--accent));
+  }
+
+  .tile-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tile-name-block { min-width: 0; flex: 1; }
+  .tile-name {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tile-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .tile-arrow {
+    width: 16px;
+    height: 16px;
+    color: var(--text-3);
+    flex-shrink: 0;
+    transition: transform var(--t) var(--ease), color var(--t);
+  }
+  .tile-desc {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .tile-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--hairline);
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .status::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status.live { color: var(--available); border-color: rgba(var(--avail-rgb),0.30); background: rgba(var(--avail-rgb),0.07); }
+  .status.beta { color: var(--accent); border-color: rgba(var(--accent-rgb),0.30); background: rgba(var(--accent-rgb),0.07); }
+  .status.soon { color: var(--text-3); border-color: var(--hairline-2); background: var(--surface-2); }
+
+  .tile-cta {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color var(--t);
+  }
+  .tile:hover .tile-cta { color: var(--tile-color, var(--accent)); }
+
+  /* Footer signature */
+  .signature {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .signature a { color: var(--text-2); transition: color var(--t); }
+  .signature a:hover { color: var(--accent); }
+
+  /* ────────────────────────────────────────────────────────────
+     Animations
+  ─────────────────────────────────────────────────────────────── */
+  .sidebar, .main { opacity: 0; animation: fadeUp 0.5s var(--ease) forwards; }
+  .main { animation-delay: 0.10s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .tile { opacity: 0; animation: tileRise 0.45s var(--ease) forwards; }
+  @keyframes tileRise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     Responsive
+  ─────────────────────────────────────────────────────────────── */
+  @media (max-width: 920px) {
+    .wrapper { grid-template-columns: 1fr; gap: 20px; padding: 28px 18px 48px; }
+    .sidebar { position: static; }
+    .profile-card { max-width: 540px; margin: 0 auto; width: 100%; }
+    .connect-card { max-width: 540px; margin: 0 auto; width: 100%; }
+  }
+  @media (max-width: 600px) {
+    .products { grid-template-columns: 1fr; }
+    .tile { padding: 16px 16px 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle (manual override, persists to localStorage). Defaults to OS
+     preference on first visit; once clicked, lock-in is remembered. -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" type="button" title="Toggle theme">
+  <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+</button>
+
+<div class="wrapper">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div class="profile-card">
+      <div class="avatar" id="avatar" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="avatarBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1a1814"/>
+              <stop offset="100%" stop-color="#2c1f15"/>
+            </linearGradient>
+            <radialGradient id="avatarGlow" cx="30%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#f0a052"/>
+              <stop offset="65%" stop-color="#e8813a" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#e8813a" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="100" height="100" fill="url(#avatarBg)"/>
+          <circle cx="42" cy="40" r="34" fill="url(#avatarGlow)" opacity="0.85"/>
+          <text x="50" y="65" text-anchor="middle"
+                font-family="Inter, system-ui, sans-serif" font-size="24"
+                font-weight="1000" fill="#fdf7ee" letter-spacing="-1"
+                id="avatarInitials">AS</text>
+        </svg>
+      </div>
+      <span class="available-pill" id="availabilityPill">Available</span>
+      <div>
+        <div class="profile-name" id="profileName"></div>
+      </div>
+      <div class="profile-handle" id="profileHandle"></div>
+      <div class="profile-meta">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="profileLocation"></span>
+      </div>
+      <p class="profile-bio" id="profileBio"></p>
+      <a class="cta-primary" id="ctaConnect">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Get in touch
+      </a>
+      <a class="cta-secondary" id="ctaFeedback" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span id="ctaFeedbackLabel">Request a tool or report a bug</span>
+      </a>
+    </div>
+
+    <div class="connect-card">
+      <div class="connect-label">Find me</div>
+      <nav class="connect-list" id="connectList" aria-label="Contact and social links"></nav>
+    </div>
+
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="main-head">
+      <span class="main-title">Products &amp; Projects</span>
+      <span class="main-meta" id="productsMeta"></span>
+    </div>
+    <div class="products" id="products"></div>
+
+    <div class="signature">
+      <span>© <span id="yr"></span> · <span id="copyName"></span> · Made in browser</span>
+      <span><a href="https://datapad.in">datapad.in</a></span>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  /* ──────────────────────────────────────────────────────────
+     Profile data — single source of truth, SaaS-extensible.
+     This same template renders against any profile object,
+     so a multi-tenant version (one URL per builder) just
+     swaps this object for one fetched by handle.
+  ─────────────────────────────────────────────────────────── */
+  const profile = {
+    identity: {
+      name: "Abhishek Pratap Singh",
+      // handle: "@abhishek.builds",
+      location: "Bangalore, IN",
+      available: true,
+      availabilityLabel: "Available for collab",
+      avatarInitials: "Hola!",
+      bio: "Shipping free tools for developers, analysts, and product managers."
+    },
+    links: [
+      { type: "email",    label: "hello.datapad@gmail.com", url: "mailto:hello.datapad@gmail.com", primary: true },
+      { type: "website",  label: "datapad.in",              url: "https://datapad.in" },
+      { type: "linkedin", label: "linkedin.com/in/aa-abhi07", url: "https://www.linkedin.com/in/aa-abhi07" },
+      { type: "github",   label: "github.com/aa-abhi", url: "https://github.com/aa-abhi" },
+      // { type: "twitter",  label: "@abhishek_builds",        url: "https://twitter.com/abhishek_builds" }
+    ],
+    // Secondary CTA — opens the Datapad feedback form so visitors can request
+    // a tool or report an issue without writing an email.
+    feedback: {
+      label: "Request a tool or report a bug",
+      url: "https://forms.gle/YbTWLM3BQbHciHkr7"
+    },
+    projects: [
+      {
+        id: "datapad",
+        name: "Datapad",
+        url: "https://datapad.in",
+        urlLabel: "datapad.in",
+        description: "The browser-based toolkit for builders, analysts, and PMs. Five free utilities and growing.",
+        status: "live",
+        color: "#16a34a"
+      },
+      {
+        id: "glimpse",
+        name: "Glimpse",
+        url: "https://datapad.in/glimpse",
+        urlLabel: "datapad.in/glimpse",
+        description: "Drop a CSV or Sheet, get a dashboard. Auto-detected charts, calculated fields, share via link.",
+        status: "live",
+        color: "#0d9488"
+      },
+      {
+        id: "ab-test",
+        name: "A/B Test Calculator",
+        url: "https://datapad.in/ab-test-calculator",
+        urlLabel: "datapad.in/ab-test-calculator",
+        description: "Statistical significance for randomized experiments — Z-test, Wilson CIs, Monte Carlo, power analysis.",
+        status: "live",
+        color: "#22c55e"
+      },
+      {
+        id: "pre-post",
+        name: "Pre/Post Analyzer",
+        url: "https://datapad.in/pre-post-analyzer",
+        urlLabel: "datapad.in/pre-post-analyzer",
+        description: "Before/after impact when you can't randomize. Welch correction, Cohen's h, revenue lift.",
+        status: "live",
+        color: "#0891b2"
+      },
+      {
+        id: "json-studio",
+        name: "JSON Studio",
+        url: "https://datapad.in/json-studio",
+        urlLabel: "datapad.in/json-studio",
+        description: "Format, fix, diff, clean, analyze — the browser-side JSON workbench.",
+        status: "live",
+        color: "#7c3aed"
+      },
+      {
+        id: "rice",
+        name: "RICE Calculator",
+        url: "https://datapad.in/rice-calculator",
+        urlLabel: "datapad.in/rice-calculator",
+        description: "Score & rank features by Reach × Impact × Confidence ÷ Effort. Multi-board, share URLs.",
+        status: "live",
+        color: "#ea7f1f"
+      },
+      {
+        id: "csv-merger",
+        name: "CSV Merger",
+        url: "https://datapad.in/csv-merger",
+        urlLabel: "datapad.in/csv-merger",
+        description: "Merge multiple CSVs by column or key. Type-aware joins, files stay in your browser.",
+        status: "live",
+        color: "#db2777"
+      }
+    ]
+  };
+
+  /* ──────────────────────────────────────────────────────────
+     Renderer — pure functions over `profile`
+  ─────────────────────────────────────────────────────────── */
+  const ICONS = {
+    email:    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    website:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+    twitter:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+    github:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>',
+    linkedin: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>'
+  };
+
+  function renderProfile(p) {
+    const id = p.identity || {};
+    document.getElementById('avatarInitials').textContent = id.avatarInitials || initialsOf(id.name);
+    document.getElementById('profileName').textContent = id.name || '';
+    document.getElementById('profileHandle').textContent = id.handle || '';
+    document.getElementById('profileLocation').textContent = id.location || '';
+    document.getElementById('profileBio').textContent = id.bio || '';
+    document.getElementById('availabilityPill').textContent = id.availabilityLabel || (id.available ? 'Available' : 'Heads-down');
+    document.getElementById('availabilityPill').style.display = id.available === false ? 'none' : '';
+    document.getElementById('copyName').textContent = id.name || '';
+    document.getElementById('yr').textContent = String(new Date().getFullYear());
+
+    // Primary CTA → first link flagged primary, fallback to first email link.
+    const links = p.links || [];
+    const primary = links.find(l => l.primary) || links.find(l => l.type === 'email');
+    const cta = document.getElementById('ctaConnect');
+    if (primary) { cta.href = primary.url; cta.style.display = ''; }
+    else { cta.style.display = 'none'; }
+
+    // Secondary CTA → feedback / feature request form
+    const fb = p.feedback;
+    const fbBtn = document.getElementById('ctaFeedback');
+    if (fb && fb.url) {
+      fbBtn.href = fb.url;
+      fbBtn.style.display = '';
+      document.getElementById('ctaFeedbackLabel').textContent = fb.label || 'Send feedback';
+    } else { fbBtn.style.display = 'none'; }
+
+    // Connect list — every link rendered as a row
+    const list = document.getElementById('connectList');
+    list.innerHTML = '';
+    links.forEach(l => {
+      if (!l || !l.url || l.url === '#') return;  // skip placeholder links
+      const a = document.createElement('a');
+      a.href = l.url;
+      a.className = 'connect-row';
+      if (l.url.indexOf('mailto:') !== 0) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.innerHTML = `
+        <span class="icon">${ICONS[l.type] || ICONS.website}</span>
+        <span class="label">${escape(l.label || l.url)}</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      `;
+      list.appendChild(a);
+    });
+
+    // Products grid
+    const projects = p.projects || [];
+    const grid = document.getElementById('products');
+    grid.innerHTML = '';
+    projects.forEach((proj, i) => {
+      const a = document.createElement('a');
+      a.href = proj.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'tile';
+      a.style.setProperty('--tile-color', proj.color || 'var(--accent)');
+      a.style.animationDelay = (0.06 + i * 0.04).toFixed(2) + 's';
+      a.setAttribute('aria-label', 'Open ' + proj.name);
+      a.innerHTML = `
+        <div class="tile-row">
+          <div class="tile-name-block">
+            <div class="tile-name">${escape(proj.name)}</div>
+            <span class="tile-url">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+              ${escape(proj.urlLabel || proj.url)}
+            </span>
+          </div>
+          <svg class="tile-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </div>
+        <p class="tile-desc">${escape(proj.description || '')}</p>
+        <div class="tile-foot">
+          <span class="status ${escape(proj.status || 'live')}">${escape(proj.status || 'live')}</span>
+          <span class="tile-cta">Open →</span>
+        </div>
+      `;
+      grid.appendChild(a);
+    });
+
+    document.getElementById('productsMeta').textContent = projects.length + ' shipped';
+  }
+
+  function initialsOf(name) {
+    return (name || '').trim().split(/\s+/)
+      .map(w => w.charAt(0)).join('').slice(0, 2).toUpperCase();
+  }
+  function escape(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  renderProfile(profile);
+
+  /* ──────────────────────────────────────────────────────────
+     Theme toggle — manual override on top of the auto OS pref.
+     Three states cycle:
+       (no localStorage) → auto, follows OS
+       click             → explicit "light"
+       click             → explicit "dark"
+       click             → back to auto
+     The icon shown is for the THEME ABOUT TO BE APPLIED (next click),
+     so users see what tapping will do.
+  ─────────────────────────────────────────────────────────── */
+  (function setupThemeToggle() {
+    const STORAGE_KEY = 'portfolio:theme';
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const iconHost = document.getElementById('themeIcon');
+
+    const SUN  = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+    const MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function effectiveTheme() {
+      // Returns the actually-applied theme: explicit override, or OS preference
+      const explicit = root.getAttribute('data-theme');
+      if (explicit === 'light' || explicit === 'dark') return explicit;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function paintIcon() {
+      // Show the icon that PREVIEWS the next click — sun while currently dark
+      // (because clicking will move to light), moon while currently light.
+      iconHost.innerHTML = effectiveTheme() === 'dark' ? SUN : MOON;
+    }
+    // Apply persisted preference on first paint
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    } catch (e) {}
+    paintIcon();
+
+    // Live-track OS pref changes when in auto mode
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (!root.hasAttribute('data-theme')) paintIcon();
+      });
+    }
+
+    btn.addEventListener('click', () => {
+      const current = effectiveTheme();
+      const next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+      paintIcon();
+    });
+  })();
+</script>
+</body>
+</html>

@@ -2714,7 +2714,7 @@
   <div class="drop-overlay-card">
     <svg class="drop-overlay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <div class="drop-overlay-title">Drop your CSV anywhere</div>
-    <div class="drop-overlay-sub">.csv, .tsv, or .txt — auto-detected</div>
+    <div class="drop-overlay-sub">.csv, .tsv, or .txt - auto-detected</div>
   </div>
 </div>
 
@@ -2764,7 +2764,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13l-2 2 2 2M14 13l2 2-2 2"/></svg>
             <div class="dropdown-item-text">
               <div class="dropdown-item-label">Export project file</div>
-              <div class="dropdown-item-sub">Single .glimpse.json — share via Slack / email / Drive</div>
+              <div class="dropdown-item-sub">Single .glimpse.json - share via Slack / email / Drive</div>
             </div>
           </button>
         </div>
@@ -2846,7 +2846,7 @@
 // ─── CONSTANTS ────────────────────────────────────────────────────
 var DB_NAME      = 'glimpse-v1';
 // History: v1 had datasets+dashboards. v2 added folders. v3/v4 were transient
-// versions during a buggy self-heal in earlier dev. v5 is the canonical schema —
+// versions during a buggy self-heal in earlier dev. v5 is the canonical schema -
 // any existing DB at any earlier version migrates cleanly via `onupgradeneeded`.
 var DB_VERSION   = 5;
 var STORE_DS     = 'datasets';
@@ -2893,7 +2893,7 @@ var App = {
   db: null,
   dbPromise: null,         // set immediately below; resolves with db handle (or null on failure)
   datasets: [],            // [{id, name, rows, schema, rowCount, colCount, createdAt, sampleMode, folderId}]
-  folders: [],             // [{id, name, createdAt}] — flat collections (one level)
+  folders: [],             // [{id, name, createdAt}] - flat collections (one level)
   dashboards: {},          // {[datasetId]: [{id, type, title, xField, yField, agg, span, insight}]}
   activeDatasetId: null,
   filters: [],             // [{field, op, value}]
@@ -2907,7 +2907,7 @@ var App = {
   refreshInFlight: false,
   sheetSourceMode: 'public',
   pendingSheetImport: null,
-  expandedFolders: {}      // {[folderId]: bool} — UI-only expansion state
+  expandedFolders: {}      // {[folderId]: bool} - UI-only expansion state
 };
 
 // Kick off IndexedDB open IMMEDIATELY when the script parses, not inside init().
@@ -2961,7 +2961,7 @@ function dbOpen() {
       }
     };
     req.onblocked = function() {
-      console.warn('[Glimpse] DB upgrade blocked — another tab has the database open. Close other Glimpse tabs and reload.');
+      console.warn('[Glimpse] DB upgrade blocked - another tab has the database open. Close other Glimpse tabs and reload.');
       try { toast('Another Glimpse tab is open. Close it and reload to enable folders.', 'warn', 6000); } catch(e) {}
     };
     req.onsuccess = function(e) {
@@ -2994,13 +2994,13 @@ function withDb(fn) {
   if (App.dbPromise) {
     return App.dbPromise.then(function(db) {
       if (!db) {
-        console.warn('[Glimpse] DB unavailable — operation skipped');
+        console.warn('[Glimpse] DB unavailable - operation skipped');
         return undefined;
       }
       return fn(db);
     });
   }
-  console.warn('[Glimpse] DB not initialised yet — operation skipped');
+  console.warn('[Glimpse] DB not initialised yet - operation skipped');
   return Promise.resolve();
 }
 
@@ -3239,7 +3239,7 @@ function parsePrimary(pos) {
       }
       return { type: 'call', name: t.value.toUpperCase(), args: args };
     }
-    throw new Error('Unknown identifier "' + t.value + '" — did you mean a field reference [' + t.value + ']?');
+    throw new Error('Unknown identifier "' + t.value + '" - did you mean a field reference [' + t.value + ']?');
   }
   if (eat(pos, 'op', '(')) {
     var inner = parseExpression(pos);
@@ -4012,7 +4012,7 @@ function buildForecast(pts, steps) {
   for (var s = 1; s <= steps; s++) {
     var t = lastX + s * stepMs;
     var pred = fit.slope * t + fit.intercept;
-    // Prediction-interval grows with sqrt(s) — cheap proxy for genuine widening uncertainty.
+    // Prediction-interval grows with sqrt(s) - cheap proxy for genuine widening uncertainty.
     var widen = fit.residualStd * 1.96 * Math.sqrt(s);
     var iso = new Date(t).toISOString().slice(0, 10);
     line.push({ x: iso, y: pred });
@@ -4751,7 +4751,7 @@ function renderNoteCard(canvas, chartDef) {
   wrap.appendChild(body);
 }
 
-// Minimal "markdown" — line breaks, **bold**, *italic*, `code`. All input is HTML-escaped first.
+// Minimal "markdown" - line breaks, **bold**, *italic*, `code`. All input is HTML-escaped first.
 function renderNoteText(raw) {
   if (!raw) return '<div class="note-empty">Empty note. Edit to add text.</div>';
   var safe = escHTML(String(raw));
@@ -4854,7 +4854,7 @@ function sortAggData(items, dir) {
   return out;
 }
 function coerceTableCell(value, field) {
-  if (value === null || value === undefined || value === '') return '—';
+  if (value === null || value === undefined || value === '') return '-';
   if (field && (field.type === 'integer' || field.type === 'decimal')) {
     var num = safeNumber(value);
     return num === null ? String(value) : fmtNum(num);
@@ -5024,7 +5024,7 @@ function buildPivotModel(rows, schema, chartDef) {
   }
 
   // Cap pivot columns to keep DOM render bounded. Use occurrence frequency (already
-  // counted in the single pass) instead of aggregated totals — same shape of "kept the
+  // counted in the single pass) instead of aggregated totals - same shape of "kept the
   // common ones", but no extra walk over the matrix.
   var MAX_PIVOT_COLS = 49;
   var droppedColumnCount = 0;
@@ -5121,7 +5121,7 @@ function buildPivotModel(rows, schema, chartDef) {
     return cells;
   });
   if (chartDef.heatmap) {
-    // Heatmap should NOT include the Total column or the row-key column — those
+    // Heatmap should NOT include the Total column or the row-key column - those
     // would dominate the scale. Stamp only the data cells.
     var dataOnly = pivotRows.map(function(row) {
       return row.filter(function(cell) {
@@ -5137,7 +5137,7 @@ function buildPivotModel(rows, schema, chartDef) {
     headers: headers,
     rows: pivotRows,
     note: dataRows.length + ' row groups · ' + columnKeys.length + ' pivot columns'
-      + (droppedColumnCount ? ' (' + droppedColumnCount + ' more merged into "Other" — pick a lower-cardinality column to see them)' : '')
+      + (droppedColumnCount ? ' (' + droppedColumnCount + ' more merged into "Other" - pick a lower-cardinality column to see them)' : '')
       + (droppedRowCount ? ' · ' + droppedRowCount + ' row groups dropped (pick a lower-cardinality row field)' : '')
       + (chartDef.showPercent ? ' · percentages are share of each row total' : '')
   };
@@ -5826,7 +5826,7 @@ function syncDatasetRefreshTimer() {
   var ms = refreshIntervalMs(ds.refreshMode);
   if (!ms) { clearDatasetRefreshTimer(); return; }
   var key = ds.id + ':' + ds.refreshMode;
-  // Already running for the same dataset+interval — leave the existing
+  // Already running for the same dataset+interval - leave the existing
   // countdown intact so it actually reaches its scheduled time.
   if (App.refreshTimer && App.refreshTimerKey === key) return;
   clearDatasetRefreshTimer();
@@ -5945,7 +5945,7 @@ function renderHome() {
         '</div>' +
         '<div class="home-action-text">' +
           '<div class="home-action-title">Upload a CSV</div>' +
-          '<div class="home-action-sub">Drag, drop, or browse — works with .csv, .tsv, .txt</div>' +
+          '<div class="home-action-sub">Drag, drop, or browse - works with .csv, .tsv, .txt</div>' +
         '</div>' +
       '</button>' +
       '<button type="button" class="home-action" onclick="setStep(\'upload\')">' +
@@ -5963,7 +5963,7 @@ function renderHome() {
         '</div>' +
         '<div class="home-action-text">' +
           '<div class="home-action-title">Try a sample dataset</div>' +
-          '<div class="home-action-sub">Web traffic, sales, customer data — explore the chart types</div>' +
+          '<div class="home-action-sub">Web traffic, sales, customer data - explore the chart types</div>' +
         '</div>' +
       '</button>' +
     '</div>';
@@ -6005,7 +6005,7 @@ function renderHome() {
 }
 
 function bindHome() {
-  // The home page is fully declarative — its onclick handlers wire it up.
+  // The home page is fully declarative - its onclick handlers wire it up.
   // Nothing to do here, but keep this for symmetry with the other steps.
 }
 
@@ -6735,7 +6735,7 @@ function confirmDeleteFolder(id) {
   var idx = App.folders.findIndex(function(f){ return f.id === id; });
   if (idx === -1) { closeModal(); return; }
   // Stash the original record so we can roll the in-memory state back if the
-  // IndexedDB delete fails — otherwise the folder reappears after reload.
+  // IndexedDB delete fails - otherwise the folder reappears after reload.
   var deletedFolder = App.folders[idx];
   var movedChildren = App.datasets.filter(function(ds){ return ds.folderId === id; });
   movedChildren.forEach(function(ds) { ds.folderId = null; });
@@ -6755,7 +6755,7 @@ function confirmDeleteFolder(id) {
     movedChildren.forEach(function(ds){ ds.folderId = id; });
     if (wasExpanded !== undefined) App.expandedFolders[id] = wasExpanded;
     renderSidebar();
-    toast('Could not delete folder — restored.', 'error', 5000);
+    toast('Could not delete folder - restored.', 'error', 5000);
   });
 }
 
@@ -7202,7 +7202,7 @@ function renderCalculatedFieldsSection(ds) {
     '<div class="calc-section-head">' +
       '<div>' +
         '<div class="calc-section-title">Calculated fields</div>' +
-        '<div class="calc-section-sub">Derive new columns from existing ones — ratios, flags, date parts, string ops.</div>' +
+        '<div class="calc-section-sub">Derive new columns from existing ones - ratios, flags, date parts, string ops.</div>' +
       '</div>' +
       '<button class="btn btn-primary btn-sm" onclick="openCalculatedFieldModal(null)">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
@@ -7362,7 +7362,7 @@ function confirmDeleteCalculatedField(index) {
         .filter(function(i){ return i !== index; })
         .map(function(i){ return i > index ? i - 1 : i; });
     }
-    // tableSort encodes a column index in the "field:N" sortKey — reset if it points
+    // tableSort encodes a column index in the "field:N" sortKey - reset if it points
     // at the deleted column or shift if it points beyond.
     if (ch.tableSort && ch.tableSort.key && ch.tableSort.key.indexOf('field:') === 0) {
       var sortIdx = parseInt(ch.tableSort.key.slice(6), 10);
@@ -7376,7 +7376,7 @@ function confirmDeleteCalculatedField(index) {
   ds.rows.forEach(function(row) { if (row.length > index) row.splice(index, 1); });
   ds.schema.forEach(function(f, i) { f.index = i; });
 
-  // Other calculated fields may have referenced this one — recompute them all
+  // Other calculated fields may have referenced this one - recompute them all
   // and surface any that now error (their `calcError` will be set on the field).
   applyCalculatedFields(ds);
 
@@ -7387,7 +7387,7 @@ function confirmDeleteCalculatedField(index) {
   // Warn if any other calc field broke as a result of this delete.
   var brokenCalcs = ds.schema.filter(function(f){ return f.calculated && f.calcError; });
   if (brokenCalcs.length) {
-    toast('Removed. ' + brokenCalcs.length + ' other calc field' + (brokenCalcs.length === 1 ? '' : 's') + ' now reference a missing column — edit to fix.', 'warn', 6000);
+    toast('Removed. ' + brokenCalcs.length + ' other calc field' + (brokenCalcs.length === 1 ? '' : 's') + ' now reference a missing column - edit to fix.', 'warn', 6000);
   } else {
     toast('Calculated field removed', 'success');
   }
@@ -8723,7 +8723,7 @@ function confirmDeleteDataset(id) {
     } else {
       renderSidebar();
     }
-    toast('Could not delete dataset — restored.', 'error', 5000);
+    toast('Could not delete dataset - restored.', 'error', 5000);
   });
 }
 
@@ -8787,7 +8787,7 @@ function deriveProjectName() {
   return 'Glimpse project';
 }
 
-// Shape sent over the wire — same fields saveDataset persists, no DOM refs.
+// Shape sent over the wire - same fields saveDataset persists, no DOM refs.
 function serializeDataset(ds) {
   return {
     id: ds.id,
@@ -8812,7 +8812,7 @@ function serializeDataset(ds) {
 // ─── File export ──────────────────────────────────────────────────
 function exportProjectFile() {
   if (!App.datasets.length) {
-    toast('Nothing to export — add a dataset first', 'warn');
+    toast('Nothing to export - add a dataset first', 'warn');
     return;
   }
   var bundle = buildProjectBundle();
@@ -8833,11 +8833,11 @@ function exportProjectFile() {
 }
 
 // ─── Share link (URL fragment) ────────────────────────────────────
-// Browser-native gzip + base64-url. No third-party server involved — the
+// Browser-native gzip + base64-url. No third-party server involved - the
 // payload travels in `location.hash`, which is never sent to any HTTP server.
 async function gzipToBase64Url(text) {
   if (typeof CompressionStream === 'undefined') {
-    throw new Error('Your browser does not support compression for share links — use the file export instead.');
+    throw new Error('Your browser does not support compression for share links - use the file export instead.');
   }
   var inputStream = new Blob([text]).stream();
   var compressedStream = inputStream.pipeThrough(new CompressionStream('gzip'));
@@ -8846,7 +8846,7 @@ async function gzipToBase64Url(text) {
 }
 async function base64UrlToText(b64url) {
   if (typeof DecompressionStream === 'undefined') {
-    throw new Error('Your browser does not support decompression — open the project file instead.');
+    throw new Error('Your browser does not support decompression - open the project file instead.');
   }
   var bytes = base64UrlToBytes(b64url);
   var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
@@ -8874,7 +8874,7 @@ function base64UrlToBytes(b64url) {
 var _shareSizeCache = { signature: null, chars: 0, payload: null, name: '' };
 
 function projectSignature() {
-  // Cheap fingerprint — total dataset + dashboard counts and the most recent
+  // Cheap fingerprint - total dataset + dashboard counts and the most recent
   // touch time. Enough to invalidate the cache on any meaningful change.
   var lastTouched = (App.datasets || []).reduce(function(m, d){ return Math.max(m, d.lastRefreshedAt || d.createdAt || 0); }, 0);
   var dashTouched = Object.keys(App.dashboards || {}).reduce(function(m, k){ return m + (App.dashboards[k] || []).length; }, 0);
@@ -8911,7 +8911,7 @@ function applyShareSizeUI(chars) {
   var item = document.getElementById('copyShareLinkItem');
   if (!sub || !item) return;
   if (chars > SHARE_URL_MAX_CHARS) {
-    sub.textContent = 'Too large for a link (' + fmtCompactBytes(chars) + ') — use file export';
+    sub.textContent = 'Too large for a link (' + fmtCompactBytes(chars) + ') - use file export';
     item.classList.add('is-disabled');
   } else {
     sub.textContent = 'Self-contained URL (' + fmtCompactBytes(chars) + ', ~' + Math.ceil(chars / 1024) + ' KB)';
@@ -8924,14 +8924,14 @@ function fmtCompactBytes(chars) {
 }
 
 async function openShareModal() {
-  if (!App.datasets.length) { toast('Nothing to share — add a dataset first', 'warn'); return; }
+  if (!App.datasets.length) { toast('Nothing to share - add a dataset first', 'warn'); return; }
   // Open the modal with a loading state, then encode in the background.
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<h2>Share this project</h2>' +
     '<p style="color:var(--text-3);font-size:13px;line-height:1.6;margin-bottom:var(--space-5)">' +
       'Anyone who opens the link will see the same datasets, dashboards, and folders. ' +
-      'The data travels inside the URL — nothing is uploaded to any server.' +
+      'The data travels inside the URL - nothing is uploaded to any server.' +
     '</p>' +
     '<div class="share-modal-body" id="shareModalBody">' +
       '<div class="share-modal-loading">Encoding project…</div>' +
@@ -8978,9 +8978,9 @@ function renderShareModalBody(bundle, encoded) {
       '<div class="share-card share-card--disabled">' +
         '<div class="share-card-head">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>' +
-          '<div><div class="share-card-title">Project too large for a link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' — links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
+          '<div><div class="share-card-title">Project too large for a link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' - links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
         '</div>' +
-        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Use the file export below instead — it has no size limit.</div>' +
+        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Use the file export below instead - it has no size limit.</div>' +
       '</div>' +
       renderShareFileSection(bundle);
   }
@@ -9014,19 +9014,19 @@ async function copyShareLinkFromModal() {
     }
     toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2200);
   } catch (err) {
-    toast('Could not copy — select the URL and copy manually', 'warn', 4000);
+    toast('Could not copy - select the URL and copy manually', 'warn', 4000);
   }
 }
 
 async function copyShareLink() {
-  if (!App.datasets.length) { toast('Nothing to share — add a dataset first', 'warn'); return; }
+  if (!App.datasets.length) { toast('Nothing to share - add a dataset first', 'warn'); return; }
   try {
     if (!_shareSizeCache.payload || _shareSizeCache.signature !== projectSignature()) {
       await refreshShareLinkSize();
     }
     if (!_shareSizeCache.payload) throw new Error('Could not build share payload');
     if (_shareSizeCache.chars > SHARE_URL_MAX_CHARS) {
-      toast('Project too large for a share link — use Export project file instead', 'warn', 5000);
+      toast('Project too large for a share link - use Export project file instead', 'warn', 5000);
       return;
     }
     var base = location.origin + location.pathname + location.search;
@@ -9035,11 +9035,11 @@ async function copyShareLink() {
       await navigator.clipboard.writeText(url);
       toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2500);
     } else {
-      // Fallback — show in a modal so the user can copy manually.
+      // Fallback - show in a modal so the user can copy manually.
       openModal(
         '<button class="modal-close" onclick="closeModal()">✕</button>' +
         '<h2>Share link</h2>' +
-        '<p>Copy this URL and paste it anywhere — recipients open it to see the same project.</p>' +
+        '<p>Copy this URL and paste it anywhere - recipients open it to see the same project.</p>' +
         '<textarea class="modal-field-input" rows="6" readonly onclick="this.select()">' + escHTML(url) + '</textarea>' +
         '<div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">Done</button></div>'
       );
@@ -9056,7 +9056,7 @@ function importProjectFromText(text, sourceLabel) {
   try {
     bundle = JSON.parse(text);
   } catch (e) {
-    toast('Invalid project file — could not parse JSON', 'error', 5000);
+    toast('Invalid project file - could not parse JSON', 'error', 5000);
     return;
   }
   if (!bundle || typeof bundle !== 'object' || !bundle.version || !Array.isArray(bundle.datasets)) {
@@ -9064,7 +9064,7 @@ function importProjectFromText(text, sourceLabel) {
     return;
   }
   if (bundle.version > PROJECT_BUNDLE_VERSION) {
-    toast('Project was exported from a newer Glimpse — try refreshing this tab', 'warn', 5000);
+    toast('Project was exported from a newer Glimpse - try refreshing this tab', 'warn', 5000);
     // Continue anyway: we may still understand it.
   }
   promptProjectImportConflicts(bundle, sourceLabel || 'project file');
@@ -9137,7 +9137,7 @@ async function applyProjectBundle(bundle, mode) {
   App.folders.forEach(function(f){ existingFolderIds[f.id] = true; });
   (bundle.folders || []).forEach(function(f) {
     if (existingFolderIds[f.id]) {
-      // Always keep both for folders — never destroy an existing folder.
+      // Always keep both for folders - never destroy an existing folder.
       var newId = genId();
       folderRemap[f.id] = newId;
       App.folders.push({ id: newId, name: f.name + ' (imported)', createdAt: f.createdAt || Date.now() });
@@ -9206,7 +9206,7 @@ function tryHandleProjectFile(file) {
   return true;
 }
 
-// Read location.hash on init — if it carries a #p=… payload, decode + prompt.
+// Read location.hash on init - if it carries a #p=… payload, decode + prompt.
 async function tryConsumeShareLinkFromUrl() {
   var hash = location.hash || '';
   if (hash.indexOf('#p=') !== 0) return false;
@@ -9218,14 +9218,14 @@ async function tryConsumeShareLinkFromUrl() {
     importProjectFromText(json, 'shared link');
   } catch (err) {
     console.error('[Glimpse] could not decode share link:', err);
-    toast('Could not decode shared link — it may be malformed.', 'error', 5000);
+    toast('Could not decode shared link - it may be malformed.', 'error', 5000);
   }
   return true;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────
 function init() {
-  // Surface any uncaught error or unhandled promise rejection — they were
+  // Surface any uncaught error or unhandled promise rejection - they were
   // silently dropping into the void before, which made data-loss bugs invisible.
   window.addEventListener('error', function(ev) {
     console.error('[Glimpse] uncaught error:', ev.error || ev.message);
@@ -9239,7 +9239,7 @@ function init() {
   // so it works regardless of UI state.
   window.glimpseDbStatus = function() {
     if (!App.db) {
-      console.log('%c[Glimpse] App.db is NULL — nothing is being persisted.', 'color:red;font-weight:bold');
+      console.log('%c[Glimpse] App.db is NULL - nothing is being persisted.', 'color:red;font-weight:bold');
       return;
     }
     var stores = Array.prototype.slice.call(App.db.objectStoreNames);
@@ -9259,7 +9259,7 @@ function init() {
 
   // Render the home/landing page IMMEDIATELY so the user is never staring at a
   // blank main area while IndexedDB does its (sometimes slow) open + migration
-  // dance. The home page works fine with zero data — it just shows the hero +
+  // dance. The home page works fine with zero data - it just shows the hero +
   // empty-state quick actions. Once persisted state loads we re-render to fill
   // in the recent-dashboards section.
   setStep('home');
