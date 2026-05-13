@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KXK3M3879Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KXK3M3879Q');
+  </script>
+
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="theme-color" content="#050508"/>
@@ -202,6 +211,30 @@
     }
     .hbtn-pri:hover{background:transparent;color:var(--pri);box-shadow:0 0 24px rgba(var(--pri-rgb),.2)}
     .hbtn-pri:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+    /* Share - subtle cyan, signals "send out" without competing with the primary export CTA. */
+    .hbtn-share{
+      background:rgba(var(--acc-rgb),.06);
+      border:1px solid rgba(var(--acc-rgb),.22);
+      color:var(--acc);
+    }
+    .hbtn-share:hover{
+      background:rgba(var(--acc-rgb),.12);
+      border-color:rgba(var(--acc-rgb),.38);
+      box-shadow:0 0 18px rgba(var(--acc-rgb),.15);
+    }
+
+    /* Clear Data - muted red so it reads as destructive but stays low-emphasis. */
+    .hbtn-danger{
+      background:rgba(var(--red-rgb),.05);
+      border:1px solid rgba(var(--red-rgb),.2);
+      color:var(--red);
+    }
+    .hbtn-danger:hover{
+      background:rgba(var(--red-rgb),.12);
+      border-color:rgba(var(--red-rgb),.36);
+      box-shadow:0 0 18px rgba(var(--red-rgb),.15);
+    }
 
     .dropdown{position:relative}
     .dd-menu{
@@ -617,35 +650,38 @@
       letter-spacing:.3px;
     }
 
-    /* Hero stats */
+    /* Hero stats - 4 equal cards. Height shaved ~12%, labels & sub bumped up
+       so they're actually readable on a 15"+ monitor without leaning in. */
     .hero-bar{
-      display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;
+      display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;
       margin-bottom:12px;position:relative;z-index:1;
     }
     .hstat{
       background:var(--bg2);border:1px solid var(--brd);
-      border-radius:10px;padding:13px 14px;
+      border-radius:10px;padding:8px 12px;
       transition:all .2s;
       position:relative;overflow:hidden;
+      display:flex;flex-direction:column;justify-content:center;
+      min-height:64px;
     }
     .hstat:hover{
       border-color:rgba(var(--pri-rgb),.12);
       background:rgba(var(--pri-rgb),.015);
     }
     .hstat-lbl{
-      font-size:9.5px;color:var(--t2);
-      text-transform:uppercase;letter-spacing:1.3px;font-weight:700;
-      margin-bottom:6px;
+      font-size:10.5px;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1.2px;font-weight:700;
+      margin-bottom:3px;
       display:flex;align-items:center;gap:4px;
       font-family:var(--mono);
     }
     .hstat-val{
-      font-size:18px;font-weight:800;
-      font-family:var(--mono);line-height:1;
+      font-size:19px;font-weight:800;
+      font-family:var(--mono);line-height:1.05;
       letter-spacing:-.3px;
     }
     .hstat-sub{
-      font-size:9.5px;color:var(--t2);margin-top:5px;
+      font-size:11px;color:var(--t2);margin-top:3px;
       font-family:var(--mono);letter-spacing:.3px;
     }
 
@@ -1136,13 +1172,48 @@
       .app-body-outer{padding:0 18px}
     }
     @media(max-width:600px){
-      .hdr-status,.hdr-sep,.hdr-tool-name{display:none}
+      .hdr-status,.hdr-sep,.hdr-tool-name,.hdr-badge{display:none}
+      /* Tight header: smaller logo + icon-only action buttons so 3 actions + logo
+         fit comfortably on a 360px-wide phone without overlap. */
+      .app-header{padding:0 12px;height:54px}
+      :root{--hh:54px}
+      .hdr-inner{gap:6px}
+      .hdr-left{gap:8px}
+      .hdr-logo img{width:28px;height:28px}
+      .hdr-logo-name{font-size:15px;letter-spacing:.5px}
+      .hdr-right{gap:6px}
+      .hbtn{padding:8px 10px;font-size:0;gap:0}
+      .hbtn svg{width:15px;height:15px}
+      .hbtn .hbtn-label{display:none}
       .hero-bar{grid-template-columns:1fr 1fr}
-      .sim-big{grid-template-columns:1fr 1fr 1fr}
+      /* Some hero-bars use an inline grid-template-columns override (Business
+         Impact uses repeat(3,1fr)). Inline beats media-query, so this attribute
+         selector forces 2-col on small screens. */
+      .hero-bar[style*="repeat(3,1fr)"]{grid-template-columns:1fr 1fr !important}
+      /* Monte Carlo cards: 3 wide cards don't fit at 30px-font sizing. Drop the
+         number size & padding so all three sit comfortably on a 360px row. */
+      .sim-big{grid-template-columns:1fr 1fr 1fr;gap:6px}
+      .sim-card{padding:10px 8px}
+      .sim-val{font-size:22px}
       .pctl-row{flex-wrap:wrap}
       .pctl-card{min-width:calc(33% - 5px)}
       .rev-row{grid-template-columns:1fr}
       .footer-inner{flex-direction:column;align-items:flex-start;gap:12px}
+      /* Compact stat-strip rows (ARPQ/ATS rev-strip + dual-perspective callout)
+         use inline min-width:90px/60px on each cell. Inline wins over CSS, so
+         drop them only on mobile via attribute selector — items can then wrap
+         freely instead of forcing horizontal scroll. */
+      [style*="min-width:90px"]{min-width:0 !important}
+      [style*="min-width:60px"]{min-width:0 !important}
+      /* Net Impact decomposition table: 5 columns × monospace doesn't fit on
+         narrow viewports. Let it scroll horizontally inside its card. */
+      .card .data-table{display:block;overflow-x:auto;white-space:nowrap;width:100%}
+      .card .data-table thead,.card .data-table tbody{display:table;width:100%;table-layout:auto}
+      .card .data-table th,.card .data-table td{padding:8px 10px;font-size:11px}
+      /* Tradeoff Quadrant: shrink the SVG height a bit so the chart + legend
+         fit in a single screen on phones. */
+      .card .card-head-title{font-size:14px}
+      .main-panel{padding:14px}
     }
     @media(max-width:400px){
       .vinputs.c2,.vinputs.c3{grid-template-columns:1fr 1fr}
@@ -1363,9 +1434,17 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
         Guide
       </button> -->
+      <button class="hbtn hbtn-share" id="shareBtn" onclick="doShare()" aria-label="Copy a shareable link with the current data" title="Copy a shareable link with the current data">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        <span class="hbtn-label">Share</span>
+      </button>
+      <button class="hbtn hbtn-danger" id="resetBtn" onclick="resetAll()" aria-label="Clear all entered data" title="Clear all entered data and the saved snapshot">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span class="hbtn-label">Clear Data</span>
+      </button>
       <button class="hbtn hbtn-pri" id="exportBtn" disabled onclick="doExport()" aria-label="Export to Excel">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        Export Excel
+        <span class="hbtn-label">Export Excel</span>
       </button>
     </div>
   </div>
@@ -1436,10 +1515,11 @@
 
       <div class="ig">
         <div class="conf-row">
-          <label class="il" style="margin-bottom:0" for="confRange">Confidence <button class="ibtn" data-tip="How certain you need to be that the result is real. Alpha = 1 - confidence level." aria-label="About confidence level">i</button></label>
+          <label class="il" style="margin-bottom:0" for="confRange">Confidence <button class="ibtn" data-tip="The significance threshold the test must clear.&#10;&#10;Confidence is NOT the probability your variant is better - it's the long-run rate at which a no-effect test would falsely call a winner.&#10;&#10;95% = industry standard for shipping decisions.&#10;90% = early exploration.&#10;Below 90% = directional reads only - don't ship on these." aria-label="About confidence level">i</button></label>
           <span class="conf-val" aria-hidden="true"><span id="confLabel">95</span>%</span>
         </div>
-        <input type="range" min="80" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level percentage" aria-valuemin="80" aria-valuemax="99" aria-valuenow="95"/>
+        <input type="range" min="70" max="99" step="1" value="95" id="confRange" oninput="setConfidence(this.value)" aria-label="Confidence level percentage" aria-valuemin="70" aria-valuemax="99" aria-valuenow="95"/>
+        <div id="confWarn" style="display:none;margin-top:8px;padding:8px 10px;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.18);border-radius:7px;font-size:11px;color:var(--warn);line-height:1.5">⚠ Below 90% - treat results as exploratory only. Variants flagged "Winner" at this threshold should not be shipped without confirmation.</div>
       </div>
 
       <div class="ig">
@@ -1455,6 +1535,7 @@
         <label class="il" for="daysInput">Days running <button class="ibtn" data-tip="How many days the test has been live so far. Used together with the visitor totals you've entered to compute your average daily traffic per variant - and from there, the days you still need to detect a target effect." aria-label="About days running">i</button></label>
         <input id="daysInput" class="ifield" type="number" inputmode="numeric" min="1" max="365" step="1" value="7" oninput="setDaysCollected(this.value)" placeholder="7" aria-label="Days the test has been collecting data" />
       </div>
+
     </div>
 
     <div class="sb-section">
@@ -1470,10 +1551,6 @@
       <button class="tab-btn active" role="tab" id="tab-results" aria-selected="true" aria-controls="tabContent" onclick="setTab('results',this)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Results
-      </button>
-      <button class="tab-btn" role="tab" id="tab-power" aria-selected="false" aria-controls="tabContent" onclick="setTab('power',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Power Analysis
       </button>
       <button class="tab-btn" role="tab" id="tab-sim" aria-selected="false" aria-controls="tabContent" onclick="setTab('sim',this)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/></svg>
@@ -1970,14 +2047,19 @@
 // ═══════════ STATE ═══════════
 var S={
   mode:'conversion',numVariants:2,confidence:95,hypothesis:'two',activeTab:'results',
-  simResult:null,simCacheKey:'',
+  // Monte Carlo cache keyed by per-variant input signature so re-renders are free.
+  simResults:{},
   daysCollected:7,           // how long current visitors were accumulated over
-  targetMdePct:'',           // user-typed target MDE in percentage points (absolute); '' = use observed
+  // Coefficient of variation used to estimate ticket-size SD when raw SD isn't supplied.
+  // 0.7 is a sensible default for insurance premiums; retail AOV is usually 0.4–0.6.
+  // No longer user-tunable - kept as a constant so per-quote variance has a reasonable
+  // estimate even without per-row data.
+  cv:0.7,
   variants:[
-    {name:'Control (A)',customName:'',visitors:10000,conversions:450,revenue:22500},
-    {name:'Variant B',customName:'',visitors:10000,conversions:520,revenue:28600},
-    {name:'Variant C',customName:'',visitors:'',conversions:'',revenue:''},
-    {name:'Variant D',customName:'',visitors:'',conversions:'',revenue:''}
+    {name:'Control (A)',customName:'',visitors:10000,conversions:450,revenue:22500,mean:'',stdDev:''},
+    {name:'Variant B',customName:'',visitors:10000,conversions:520,revenue:28600,mean:'',stdDev:''},
+    {name:'Variant C',customName:'',visitors:'',conversions:'',revenue:'',mean:'',stdDev:''},
+    {name:'Variant D',customName:'',visitors:'',conversions:'',revenue:'',mean:'',stdDev:''}
   ]
 };
 
@@ -1985,17 +2067,91 @@ function getVarName(i){return S.variants[i].customName||S.variants[i].name}
 
 // ═══════════ STATS ═══════════
 function normalCDF(x){var t=1/(1+0.2316419*Math.abs(x));var d=0.3989422820*Math.exp(-x*x/2);var p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));return x>0?1-p:p}
-function normalPPF(p){if(p<=0)return-Infinity;if(p>=1)return Infinity;if(p<0.5)return-normalPPF(1-p);var q=p-0.5,r=q*q;var n=q*(2.5090809287301226727e3+r*(3.3430575583588128105e4+r*(6.7265770927008700853e4+r*(4.5921953931549871457e4+r*(1.3731693765509461125e4+r*(1.9715909503065514427e3+r*(1.3314349742930454610e2+r*3.3871328727963666080)))))));var d=(2.5090809287301226727e3+r*(2.0440107817814567588e4+r*(4.3548959706765579462e4+r*(2.8862383475678374638e4+r*(8.3050093638376789974e3+r*(1.0823038792095716174e3+r*(5.5706694245767834917e1+r)))))));return n/d}
+// Inverse standard normal - full Acklam algorithm. Three regions (lower tail,
+// central, upper tail) so accuracy holds for p > 0.92 too. Earlier code had only
+// the central rational approximation, which silently returned ~0.69 instead of
+// 1.96 at p=0.975 - bug-corrupted every CI / power / sample-size calculation.
+function normalPPF(p){
+  if(p<=0)return-Infinity;if(p>=1)return Infinity;
+  var a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  var b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  var c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  var d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  var plow=0.02425,phigh=1-plow,q,r;
+  if(p<plow){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p<=phigh){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+  q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
 function calcPValue(n1,c1,n2,c2){if(!n1||!n2||n1<=0||n2<=0)return 1;var p1=c1/n1,p2=c2/n2,pool=(c1+c2)/(n1+n2),se=Math.sqrt(pool*(1-pool)*(1/n1+1/n2));if(se===0)return 1;var z=(p2-p1)/se;if(S.hypothesis==='one')return z>0?1-normalCDF(z):1;return 2*(1-normalCDF(Math.abs(z)))}
 function calcCI(n,c,conf){if(!n||n<=0)return[0,0];var p=c/n,z=normalPPF(1-(1-conf/100)/2),z2=z*z,denom=1+z2/n,center=(p+z2/(2*n))/denom,margin=(z*Math.sqrt(p*(1-p)/n+z2/(4*n*n)))/denom;return[Math.max(0,center-margin),Math.min(1,center+margin)]}
-function calcPower(n1,p1,n2,p2){var a=1-S.confidence/100,se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2);if(se===0)return p1!==p2?1:0;var za=normalPPF(1-a/2),ncp=Math.abs(p2-p1)/se;return normalCDF(ncp-za)+normalCDF(-ncp-za)}
+function calcPower(n1,p1,n2,p2,a){a=(a!=null)?a:(1-S.confidence/100);var se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2);if(se===0)return p1!==p2?1:0;var za=normalPPF(1-a/2),ncp=Math.abs(p2-p1)/se;return normalCDF(ncp-za)+normalCDF(-ncp-za)}
 function calcMDE(n1,n2,br,a,pw){a=a!==undefined?a:(1-S.confidence/100);pw=pw!==undefined?pw:0.8;return(normalPPF(1-a/2)+normalPPF(pw))*Math.sqrt(br*(1-br)*(1/n1+1/n2))}
+// Equal-allocation forward planning only (used by the Excel "Power Analysis" sheet).
+// For *this* test's "sample needed", use requiredN2ForPower instead - it respects unequal arms.
 function calcSampleSize(br,mde,a,pw){a=a!==undefined?a:(1-S.confidence/100);pw=pw!==undefined?pw:0.8;if(Math.abs(mde)<1e-10)return Infinity;var za=normalPPF(1-a/2),zb=normalPPF(pw),p2=Math.min(Math.max(br+mde,0.001),0.999);return Math.ceil(Math.pow(za*Math.sqrt(2*br*(1-br))+zb*Math.sqrt(br*(1-br)+p2*(1-p2)),2)/Math.pow(mde,2))}
+// Scale factor s >= 1 such that calcPower(s*n1, p1, s*n2, p2, alpha) >= targetPower.
+// Assumes both arms keep growing at their current daily rates - i.e. the user
+// keeps the same allocation ratio. Holding one arm fixed (an earlier attempt)
+// is wrong because the fixed arm's variance becomes a hard floor that even an
+// infinite second arm can't overcome. With proportional growth, total variance
+// shrinks like 1/s, so any non-zero effect eventually reaches target power.
+// Returns null if effect is zero. scaleFactor = 1 means already sufficient.
+function scaleForPower(n1,n2,p1,p2,targetPower,a){
+  targetPower=targetPower||0.8;
+  if(p1===p2||n1<=0||n2<=0)return null;
+  if(calcPower(n1,p1,n2,p2,a)>=targetPower)return 1;
+  var hi=2;
+  while(calcPower(hi*n1,p1,hi*n2,p2,a)<targetPower){hi*=2;if(hi>1e9)return Infinity}
+  var lo=1;
+  for(var i=0;i<60&&(hi-lo)>1e-5;i++){
+    var mid=(lo+hi)/2;
+    if(calcPower(mid*n1,p1,mid*n2,p2,a)>=targetPower)hi=mid;else lo=mid;
+  }
+  return hi;
+}
+// Welch's t-test for difference of means with unequal variances.
+// Returns p-value via normal approximation (df large enough at A/B scale).
+// Inputs: per-arm sample size, mean, SD.
+function welchT(n1,m1,sd1,n2,m2,sd2){
+  if(!n1||!n2||n1<2||n2<2)return{t:0,df:0,pValue:1,seDiff:0,diff:0};
+  var v1=sd1*sd1/n1,v2=sd2*sd2/n2,seDiff=Math.sqrt(v1+v2),diff=m2-m1;
+  if(seDiff===0)return{t:0,df:0,pValue:diff===0?1:0,seDiff:0,diff:diff};
+  var t=diff/seDiff;
+  var df=Math.pow(v1+v2,2)/((v1*v1)/(n1-1)+(v2*v2)/(n2-1));
+  var p=S.hypothesis==='one'?(t>0?1-normalCDF(t):1):2*(1-normalCDF(Math.abs(t)));
+  return{t:t,df:df,pValue:p,seDiff:seDiff,diff:diff};
+}
+// Power for Welch's t-test (normal approximation; same shape as calcPower).
+function welchPower(n1,sd1,n2,sd2,diff,a){
+  a=(a!=null)?a:(1-S.confidence/100);
+  var se=Math.sqrt(sd1*sd1/n1+sd2*sd2/n2);
+  if(se===0)return diff!==0?1:0;
+  var za=normalPPF(1-a/2),ncp=Math.abs(diff)/se;
+  return normalCDF(ncp-za)+normalCDF(-ncp-za);
+}
+// Proportional growth: scale factor for both arms so Welch t-test hits target power.
+function scaleForWelchPower(n1,sd1,n2,sd2,diff,targetPower,a){
+  targetPower=targetPower||0.8;
+  if(diff===0||n1<=0||n2<=0)return null;
+  if(welchPower(n1,sd1,n2,sd2,diff,a)>=targetPower)return 1;
+  var hi=2;
+  while(welchPower(hi*n1,sd1,hi*n2,sd2,diff,a)<targetPower){hi*=2;if(hi>1e9)return Infinity}
+  var lo=1;
+  for(var i=0;i<60&&(hi-lo)>1e-5;i++){
+    var mid=(lo+hi)/2;
+    if(welchPower(mid*n1,sd1,mid*n2,sd2,diff,a)>=targetPower)hi=mid;else lo=mid;
+  }
+  return hi;
+}
 function binomialSample(n,p){if(n<=0)return 0;if(n>500){var mu=n*p,sg=Math.sqrt(n*p*(1-p));if(sg<1e-10)return Math.round(mu);var u1=Math.random(),u2=Math.random(),z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);return Math.min(n,Math.max(0,Math.round(mu+sg*z)))}var x=0;for(var i=0;i<n;i++)if(Math.random()<p)x++;return x}
-function runSimulation(n1,c1,n2,c2,ns){ns=ns||5000;var p1=c1/n1,p2=c2/n2,alpha=1-S.confidence/100,wins=0,losses=0,inc=0,lifts=new Array(ns);for(var i=0;i<ns;i++){var s1=binomialSample(n1,p1),s2=binomialSample(n2,p2),sp1=s1/n1,sp2=s2/n2,lift=sp1===0?(sp2>0?1:0):(sp2-sp1)/sp1;lifts[i]=lift;var pv=calcPValue(n1,s1,n2,s2);if(pv<alpha){if(sp2>sp1)wins++;else losses++}else inc++}lifts.sort(function(a,b){return a-b});var pctl=function(p){return lifts[Math.min(ns-1,Math.floor(ns*p))]*100};return{winRate:wins/ns*100,lossRate:losses/ns*100,incRate:inc/ns*100,p5:pctl(.05),p25:pctl(.25),p50:pctl(.5),p75:pctl(.75),p95:pctl(.95)}}
+function runSimulation(n1,c1,n2,c2,ns,alpha){ns=ns||5000;alpha=(alpha!=null)?alpha:(1-S.confidence/100);var p1=c1/n1,p2=c2/n2,wins=0,losses=0,inc=0,lifts=new Array(ns);for(var i=0;i<ns;i++){var s1=binomialSample(n1,p1),s2=binomialSample(n2,p2),sp1=s1/n1,sp2=s2/n2,lift=sp1===0?(sp2>0?1:0):(sp2-sp1)/sp1;lifts[i]=lift;var pv=calcPValue(n1,s1,n2,s2);if(pv<alpha){if(sp2>sp1)wins++;else losses++}else inc++}lifts.sort(function(a,b){return a-b});var pctl=function(p){return lifts[Math.min(ns-1,Math.floor(ns*p))]*100};return{winRate:wins/ns*100,lossRate:losses/ns*100,incRate:inc/ns*100,p5:pctl(.05),p25:pctl(.25),p50:pctl(.5),p75:pctl(.75),p95:pctl(.95)}}
 function checkSRM(visitors){var total=0;for(var i=0;i<visitors.length;i++)total+=visitors[i];if(total===0)return{ok:true,pValue:1};var expected=total/visitors.length,chiSq=0;for(var i=0;i<visitors.length;i++)chiSq+=Math.pow(visitors[i]-expected,2)/expected;var df=visitors.length-1;if(df<=0)return{ok:true,pValue:1};var wh=Math.pow(chiSq/df,1/3)-(1-2/(9*df)),whSE=Math.sqrt(2/(9*df)),z=wh/whSE,pv=Math.max(0,Math.min(1,1-normalCDF(z)));return{ok:pv>0.01,pValue:pv,chiSq:chiSq}}
 
 // ═══════════ FORMAT ═══════════
+// HTML-escape any user-supplied string before injecting into innerHTML or
+// attribute values. Variant names are user-controlled AND travel via the share
+// link, so this is a hard requirement, not a nice-to-have.
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function fmt(n,d){d=d==null?2:d;return(isNaN(n)||!isFinite(n))?'-':n.toFixed(d)}
 function fmtPct(n,d){d=d==null?2:d;return(isNaN(n)||!isFinite(n))?'-':(n*100).toFixed(d)+'%'}
 function fmtRaw(n,d){d=d==null?2:d;return(isNaN(n)||!isFinite(n))?'-':n.toFixed(d)+'%'}
@@ -2035,6 +2191,14 @@ function fmtNum(n){return(isNaN(n)||!isFinite(n))?'-':Math.round(n).toLocaleStri
       t=t.parentElement;
     }
   });
+  // Keyboard parity: show on focus, hide on blur, dismiss on Escape.
+  document.addEventListener('focusin',function(e){
+    var t=e.target;if(t&&t.getAttribute&&t.getAttribute('data-tip'))showTip(t);
+  });
+  document.addEventListener('focusout',function(e){
+    var t=e.target;if(t&&t.getAttribute&&t.getAttribute('data-tip'))hideTip();
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&cur)hideTip()});
   window.addEventListener('scroll',function(){if(cur)showTip(cur)},true);
   window.addEventListener('resize',function(){if(cur)showTip(cur)});
 })();
@@ -2075,57 +2239,10 @@ function faqKey(e,card){if(e.key==='Enter'||e.key===' '){e.preventDefault();faqT
 function actToggle(el){el.parentNode.querySelectorAll('.tbtn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false')});el.classList.add('active');el.setAttribute('aria-pressed','true')}
 function setMode(m,el){S.mode=m;actToggle(el);buildInputs();compute()}
 function setVariants(n,el){S.numVariants=n;actToggle(el);buildInputs();compute()}
-function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;var r=document.getElementById('confRange');if(r)r.setAttribute('aria-valuenow',v);compute()}
+function setConfidence(v){S.confidence=+v;document.getElementById('confLabel').textContent=v;var r=document.getElementById('confRange');if(r)r.setAttribute('aria-valuenow',v);var w=document.getElementById('confWarn');if(w)w.style.display=S.confidence<90?'block':'none';compute()}
 function setHypothesis(h,el){S.hypothesis=h;actToggle(el);updateHyp();compute()}
-function setTab(t,el){S.activeTab=t;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false')});el.classList.add('active');el.setAttribute('aria-selected','true');render()}
+function setTab(t,el){S.activeTab=t;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false')});el.classList.add('active');el.setAttribute('aria-selected','true');render();if(typeof saveState==='function')saveState()}
 function setDaysCollected(v){var n=Math.max(1,Math.min(365,Math.floor(Number(v)||1)));S.daysCollected=n;compute()}
-// Partial update only - never re-render the whole card on each keystroke,
-// otherwise the input element is destroyed and the cursor jumps to the end
-// every time the user types a digit.
-function setTargetMde(v){var raw=String(v||'').trim();S.targetMdePct=raw===''?'':Math.max(0,Number(raw));updateTttCells()}
-function useObservedMde(){
-  var v=R&&R.variantResults&&R.variantResults[0];
-  S.targetMdePct=v?+(v.mde*100).toFixed(2):'';
-  var input=document.getElementById('targetMdeInput');
-  if(input)input.value=String(S.targetMdePct);
-  updateTttCells();
-}
-
-// Build a duration projection for a given target MDE.
-// Returns {dailyRate, requiredN, currentN, additionalN, daysNeeded, additionalDays, progressPct, verdict}.
-// "verdict" is a short string the UI can show next to the numbers.
-function projectTimeToTarget(targetMdeAbs) {
-  if (!R || !R.variantResults || !R.variantResults.length) return null;
-  var v0      = R.variantResults[0];
-  var current = +R.ctrl.visitors || 0;
-  var days    = Math.max(1, S.daysCollected || 1);
-  var dailyRate = current / days; // per-variant daily rate (control bucket)
-  // Guard against meaningless inputs.
-  if (!isFinite(targetMdeAbs) || targetMdeAbs <= 0) return null;
-  var requiredN = calcSampleSize(R.baseRate, targetMdeAbs, R.alphaAdj);
-  if (!isFinite(requiredN)) return { invalid: true };
-  var additionalN  = Math.max(0, requiredN - current);
-  var additionalDays = dailyRate > 0 ? Math.ceil(additionalN / dailyRate) : Infinity;
-  var daysNeeded     = dailyRate > 0 ? Math.ceil(requiredN / dailyRate) : Infinity;
-  var progressPct = requiredN > 0 ? Math.min(100, (current / requiredN) * 100) : 0;
-  var verdict;
-  if (additionalN === 0) {
-    verdict = 'You already have enough data - ship if the result is significant.';
-  } else if (!isFinite(additionalDays)) {
-    verdict = 'Need more visitors. Daily rate is 0 - increase the days field or get more traffic.';
-  } else if (additionalDays === 0) {
-    verdict = 'About a day away from the target sample.';
-  } else {
-    verdict = 'Need ~' + additionalDays + ' more day' + (additionalDays === 1 ? '' : 's') +
-              ' at your current pace of ~' + Math.round(dailyRate).toLocaleString() +
-              ' visitors/day per variant.';
-  }
-  return {
-    dailyRate: dailyRate, requiredN: requiredN, currentN: current,
-    additionalN: additionalN, daysNeeded: daysNeeded, additionalDays: additionalDays,
-    progressPct: progressPct, verdict: verdict
-  };
-}
 function toggleGuide(){var m=document.getElementById('guideModal'),b=document.getElementById('guideBtn'),open=m.classList.toggle('open');b.setAttribute('aria-expanded',open?'true':'false')}
 function updateHyp(){var el=document.getElementById('hypExplain');el.innerHTML=S.hypothesis==='two'?'<strong>Two-sided</strong> - Tests if variant differs in either direction. Safer default.':'<strong>One-sided</strong> - Tests only if variant is <em>better</em>. Only use when harm is impossible.'}
 
@@ -2137,50 +2254,142 @@ function buildInputs(){
     var nameColor=isCtrl?'var(--t1)':'var(--pri)';
     var placeholder=isCtrl?'Control (A)':v.name;
     var vname=v.customName||v.name;
-    h+='<div class="vbox '+(isCtrl?'':'va')+'" role="group" aria-label="'+vname+' data inputs">';
+    h+='<div class="vbox '+(isCtrl?'':'va')+'" role="group" aria-label="'+esc(vname)+' data inputs">';
     h+='<div class="vbox-header">';
-    h+='<input class="vbox-name-input" style="color:'+nameColor+'" type="text" value="'+(v.customName||'')+'" placeholder="'+placeholder+'" data-idx="'+i+'" oninput="onNameInput(this)" aria-label="Custom name for variant '+v.name+'"/>';
+    h+='<input class="vbox-name-input" style="color:'+nameColor+'" type="text" value="'+esc(v.customName||'')+'" placeholder="'+esc(placeholder)+'" data-idx="'+i+'" oninput="onNameInput(this)" aria-label="Custom name for variant '+esc(v.name)+'"/>';
     if(isCtrl)h+='<span class="vbox-ctrl-lbl" aria-hidden="true">Control</span>';
     h+='</div>';
     h+='<div class="vinputs '+cols+'">';
-    h+='<div><label class="vinput-lbl" for="'+id+'-v">Visitors</label><input class="ifield" id="'+id+'-v" type="number" inputmode="numeric" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)" aria-label="Visitors for '+vname+'"/></div>';
-    h+='<div><label class="vinput-lbl" for="'+id+'-c">Conversions</label><input class="ifield" id="'+id+'-c" type="number" inputmode="numeric" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)" aria-label="Conversions for '+vname+'"/></div>';
-    if(S.mode==='revenue')h+='<div><label class="vinput-lbl" for="'+id+'-r">Revenue (₹)</label><input class="ifield" id="'+id+'-r" type="number" inputmode="decimal" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" oninput="onInput(this)" aria-label="Revenue in rupees for '+vname+'"/></div>';
+    h+='<div><label class="vinput-lbl" for="'+id+'-v">Visitors</label><input class="ifield" id="'+id+'-v" type="number" inputmode="numeric" min="0" step="1" value="'+v.visitors+'" placeholder="10000" data-idx="'+i+'" data-field="visitors" oninput="onInput(this)" aria-label="Visitors for '+esc(vname)+'"/></div>';
+    h+='<div><label class="vinput-lbl" for="'+id+'-c">Conversions</label><input class="ifield" id="'+id+'-c" type="number" inputmode="numeric" min="0" step="1" value="'+v.conversions+'" placeholder="450" data-idx="'+i+'" data-field="conversions" oninput="onInput(this)" aria-label="Conversions for '+esc(vname)+'"/></div>';
+    if(S.mode==='revenue')h+='<div><label class="vinput-lbl" for="'+id+'-r">Revenue (₹)</label><input class="ifield" id="'+id+'-r" type="number" inputmode="decimal" min="0" step="1" value="'+v.revenue+'" placeholder="22500" data-idx="'+i+'" data-field="revenue" data-decimal="1" oninput="onInput(this)" aria-label="Revenue in rupees for '+esc(vname)+'"/></div>';
     h+='</div></div>';
   }
   c.innerHTML=h;
 }
 function onNameInput(el){var idx=+el.dataset.idx;S.variants[idx].customName=el.value.trim();compute()}
-function onInput(el){var idx=+el.dataset.idx,field=el.dataset.field,raw=el.value.trim();S.variants[idx][field]=raw===''?'':Math.max(0,Math.floor(Number(raw)));compute()}
+function onInput(el){
+  var idx=+el.dataset.idx,field=el.dataset.field,raw=el.value.trim(),decimal=el.dataset.decimal==='1';
+  if(raw===''){S.variants[idx][field]='';}
+  else {var n=Number(raw);S.variants[idx][field]=decimal?Math.max(0,n):Math.max(0,Math.floor(n))}
+  compute();
+}
 
 // ═══════════ COMPUTE ═══════════
 var R=null;
 function compute(){
-  var ctrl=S.variants[0],warns=[];
-  if(ctrl.visitors!==''&&ctrl.conversions!==''&&+ctrl.conversions>+ctrl.visitors)warns.push(getVarName(0)+': conversions exceed visitors.');
-  if(ctrl.visitors!==''&&+ctrl.visitors>0&&+ctrl.visitors<30)warns.push(getVarName(0)+': sample < 30 - results unreliable.');
-  for(var i=1;i<S.numVariants;i++){var v=S.variants[i];if(v.visitors!==''&&v.conversions!==''&&+v.conversions>+v.visitors)warns.push(getVarName(i)+': conversions exceed visitors.');if(v.visitors!==''&&+v.visitors>0&&+v.visitors<30)warns.push(getVarName(i)+': sample < 30 - unreliable.')}
-  document.getElementById('warnBox').innerHTML=warns.length?'<div class="warn-box">⚠ '+warns.join('<br>⚠ ')+'</div>':'';
-  if(!ctrl.visitors||!ctrl.conversions||+ctrl.visitors<=0){R=null;render();return}
+  var ctrl=S.variants[0],warns=[],fatal=false;
+  // Fatal validation: conversions can never exceed visitors. Block math entirely
+  // rather than producing nonsense probabilities >100%.
+  if(ctrl.visitors!==''&&ctrl.conversions!==''&&+ctrl.conversions>+ctrl.visitors){warns.push(esc(getVarName(0))+': conversions ('+(+ctrl.conversions)+') exceed visitors ('+(+ctrl.visitors)+') - fix input.');fatal=true}
+  if(ctrl.visitors!==''&&+ctrl.visitors>0&&+ctrl.visitors<30)warns.push(esc(getVarName(0))+': sample < 30 - results unreliable.');
+  // Catches "lots of traffic, few converts" - Z-test gets unstable with <30 conversions
+  // even at high visitor counts. 1 vs 3 converts on 1000 visitors = +200% lift but garbage.
+  if(ctrl.conversions!==''&&+ctrl.conversions>0&&+ctrl.conversions<30)warns.push(esc(getVarName(0))+': only '+(+ctrl.conversions)+' conversions - proportion-test unstable, treat the lift as directional.');
+  for(var i=1;i<S.numVariants;i++){var v=S.variants[i];if(v.visitors!==''&&v.conversions!==''&&+v.conversions>+v.visitors){warns.push(esc(getVarName(i))+': conversions ('+(+v.conversions)+') exceed visitors ('+(+v.visitors)+') - fix input.');fatal=true}if(v.visitors!==''&&+v.visitors>0&&+v.visitors<30)warns.push(esc(getVarName(i))+': sample < 30 - unreliable.');if(v.conversions!==''&&+v.conversions>0&&+v.conversions<30)warns.push(esc(getVarName(i))+': only '+(+v.conversions)+' conversions - proportion-test unstable.');}
+  document.getElementById('warnBox').innerHTML=warns.length?'<div class="warn-box"'+(fatal?' style="color:var(--red);border-color:var(--red)"':'')+'>⚠ '+warns.join('<br>⚠ ')+'</div>':'';
+  if(fatal||!ctrl.visitors||!ctrl.conversions||+ctrl.visitors<=0){R=null;document.getElementById('exportBtn').disabled=true;render();return}
   var baseRate=+ctrl.conversions/+ctrl.visitors,numComp=S.numVariants-1,alphaRaw=1-S.confidence/100,alphaAdj=numComp>1?alphaRaw/numComp:alphaRaw,srmV=[+ctrl.visitors],vr=[];
   for(var i=1;i<S.numVariants;i++){
-    var v=S.variants[i];if(!v.visitors||!v.conversions||+v.visitors<=0)continue;
+    // Skip only truly unfilled variants. A zero conversion count is legitimate
+    // (e.g. testing a hostile change), so don't drop it - '!v.conversions' was
+    // doing exactly that.
+    var v=S.variants[i];if(v.visitors===''||v.conversions===''||+v.visitors<=0)continue;
     var n2=+v.visitors,c2=+v.conversions,rate=c2/n2,lift=baseRate===0?(rate>0?Infinity:0):(rate-baseRate)/baseRate;
     var pv=calcPValue(+ctrl.visitors,+ctrl.conversions,n2,c2),ci=calcCI(n2,c2,S.confidence),ciC=calcCI(+ctrl.visitors,+ctrl.conversions,S.confidence);
-    var power=calcPower(+ctrl.visitors,baseRate,n2,rate)*100,mde=calcMDE(+ctrl.visitors,n2,baseRate,alphaAdj);
+    var power=calcPower(+ctrl.visitors,baseRate,n2,rate,alphaAdj)*100,mde=calcMDE(+ctrl.visitors,n2,baseRate,alphaAdj);
     var absDiff=rate-baseRate,se=Math.sqrt(baseRate*(1-baseRate)/+ctrl.visitors+rate*(1-rate)/n2);
-    var isSig=pv<alphaAdj,sn=calcSampleSize(baseRate,Math.max(Math.abs(absDiff),0.001),alphaAdj);
+    var isSig=pv<alphaAdj;
+    // Days needed assuming both arms keep growing at their current daily rates.
+    // sn = projected smaller-arm size when 80% power is reached (display only).
+    var scale=scaleForPower(+ctrl.visitors,n2,baseRate,rate,0.8,alphaAdj);
+    var daysSoFar=Math.max(1,S.daysCollected||1);
+    var additionalDays, sn;
+    if(scale==null){additionalDays=Infinity;sn=Infinity}
+    else if(!isFinite(scale)){additionalDays=Infinity;sn=Infinity}
+    else if(scale<=1){additionalDays=0;sn=Math.min(+ctrl.visitors,n2)}
+    else{additionalDays=Math.ceil((scale-1)*daysSoFar);sn=Math.ceil(scale*Math.min(+ctrl.visitors,n2))}
     srmV.push(n2);
     var rvc=0,rvv=0,revLift=0;
     if(S.mode==='revenue'&&ctrl.revenue&&v.revenue){rvc=+ctrl.revenue/+ctrl.visitors;rvv=+v.revenue/n2;revLift=rvc===0?0:(rvv-rvc)/rvc}
-    vr.push({name:getVarName(i),idx:i,visitors:n2,conversions:c2,rate:rate,lift:lift,pValue:pv,ci:ci,ciCtrl:ciC,power:power,mde:mde,se:se,absDiff:absDiff,isSignificant:isSig,sampleNeeded:sn,rvc:rvc,rvv:rvv,revLift:revLift});
+    // ── Always-on continuous tests in Revenue mode: ARPQ + ATS via Welch's t. ──
+    // ARPQ: revenue/quote - n=quotes, SD≈ATS·√(p·CV² + p(1−p)).
+    // ATS:  revenue/sale  - n=sales,  SD≈CV·ATS.
+    // Per-quote variance has both the conversion-Bernoulli and the per-sale-ticket
+    // components; per-sale variance is just ticket variability.
+    var arpqTest=null,atsTest=null;
+    // Welch on ARPQ/ATS needs at least 1 sale in each arm - otherwise ATS = ∞.
+    // Conversions can be 0 (legitimate) but in that case we skip the revenue tests.
+    if(S.mode==='revenue'&&ctrl.revenue&&v.revenue&&+ctrl.conversions>0&&c2>0){
+      var zCrit=normalPPF(1-alphaAdj/2);
+      var buildWelch=function(n1,m1,sd1,n2,m2,sd2){
+        var wt=welchT(n1,m1,sd1,n2,m2,sd2);
+        var wPow=welchPower(n1,sd1,n2,sd2,wt.diff,alphaAdj)*100;
+        var scl=scaleForWelchPower(n1,sd1,n2,sd2,wt.diff,0.8,alphaAdj);
+        var more=(scl==null||!isFinite(scl))?Infinity:(scl<=1?0:Math.ceil((scl-1)*daysSoFar));
+        var diffCi=[wt.diff-zCrit*wt.seDiff,wt.diff+zCrit*wt.seDiff];
+        return{n1:n1,n2:n2,mean1:m1,mean2:m2,sd1:sd1,sd2:sd2,diff:wt.diff,
+          relLift:m1!==0?(m2-m1)/m1:(m2!==0?Infinity:0),
+          t:wt.t,df:wt.df,pValue:wt.pValue,seDiff:wt.seDiff,ci:diffCi,
+          power:wPow,isSignificant:wt.pValue<alphaAdj,additionalDays:more};
+      };
+      var ats1=+ctrl.revenue/+ctrl.conversions,ats2=+v.revenue/c2;
+      var arpq1=+ctrl.revenue/+ctrl.visitors,arpq2=+v.revenue/n2;
+      var sdArpq1=ats1*Math.sqrt(baseRate*S.cv*S.cv+baseRate*(1-baseRate));
+      var sdArpq2=ats2*Math.sqrt(rate*S.cv*S.cv+rate*(1-rate));
+      arpqTest=buildWelch(+ctrl.visitors,arpq1,sdArpq1,n2,arpq2,sdArpq2);
+      atsTest=buildWelch(+ctrl.conversions,ats1,ats1*S.cv,c2,ats2,ats2*S.cv);
+    }
+    vr.push({name:getVarName(i),idx:i,visitors:n2,conversions:c2,rate:rate,lift:lift,pValue:pv,ci:ci,ciCtrl:ciC,power:power,mde:mde,se:se,absDiff:absDiff,isSignificant:isSig,sampleNeeded:sn,additionalDays:additionalDays,rvc:rvc,rvv:rvv,revLift:revLift,arpqTest:arpqTest,atsTest:atsTest});
   }
-  R={baseRate:baseRate,variantResults:vr,ctrl:ctrl,srm:checkSRM(srmV),alphaAdj:alphaAdj,numComparisons:numComp};
+  // Derived monthly traffic - visitors/quotes accumulated per day × 30. This is
+  // the user's actual observed pace; no need to ask for an estimate.
+  var totalVis=srmV.reduce(function(a,b){return a+b},0);
+  var monthlyTraffic=Math.round((totalVis/Math.max(1,S.daysCollected||1))*30);
+  R={baseRate:baseRate,variantResults:vr,ctrl:ctrl,srm:checkSRM(srmV),alphaAdj:alphaAdj,numComparisons:numComp,monthlyTraffic:monthlyTraffic};
   document.getElementById('exportBtn').disabled=!vr.length;
   render();
 }
 
-function getVerdict(v){if(!v)return{text:'Enter data',color:'var(--t2)',bg:'rgba(110,110,130,0.08)'};if(v.isSignificant&&v.lift>0)return{text:'🏆 Winner',color:'var(--pri)',bg:'rgba(0,255,136,0.08)'};if(v.isSignificant&&v.lift<0)return{text:'📉 Loser',color:'var(--red)',bg:'rgba(255,68,102,0.08)'};if(v.power<80)return{text:'⏳ Need More Data',color:'var(--warn)',bg:'rgba(255,170,0,0.08)'};return{text:'🔄 No Difference',color:'var(--acc)',bg:'rgba(0,212,255,0.08)'}}
+// Verdict - keyed to the conversion test at the user's chosen confidence.
+// When the result is significant but the test is still underpowered, append a
+// "· underpowered" suffix to the badge so it can't visually contradict the
+// Sample Status card on the same screen.
+function getVerdict(v){
+  if(!v)return{text:'Enter data',color:'var(--t2)',bg:'rgba(110,110,130,0.08)'};
+  var underpow=v.power<80?' · underpowered':'';
+  if(v.isSignificant&&v.lift>0)return{text:'🏆 Winner'+underpow,color:'var(--pri)',bg:'rgba(0,255,136,0.08)'};
+  if(v.isSignificant&&v.lift<0)return{text:'📉 Loser'+underpow,color:'var(--red)',bg:'rgba(255,68,102,0.08)'};
+  if(v.power<80)return{text:'⏳ Need More Data',color:'var(--warn)',bg:'rgba(255,170,0,0.08)'};
+  return{text:'🔄 No Difference',color:'var(--acc)',bg:'rgba(0,212,255,0.08)'};
+}
+
+// Dual-perspective verdict text. Returns {convLine, revLine} - short, scannable
+// sentences for "if conversion is primary" vs "if revenue is primary".
+function dualVerdict(v){
+  // Conversion view - matches the badge.
+  var cLine;
+  if(v.isSignificant&&v.lift>0)cLine='<strong style="color:var(--pri)">🏆 Winner</strong> on conversion (+'+fmtRaw(v.lift*100,2)+', p = '+fmt(v.pValue,3)+').';
+  else if(v.isSignificant&&v.lift<0)cLine='<strong style="color:var(--red)">📉 Loser</strong> on conversion ('+fmtRaw(v.lift*100,2)+', p = '+fmt(v.pValue,3)+').';
+  else if(v.power<80)cLine='<strong style="color:var(--warn)">⏳ Inconclusive</strong> - conversion moved '+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+' but p = '+fmt(v.pValue,3)+' (underpowered).';
+  else cLine='<strong style="color:var(--acc)">🔄 No effect</strong> on conversion at this sample.';
+
+  // Revenue view - needs both tests
+  var rLine;
+  if(!v.arpqTest||!v.atsTest){rLine=null}
+  else {
+    var arpq=v.arpqTest,ats=v.atsTest;
+    var convVerb=v.lift>=0
+      ? (Math.abs(v.lift)<0.01?'holding flat':'up '+fmtRaw(v.lift*100,2))
+      : (Math.abs(v.lift)<0.01?'a marginal drop':'down '+fmtRaw(Math.abs(v.lift)*100,2));
+    var arpqDir=arpq.relLift>=0?'improved':'dropped';
+    var arpqColor=arpq.relLift>=0?'var(--pri)':'var(--red)';
+    var arpqSig=arpq.isSignificant?'<span style="color:var(--pri)">sig</span>':'p = '+fmt(arpq.pValue,3);
+    var atsDir=ats.relLift>=0?'+':'';
+    rLine='Conversion '+convVerb+'; <strong style="color:'+arpqColor+'">ARPQ '+arpqDir+' by '+fmtRaw(Math.abs(arpq.relLift*100),2)+'</strong> ('+arpqSig+'), ATS '+atsDir+fmtRaw(ats.relLift*100,2)+'.';
+  }
+  return{convLine:cLine,revLine:rLine};
+}
 
 // ═══════════ MINI GAUGE SVG ═══════════
 function miniGauge(val,color){
@@ -2207,7 +2416,7 @@ function distSVG(p1,p2,se){
     '</svg>'
 }
 
-// ═══════════ POWER CURVE ═══════════
+// ═══════════ POWER CURVE (kept for potential future use; currently unused) ═══════════
 function powerCurveSVG(baseRate,n1,n2){
   var w=520,h=140,pts=60,maxMDE=Math.max(baseRate*0.5,0.02),path='';
   for(var i=0;i<=pts;i++){var mde=(i/pts)*maxMDE,p2=Math.min(baseRate+mde,0.9999),pw=calcPower(n1,baseRate,n2,p2)*100,px=(i/pts)*w,py=h-6-(Math.min(pw,100)/100)*(h-16);path+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1)}
@@ -2225,11 +2434,10 @@ function powerCurveSVG(baseRate,n1,n2){
 // ═══════════ RENDER ═══════════
 function render(){
   var el=document.getElementById('tabContent');
-  if(!R||R.variantResults.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Enter Your Test Data</div><div class="empty-desc">Fill in visitors and conversions on the left to see your statistical analysis.</div></div>';return}
-  if(S.activeTab==='results')renderResults(el);
-  else if(S.activeTab==='power')renderPower(el);
-  else if(S.activeTab==='sim')renderSim(el);
-  else renderInsights(el);
+  if(!R||R.variantResults.length===0){el.innerHTML='<div class="empty"><div class="empty-icon"></div><div class="empty-title">Enter Your Test Data</div><div class="empty-desc">Fill in visitors and conversions on the left to see your statistical analysis.</div></div>';return}
+  if(S.activeTab==='sim')renderSim(el);
+  else if(S.activeTab==='insights')renderInsights(el);
+  else renderResults(el);
 }
 
 function renderResults(el){
@@ -2238,188 +2446,299 @@ function renderResults(el){
   else if(R.srm&&R.variantResults.length>0)h+='<div class="srm-ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> <strong>SRM Check Passed</strong> - Traffic split balanced (χ² p = '+fmt(R.srm.pValue,3)+')</div>';
   if(R.numComparisons>1)h+='<div class="bonf-badge">⚡ Bonferroni active - α = '+fmt(R.alphaAdj,4)+' for '+R.numComparisons+' comparisons</div>';
 
+  var nCtrl=+R.ctrl.visitors||0;
+  var days=Math.max(1,S.daysCollected||1);
+
   R.variantResults.forEach(function(v){
     var vd=getVerdict(v);
-    var lc=v.lift>=0?'var(--pri)':'var(--red)';
-    var pvc=v.isSignificant?'var(--pri)':'var(--red)';
-    var pwc=v.power>=80?'var(--acc)':'var(--warn)';
-    var ld=isFinite(v.lift)?(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2):'N/A';
+    var liftColor=v.lift>=0?'var(--pri)':'var(--red)';
+    var sigColor=v.isSignificant?'var(--pri)':'var(--red)';
+    var pwColor=v.power>=80?'var(--acc)':'var(--warn)';
+    var liftText=isFinite(v.lift)?(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2):'N/A';
     var ciW=Math.min(88,Math.max(8,(v.ci[1]-v.ci[0])/Math.max(v.rate+0.04,0.08)*100));
+    var ctrlBarW=Math.min(88,Math.max(8,(v.ciCtrl[1]-v.ciCtrl[0])/Math.max(R.baseRate+0.04,0.08)*100));
+    var sufficient=v.power>=80;
+    var totalDailyRate=(nCtrl+v.visitors)/days;
+    var moreDays=v.additionalDays;
+    var progressPct=isFinite(moreDays)?Math.min(100,(days/(days+moreDays))*100):0;
+    var dual=dualVerdict(v);
 
     h+='<article class="card">';
-
     h+='<div class="rc-topbar">';
-    h+='<div class="rc-left"><span class="rc-name">'+v.name+'</span><span class="rc-vs">vs Control</span></div>';
+    h+='<div class="rc-left"><span class="rc-name">'+esc(v.name)+'</span><span class="rc-vs">vs Control</span></div>';
     h+='<span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span>';
     h+='</div>';
 
+    // Primary KPI strip - always conversion. Same four numbers in both modes.
     h+='<div class="hero-bar">';
-    h+='<div class="hstat"><div class="hstat-lbl">Relative Lift</div><div class="hstat-val" style="color:'+lc+';font-size:22px;letter-spacing:-0.5px">'+ld+'</div><div class="hstat-sub">abs: '+(v.absDiff>=0?'+':'')+fmtPct(v.absDiff)+'</div></div>';
-    h+='<div class="hstat"><div class="hstat-lbl">Certainty <button class="ibtn" data-tip="1 − p-value. Goal: ≥'+S.confidence+'%">i</button></div><div class="mini-gauge">'+miniGauge((1-v.pValue)*100,v.isSignificant?'var(--pri)':'var(--red)')+'</div></div>';
-    h+='<div class="hstat"><div class="hstat-lbl">Power <button class="ibtn" data-tip="Probability of detecting a real effect. Target ≥80%.">i</button></div><div class="mini-gauge">'+miniGauge(v.power,pwc)+'</div></div>';
-    h+='<div class="hstat"><div class="hstat-lbl">P-Value <button class="ibtn" data-tip="Probability of result by chance. Threshold: '+fmt(R.alphaAdj,4)+'">i</button></div><div class="hstat-val" style="color:'+pvc+'">'+fmt(v.pValue,4)+'</div><div class="hstat-sub">thresh: '+fmt(R.alphaAdj,4)+'</div></div>';
+    h+='<div class="hstat"><div class="hstat-lbl">Conv. Lift</div><div class="hstat-val" style="color:'+liftColor+'">'+liftText+'</div><div class="hstat-sub">abs: '+(v.absDiff>=0?'+':'')+fmtPct(v.absDiff)+'</div></div>';
+    h+='<div class="hstat"><div class="hstat-lbl">P-Value <button class="ibtn" data-tip="Probability of seeing this conversion difference by chance. Significant if below the threshold.">i</button></div><div class="hstat-val" style="color:'+sigColor+'">'+fmt(v.pValue,4)+'</div><div class="hstat-sub">thresh: '+fmt(R.alphaAdj,4)+'</div></div>';
+    h+='<div class="hstat"><div class="hstat-lbl">Power <button class="ibtn" data-tip="Probability of detecting the observed effect at current sample. Target ≥80%.">i</button></div><div class="mini-gauge">'+miniGauge(v.power,pwColor)+'</div><div class="hstat-sub">target ≥80%</div></div>';
     h+='<div class="hstat"><div class="hstat-lbl">Conv. Rate</div><div class="hstat-val">'+fmtPct(v.rate)+'</div><div class="hstat-sub">ctrl: '+fmtPct(R.baseRate)+'</div></div>';
     h+='</div>';
 
-    h+='<div class="detail-row">';
-    h+='<div class="dcard"><div class="dcard-lbl">'+S.confidence+'% CI (Wilson) <button class="ibtn" data-tip="Range where the true conversion rate most likely falls. Wilson method is more accurate for small samples.">i</button></div>';
-    h+='<div class="ci-row"><span class="ci-val" style="color:var(--acc)">'+fmtPct(v.ci[0])+'</span><div class="ci-track"><div class="ci-fill" style="width:'+ciW+'%"></div></div><span class="ci-val" style="color:var(--pri)">'+fmtPct(v.ci[1])+'</span></div>';
-    h+='<div class="ci-ctrl">Control: '+fmtPct(v.ciCtrl[0])+' – '+fmtPct(v.ciCtrl[1])+'</div>';
-    h+='<div style="margin-top:12px"><div class="hstat-lbl" style="margin-bottom:5px">MDE at current n</div><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--acc)">'+fmtPct(v.mde)+'</div><div class="hstat-sub" style="margin-top:3px">sample needed: '+(isFinite(v.sampleNeeded)?fmtNum(v.sampleNeeded):'∞')+'</div></div>';
-    h+='</div>';
-    h+='<div class="dcard"><div class="dcard-lbl">Distribution <button class="ibtn" data-tip="Bell curve centred on zero. Δ marks observed difference. Δ far from centre = strong evidence.">i</button></div>'+distSVG(R.baseRate,v.rate,v.se)+'</div>';
-    h+='</div>';
-
-    if(S.mode==='revenue'&&v.rvc){
-      h+='<div class="rev-row">';
-      h+='<div class="hstat"><div class="hstat-lbl">Rev/Visitor (Ctrl)</div><div class="hstat-val">₹'+fmt(v.rvc)+'</div></div>';
-      h+='<div class="hstat"><div class="hstat-lbl">Rev/Visitor (Var)</div><div class="hstat-val">₹'+fmt(v.rvv)+'</div></div>';
-      h+='<div class="hstat"><div class="hstat-lbl">Revenue Lift</div><div class="hstat-val" style="color:'+(v.revLift>=0?'var(--pri)':'var(--red)')+'">'+(v.revLift>=0?'+':'')+fmtRaw(v.revLift*100)+'</div></div>';
+    // Revenue strip - two compact one-liners (ARPQ + ATS) tucked under the main KPI row.
+    // Always present in Revenue mode, with both Welch's t-test results inline.
+    if(S.mode==='revenue'&&v.arpqTest&&v.atsTest){
+      var arpq=v.arpqTest,ats=v.atsTest;
+      var arpqArrow=arpq.relLift>=0?'▲':'▼',atsArrow=ats.relLift>=0?'▲':'▼';
+      var arpqCol=arpq.relLift>=0?'var(--pri)':'var(--red)';
+      var atsCol=ats.relLift>=0?'var(--pri)':'var(--red)';
+      var arpqSigCol=arpq.isSignificant?'var(--pri)':'var(--t2)';
+      var atsSigCol=ats.isSignificant?'var(--pri)':'var(--t2)';
+      h+='<div class="dcard" style="margin-top:10px;padding:12px 14px;font-family:var(--mono);font-size:12px">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:14px;flex-wrap:wrap">';
+      h+='<span style="color:var(--t2);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;min-width:90px">ARPQ <span style="color:var(--t2);text-transform:none;letter-spacing:0">(₹/quote)</span></span>';
+      h+='<span style="color:var(--t1);flex:1">₹'+fmt(arpq.mean1,2)+' → ₹'+fmt(arpq.mean2,2)+'</span>';
+      h+='<span style="color:'+arpqCol+';font-weight:700;min-width:60px;text-align:right">'+arpqArrow+' '+fmtRaw(Math.abs(arpq.relLift*100),2)+'</span>';
+      h+='<span style="color:'+arpqSigCol+';min-width:90px;text-align:right">p = '+fmt(arpq.pValue,3)+(arpq.isSignificant?' ✓':'')+'</span>';
+      h+='</div>';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;gap:14px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,0.04);margin-top:4px;padding-top:8px">';
+      h+='<span style="color:var(--t2);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;min-width:90px">ATS <span style="color:var(--t2);text-transform:none;letter-spacing:0">(₹/sale)</span></span>';
+      h+='<span style="color:var(--t1);flex:1">₹'+fmt(ats.mean1,0)+' → ₹'+fmt(ats.mean2,0)+'</span>';
+      h+='<span style="color:'+atsCol+';font-weight:700;min-width:60px;text-align:right">'+atsArrow+' '+fmtRaw(Math.abs(ats.relLift*100),2)+'</span>';
+      h+='<span style="color:'+atsSigCol+';min-width:90px;text-align:right">p = '+fmt(ats.pValue,3)+(ats.isSignificant?' ✓':'')+'</span>';
+      h+='</div>';
       h+='</div>';
     }
 
+    // Dual-perspective callout - two short lines for the two ways an analyst
+    // might frame "did we win?". Conversion-primary on top, revenue-primary below.
+    h+='<div class="dcard" style="margin-top:10px;padding:12px 14px;background:rgba(0,212,255,0.025);border-color:rgba(0,212,255,0.12)">';
+    h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:3px 0;font-size:12.5px;line-height:1.6"><span style="color:var(--acc);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;min-width:90px;padding-top:1px">CONVERSION VIEW : </span><span style="color:var(--t1);flex:1">'+dual.convLine+'</span></div>';
+    if(dual.revLine){
+      h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:3px 0;font-size:12.5px;line-height:1.6;border-top:1px solid rgba(255,255,255,0.04);margin-top:6px;padding-top:8px"><span style="color:var(--acc);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.2px;min-width:90px;padding-top:1px">REVENUE VIEW : </span><span style="color:var(--t1);flex:1">'+dual.revLine+'</span></div>';
+    }
+    h+='</div>';
+
+    // Wilson CI - Control left, Variant right (50/50) so the row is half as tall
+    // and the two arms read side-by-side for direct visual comparison.
+    h+='<div class="dcard" style="margin-top:10px">';
+    h+='<div class="dcard-lbl">'+S.confidence+'% CI (Wilson, conversion) <button class="ibtn" data-tip="Range where each arm’s true conversion rate most likely falls.&#10;&#10;⚠ Overlapping CIs ≠ “not significant”. The bars can overlap while the p-value is still below threshold, because the test uses pooled variance and these bars use per-arm variance. Use the p-value (above) for the actual sig call.">i</button></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">';
+    h+='<div>';
+    h+='<div class="ci-row"><span class="ci-val" style="color:var(--t2)">'+fmtPct(v.ciCtrl[0])+'</span><div class="ci-track"><div class="ci-fill" style="width:'+ctrlBarW+'%;background:var(--t2);opacity:.55"></div></div><span class="ci-val" style="color:var(--t2)">'+fmtPct(v.ciCtrl[1])+'</span></div>';
+    h+='<div class="hstat-sub" style="margin-top:6px">Control · n = '+fmtNum(nCtrl)+'</div>';
+    h+='</div>';
+    h+='<div>';
+    h+='<div class="ci-row"><span class="ci-val" style="color:var(--acc)">'+fmtPct(v.ci[0])+'</span><div class="ci-track"><div class="ci-fill" style="width:'+ciW+'%"></div></div><span class="ci-val" style="color:var(--pri)">'+fmtPct(v.ci[1])+'</span></div>';
+    h+='<div class="hstat-sub" style="margin-top:6px">'+esc(v.name)+' · n = '+fmtNum(v.visitors)+'</div>';
+    h+='</div>';
+    h+='</div>';
+    h+='</div>';
+
+    // Sample Status - keyed to the conversion test (the verdict badge's source).
+    var statusColor=sufficient?'var(--pri)':'var(--warn)';
+    var statusBg=sufficient?'rgba(0,255,136,0.04)':'rgba(255,170,0,0.04)';
+    var statusBorder=sufficient?'rgba(0,255,136,0.18)':'rgba(255,170,0,0.18)';
+    h+='<div class="dcard" style="margin-top:10px;background:'+statusBg+';border-color:'+statusBorder+'">';
+    h+='<div class="dcard-lbl" style="color:'+statusColor+'">Sample Size Status</div>';
+    if(sufficient){
+      h+='<div style="font-size:13px;color:var(--t1);line-height:1.7"><strong style="color:'+statusColor+'">✓ Enough data.</strong> Power for the observed conversion effect is <strong>'+fmtRaw(v.power,1)+'</strong>. '+(v.isSignificant?'Result is significant - ship the variant.':'Result is not significant - the true effect is likely smaller than '+fmtPct(v.mde)+'.')+'</div>';
+    } else if(!isFinite(moreDays)){
+      h+='<div style="font-size:13px;color:var(--t1)">Observed effect is zero or unmeasurable - can\'t project a time to 80% power.</div>';
+    } else {
+      h+='<div style="font-size:13px;color:var(--t1);line-height:1.7;margin-bottom:10px"><strong style="color:'+statusColor+'">⏳ Underpowered.</strong> Power is only <strong>'+fmtRaw(v.power,1)+'</strong> for the observed effect. Need ~<strong>'+moreDays+'</strong> more day'+(moreDays===1?'':'s')+' at your current pace ('+Math.round(totalDailyRate).toLocaleString()+' visitors/day) to reach 80% power.</div>';
+      h+='<div class="ttt-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(progressPct)+'"><div class="ttt-progress-fill" style="width:'+progressPct.toFixed(1)+'%"></div></div>';
+      h+='<div class="ttt-progress-meta" style="margin-top:6px"><span class="ttt-progress-pct">'+fmtRaw(progressPct,0)+'</span><span class="ttt-progress-frac">Day '+days+' of ~'+(days+moreDays)+'</span></div>';
+    }
+    h+='</div>';
+
     h+='</article>';
   });
+
   el.innerHTML=h;
 }
 
-function renderPower(el){
-  var v0=R.variantResults[0],n2=v0?v0.visitors:+R.ctrl.visitors,rows='';
-  [0.5,1,1.5,2,2.5,3,4,5,7,10].forEach(function(mde){
-    var n=calcSampleSize(R.baseRate,mde/100,R.alphaAdj),pw=calcPower(n,R.baseRate,n,R.baseRate+mde/100)*100,cur=v0&&Math.abs(v0.absDiff*100)>=mde-0.01;
-    rows+='<tr'+(cur?' style="background:rgba(0,255,136,0.04)"':'')+'><td>'+mde+'%</td><td>'+(isFinite(n)?n.toLocaleString():'∞')+'</td><td>'+(isFinite(n)?(n*S.numVariants).toLocaleString():'∞')+'</td><td style="color:'+(pw>=80?'var(--pri)':'var(--warn)')+'">'+fmtRaw(pw,1)+'</td></tr>';
+// ─── Business Impact Projection ───
+// Inputs: traffic × uplift × monetization. Uses the chosen success metric to
+// pick the right monetization factor (ATS for conversion lifts, mean for revenue).
+function renderBusinessImpact(v){
+  if(!v||!R.monthlyTraffic||R.monthlyTraffic<=0)return'';
+  var baseATS=R.ctrl.conversions?(+R.ctrl.revenue/+R.ctrl.conversions):0;
+  var baseRevPerVis=R.ctrl.revenue?(+R.ctrl.revenue/+R.ctrl.visitors):0;
+  var monthly=R.monthlyTraffic;
+  // Revenue mode uses Δ ARPQ × monthly quotes (most stable basis; folds in both
+  // conversion and ticket-size effects). Conversion mode uses Δ conv × ATS.
+  var extraOrders=monthly*v.absDiff,extraRevenue,liftPctText,basis;
+  var bounds;
+  if(S.mode==='revenue'&&v.arpqTest){
+    var arpq=v.arpqTest;
+    extraRevenue=monthly*arpq.diff;
+    bounds={low:monthly*arpq.ci[0],high:monthly*arpq.ci[1]};
+    liftPctText=(arpq.relLift>=0?'+':'')+fmtRaw(arpq.relLift*100,2)+' ARPQ lift';
+    basis='Δ ARPQ × monthly quotes';
+  } else {
+    extraRevenue=extraOrders*baseATS;
+    var zCrit=normalPPF(1-R.alphaAdj/2);
+    var ciLow=v.absDiff-zCrit*v.se,ciHigh=v.absDiff+zCrit*v.se;
+    bounds={low:monthly*ciLow*baseATS,high:monthly*ciHigh*baseATS};
+    liftPctText=(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+' conversion lift';
+    basis='Conversion × ATS';
+  }
+  var annual=extraRevenue*12;
+  var revColor=extraRevenue>=0?'var(--pri)':'var(--red)';
+  var h='<article class="card">';
+  h+='<div class="card-head"><div><div class="card-head-title">💰 Business Impact · '+esc(v.name)+'</div><div class="card-head-sub">'+basis+' · ~'+fmtNum(monthly)+' monthly traffic (from observed daily pace) · '+liftPctText+'</div></div></div>';
+  h+='<div class="hero-bar" style="grid-template-columns:repeat(3,1fr)">';
+  h+='<div class="hstat"><div class="hstat-lbl">Extra Revenue / month</div><div class="hstat-val" style="color:'+revColor+'">'+fmtINR(extraRevenue)+'</div><div class="hstat-sub">95% CI: '+fmtINR(bounds.low)+' to '+fmtINR(bounds.high)+'</div></div>';
+  h+='<div class="hstat"><div class="hstat-lbl">Additional Orders / month</div><div class="hstat-val">'+(extraOrders>=0?'+':'')+fmtNum(extraOrders)+'</div><div class="hstat-sub">at variant rate</div></div>';
+  h+='<div class="hstat"><div class="hstat-lbl">Annualized Gain</div><div class="hstat-val" style="color:'+revColor+'">'+fmtINR(annual)+'</div><div class="hstat-sub">12× monthly · point estimate</div></div>';
+  h+='</div>';
+  var anySig=v.isSignificant||(v.arpqTest&&v.arpqTest.isSignificant);
+  if(!anySig){
+    h+='<div style="margin-top:12px;padding:10px 12px;background:rgba(255,170,0,0.05);border:1px solid rgba(255,170,0,0.2);border-radius:8px;font-size:12px;color:var(--warn);line-height:1.5">⚠ Projection is point-estimate only. Neither conversion nor revenue is statistically significant yet - true monthly impact could be anywhere in the CI, including zero or negative.</div>';
+  }
+  h+='</article>';
+  return h;
+}
+
+// ─── Tradeoff Quadrant: conversion lift (x) vs continuous-metric lift (y) ───
+// Single dot for the chosen variant + 95% CI cross-hairs. Quadrant labels make
+// the win/lose framing obvious at a glance.
+// Tradeoff Quadrant - accepts ALL variants and plots each as a distinct dot.
+// Single variant: keep CI cross-hairs (uncluttered). Multi-variant: drop cross-hairs
+// and rely on the legend so 2/3/4 dots stay readable.
+function renderTradeoffQuadrant(variants){
+  // Only plottable variants: must have an ARPQ test AND finite lifts on both axes.
+  // Otherwise axis-scaling collapses (Math.max with Infinity → all dots at origin).
+  var vs=variants.filter(function(v){return v&&v.arpqTest&&isFinite(v.lift)&&isFinite(v.arpqTest.relLift)});
+  if(!vs.length)return'';
+  var w=520,h=340,pad=48;
+  var convCrit=normalPPF(1-R.alphaAdj/2);
+  var absFin=function(x){return isFinite(x)?Math.abs(x):0};
+  // Discover overall axis range across all variants (and CIs when a single one).
+  var xMax=5,yMax=5;
+  vs.forEach(function(v){
+    xMax=Math.max(xMax,absFin(v.lift*100));
+    yMax=Math.max(yMax,absFin(v.arpqTest.relLift*100));
+    if(vs.length===1){
+      var cLow=(v.absDiff-convCrit*v.se)/Math.max(R.baseRate,1e-6)*100;
+      var cHigh=(v.absDiff+convCrit*v.se)/Math.max(R.baseRate,1e-6)*100;
+      var aLow=v.arpqTest.mean1!==0?(v.arpqTest.ci[0]/v.arpqTest.mean1)*100:0;
+      var aHigh=v.arpqTest.mean1!==0?(v.arpqTest.ci[1]/v.arpqTest.mean1)*100:0;
+      xMax=Math.max(xMax,absFin(cLow),absFin(cHigh));
+      yMax=Math.max(yMax,absFin(aLow),absFin(aHigh));
+    }
   });
-  el.innerHTML=
-    renderTimeToTargetCard(v0)+
-    '<div class="card"><div class="card-head"><div><div class="card-head-title">Power Curve</div><div class="card-head-sub">Detection probability vs effect size</div></div></div>'+powerCurveSVG(R.baseRate,+R.ctrl.visitors,n2)+'</div>'+
-    '<div class="card"><div class="card-head"><div><div class="card-head-title">Sample Size Table</div><div class="card-head-sub">Visitors per variant for 80% power at '+S.confidence+'% confidence</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>MDE</th><th>Per Variant</th><th>Total</th><th>Power at current n</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-    '<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><p style="font-size:13px;color:var(--t1);line-height:1.85">Currently testing with <strong style="color:var(--t0);font-family:var(--mono)">'+fmtNum(+R.ctrl.visitors)+'</strong> visitors/variant at baseline <strong style="color:var(--pri);font-family:var(--mono)">'+fmtPct(R.baseRate)+'</strong>. Your current MDE is <strong style="color:var(--acc);font-family:var(--mono)">'+(v0?fmtPct(v0.mde):'-')+'</strong>.</p></div>';
-  // Now that the card shell is in the DOM, fill in its body. Subsequent
-  // keystrokes on the input call updateTttCells() directly (no innerHTML reset
-  // on the input itself), so the cursor stays put while the user types.
-  updateTttCells();
+  xMax*=1.3;yMax*=1.3;
+  var ix=function(v){return pad+(v+xMax)/(2*xMax)*(w-2*pad)};
+  var iy=function(v){return (h-pad)-(v+yMax)/(2*yMax)*(h-2*pad)};
+  var ox=ix(0),oy=iy(0);
+  var qLabel=function(x,y,txt,c){return '<text x="'+x+'" y="'+y+'" font-family="var(--mono)" font-size="10" fill="'+c+'" font-weight="700" letter-spacing=".5px">'+txt+'</text>'};
+
+  // No fixed `height` attribute: let the SVG height follow viewBox aspect ratio so
+  // it shrinks proportionally on narrow viewports (no dead whitespace below).
+  var svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">';
+  // Quadrant tints.
+  svg+='<rect x="'+ox+'" y="'+pad+'" width="'+(w-pad-ox)+'" height="'+(oy-pad)+'" fill="rgba(0,255,136,0.05)"/>';
+  svg+='<rect x="'+pad+'" y="'+pad+'" width="'+(ox-pad)+'" height="'+(oy-pad)+'" fill="rgba(255,170,0,0.05)"/>';
+  svg+='<rect x="'+ox+'" y="'+oy+'" width="'+(w-pad-ox)+'" height="'+(h-pad-oy)+'" fill="rgba(255,170,0,0.05)"/>';
+  svg+='<rect x="'+pad+'" y="'+oy+'" width="'+(ox-pad)+'" height="'+(h-pad-oy)+'" fill="rgba(255,68,102,0.07)"/>';
+  // Axes
+  svg+='<line x1="'+pad+'" y1="'+oy+'" x2="'+(w-pad)+'" y2="'+oy+'" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>';
+  svg+='<line x1="'+ox+'" y1="'+pad+'" x2="'+ox+'" y2="'+(h-pad)+'" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>';
+  // Quadrant labels (compact wording so they fit).
+  svg+=qLabel(w-pad-110,pad+18,'✓ WIN / WIN','var(--pri)');
+  svg+=qLabel(pad+10,pad+18,'LOSE conv / WIN rev','var(--warn)');
+  svg+=qLabel(w-pad-150,h-pad-10,'WIN conv / LOSE rev','var(--warn)');
+  svg+=qLabel(pad+10,h-pad-10,'✗ LOSE / LOSE','var(--red)');
+  // Axis titles
+  svg+='<text x="'+(w/2)+'" y="'+(h-10)+'" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--t2)">Conversion lift (%)</text>';
+  svg+='<text transform="translate(14,'+(h/2)+') rotate(-90)" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--t2)">ARPQ lift (%)</text>';
+  // Axis ticks
+  svg+='<text x="'+ix(xMax*0.7)+'" y="'+(oy+14)+'" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--t2)">+'+(xMax*0.7).toFixed(1)+'%</text>';
+  svg+='<text x="'+ix(-xMax*0.7)+'" y="'+(oy+14)+'" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--t2)">-'+(xMax*0.7).toFixed(1)+'%</text>';
+  svg+='<text x="'+(ox-6)+'" y="'+iy(yMax*0.7)+'" text-anchor="end" font-family="var(--mono)" font-size="9" fill="var(--t2)">+'+(yMax*0.7).toFixed(1)+'%</text>';
+  svg+='<text x="'+(ox-6)+'" y="'+iy(-yMax*0.7)+'" text-anchor="end" font-family="var(--mono)" font-size="9" fill="var(--t2)">-'+(yMax*0.7).toFixed(1)+'%</text>';
+  // Cross-hairs only for single-variant case (multi-variant would be unreadable).
+  if(vs.length===1){
+    var v=vs[0],ct=v.arpqTest;
+    var cLow=(v.absDiff-convCrit*v.se)/Math.max(R.baseRate,1e-6)*100;
+    var cHigh=(v.absDiff+convCrit*v.se)/Math.max(R.baseRate,1e-6)*100;
+    var aLow=ct.mean1!==0?(ct.ci[0]/ct.mean1)*100:0;
+    var aHigh=ct.mean1!==0?(ct.ci[1]/ct.mean1)*100:0;
+    var dX=ix(v.lift*100),dY=iy(ct.relLift*100);
+    svg+='<line x1="'+ix(cLow)+'" y1="'+dY+'" x2="'+ix(cHigh)+'" y2="'+dY+'" stroke="rgba(0,212,255,0.6)" stroke-width="2" stroke-linecap="round"/>';
+    svg+='<line x1="'+dX+'" y1="'+iy(aLow)+'" x2="'+dX+'" y2="'+iy(aHigh)+'" stroke="rgba(0,212,255,0.6)" stroke-width="2" stroke-linecap="round"/>';
+  }
+  // Plot each variant as a colored dot. Distinct hues so 4 dots stay distinguishable.
+  var palette=['var(--pri)','var(--acc)','var(--warn)','#ff66cc'];
+  vs.forEach(function(v,i){
+    var color=palette[i%palette.length];
+    var dX=ix(v.lift*100),dY=iy(v.arpqTest.relLift*100);
+    svg+='<circle cx="'+dX+'" cy="'+dY+'" r="6" fill="'+color+'" stroke="var(--bg0)" stroke-width="2"/>';
+    // Label offset to avoid overlap when dots cluster: alternate above/below.
+    var labelOffset=i%2===0?-10:18;
+    svg+='<text x="'+(dX+10)+'" y="'+(dY+labelOffset)+'" font-family="var(--mono)" font-size="10" fill="'+color+'" font-weight="700">'+esc(v.name)+'</text>';
+  });
+  svg+='</svg>';
+
+  // Legend (one line per variant) - shows lift coordinates + sig markers.
+  var legend='<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-family:var(--mono);font-size:11px">';
+  vs.forEach(function(v,i){
+    var color=palette[i%palette.length];
+    var convSig=v.isSignificant?' ✓':'';
+    var arpqSig=v.arpqTest.isSignificant?' ✓':'';
+    legend+='<span style="display:inline-flex;align-items:center;gap:6px;color:var(--t1)"><span style="width:10px;height:10px;border-radius:50%;background:'+color+';display:inline-block"></span>'+esc(v.name)+' · conv '+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+convSig+' · ARPQ '+(v.arpqTest.relLift>=0?'+':'')+fmtRaw(v.arpqTest.relLift*100,2)+arpqSig+'</span>';
+  });
+  legend+='</div>';
+
+  var sub=vs.length===1
+    ? 'Single variant · 95% CI shown as cross-hairs'
+    : vs.length+' variants plotted · top-right = wins on both metrics, bottom-left = loses on both';
+  return '<article class="card"><div class="card-head"><div><div class="card-head-title">⚖ Tradeoff Quadrant</div><div class="card-head-sub">Conversion lift × ARPQ lift · '+sub+'</div></div></div>'+svg+legend+'</article>';
 }
 
-// Time-to-target sample size card. The user picks a target MDE (defaulting
-// to the currently observed MDE); the calc tells them how many more days
-// they need at their actual collection rate (visitors / days running).
-//
-// The card markup is built once; subsequent input changes call updateTttCells()
-// which mutates only the dependent <span>/<div> innerText, leaving the input
-// element (and its cursor) untouched.
-function renderTimeToTargetCard(v0) {
-  var observedMdePct = v0 ? +(v0.mde * 100).toFixed(2) : 1.5;
-  var displayedTarget = (S.targetMdePct === '' || S.targetMdePct == null) ? observedMdePct : +S.targetMdePct;
-
-  return '<div class="card ttt-card">' +
-    '<div class="card-head">' +
-      '<div><div class="card-head-title">Time to Target MDE</div>' +
-      '<div class="card-head-sub">Tell us how many days you have been running &amp; the effect you want to detect - we project the days remaining</div></div>' +
-    '</div>' +
-    '<div class="ttt-controls">' +
-      '<div class="ttt-input-wrap">' +
-        '<label class="ttt-input-lbl" for="targetMdeInput">Target MDE (% absolute)</label>' +
-        '<input id="targetMdeInput" class="ifield ttt-mde-input" type="number" inputmode="decimal" step="0.05" min="0.05" max="50" value="' + displayedTarget + '" oninput="setTargetMde(this.value)" placeholder="' + observedMdePct + '" autocomplete="off" />' +
-      '</div>' +
-      '<button type="button" class="hbtn" id="useObservedBtn" onclick="useObservedMde()">Use observed (' + fmtPct(observedMdePct/100) + ')</button>' +
-    '</div>' +
-    '<div id="tttBody"></div>' +
-  '</div>';
-}
-
-// Mutates only the inner stat values - never the input element. Called both
-// after the card is first rendered and on every target-MDE keystroke.
-function updateTttCells() {
-  var host = document.getElementById('tttBody');
-  if (!host) return;
-  var v0 = R && R.variantResults && R.variantResults[0];
-  var observedMdePct = v0 ? +(v0.mde * 100).toFixed(2) : 1.5;
-  var displayedTarget = (S.targetMdePct === '' || S.targetMdePct == null) ? observedMdePct : +S.targetMdePct;
-  var p = projectTimeToTarget(displayedTarget / 100);
-
-  if (!p) {
-    host.innerHTML = '<p class="ttt-empty">Enter visitors and conversions for the control to see a duration estimate.</p>';
-    return;
-  }
-  if (p.invalid) {
-    host.innerHTML = '<p class="ttt-empty ttt-empty--warn">Target is too small to compute a finite sample size. Pick a larger MDE.</p>';
-    return;
-  }
-
-  var done = p.additionalN === 0;
-  var fillW = Math.min(100, p.progressPct).toFixed(1);
-
-  // Status cell adapts to the situation rather than always showing the same shape.
-  var statusValHtml, statusSub;
-  if (done) {
-    statusValHtml = '<span class="ttt-status-done">✓ Sample reached</span>';
-    statusSub = 'ship if the result is significant';
-  } else if (!isFinite(p.additionalDays)) {
-    statusValHtml = '<span class="ttt-status-warn">Increase traffic</span>';
-    statusSub = 'no daily rate detected';
-  } else if (p.additionalDays === 0) {
-    statusValHtml = '<span class="ttt-status-near">Almost there</span>';
-    statusSub = 'less than a day to go';
-  } else {
-    statusValHtml = '<span class="ttt-status-pending">~' + p.additionalDays + ' more day' + (p.additionalDays === 1 ? '' : 's') + '</span>';
-    statusSub = 'at current pace';
-  }
-
-  // Days cell shows a different breakdown depending on whether we're done.
-  var daysVal, daysSub;
-  if (done) {
-    daysVal = S.daysCollected.toLocaleString();
-    daysSub = 'days complete · 0 more needed';
-  } else if (!isFinite(p.daysNeeded)) {
-    daysVal = '∞';
-    daysSub = 'cannot reach at current rate';
-  } else {
-    daysVal = p.daysNeeded.toLocaleString();
-    daysSub = S.daysCollected + ' done · ' + p.additionalDays + ' to go';
-  }
-
-  host.innerHTML =
-    '<div class="ttt-stat-row">' +
-      '<div class="ttt-stat"><div class="ttt-stat-lbl">Daily traffic</div><div class="ttt-stat-val">' + fmtNum(p.dailyRate) + '</div><div class="ttt-stat-sub">visitors/day · per variant</div></div>' +
-      '<div class="ttt-stat"><div class="ttt-stat-lbl">Required sample</div><div class="ttt-stat-val">' + fmtNum(p.requiredN) + '</div><div class="ttt-stat-sub">per variant · 80% power</div></div>' +
-      '<div class="ttt-stat"><div class="ttt-stat-lbl">Days needed</div><div class="ttt-stat-val">' + daysVal + '</div><div class="ttt-stat-sub">' + daysSub + '</div></div>' +
-      '<div class="ttt-stat"><div class="ttt-stat-lbl">Status</div><div class="ttt-stat-val ttt-stat-val--status">' + statusValHtml + '</div><div class="ttt-stat-sub">' + statusSub + '</div></div>' +
-    '</div>' +
-    '<div class="ttt-progress-row">' +
-      '<div class="ttt-progress" aria-label="Sample collection progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(p.progressPct) + '">' +
-        '<div class="ttt-progress-fill ' + (done ? 'is-done' : '') + '" style="width:' + fillW + '%"></div>' +
-      '</div>' +
-      '<div class="ttt-progress-meta"><span class="ttt-progress-pct">' + fmtRaw(p.progressPct, 0) + '</span><span class="ttt-progress-frac">' + fmtNum(p.currentN) + ' / ' + fmtNum(p.requiredN) + ' visitors</span></div>' +
-    '</div>' +
-    '<p class="ttt-verdict ' + (done ? 'is-done' : '') + '">' + p.verdict + '</p>';
+// Compact Indian-rupee formatter that picks Cr / L / K based on magnitude.
+function fmtINR(n){
+  if(!isFinite(n)||isNaN(n))return '-';
+  var sign=n<0?'-':'+',abs=Math.abs(n);
+  if(abs>=1e7)return sign+'₹'+(abs/1e7).toFixed(2)+'Cr';
+  if(abs>=1e5)return sign+'₹'+(abs/1e5).toFixed(2)+'L';
+  if(abs>=1e3)return sign+'₹'+(abs/1e3).toFixed(1)+'K';
+  return sign+'₹'+Math.round(abs).toLocaleString();
 }
 
 function renderSim(el){
-  var sim=S.simResult,sh='';
-  if(sim){
-    sh='<div class="sim-big">';
+  var html='';
+  // Plain-English explainer at the top so a first-time reader knows what they're looking at.
+  html+='<div class="dcard" style="margin-bottom:14px;padding:14px 16px;background:rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.18)">';
+  html+='<div style="font-size:12.5px;color:var(--t1);line-height:1.75">'+
+    '<strong style="color:var(--acc)">What this tab shows.</strong> Two "what-if" views, one per variant:<br>'+
+    '<strong style="color:var(--t0)">⚖ Tradeoff Quadrant</strong> - where each variant sits on (Conversion lift × ARPQ lift). Top-right = wins on both. Bottom-left = loses on both. Off-axis = a tradeoff.<br>'+
+    '<strong style="color:var(--t0)">🎲 Monte Carlo</strong> - we re-run the experiment 5,000 times using the observed rates. <em>Win Rate</em> = how often the variant beats control significantly. The P5–P95 row is the lift you\'d see in 90% of replays.'+
+    '</div></div>';
+
+  // Tradeoff Quadrant - Revenue mode only, plots every variant at once.
+  if(S.mode==='revenue'){
+    var anyArpq=R.variantResults.some(function(v){return v&&v.arpqTest});
+    if(anyArpq)html+=renderTradeoffQuadrant(R.variantResults);
+  }
+
+  // Monte Carlo card per variant - auto-runs and caches by input signature so
+  // returning to the tab is free unless the inputs changed.
+  S.simResults=S.simResults||{};
+  R.variantResults.forEach(function(v){
+    // Cache key includes everything that affects the simulation: inputs, alpha
+    // threshold (Bonferroni-aware), and hypothesis (one-sided flips p-value).
+    var ck=R.ctrl.visitors+':'+R.ctrl.conversions+':'+v.visitors+':'+v.conversions+':'+R.alphaAdj.toFixed(6)+':'+S.hypothesis;
+    if(!S.simResults[ck])S.simResults[ck]=runSimulation(+R.ctrl.visitors,+R.ctrl.conversions,v.visitors,v.conversions,5000,R.alphaAdj);
+    var sim=S.simResults[ck];
+    var sh='<div class="sim-big">';
     sh+='<div class="sim-card"><div class="sim-val" style="color:var(--pri)">'+fmtRaw(sim.winRate,1)+'</div><div class="sim-lbl">Win Rate</div></div>';
     sh+='<div class="sim-card"><div class="sim-val" style="color:var(--red)">'+fmtRaw(sim.lossRate,1)+'</div><div class="sim-lbl">Loss Rate</div></div>';
     sh+='<div class="sim-card"><div class="sim-val" style="color:var(--warn)">'+fmtRaw(sim.incRate,1)+'</div><div class="sim-lbl">Inconclusive</div></div>';
     sh+='</div>';
-    sh+='<div style="font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-family:var(--mono)">Lift Percentile Distribution</div>';
+    sh+='<div style="font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-family:var(--mono)">Lift Percentile Distribution (conversion)</div>';
     sh+='<div class="pctl-row">';
     [{l:'P5',v:sim.p5},{l:'P25',v:sim.p25},{l:'Median',v:sim.p50},{l:'P75',v:sim.p75},{l:'P95',v:sim.p95}].forEach(function(p){
       sh+='<div class="pctl-card"><div class="pctl-val" style="color:'+(p.v>=0?'var(--pri)':'var(--red)')+'">'+(p.v>=0?'+':'')+fmtRaw(p.v,1)+'</div><div class="pctl-lbl">'+p.l+'</div></div>';
     });
     sh+='</div>';
-  }else{sh='<div class="empty" style="padding:50px 20px"><div class="empty-icon">🎲</div><div class="empty-title">Run Simulation</div><div class="empty-desc">Click the button above to run 5,000 randomised binomial trials.</div></div>'}
-  el.innerHTML='<div class="card"><div class="card-head">'+
-    '<div><div class="card-head-title">Monte Carlo Simulation</div><div class="card-head-sub">5,000 trials · true binomial sampling</div></div>'+
-    '<button class="hbtn hbtn-pri" id="simBtn" onclick="doSim()"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Run Simulation</button></div>'+sh+'</div>';
-}
-
-function doSim(){
-  if(!R||R.variantResults.length===0)return;
-  var v0=R.variantResults[0],ck=R.ctrl.visitors+':'+R.ctrl.conversions+':'+v0.visitors+':'+v0.conversions+':'+S.confidence;
-  if(S.simCacheKey===ck&&S.simResult){render();return}
-  var btn=document.getElementById('simBtn');if(btn){btn.textContent='Running…';btn.disabled=true}
-  setTimeout(function(){S.simResult=runSimulation(+R.ctrl.visitors,+R.ctrl.conversions,v0.visitors,v0.conversions);S.simCacheKey=ck;render()},16);
+    html+='<article class="card"><div class="card-head"><div><div class="card-head-title">🎲 Monte Carlo · '+esc(v.name)+'</div><div class="card-head-sub">5,000 binomial trials · auto-runs when inputs change</div></div></div>'+sh+'</article>';
+  });
+  el.innerHTML=html;
 }
 
 function renderInsights(el){
@@ -2427,25 +2746,88 @@ function renderInsights(el){
   R.variantResults.forEach(function(v){
     var vd=getVerdict(v),winner=v.isSignificant&&v.lift>0,loser=v.isSignificant&&v.lift<0,lowPow=v.power<80,advice='';
     if(winner){var proj=isFinite(v.lift)?Math.round(100000*Math.abs(v.lift)).toLocaleString():'significant';
-      advice='<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p><p>'+v.name+' shows a significant <strong>'+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+'</strong> improvement (p = '+fmt(v.pValue,4)+', power = '+fmtRaw(v.power)+'). Wilson CI: ['+fmtPct(v.ci[0])+' – '+fmtPct(v.ci[1])+'].'+(R.numComparisons>1?' Bonferroni-adjusted α = '+fmt(R.alphaAdj,4)+'.':'')+'</p><p style="margin-top:10px;color:var(--t2)">📈 If baseline yields 100,000 conversions/year, this lift adds ~<strong style="color:var(--t1)">+'+proj+'</strong> conversions annually.</p>';}
-    else if(loser){advice='<p><strong style="color:var(--red)">❌ Do NOT deploy.</strong></p><p>'+v.name+' is significantly worse (<strong>'+fmtRaw(v.lift*100,2)+'</strong>, p = '+fmt(v.pValue,4)+'). Revert to control and investigate why.</p>';}
+      advice='<p><strong style="color:var(--pri)">✅ Deploy this variant.</strong></p><p>'+esc(v.name)+' shows a significant <strong>'+(v.lift>=0?'+':'')+fmtRaw(v.lift*100,2)+'</strong> improvement (p = '+fmt(v.pValue,4)+', power = '+fmtRaw(v.power)+'). Wilson CI: ['+fmtPct(v.ci[0])+' – '+fmtPct(v.ci[1])+'].'+(R.numComparisons>1?' Bonferroni-adjusted α = '+fmt(R.alphaAdj,4)+'.':'')+'</p><p style="margin-top:10px;color:var(--t2)">📈 If baseline yields 100,000 conversions/year, this lift adds ~<strong style="color:var(--t1)">+'+proj+'</strong> conversions annually.</p>';}
+    else if(loser){advice='<p><strong style="color:var(--red)">❌ Do NOT deploy.</strong></p><p>'+esc(v.name)+' is significantly worse (<strong>'+fmtRaw(v.lift*100,2)+'</strong>, p = '+fmt(v.pValue,4)+'). Revert to control and investigate why.</p>';}
     else if(!v.isSignificant&&lowPow){
-      var current=+R.ctrl.visitors||0;
-      var dailyRate=current/Math.max(1,S.daysCollected||1);
-      var moreDays=(dailyRate>0&&isFinite(v.sampleNeeded))?Math.max(0,Math.ceil((v.sampleNeeded-current)/dailyRate)):'?';
+      var totalDaily=Math.round(((+R.ctrl.visitors||0)+v.visitors)/Math.max(1,S.daysCollected||1));
+      var moreDays=isFinite(v.additionalDays)?v.additionalDays:'?';
       advice='<p><strong style="color:var(--warn)">⏳ Continue collecting data.</strong></p>'+
-        '<p>Not significant (p = '+fmt(v.pValue,4)+') and power is only '+fmtRaw(v.power)+' (below 80%). Need ~<strong>'+(isFinite(v.sampleNeeded)?v.sampleNeeded.toLocaleString():'∞')+'</strong> visitors/variant - about <strong>'+moreDays+'</strong> more day'+(moreDays===1?'':'s')+' at your current pace of ~'+Math.round(dailyRate).toLocaleString()+' visitors/day per variant.</p>';
+        '<p>Not significant (p = '+fmt(v.pValue,4)+') and power is only '+fmtRaw(v.power)+' (below 80%). Need ~<strong>'+moreDays+'</strong> more day'+(moreDays===1?'':'s')+' at your current pace ('+totalDaily.toLocaleString()+' visitors/day total) to reach 80% power.</p>';
     }
     else{advice='<p><strong style="color:var(--acc)">🔄 No meaningful difference detected.</strong></p><p>Sufficient power ('+fmtRaw(v.power)+') but no significant result. True effect likely smaller than MDE of '+fmtPct(v.mde)+'. Consider if that small effect is business-relevant.</p>';}
-    h+='<article class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;position:relative;z-index:1"><span style="font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:-.3px">'+v.name+'</span><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div><div style="font-size:13px;color:var(--t1);line-height:2;position:relative;z-index:1">'+advice+'</div></article>';
+    // In Revenue mode, fold the verdict prose INTO the Net Impact card so each
+    // variant has exactly one Insights card instead of two side-by-side.
+    if(S.mode==='revenue'&&v.arpqTest){
+      h+=renderNetImpact(v,advice,vd);
+    } else {
+      h+='<article class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;position:relative;z-index:1"><span style="font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:-.3px">'+esc(v.name)+'</span><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div><div style="font-size:13px;color:var(--t1);line-height:2;position:relative;z-index:1">'+advice+'</div></article>';
+    }
   });
-  h+='<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><div style="font-size:10px;font-weight:700;color:var(--acc);margin-bottom:10px;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono)">📐 Statistical Methodology</div><div style="font-size:12.5px;color:var(--t2);line-height:2;position:relative;z-index:1"><strong>Test:</strong> Two-proportion Z-test with signed z-statistic.<br><strong>CIs:</strong> Wilson interval - superior to Wald for small samples.<br><strong>Power:</strong> Non-central normal approximation with unpooled variance.<br><strong>Multiple testing:</strong> Bonferroni correction for 3+ variants.<br><strong>SRM:</strong> Chi-square test (Wilson-Hilferty approximation).<br><strong>Simulation:</strong> True binomial Monte Carlo, 5,000 trials.<br><strong>Privacy:</strong> 100% client-side. Zero data transmitted.</div></div>';
+  // Business Impact per variant (Revenue mode) - one projection card each so
+  // multi-variant tests don't silently show only the first variant.
+  if(S.mode==='revenue'&&R.variantResults.length>0){
+    R.variantResults.forEach(function(v){h+=renderBusinessImpact(v)});
+  }
+  h+='<div class="card" style="background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.1)"><div style="font-size:10px;font-weight:700;color:var(--acc);margin-bottom:10px;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono)">📐 Statistical Methodology</div><div style="font-size:12.5px;color:var(--t2);line-height:2;position:relative;z-index:1"><strong>Conversion test:</strong> Two-proportion Z-test with Wilson CIs.<br><strong>Revenue test:</strong> Welch\'s t-test on ARPQ (revenue / quote) with per-quote variance estimated from CV·ATS.<br><strong>Power:</strong> Non-central normal approximation with proportional growth.<br><strong>Multiple testing:</strong> Bonferroni correction for 3+ variants.<br><strong>SRM:</strong> Chi-square test (Wilson-Hilferty).<br><strong>Privacy:</strong> 100% client-side.</div></div>';
   el.innerHTML=h;
+}
+
+// ─── Net Impact decomposition: conversion × ATS → ARPQ ───
+// When the success metric is Revenue, the variant can win on revenue even if
+// conversion drops, because ATS may have moved the other way. This card breaks
+// the move out cleanly and gives a one-line "net positive / negative" verdict.
+function renderNetImpact(v,advice,vd){
+  if(!v.arpqTest)return'';
+  var atsC=R.ctrl.conversions?(+R.ctrl.revenue/+R.ctrl.conversions):0;
+  var atsV=v.conversions?(+v.revenue/v.conversions):0;
+  var atsDiff=atsV-atsC,atsRel=atsC?(atsDiff/atsC):0;
+  var ct=v.arpqTest;
+  var convRel=v.lift,convPct=convRel*100;
+  var atsPct=atsRel*100;
+  var arpqPct=ct.relLift*100;
+  var convArrow=convRel>=0?'▲':'▼',atsArrow=atsRel>=0?'▲':'▼',arpqArrow=ct.relLift>=0?'▲':'▼';
+  var convColor=convRel>=0?'var(--pri)':'var(--red)';
+  var atsColor=atsRel>=0?'var(--pri)':'var(--red)';
+  var arpqColor=ct.relLift>=0?'var(--pri)':'var(--red)';
+  var verdictLine;
+  if(ct.relLift>0 && convRel<0){
+    verdictLine='Conversion dropped, but ticket size rose enough to <strong style="color:var(--pri)">overcome the loss</strong>. The variant is <strong style="color:var(--pri)">net positive on revenue</strong> by '+fmtRaw(arpqPct,2)+'.';
+  } else if(ct.relLift<0 && convRel>0){
+    verdictLine='Conversion improved, but ticket size dropped enough to <strong style="color:var(--red)">wipe out the gain</strong>. The variant is <strong style="color:var(--red)">net negative on revenue</strong> by '+fmtRaw(Math.abs(arpqPct),2)+'.';
+  } else if(ct.relLift>=0){
+    verdictLine='Both pieces move the right way: <strong style="color:var(--pri)">net positive on revenue</strong> by '+fmtRaw(arpqPct,2)+'.';
+  } else {
+    verdictLine='Both pieces move against you: <strong style="color:var(--red)">net negative on revenue</strong> by '+fmtRaw(Math.abs(arpqPct),2)+'.';
+  }
+  // Add a significance caveat - the headline number is only trustworthy if Welch's t passed.
+  if(!ct.isSignificant){
+    verdictLine+=' <span style="color:var(--warn)">⚠ Revenue test is not significant yet (p = '+fmt(ct.pValue,3)+') - the net move could still be noise.</span>';
+  }
+  // Compact 3-row table: metric · before → after · Δ · sig.
+  var rowStyle='border-bottom:1px solid rgba(255,255,255,0.04)';
+  var h='<article class="card">';
+  // Header carries the variant name AND the verdict badge when called from Insights.
+  if(vd){
+    h+='<div class="rc-topbar"><div class="rc-left"><span class="rc-name">'+esc(v.name)+'</span><span class="rc-vs">Net Impact · Revenue Goal</span></div><span class="verdict" style="background:'+vd.bg+';color:'+vd.color+';border:1px solid '+vd.color+'22">'+vd.text+'</span></div>';
+  } else {
+    h+='<div class="card-head"><div><div class="card-head-title">🧮 Net Impact: '+esc(v.name)+'</div><div class="card-head-sub">Conversion × ticket size → revenue per quote</div></div></div>';
+  }
+  h+='<table class="data-table" style="font-size:12.5px"><thead><tr><th>Metric</th><th>Before</th><th>After</th><th>Δ</th><th>Sig?</th></tr></thead><tbody>';
+  h+='<tr style="'+rowStyle+'"><td>Conversion</td><td>'+fmtPct(R.baseRate)+'</td><td>'+fmtPct(v.rate)+'</td><td style="color:'+convColor+';font-weight:700">'+convArrow+' '+fmtRaw(Math.abs(convPct),2)+'</td><td style="color:'+(v.isSignificant?'var(--pri)':'var(--t2)')+'">'+(v.isSignificant?'✓':'-')+'</td></tr>';
+  h+='<tr style="'+rowStyle+'"><td>Ticket size (ATS)</td><td>₹'+fmt(atsC,0)+'</td><td>₹'+fmt(atsV,0)+'</td><td style="color:'+atsColor+';font-weight:700">'+atsArrow+' '+fmtRaw(Math.abs(atsPct),2)+'</td><td style="color:var(--t2)">-</td></tr>';
+  h+='<tr><td><strong style="color:var(--t0)">Revenue / quote (ARPQ)</strong></td><td>₹'+fmt(ct.mean1,2)+'</td><td>₹'+fmt(ct.mean2,2)+'</td><td style="color:'+arpqColor+';font-weight:700">'+arpqArrow+' '+fmtRaw(Math.abs(arpqPct),2)+'</td><td style="color:'+(ct.isSignificant?'var(--pri)':'var(--t2)')+'">'+(ct.isSignificant?'✓':'p='+fmt(ct.pValue,3))+'</td></tr>';
+  h+='</tbody></table>';
+  h+='<div style="margin-top:14px;padding:12px 14px;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:10px;font-size:13px;color:var(--t0);line-height:1.7">'+verdictLine+'</div>';
+  if(advice)h+='<div style="margin-top:12px;font-size:12.5px;color:var(--t2);line-height:1.85">'+advice+'</div>';
+  h+='</article>';
+  return h;
 }
 
 // ═══════════ EXPORT ═══════════
 function doExport(){
-  if(!R||!window.XLSX)return;var wb=XLSX.utils.book_new();
+  if(!R)return;
+  if(!window.XLSX){alert('Excel library failed to load (offline or CDN blocked). Please refresh while online to enable export.');return}
+  var wb=XLSX.utils.book_new();
   var summary=[['A/B Test Analysis - Datapad'],['Generated',new Date().toLocaleString()],['Confidence',S.confidence+'%'],['Hypothesis',S.hypothesis==='two'?'Two-sided':'One-sided'],['Mode',S.mode==='revenue'?'Conversion + Revenue':'Conversion'],['CI Method','Wilson'],['Correction',R.numComparisons>1?'Bonferroni (alpha = '+fmt(R.alphaAdj,4)+')':'None'],['SRM Check',R.srm.ok?'Passed (p = '+fmt(R.srm.pValue,4)+')':'FAILED (p = '+fmt(R.srm.pValue,4)+')'],
   [],['Metric','Control'].concat(R.variantResults.map(function(v){return v.name})),
   ['Visitors',R.ctrl.visitors].concat(R.variantResults.map(function(v){return v.visitors})),
@@ -2459,18 +2841,191 @@ function doExport(){
   ['CI Lower',fmtPct(R.variantResults[0]?R.variantResults[0].ciCtrl[0]:0)].concat(R.variantResults.map(function(v){return fmtPct(v.ci[0])})),
   ['CI Upper',fmtPct(R.variantResults[0]?R.variantResults[0].ciCtrl[1]:0)].concat(R.variantResults.map(function(v){return fmtPct(v.ci[1])}))];
   var ws1=XLSX.utils.aoa_to_sheet(summary);ws1['!cols']=[{wch:24},{wch:16},{wch:16},{wch:16}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
-  var ins=[['Insights & Recommendations'],[]];R.variantResults.forEach(function(v){var w=v.isSignificant&&v.lift>0;ins.push([v.name]);ins.push(['Status',v.isSignificant?'Significant':'Not Significant']);ins.push(['Recommendation',w?'Deploy. '+fmtRaw(v.lift*100,2)+' lift.':v.power<80?'Continue. Need ~'+(isFinite(v.sampleNeeded)?fmtNum(v.sampleNeeded):'N/A')+' visitors/variant.':'No meaningful difference. MDE = '+fmtPct(v.mde)+'.']);ins.push([])});
+  var ins=[['Insights & Recommendations'],[]];R.variantResults.forEach(function(v){var w=v.isSignificant&&v.lift>0;ins.push([v.name]);ins.push(['Status',v.isSignificant?'Significant':'Not Significant']);ins.push(['Recommendation',w?'Deploy. '+fmtRaw(v.lift*100,2)+' lift.':v.power<80?'Continue. ~'+(isFinite(v.additionalDays)?v.additionalDays:'?')+' more days at current pace.':'No meaningful difference. MDE = '+fmtPct(v.mde)+'.']);ins.push([])});
   var ws2=XLSX.utils.aoa_to_sheet(ins);ws2['!cols']=[{wch:24},{wch:80}];XLSX.utils.book_append_sheet(wb,ws2,'Insights');
-  if(S.simResult){var sim=S.simResult,sd=[['Monte Carlo (5000 trials)'],['Win Rate',fmtRaw(sim.winRate)],['Loss Rate',fmtRaw(sim.lossRate)],['Inconclusive',fmtRaw(sim.incRate)],[],['P5',fmtRaw(sim.p5)],['P25',fmtRaw(sim.p25)],['Median',fmtRaw(sim.p50)],['P75',fmtRaw(sim.p75)],['P95',fmtRaw(sim.p95)]];var ws3=XLSX.utils.aoa_to_sheet(sd);XLSX.utils.book_append_sheet(wb,ws3,'Simulation')}
+  // Export every variant's Monte Carlo result, not just the first one.
+  var simKeys=Object.keys(S.simResults||{});
+  if(simKeys.length){
+    var sd=[['Monte Carlo (5,000 trials per variant)'],[],['Variant','Win Rate','Loss Rate','Inconclusive','P5','P25','Median','P75','P95']];
+    R.variantResults.forEach(function(v){
+      var ck=R.ctrl.visitors+':'+R.ctrl.conversions+':'+v.visitors+':'+v.conversions+':'+R.alphaAdj.toFixed(6)+':'+S.hypothesis;
+      var sim=S.simResults[ck];if(!sim)return;
+      sd.push([v.name,fmtRaw(sim.winRate),fmtRaw(sim.lossRate),fmtRaw(sim.incRate),fmtRaw(sim.p5),fmtRaw(sim.p25),fmtRaw(sim.p50),fmtRaw(sim.p75),fmtRaw(sim.p95)]);
+    });
+    var ws3=XLSX.utils.aoa_to_sheet(sd);XLSX.utils.book_append_sheet(wb,ws3,'Simulation');
+  }
   var pd=[['MDE (%)','Per Variant','Total']];[0.5,1,1.5,2,2.5,3,4,5,7,10].forEach(function(m){var n=calcSampleSize(R.baseRate,m/100,R.alphaAdj);pd.push([m+'%',isFinite(n)?n:'N/A',isFinite(n)?n*S.numVariants:'N/A'])});
   var ws4=XLSX.utils.aoa_to_sheet(pd);XLSX.utils.book_append_sheet(wb,ws4,'Power Analysis');
   XLSX.writeFile(wb,'AB_Test_Datapad_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 
+// ═══════════ SHARE LINK ═══════════
+// Encodes the essential state into a base64url string after the URL hash.
+// Compact packed-array form keeps the link short (~120 chars for a default A/B):
+//   [mode_code, numVariants, confidence, hyp_code, daysCollected, [[v,c,r,name], ...]]
+function encodeShareState(){
+  var arr=[
+    S.mode==='revenue'?'r':'c',
+    S.numVariants,
+    S.confidence,
+    S.hypothesis==='one'?1:2,
+    S.daysCollected,
+    S.variants.slice(0,S.numVariants).map(function(v){
+      // Preserve empty fields as null so round-tripping doesn't turn '' into 0.
+      var n=function(x){return x===''||x==null?null:+x};
+      return[n(v.visitors),n(v.conversions),n(v.revenue),v.customName||''];
+    })
+  ];
+  var json=JSON.stringify(arr);
+  // base64url: no +, /, =. Shorter and safe for URL hash.
+  return btoa(json).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeShareState(s){
+  try{
+    var pad=s.length%4?4-(s.length%4):0;
+    var b64=s.replace(/-/g,'+').replace(/_/g,'/')+(pad?'===='.slice(0,pad):'');
+    var arr=JSON.parse(atob(b64));
+    if(!Array.isArray(arr)||arr.length<6)return null;
+    return{
+      mode:arr[0]==='r'?'revenue':'conversion',
+      numVariants:Math.max(2,Math.min(4,+arr[1]||2)),
+      confidence:Math.max(70,Math.min(99,+arr[2]||95)),
+      hypothesis:+arr[3]===1?'one':'two',
+      daysCollected:Math.max(1,Math.min(365,+arr[4]||7)),
+      variants:Array.isArray(arr[5])?arr[5]:[]
+    };
+  }catch(e){return null}
+}
+function loadShareFromHash(){
+  var m=(location.hash||'').match(/d=([A-Za-z0-9_-]+)/);
+  if(!m)return false;
+  var st=decodeShareState(m[1]);if(!st)return false;
+  S.mode=st.mode;S.numVariants=st.numVariants;S.confidence=st.confidence;
+  S.hypothesis=st.hypothesis;S.daysCollected=st.daysCollected;
+  // Preserve legitimate zeros from the encoded array - `+v[0]||''` was
+  // collapsing 0 to '' (treats a real "0 visitors" as if empty).
+  for(var i=0;i<S.variants.length;i++){
+    var v=st.variants[i];if(!v)continue;
+    var num=function(x){return (x==null||x==='')?'':(isFinite(+x)?+x:'')};
+    S.variants[i].visitors=num(v[0]);
+    S.variants[i].conversions=num(v[1]);
+    S.variants[i].revenue=num(v[2]);
+    S.variants[i].customName=typeof v[3]==='string'?v[3]:'';
+  }
+  return true;
+}
+function doShare(){
+  var url=location.origin+location.pathname+'#d='+encodeShareState();
+  var done=function(){showToast('Link copied - paste anywhere to share')};
+  var fail=function(){window.prompt('Copy this link:',url)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done,fail);
+  } else { fail() }
+  // Reflect the link in the address bar so the browser back/forward retains state.
+  try{history.replaceState(null,'','#d='+encodeShareState())}catch(e){}
+}
+// Lightweight non-blocking toast - no library, dismisses on its own.
+function showToast(msg,kind){
+  var t=document.createElement('div');
+  var bg=kind==='warn'?'rgba(255,170,0,0.95)':'rgba(0,255,136,0.95)';
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:'+bg+';color:#050508;padding:11px 20px;border-radius:9px;font-size:13px;font-weight:700;font-family:var(--body-font);z-index:10001;box-shadow:0 12px 36px rgba(0,0,0,0.55);opacity:0;transition:opacity .18s ease, transform .18s ease;letter-spacing:.2px';
+  document.body.appendChild(t);
+  // Force a paint frame, then animate in.
+  requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)'});
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';setTimeout(function(){t.remove()},220)},2000);
+}
+
 // ═══════════ INIT ═══════════
+// ═══════════ PERSISTENCE ═══════════
+// Survive page refresh. Only persist what the user typed - never derived
+// results (R, simResult). Reset wipes the key and restores defaults.
+var LS_KEY='datapad.abtest.v1';
+var DEFAULTS={
+  mode:'conversion',numVariants:2,confidence:95,hypothesis:'two',activeTab:'results',
+  daysCollected:7,
+  variants:[
+    {name:'Control (A)',customName:'',visitors:10000,conversions:450,revenue:22500,mean:'',stdDev:''},
+    {name:'Variant B',customName:'',visitors:10000,conversions:520,revenue:28600,mean:'',stdDev:''},
+    {name:'Variant C',customName:'',visitors:'',conversions:'',revenue:'',mean:'',stdDev:''},
+    {name:'Variant D',customName:'',visitors:'',conversions:'',revenue:'',mean:'',stdDev:''}
+  ]
+};
+function saveState(){
+  try{
+    var snap={mode:S.mode,numVariants:S.numVariants,confidence:S.confidence,hypothesis:S.hypothesis,activeTab:S.activeTab,daysCollected:S.daysCollected,variants:S.variants};
+    localStorage.setItem(LS_KEY,JSON.stringify(snap));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    var raw=localStorage.getItem(LS_KEY);if(!raw)return;
+    var snap=JSON.parse(raw);if(!snap||typeof snap!=='object')return;
+    if(snap.mode==='conversion'||snap.mode==='revenue')S.mode=snap.mode;
+    if([2,3,4].indexOf(+snap.numVariants)>=0)S.numVariants=+snap.numVariants;
+    if(+snap.confidence>=70&&+snap.confidence<=99)S.confidence=+snap.confidence;
+    if(snap.hypothesis==='two'||snap.hypothesis==='one')S.hypothesis=snap.hypothesis;
+    if(['results','sim','insights'].indexOf(snap.activeTab)>=0)S.activeTab=snap.activeTab;
+    if(+snap.daysCollected>=1&&+snap.daysCollected<=365)S.daysCollected=+snap.daysCollected;
+    if(Array.isArray(snap.variants)){
+      for(var i=0;i<S.variants.length&&i<snap.variants.length;i++){
+        var s=snap.variants[i],t=S.variants[i];if(!s)continue;
+        if(typeof s.customName==='string')t.customName=s.customName;
+        t.visitors=s.visitors===''?'':(+s.visitors>=0?+s.visitors:t.visitors);
+        t.conversions=s.conversions===''?'':(+s.conversions>=0?+s.conversions:t.conversions);
+        t.revenue=s.revenue===''?'':(+s.revenue>=0?+s.revenue:t.revenue);
+        if(s.mean!=null)t.mean=s.mean===''?'':+s.mean;
+        if(s.stdDev!=null)t.stdDev=s.stdDev===''?'':+s.stdDev;
+      }
+    }
+  }catch(e){}
+}
+function syncControlsFromState(){
+  // Reflect S back into the static control widgets after a load/reset.
+  document.getElementById('confLabel').textContent=S.confidence;
+  var cr=document.getElementById('confRange');if(cr){cr.value=S.confidence;cr.setAttribute('aria-valuenow',S.confidence)}
+  var cw=document.getElementById('confWarn');if(cw)cw.style.display=S.confidence<90?'block':'none';
+  var di=document.getElementById('daysInput');if(di)di.value=S.daysCollected;
+  document.querySelectorAll('.sb-section .tbtn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false')});
+  // Mode buttons live in the first .ig; variants in the second; hypothesis in the fourth.
+  // Match by visible text to stay resilient to markup tweaks.
+  document.querySelectorAll('.tbtn').forEach(function(b){
+    var t=(b.textContent||'').trim().toLowerCase();
+    if((S.mode==='conversion'&&t==='conversion')||(S.mode==='revenue'&&t==='revenue')||
+       (S.numVariants===2&&t==='a/b')||(S.numVariants===3&&t==='a/b/c')||(S.numVariants===4&&t==='a/b/c/d')||
+       (S.hypothesis==='two'&&t==='two-sided')||(S.hypothesis==='one'&&t==='one-sided')){
+      b.classList.add('active');b.setAttribute('aria-pressed','true');
+    }
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    var on=b.id==='tab-'+(S.activeTab==='results'?'results':S.activeTab);
+    b.classList.toggle('active',on);b.setAttribute('aria-selected',on?'true':'false');
+  });
+}
+// Clear Data: wipe localStorage + URL hash + state in one click. No confirm
+// dialog - the action is non-destructive (local only) and instantly visible.
+function resetAll(){
+  try{localStorage.removeItem(LS_KEY)}catch(e){}
+  try{history.replaceState(null,'',location.pathname)}catch(e){}
+  S.mode=DEFAULTS.mode;S.numVariants=DEFAULTS.numVariants;S.confidence=DEFAULTS.confidence;
+  S.hypothesis=DEFAULTS.hypothesis;S.activeTab='results';S.daysCollected=DEFAULTS.daysCollected;
+  S.simResults={};
+  S.variants=DEFAULTS.variants.map(function(v){return {name:v.name,customName:v.customName,visitors:v.visitors,conversions:v.conversions,revenue:v.revenue,mean:v.mean,stdDev:v.stdDev}});
+  syncControlsFromState();updateHyp();buildInputs();compute();
+  if(typeof showToast==='function')showToast('Data cleared');
+}
+
+// Wrap compute() so every input change persists automatically.
+var _compute=compute;
+compute=function(){_compute();saveState()};
+
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=document.getElementById('guideModal');if(m.classList.contains('open'))toggleGuide()}});
 document.getElementById('guideModal').addEventListener('click',function(e){if(e.target===document.getElementById('guideModal'))toggleGuide()});
-buildInputs();updateHyp();compute();
+// Share-link wins over localStorage: if a #d=... hash is present we hydrate from
+// it and then save back so subsequent edits persist normally.
+var _hadShare=loadShareFromHash();
+if(!_hadShare)loadState();
+syncControlsFromState();buildInputs();updateHyp();compute();
 </script>
 </body>
 </html>
