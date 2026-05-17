@@ -41,6 +41,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js" defer></script>
+  <!-- CodeMirror 5 (loaded lazily; CSS pre-loaded so first paint is clean) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
   <style>
     /* ════════════════════════════════════════════
        GLIMPSE - Design System
@@ -2685,6 +2688,246 @@
       .upload-hero h1{font-size: 28px}
     }
 
+    /* ─── SQL / data-source icon variants ───────────────────────── */
+    .dataset-icon.src-file    { background: #eef4fb; color: #2563eb; }
+    .dataset-icon.src-sheet   { background: #e8f5ec; color: #0f9d58; }
+    .dataset-icon.src-sample  { background: #fdf4e6; color: #c98a17; }
+    .dataset-icon.src-sql     { background: #f0ebfa; color: #6f42c1; }
+    .dataset-item.active .dataset-icon.src-file   { background: var(--accent); color: #fff; }
+    .dataset-item.active .dataset-icon.src-sheet  { background: #0f9d58; color: #fff; }
+    .dataset-item.active .dataset-icon.src-sample { background: #c98a17; color: #fff; }
+    .dataset-item.active .dataset-icon.src-sql    { background: #6f42c1; color: #fff; }
+
+    .dataset-badge {
+      display: inline-block;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+      padding: 1px 5px; border-radius: 3px; margin-left: 6px;
+      text-transform: uppercase;
+      vertical-align: 1px;
+    }
+    .dataset-badge.sql   { background: #f0ebfa; color: #6f42c1; }
+    .dataset-badge.stale { background: #fff3cd; color: #8a6d1c; }
+
+    .home-card-icon.src-file   { background: #eef4fb; color: #2563eb; }
+    .home-card-icon.src-sheet  { background: #e8f5ec; color: #0f9d58; }
+    .home-card-icon.src-sample { background: #fdf4e6; color: #c98a17; }
+    .home-card-icon.src-sql    { background: #f0ebfa; color: #6f42c1; }
+
+    /* ─── Sidebar "+ New SQL query" CTA ────────────────────────── */
+    .sidebar-sql-cta {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%;
+      padding: 8px 10px;
+      margin: 0 var(--space-3) var(--space-3) var(--space-3);
+      width: calc(100% - var(--space-6));
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      border: 1px solid #d9c9f5;
+      color: #5b2ec2;
+      border-radius: var(--r-md);
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+    .sidebar-sql-cta:hover {
+      background: linear-gradient(135deg, #ede4fc 0%, #e0d0fa 100%);
+      border-color: #c4ade8;
+      transform: translateY(-1px);
+    }
+    .sidebar-sql-cta-plus {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #6f42c1; color: #fff;
+      font-size: 14px; font-weight: 700; line-height: 1;
+      flex-shrink: 0;
+    }
+    .sidebar-sql-cta > span:nth-of-type(2) { flex: 1; text-align: left; }
+    .sidebar-sql-cta-badge {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+      padding: 2px 5px; border-radius: 3px;
+      background: #6f42c1; color: #fff;
+    }
+
+    /* ─── SQL editor: tables search input ───────────────────────── */
+    .sql-tables-search {
+      position: sticky; top: 0; z-index: 1;
+      background: var(--surface-2);
+      padding: 4px 6px 6px 6px;
+      border-bottom: 1px solid var(--border-1);
+      margin: -8px -8px 6px -8px;
+    }
+    .sql-tables-search input {
+      width: 100%;
+      padding: 6px 8px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-sm);
+      color: var(--text-1);
+      font-size: 12px;
+      font-family: var(--font-base);
+    }
+    .sql-tables-search input:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .sql-tables-empty {
+      padding: 12px 8px; font-size: 11.5px; color: var(--text-4); text-align: center;
+    }
+
+    /* ─── SQL editor: unsaved-changes inline confirm overlay ─────── */
+    .sql-confirm-overlay {
+      position: absolute; inset: 0;
+      background: rgba(20, 20, 30, 0.55);
+      backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-xl);
+      z-index: 5;
+    }
+    .sql-confirm-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-md);
+      padding: 20px 24px;
+      max-width: 440px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+    .sql-confirm-card h3 {
+      font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text-1);
+    }
+    .sql-confirm-card p {
+      font-size: 13px; color: var(--text-3); line-height: 1.5; margin-bottom: 16px;
+    }
+    .sql-confirm-actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+
+    /* ─── SQL editor modal ──────────────────────────────────────── */
+    .modal.modal--sql {
+      max-width: min(1180px, 96vw);
+      padding: var(--space-5);
+      display: flex; flex-direction: column;
+      max-height: 92vh;
+    }
+    .modal--sql h2 { margin-bottom: var(--space-2); }
+    .sql-modal-sub {
+      color: var(--text-3); font-size: 12.5px; margin-bottom: var(--space-3);
+    }
+    .sql-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: var(--space-4);
+      flex: 1; min-height: 0;
+    }
+    .sql-tables-panel {
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      background: var(--surface-2);
+      overflow-y: auto;
+      padding: var(--space-2);
+      min-height: 380px;
+      max-height: 64vh;
+    }
+    .sql-tables-title {
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-4);
+      padding: 6px 8px;
+    }
+    .sql-table-entry {
+      padding: 6px 8px; border-radius: var(--r-sm); cursor: pointer;
+      font-size: 12px;
+    }
+    .sql-table-entry:hover { background: var(--surface-3); }
+    .sql-table-name {
+      font-family: var(--font-mono); font-weight: 600; color: var(--text-1);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sql-table-name .pill {
+      font-size: 9px; padding: 1px 4px; border-radius: 3px;
+      background: var(--surface-4); color: var(--text-3);
+      font-family: var(--font-base); font-weight: 600;
+    }
+    .sql-table-cols {
+      margin-left: 4px; margin-top: 3px; font-family: var(--font-mono);
+      font-size: 10.5px; color: var(--text-3); line-height: 1.5;
+      display: none;
+    }
+    .sql-table-entry.open .sql-table-cols { display: block; }
+    .sql-table-col {
+      padding: 1px 4px; cursor: copy; border-radius: 2px;
+    }
+    .sql-table-col:hover { background: var(--surface-1); color: var(--text-1); }
+    .sql-table-col .ty {
+      color: var(--text-4); font-size: 9.5px; margin-left: 4px;
+    }
+
+    .sql-main {
+      display: flex; flex-direction: column; min-height: 0; gap: var(--space-3);
+    }
+    .sql-editor-wrap {
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      min-height: 180px;
+    }
+    .sql-editor-wrap .CodeMirror {
+      height: 220px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--surface-1);
+    }
+    .sql-toolbar {
+      display: flex; align-items: center; gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+    .sql-toolbar .spacer { flex: 1; }
+    .sql-status {
+      font-size: 11.5px; color: var(--text-3);
+      font-family: var(--font-mono);
+    }
+    .sql-status.err { color: #c0392b; }
+    .sql-status.ok  { color: #0f9d58; }
+    .sql-result-wrap {
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      overflow: auto;
+      background: var(--surface-1);
+      min-height: 180px;
+      max-height: 38vh;
+    }
+    .sql-result-empty {
+      padding: var(--space-5); text-align: center; color: var(--text-4);
+      font-size: 12.5px;
+    }
+    .sql-result-table {
+      width: 100%; border-collapse: collapse; font-size: 12px;
+      font-family: var(--font-mono);
+    }
+    .sql-result-table th, .sql-result-table td {
+      padding: 5px 8px; border-bottom: 1px solid var(--border-1);
+      text-align: left; white-space: nowrap;
+    }
+    .sql-result-table th {
+      background: var(--surface-2); position: sticky; top: 0;
+      font-weight: 700; font-size: 11px;
+    }
+    .sql-error {
+      background: #fdecea; color: #b3261e; border: 1px solid #f5c6c2;
+      padding: 10px 12px; border-radius: var(--r-md);
+      font-family: var(--font-mono); font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .sql-stale-banner {
+      background: #fff8e1; border: 1px solid #f5d680; color: #8a6d1c;
+      padding: 10px 14px; border-radius: var(--r-md);
+      font-size: 13px; margin-bottom: var(--space-3);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sql-stale-banner button {
+      margin-left: auto;
+    }
+    @media (max-width: 820px) {
+      .sql-layout { grid-template-columns: 1fr; }
+      .sql-tables-panel { max-height: 160px; min-height: 0; }
+    }
+
     /* Print stylesheet */
     @media print{
       .header, .sidebar, .chart-action-btn, .chart-card-actions,
@@ -2801,6 +3044,11 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
           </button>
         </div>
+        <button class="sidebar-sql-cta" onclick="openSqlEditor()" title="Write a SQL query across your datasets">
+          <span class="sidebar-sql-cta-plus" aria-hidden="true">+</span>
+          <span>Ask with SQL</span>
+          <span class="sidebar-sql-cta-badge">SQL</span>
+        </button>
         <div class="dataset-list" id="datasetList" role="list"></div>
       </div>
       <div class="sidebar-section" style="border-top:1px solid var(--border-1)">
@@ -5513,16 +5761,28 @@ function openModal(html) {
   var el = document.getElementById('modal');
   var content = document.getElementById('modalContent');
   if (!el || !content) return;
+  // If a previous open() used a custom modal variant (e.g. modal--sql), reset it.
+  content.className = 'modal';
   content.innerHTML = html;
   el.classList.add('show');
 }
 function closeModal() {
+  // If the SQL editor is open, route through its dedicated close-flow so the
+  // unsaved-changes overlay fires. Background flows (toasts, sheet-import,
+  // ESC) call closeModal() generically and must not skip the confirmation.
+  if (typeof isSqlEditorOpen === 'function' && isSqlEditorOpen()) {
+    closeSqlEditor();
+    return;
+  }
   var el = document.getElementById('modal');
   if (el) el.classList.remove('show');
 }
 document.addEventListener('click', function(e) {
   var el = document.getElementById('modal');
   if (el && e.target === el) {
+    // SQL editor: backdrop clicks must NOT close. User has to use the X / Cancel
+    // (and gets the unsaved-changes prompt). Prevents accidental loss of typed SQL.
+    if (isSqlEditorOpen()) return;
     if (App.pendingSheetImport) cancelPendingSheetImport();
     else closeModal();
   }
@@ -5602,12 +5862,18 @@ function saveDataset(ds) {
     refreshMode: ds.refreshMode || AUTO_REFRESH_OFF,
     lastRefreshedAt: ds.lastRefreshedAt || ds.createdAt,
     folderId: ds.folderId === undefined ? null : ds.folderId,
+    sql: ds.sql || null,
+    sourceDatasetIds: Array.isArray(ds.sourceDatasetIds) ? ds.sourceDatasetIds.slice() : [],
+    isStale: !!ds.isStale,
     rows: ds.rows
   }).then(function() {
     console.log('[Glimpse] saved dataset', ds.id, ds.name, ds.rowCount + ' rows');
   }).catch(function(e) {
     console.error('[Glimpse] saveDataset failed:', e, ds.id);
     toast('Could not save "' + ds.name + '" to local storage: ' + (e && e.message ? e.message : e), 'error', 6000);
+    // Re-throw so chained callers (SQL save flow, project import) can react
+    // instead of seeing an undefined-resolved promise and claiming success.
+    throw e;
   });
 }
 
@@ -5919,14 +6185,14 @@ function renderHome() {
 
   var datasetCardsHtml = recentDatasets.map(function(ds) {
     var charts = App.dashboards[ds.id] || [];
-    var sourceLabel = ds.sourceType === 'google_sheet' ? 'Google Sheet' : ds.sourceType === 'sample' ? 'Sample' : 'CSV';
+    var info = datasetSourceInfo(ds);
     var folder = ds.folderId ? findFolder(ds.folderId) : null;
     return '<div class="home-card" role="button" tabindex="0" onclick="switchDataset(\'' + ds.id + '\')" onkeydown="if(event.key===\'Enter\')switchDataset(\'' + ds.id + '\')" aria-label="Open ' + escHTML(ds.name) + '">' +
       '<div class="home-card-head">' +
-        '<div class="home-card-icon">' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' +
+        '<div class="home-card-icon ' + info.cls + '">' +
+          info.icon +
         '</div>' +
-        '<span class="home-card-source">' + escHTML(sourceLabel) + '</span>' +
+        '<span class="home-card-source">' + escHTML(info.label) + '</span>' +
         (folder ? '<span class="home-card-folder">' + escHTML(folder.name) + '</span>' : '') +
       '</div>' +
       '<div class="home-card-title">' + escHTML(ds.name) + '</div>' +
@@ -6609,6 +6875,9 @@ function normalizeDatasetRecord(ds) {
   ds.refreshMode = ds.refreshMode || AUTO_REFRESH_OFF;
   ds.lastRefreshedAt = ds.lastRefreshedAt || ds.createdAt || Date.now();
   if (ds.folderId === undefined) ds.folderId = null;
+  if (ds.sql === undefined) ds.sql = null;
+  if (!Array.isArray(ds.sourceDatasetIds)) ds.sourceDatasetIds = [];
+  if (ds.isStale === undefined) ds.isStale = false;
   return ds;
 }
 
@@ -6823,7 +7092,20 @@ function openDatasetMenu(e, datasetId) {
   if (!ds) return;
   var menu = document.createElement('div');
   menu.className = 'ctx-menu';
+  var sqlExtra = '';
+  if (ds.sourceType === 'sql') {
+    sqlExtra =
+      '<button type="button" onclick="openSqlEditor(\'' + datasetId + '\');closeAnyContextMenu()">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        'Edit SQL…' +
+      '</button>' +
+      '<button type="button" onclick="rerunSqlDataset(\'' + datasetId + '\');closeAnyContextMenu()">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+        'Re-run query' +
+      '</button>';
+  }
   menu.innerHTML =
+    sqlExtra +
     '<button type="button" onclick="moveDatasetToFolder(\'' + datasetId + '\');closeAnyContextMenu()">' +
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' +
       'Move to…' +
@@ -8610,17 +8892,19 @@ function renderSidebar() {
 
   function datasetRowHtml(ds, indented) {
     var active = ds.id === App.activeDatasetId;
-    var sourceLabel = ds.sourceType === 'google_sheet' ? 'Google Sheet' : ds.sourceType === 'sample' ? 'Sample' : 'CSV';
+    var info = datasetSourceInfo(ds);
+    var badge = (ds.sourceType === 'sql' ? '<span class="dataset-badge sql">SQL</span>' : '') +
+                (ds.isStale ? '<span class="dataset-badge stale" title="Source data changed or removed - re-run query">STALE</span>' : '');
     return '<div class="dataset-item' + (active ? ' active' : '') + (indented ? ' indented' : '') + '" ' +
         'onclick="switchDataset(\'' + ds.id + '\')" role="listitem" tabindex="0" ' +
         'onkeydown="if(event.key===\'Enter\')switchDataset(\'' + ds.id + '\')" ' +
         'aria-label="' + escHTML(ds.name) + (active ? ' (active)' : '') + '">' +
-      '<div class="dataset-icon">' +
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' +
+      '<div class="dataset-icon ' + info.cls + '" title="' + escHTML(info.label) + '">' +
+        info.icon +
       '</div>' +
       '<div class="dataset-info">' +
-        '<div class="dataset-name">' + escHTML(ds.name) + '</div>' +
-        '<div class="dataset-meta">' + ds.rowCount.toLocaleString() + ' rows · ' + escHTML(sourceLabel) + ' · ' + fmtDate(ds.createdAt) + '</div>' +
+        '<div class="dataset-name">' + escHTML(ds.name) + badge + '</div>' +
+        '<div class="dataset-meta">' + ds.rowCount.toLocaleString() + ' rows · ' + escHTML(info.label) + ' · ' + fmtDate(ds.createdAt) + '</div>' +
       '</div>' +
       '<button class="dataset-action" onclick="openDatasetMenu(event, \'' + ds.id + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.stopPropagation();}" title="Dataset options" aria-label="Options for ' + escHTML(ds.name) + '">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>' +
@@ -8686,10 +8970,26 @@ function switchDataset(id) {
 }
 
 function deleteDataset(id) {
+  var ds = App.datasets.find(function(d){ return d.id === id; });
+  if (!ds) return;
+  var dependents = App.datasets.filter(function(d) {
+    return d.sourceType === 'sql' && Array.isArray(d.sourceDatasetIds) &&
+           d.sourceDatasetIds.indexOf(id) !== -1 && !d.isStale;
+  });
+  var depMsg = '';
+  if (dependents.length) {
+    depMsg =
+      '<p style="background:#fff8e1;border:1px solid #f5d680;color:#8a6d1c;padding:10px 12px;border-radius:6px;font-size:12.5px">' +
+        '<strong>' + dependents.length + ' SQL dataset' + (dependents.length === 1 ? '' : 's') + '</strong> depend' + (dependents.length === 1 ? 's' : '') + ' on this:<br/>' +
+        dependents.map(function(d){ return '• ' + escHTML(d.name); }).join('<br/>') +
+        '<br/><br/>Their cached rows will be kept so existing charts keep working, but they will be marked <strong>stale</strong> and cannot be re-run until the source is restored.' +
+      '</p>';
+  }
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
     '<h2>Delete dataset?</h2>' +
-    '<p>This will remove the dataset and all its charts from your browser. This cannot be undone.</p>' +
+    '<p>This will remove "<strong>' + escHTML(ds.name) + '</strong>" and all its charts from your browser. This cannot be undone.</p>' +
+    depMsg +
     '<div class="modal-actions">' +
       '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
       '<button class="btn btn-danger" onclick="confirmDeleteDataset(\'' + id + '\')">Delete</button>' +
@@ -8707,6 +9007,16 @@ function confirmDeleteDataset(id) {
   var wasActive = App.activeDatasetId === id;
   var prevFilters = App.filters.slice();
 
+  // Mark any SQL dependents as stale (keep their cached rows).
+  var staleSnapshot = [];
+  App.datasets.forEach(function(d) {
+    if (d.id !== id && d.sourceType === 'sql' && Array.isArray(d.sourceDatasetIds) &&
+        d.sourceDatasetIds.indexOf(id) !== -1) {
+      staleSnapshot.push({ id: d.id, wasStale: !!d.isStale });
+      d.isStale = true;
+    }
+  });
+
   App.datasets.splice(idx, 1);
   delete App.dashboards[id];
 
@@ -8719,12 +9029,40 @@ function confirmDeleteDataset(id) {
     renderSidebar();
   }
 
-  Promise.all([dbDelete(STORE_DS, id), dbDelete(STORE_DASH, id)]).then(function() {
-    toast('Dataset deleted', 'success');
+  var savePromises = staleSnapshot.map(function(snap) {
+    var d = App.datasets.find(function(x){ return x.id === snap.id; });
+    return d ? saveDataset(d) : Promise.resolve();
+  });
+
+  // Best-effort: drop any DuckDB views/files that referenced this dataset so
+  // a future SQL session doesn't surface stale rows for a deleted name.
+  try {
+    if (window.DuckDBSQL) {
+      var seen = {};
+      App.datasets.forEach(function(d) {
+        var safe = sanitizeTableName(d.name, seen);
+        seen[safe] = true;
+      });
+      // ds we just removed wasn't in seen above; reconstruct its safe name.
+      var deletedSafe = sanitizeTableName(deletedDs.name, seen);
+      DuckDBSQL.unregister(deletedSafe);
+    }
+  } catch (e) { /* non-fatal */ }
+
+  Promise.all([dbDelete(STORE_DS, id), dbDelete(STORE_DASH, id)].concat(savePromises)).then(function() {
+    if (staleSnapshot.length) {
+      toast('Dataset deleted · ' + staleSnapshot.length + ' SQL dataset' + (staleSnapshot.length === 1 ? '' : 's') + ' marked stale', 'success', 4000);
+    } else {
+      toast('Dataset deleted', 'success');
+    }
   }).catch(function(err) {
     console.error('[Glimpse] dataset delete failed, rolling back:', err);
     App.datasets.splice(idx, 0, deletedDs);
     if (deletedDash) App.dashboards[id] = deletedDash;
+    staleSnapshot.forEach(function(snap) {
+      var d = App.datasets.find(function(x){ return x.id === snap.id; });
+      if (d) d.isStale = snap.wasStale;
+    });
     if (wasActive) {
       App.activeDatasetId = id;
       App.filters = prevFilters;
@@ -8814,7 +9152,10 @@ function serializeDataset(ds) {
     sourceMeta: ds.sourceMeta || null,
     refreshMode: ds.refreshMode || AUTO_REFRESH_OFF,
     lastRefreshedAt: ds.lastRefreshedAt || ds.createdAt,
-    folderId: ds.folderId === undefined ? null : ds.folderId
+    folderId: ds.folderId === undefined ? null : ds.folderId,
+    sql: ds.sql || null,
+    sourceDatasetIds: Array.isArray(ds.sourceDatasetIds) ? ds.sourceDatasetIds.slice() : [],
+    isStale: !!ds.isStale
   };
 }
 
@@ -9185,6 +9526,35 @@ async function applyProjectBundle(bundle, mode) {
     await saveDataset(targetDs);
   }
 
+  // ---- remap SQL dependency pointers after all datasets are placed ----
+  // sourceDatasetIds may reference dataset ids that got renumbered above.
+  // Without this, a SQL dataset would silently point at the wrong source.
+  if (Object.keys(idRemap).length) {
+    for (var si = 0; si < App.datasets.length; si++) {
+      var sds = App.datasets[si];
+      if (sds.sourceType !== 'sql' || !Array.isArray(sds.sourceDatasetIds) || !sds.sourceDatasetIds.length) continue;
+      var changed = false;
+      sds.sourceDatasetIds = sds.sourceDatasetIds.map(function(sid) {
+        if (idRemap[sid]) { changed = true; return idRemap[sid]; }
+        return sid;
+      });
+      if (changed) await saveDataset(sds);
+    }
+  }
+
+  // ---- mark stale any SQL dataset whose sources are now missing ----
+  for (var mi = 0; mi < App.datasets.length; mi++) {
+    var mds = App.datasets[mi];
+    if (mds.sourceType !== 'sql' || !Array.isArray(mds.sourceDatasetIds) || !mds.sourceDatasetIds.length) continue;
+    var hasMissing = mds.sourceDatasetIds.some(function(sid) {
+      return !App.datasets.find(function(d){ return d.id === sid; });
+    });
+    if (hasMissing && !mds.isStale) {
+      mds.isStale = true;
+      await saveDataset(mds);
+    }
+  }
+
   // ---- dashboards ----
   var dashMap = bundle.dashboards || {};
   var dashKeys = Object.keys(dashMap);
@@ -9333,6 +9703,19 @@ function init() {
   // Keyboard shortcut: Esc closes drawer / modal / open dropdown.
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+      // Inline overlays inside the SQL editor take priority: name prompt first,
+      // then the discard-changes confirm. Both are dismissed without closing the editor.
+      var nameOverlay = document.getElementById('sqlNameOverlay');
+      if (nameOverlay) {
+        // Click the Cancel button so the awaiting promise resolves cleanly.
+        var cancelBtn = nameOverlay.querySelector('#sqlNameCancelBtn');
+        if (cancelBtn) cancelBtn.click();
+        return;
+      }
+      if (document.getElementById('sqlCloseConfirm')) { hideSqlCloseConfirm(); return; }
+      // If the SQL editor is open, route through its own close-flow so the
+      // unsaved-changes prompt is honored. Otherwise behave as before.
+      if (isSqlEditorOpen()) { closeSqlEditor(); return; }
       closePreviewDrawer();
       closeModal();
       closeDownloadMenu();
@@ -9351,6 +9734,902 @@ function init() {
     if (++chartRetry < 20) setTimeout(tryApplyChartDefaults, 200);
   }
   tryApplyChartDefaults();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ─── SQL MODE (DuckDB-WASM + CodeMirror) ────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+
+// Source-info helper: returns {cls, label, icon} per dataset.sourceType.
+// Used by sidebar rows and home cards. Referenced by renderSidebar.
+function datasetSourceInfo(ds) {
+  var t = (ds && ds.sourceType) || 'file';
+  var icons = {
+    file:
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+    sheet:
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>',
+    sample:
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 9 22 9 17 14 19 22 12 18 5 22 7 14 2 9 9 9 12 2"/></svg>',
+    sql:
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>'
+  };
+  if (t === 'google_sheet') return { cls: 'src-sheet',  label: 'Google Sheet', icon: icons.sheet };
+  if (t === 'sample')       return { cls: 'src-sample', label: 'Sample',       icon: icons.sample };
+  if (t === 'sql')          return { cls: 'src-sql',    label: 'SQL Query',    icon: icons.sql };
+  return { cls: 'src-file', label: 'CSV', icon: icons.file };
+}
+
+// Ephemeral state for the open SQL editor session.
+App.sqlEditor = {
+  cm: null,
+  editingDatasetId: null,   // when re-opened to edit an existing SQL dataset
+  lastResult: null,         // { headers, rows, ms, rowCount, sourceDatasetIds }
+  registered: {}            // sanitizedName -> datasetId, for current session
+};
+
+// ─── Loader: CodeMirror 5 (SQL + show-hint) ─────────────────────────
+var CM_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/';
+var _cmLoadPromise = null;
+function loadCodeMirror() {
+  if (window.CodeMirror && window.CodeMirror.showHint) return Promise.resolve(window.CodeMirror);
+  if (_cmLoadPromise) return _cmLoadPromise;
+  function loadScript(src) {
+    return new Promise(function(res, rej) {
+      var s = document.createElement('script');
+      s.src = src; s.async = false;
+      s.onload = function() { res(); };
+      s.onerror = function() { rej(new Error('Failed to load ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  _cmLoadPromise = loadScript(CM_BASE + 'codemirror.min.js')
+    .then(function() { return loadScript(CM_BASE + 'mode/sql/sql.min.js'); })
+    .then(function() { return loadScript(CM_BASE + 'addon/hint/show-hint.min.js'); })
+    .then(function() { return loadScript(CM_BASE + 'addon/hint/sql-hint.min.js'); })
+    .then(function() { return window.CodeMirror; })
+    .catch(function(err) {
+      // Reset so a retry (close + re-open editor) can attempt the download again
+      // — otherwise the rejected promise is permanently cached.
+      _cmLoadPromise = null;
+      throw err;
+    });
+  return _cmLoadPromise;
+}
+
+// ─── Loader + singleton: DuckDB-WASM ────────────────────────────────
+var DuckDBSQL = (function() {
+  var db = null;
+  var conn = null;
+  var mod = null;
+  var initPromise = null;
+
+  function init() {
+    if (initPromise) return initPromise;
+    initPromise = (async function() {
+      mod = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm');
+      var bundles = mod.getJsDelivrBundles();
+      var bundle = await mod.selectBundle(bundles);
+      var workerUrl = URL.createObjectURL(
+        new Blob(['importScripts("' + bundle.mainWorker + '");'], { type: 'text/javascript' })
+      );
+      var worker = new Worker(workerUrl);
+      var logger = new mod.ConsoleLogger(mod.LogLevel ? mod.LogLevel.WARNING : 1);
+      db = new mod.AsyncDuckDB(logger, worker);
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+      URL.revokeObjectURL(workerUrl);
+      conn = await db.connect();
+      console.log('[Glimpse] DuckDB-WASM ready');
+      return { db: db, conn: conn };
+    })().catch(function(err) {
+      initPromise = null;
+      throw err;
+    });
+    return initPromise;
+  }
+
+  function escIdent(name) { return '"' + String(name).replace(/"/g, '""') + '"'; }
+
+  // Convert ds rows (array of arrays) + schema → CSV using Papa.unparse,
+  // register as virtual file, create view.
+  async function registerDataset(ds, viewName) {
+    if (!conn) await init();
+    if (!ds || !Array.isArray(ds.rows) || !ds.schema) {
+      throw new Error('Dataset has no data to register');
+    }
+    var headers = ds.schema.map(function(f){ return f.label || f.rawName || ('col' + f.index); });
+    var rowsForCsv = [headers].concat(ds.rows);
+    var csv = Papa.unparse(rowsForCsv, { quotes: true, newline: '\n' });
+    var fileName = viewName + '.csv';
+    try { await db.dropFile(fileName); } catch (e) {}
+    await db.registerFileText(fileName, csv);
+
+    // Build an explicit per-column type map. We rely on Glimpse's already-detected
+    // schema instead of DuckDB's auto-sniffer because the sniffer often classifies
+    // ISO date strings as TIMESTAMP<NS>; Arrow then returns BigInt nanoseconds,
+    // which surfaces as huge integers in the UI. Storing dates as VARCHAR keeps
+    // round-trip fidelity (WHERE date > '2024-01-01' still works on ISO strings),
+    // and users can CAST(col AS DATE) when they need real date semantics.
+    //
+    // DuckDB note: `types={...}` overrides specific columns but still needs
+    // auto-detect; `columns={...}` specifies ALL columns and disables auto-detect.
+    // We use `types={...}` with read_csv_auto so an empty schema (edge case) still
+    // works via fallback sniffing.
+    function duckType(t) {
+      if (t === 'integer')      return 'BIGINT';
+      if (t === 'decimal')      return 'DOUBLE';
+      if (t === 'boolean')      return 'BOOLEAN';
+      // date / datetime / categorical / identifier / empty / text → VARCHAR
+      return 'VARCHAR';
+    }
+    var typeParts = ds.schema.map(function(f) {
+      var name = f.label || f.rawName || ('col' + f.index);
+      return "'" + name.replace(/'/g, "''") + "': '" + duckType(f.type) + "'";
+    });
+    var typesClause = typeParts.length ? ", types={" + typeParts.join(', ') + "}" : '';
+
+    await conn.query('CREATE OR REPLACE VIEW ' + escIdent(viewName) +
+                     " AS SELECT * FROM read_csv_auto('" + fileName.replace(/'/g, "''") + "', header=true" + typesClause + ")");
+  }
+
+  async function unregister(viewName) {
+    if (!conn) return;
+    try { await conn.query('DROP VIEW IF EXISTS ' + escIdent(viewName)); } catch (e) {}
+    try { await db.dropFile(viewName + '.csv'); } catch (e) {}
+  }
+
+  async function query(sql) {
+    if (!conn) await init();
+    var t0 = performance.now();
+    var result = await conn.query(sql);
+    var ms = Math.round(performance.now() - t0);
+    var fields = result.schema.fields;
+    var headers = fields.map(function(f){ return f.name; });
+    // Build a per-column converter so DATE/TIMESTAMP columns come back as
+    // proper ISO strings (not BigInt epoch integers, which profileDataset
+    // would otherwise classify as "integer").
+    var converters = fields.map(makeArrowValueConverter);
+    var rawRows = result.toArray();
+    var rows = rawRows.map(function(rec) {
+      return headers.map(function(h, i) {
+        return converters[i](rec[h]);
+      });
+    });
+    return { headers: headers, rows: rows, ms: ms, rowCount: rows.length };
+  }
+
+  // Inspect an Arrow field's type and return a value-converter function.
+  // Handles Date32 (days since epoch), Date64 (ms since epoch), Timestamp
+  // (with SECOND/MS/US/NS units), Time, BigInt and plain JS Date instances.
+  //
+  // We probe three independent signals because Arrow's JS API differs across
+  // minified builds: constructor.name, numeric typeId (8=Date, 10=Timestamp,
+  // 9=Time per Arrow Type enum), and the type's toString() (e.g. "Date<DAY>").
+  function makeArrowValueConverter(field) {
+    var t = field && field.type;
+    var ctor = (t && t.constructor && t.constructor.name) || '';
+    var typeId = t && typeof t.typeId === 'number' ? t.typeId : -1;
+    var typeStr = (t && typeof t.toString === 'function') ? String(t.toString()) : '';
+    var unit = t && typeof t.unit === 'number' ? t.unit : null;
+    var isDate      = /^Date/.test(ctor) || typeId === 8  || /^Date</.test(typeStr);
+    var isTimestamp = /^Timestamp/.test(ctor) || typeId === 10 || /^Timestamp</.test(typeStr);
+    var isTime      = /^Time/.test(ctor) && !isDate && !isTimestamp;
+
+    function toIsoDate(ms) {
+      try { return new Date(ms).toISOString().slice(0, 10); }
+      catch (e) { return String(ms); }
+    }
+    function toIsoDateTime(ms) {
+      try { return new Date(ms).toISOString(); }
+      catch (e) { return String(ms); }
+    }
+
+    // Date types — return YYYY-MM-DD so the type-detector classifies them as 'date'.
+    if (isDate) {
+      // Default to DAY when unit is not exposed (Date32 most common path).
+      var isDayUnit = unit === 0 || /Day|DAY/.test(ctor) || /<DAY/.test(typeStr);
+      return function(v) {
+        if (v == null) return null;
+        if (v instanceof Date) return v.toISOString().slice(0, 10);
+        var n = typeof v === 'bigint' ? Number(v) : (typeof v === 'number' ? v : null);
+        if (n === null) return String(v);
+        var msVal = isDayUnit ? n * 86400000 : n;
+        return toIsoDate(msVal);
+      };
+    }
+
+    // Timestamp — return full ISO string so it's classified as 'datetime'.
+    if (isTimestamp) {
+      return function(v) {
+        if (v == null) return null;
+        if (v instanceof Date) return v.toISOString();
+        var n = typeof v === 'bigint' ? Number(v) : (typeof v === 'number' ? v : null);
+        if (n === null) return String(v);
+        var msVal;
+        // Pick unit from numeric enum OR from the type string (NS/US/MS/SECOND).
+        var u = unit;
+        if (u === null) {
+          if (/NANO/i.test(typeStr) || /NS/i.test(typeStr)) u = 3;
+          else if (/MICRO/i.test(typeStr) || /US/i.test(typeStr)) u = 2;
+          else if (/MILLI/i.test(typeStr) || /MS/i.test(typeStr)) u = 1;
+          else if (/SECOND/i.test(typeStr)) u = 0;
+        }
+        if (u === 0) msVal = n * 1000;            // seconds
+        else if (u === 2) msVal = n / 1000;       // microseconds
+        else if (u === 3) msVal = n / 1000000;    // nanoseconds
+        else msVal = n;                            // default to ms
+        return toIsoDateTime(msVal);
+      };
+    }
+
+    // Time — pass through as Number (BigInt loses meaning here without unit context).
+    if (isTime) {
+      return function(v) {
+        if (v == null) return null;
+        if (typeof v === 'bigint') return Number(v);
+        return v;
+      };
+    }
+
+    // Fallback: handle Dates, BigInts and Arrow's "Vector" objects.
+    return function(v) {
+      if (v == null) return v;
+      if (v instanceof Date) return v.toISOString();
+      if (typeof v === 'bigint') return Number(v);
+      // Arrow returns Lists/Structs as wrapper objects; stringify so we don't
+      // hand profileDataset something it cannot serialize.
+      if (typeof v === 'object' && !Array.isArray(v) && v.toJSON) {
+        try { return JSON.stringify(v.toJSON()); } catch (e) { return String(v); }
+      }
+      return v;
+    };
+  }
+
+  return { init: init, registerDataset: registerDataset, unregister: unregister, query: query };
+})();
+
+// ─── Helpers ─────────────────────────────────────────────────────────
+function sanitizeTableName(name, existing) {
+  existing = existing || {};
+  var base = String(name || 'dataset').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+  if (!base) base = 'dataset';
+  if (/^[0-9]/.test(base)) base = 't_' + base;
+  var candidate = base, i = 2;
+  while (existing[candidate]) { candidate = base + '_' + (i++); }
+  return candidate;
+}
+
+function getOrCreateSqlFolder() {
+  // Prefer the stored folder id (survives renames). Falls back to name match
+  // for backwards compat with pre-existing projects.
+  var existing = null;
+  if (App.sqlFolderId) existing = App.folders.find(function(f){ return f.id === App.sqlFolderId; });
+  if (!existing) existing = App.folders.find(function(f){ return f.name === 'SQL Queries'; });
+  if (existing) {
+    App.sqlFolderId = existing.id;
+    try { localStorage.setItem('glimpse:sqlFolderId', existing.id); } catch (e) {}
+    return Promise.resolve(existing);
+  }
+  var folder = { id: genId(), name: 'SQL Queries', createdAt: Date.now() };
+  return saveFolder(folder).then(function() {
+    App.folders.push(folder);
+    App.sqlFolderId = folder.id;
+    try { localStorage.setItem('glimpse:sqlFolderId', folder.id); } catch (e) {}
+    return folder;
+  });
+}
+
+// ─── SQL Editor Modal ────────────────────────────────────────────────
+function openSqlEditor(editingDatasetId) {
+  if (!App.datasets.length) {
+    toast('Add at least one dataset before writing a SQL query', 'warn', 4000);
+    return;
+  }
+  var editingDs = editingDatasetId ? App.datasets.find(function(d){ return d.id === editingDatasetId; }) : null;
+  App.sqlEditor.editingDatasetId = editingDs ? editingDs.id : null;
+  App.sqlEditor.lastResult = null;
+  App.sqlEditor.registered = {};
+  // Bump session id so any in-flight Run from a *previous* editor session
+  // (rare but possible if user closed mid-query) resolves to a no-op.
+  App.sqlEditor._sessionId = (App.sqlEditor._sessionId || 0) + 1;
+
+  // Map every existing source dataset (and other SQL datasets, if they have rows) → sanitized name.
+  var registrationPlan = [];
+  var seen = {};
+  App.datasets.forEach(function(ds) {
+    if (!Array.isArray(ds.rows) || !ds.rows.length) return;
+    if (editingDs && ds.id === editingDs.id) return; // don't register the one we're editing as a self-table
+    var safe = sanitizeTableName(ds.name, seen);
+    seen[safe] = true;
+    registrationPlan.push({ ds: ds, viewName: safe });
+  });
+  App.sqlEditor._plan = registrationPlan;
+  App.sqlEditor.registered = registrationPlan.reduce(function(acc, p){ acc[p.viewName] = p.ds.id; return acc; }, {});
+
+  function tableEntryHtml(p) {
+    var info = datasetSourceInfo(p.ds);
+    var cols = (p.ds.schema || []).map(function(f) {
+      var colName = f.label || f.rawName || ('col' + f.index);
+      var ty = f.type || '';
+      // Double-quote the column when inserting so names with spaces/special chars are SQL-safe.
+      var insertText = /^[A-Za-z_][A-Za-z0-9_]*$/.test(colName) ? colName : '"' + colName.replace(/"/g, '""') + '"';
+      return '<div class="sql-table-col" onclick="event.stopPropagation();sqlInsertAtCursor(\'' + escAttr(insertText) + '\')">' +
+               escHTML(colName) +
+               (ty ? '<span class="ty">' + escHTML(String(ty)) + '</span>' : '') +
+             '</div>';
+    }).join('');
+    return '<div class="sql-table-entry" onclick="this.classList.toggle(\'open\')">' +
+             '<div class="sql-table-name">' +
+               '<span class="' + info.cls + '" style="display:inline-flex;width:14px;height:14px;align-items:center;justify-content:center;border-radius:3px;padding:1px">' + info.icon + '</span>' +
+               '<span ondblclick="event.stopPropagation();sqlInsertAtCursor(\'' + escAttr(p.viewName) + '\')">' + escHTML(p.viewName) + '</span>' +
+               '<span class="pill">' + p.ds.rowCount.toLocaleString() + '</span>' +
+             '</div>' +
+             '<div class="sql-table-cols">' + cols + '</div>' +
+           '</div>';
+  }
+  var tablesHtml = registrationPlan.map(tableEntryHtml).join('');
+
+  var initialSql = editingDs && editingDs.sql ? editingDs.sql :
+                   (registrationPlan.length ? 'SELECT *\nFROM ' + registrationPlan[0].viewName + '\nLIMIT 100' : '-- No datasets available');
+  // Remember initial value so we can detect unsaved changes on close.
+  App.sqlEditor.initialSql = initialSql;
+
+  var staleBanner = (editingDs && editingDs.isStale)
+    ? '<div class="sql-stale-banner">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+        '<span>Source data changed or was removed. Re-run to refresh.</span>' +
+      '</div>'
+    : '';
+
+  var title = editingDs ? 'Edit SQL query — ' + escHTML(editingDs.name) : 'New SQL query';
+  var saveLabel = editingDs ? 'Save & re-run' : 'Save as dataset';
+
+  // Render modal with the wider modal--sql class.
+  var modalBg = document.getElementById('modal');
+  var modalContent = document.getElementById('modalContent');
+  if (!modalBg || !modalContent) return;
+  modalContent.className = 'modal modal--sql';
+  modalContent.innerHTML =
+    '<button class="modal-close" onclick="closeSqlEditor()">✕</button>' +
+    '<h2>' + title + '</h2>' +
+    '<div class="sql-modal-sub">Write SQL against your datasets. Powered by DuckDB-WASM — runs 100% in your browser. Click a table to expand columns; double-click any column or table name to insert. <strong>Tip:</strong> dates are stored as text — use <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">CAST(col AS DATE)</code> or <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">STRPTIME(col, \'%Y-%m-%d\')</code> when you need real date typing.</div>' +
+    staleBanner +
+    '<div class="sql-layout">' +
+      '<div class="sql-tables-panel" id="sqlTablesPanel">' +
+        '<div class="sql-tables-search">' +
+          '<input id="sqlTablesSearch" type="search" placeholder="Search tables or columns…" autocomplete="off"/>' +
+        '</div>' +
+        '<div class="sql-tables-title">Available tables · <span id="sqlTablesCount">' + registrationPlan.length + '</span></div>' +
+        '<div id="sqlTablesList">' +
+          (tablesHtml || '<div class="sql-tables-empty">No datasets to query.</div>') +
+        '</div>' +
+      '</div>' +
+      '<div class="sql-main">' +
+        '<div class="sql-editor-wrap"><textarea id="sqlEditorTA"></textarea></div>' +
+        '<div class="sql-toolbar">' +
+          '<button class="btn btn-primary btn-sm" id="sqlRunBtn" onclick="runSqlPreview()">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+            ' Run' +
+          '</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="closeSqlEditor()">Cancel</button>' +
+          '<span class="spacer"></span>' +
+          '<span class="sql-status" id="sqlStatus">Ctrl/Cmd+Enter to run</span>' +
+          '<button class="btn btn-primary btn-sm" id="sqlSaveBtn" onclick="saveSqlAsDataset()" disabled>' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
+            ' ' + saveLabel +
+          '</button>' +
+        '</div>' +
+        '<div class="sql-result-wrap" id="sqlResultWrap">' +
+          '<div class="sql-result-empty">Run a query to see results here.</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  modalBg.classList.add('show');
+
+  // Stash plan + table-html builder so the search filter can re-render rows.
+  App.sqlEditor._plan = registrationPlan;
+  App.sqlEditor._tableEntryHtml = tableEntryHtml;
+  setTimeout(function() {
+    var searchEl = document.getElementById('sqlTablesSearch');
+    if (searchEl) {
+      searchEl.addEventListener('input', filterSqlTables);
+      searchEl.addEventListener('keydown', function(e) {
+        // Don't let Escape inside the search box bubble up and close the modal.
+        if (e.key === 'Escape' && searchEl.value) { searchEl.value = ''; filterSqlTables(); e.stopPropagation(); }
+      });
+    }
+  }, 0);
+
+  // Boot CodeMirror, then register every source dataset into DuckDB in the background.
+  loadCodeMirror().then(function(CM) {
+    var ta = document.getElementById('sqlEditorTA');
+    if (!ta) return;
+    ta.value = initialSql;
+    App.sqlEditor.cm = CM.fromTextArea(ta, {
+      mode: 'text/x-sql',
+      lineNumbers: true,
+      indentWithTabs: false,
+      smartIndent: true,
+      lineWrapping: true,
+      extraKeys: {
+        'Ctrl-Space': 'autocomplete',
+        'Ctrl-Enter': function(){ runSqlPreview(); },
+        'Cmd-Enter':  function(){ runSqlPreview(); }
+      },
+      hintOptions: {
+        tables: registrationPlan.reduce(function(acc, p) {
+          acc[p.viewName] = (p.ds.schema || []).map(function(f){ return f.label || f.rawName || ('col' + f.index); });
+          return acc;
+        }, {})
+      }
+    });
+    setTimeout(function(){ if (App.sqlEditor.cm) App.sqlEditor.cm.refresh(); }, 50);
+  }).catch(function(err) {
+    setSqlStatus('Editor failed to load: ' + (err.message || err), 'err');
+  });
+
+  setSqlStatus('Loading DuckDB engine…');
+  DuckDBSQL.init().then(function() {
+    // Register all source tables.
+    return registrationPlan.reduce(function(p, item) {
+      return p.then(function(){ return DuckDBSQL.registerDataset(item.ds, item.viewName); });
+    }, Promise.resolve());
+  }).then(function() {
+    setSqlStatus('Ready · ' + registrationPlan.length + ' table' + (registrationPlan.length === 1 ? '' : 's') + ' available', 'ok');
+  }).catch(function(err) {
+    console.error('[Glimpse] DuckDB init/register failed:', err);
+    setSqlStatus('Engine failed: ' + (err.message || err), 'err');
+  });
+}
+
+// Filter the visible tables panel by table name or column name. Auto-expands
+// matching tables so the user sees the matched column.
+function filterSqlTables() {
+  var input = document.getElementById('sqlTablesSearch');
+  var listEl = document.getElementById('sqlTablesList');
+  var countEl = document.getElementById('sqlTablesCount');
+  var plan = App.sqlEditor._plan || [];
+  if (!listEl) return;
+  var q = (input ? input.value : '').trim().toLowerCase();
+  if (!q) {
+    listEl.innerHTML = plan.map(App.sqlEditor._tableEntryHtml).join('') || '<div class="sql-tables-empty">No datasets to query.</div>';
+    if (countEl) countEl.textContent = plan.length;
+    return;
+  }
+  var matched = plan.filter(function(p) {
+    if (p.viewName.toLowerCase().indexOf(q) !== -1) return true;
+    if ((p.ds.name || '').toLowerCase().indexOf(q) !== -1) return true;
+    return (p.ds.schema || []).some(function(f) {
+      var n = (f.label || f.rawName || '').toLowerCase();
+      return n.indexOf(q) !== -1;
+    });
+  });
+  if (countEl) countEl.textContent = matched.length;
+  if (!matched.length) {
+    listEl.innerHTML = '<div class="sql-tables-empty">No tables match "' + escHTML(q) + '"</div>';
+    return;
+  }
+  // Build with the column-match auto-expanded (open class) when the match is on a column.
+  listEl.innerHTML = matched.map(function(p) {
+    var html = App.sqlEditor._tableEntryHtml(p);
+    var hitOnColumn = (p.viewName.toLowerCase().indexOf(q) === -1) &&
+                      ((p.ds.name || '').toLowerCase().indexOf(q) === -1);
+    if (hitOnColumn) html = html.replace('class="sql-table-entry"', 'class="sql-table-entry open"');
+    return html;
+  }).join('');
+}
+
+// True if the user has typed something different from the initial query.
+function sqlEditorHasUnsavedChanges() {
+  if (!App.sqlEditor || !App.sqlEditor.cm) return false;
+  var current = App.sqlEditor.cm.getValue();
+  var initial = App.sqlEditor.initialSql || '';
+  return current.trim() !== initial.trim();
+}
+
+// Modal close that asks for confirmation if the query has changed. The
+// confirmation is an in-modal overlay (no browser dialog).
+function closeSqlEditor(force) {
+  if (!force && sqlEditorHasUnsavedChanges()) {
+    showSqlCloseConfirm();
+    return;
+  }
+  hideSqlCloseConfirm();
+  // Also resolve(null) any pending name-prompt so we don't leak a Promise
+  // closure holding the result rows in memory.
+  var nameOverlay = document.getElementById('sqlNameOverlay');
+  if (nameOverlay) {
+    var cancelBtn = nameOverlay.querySelector('#sqlNameCancelBtn');
+    if (cancelBtn) cancelBtn.click();
+    else if (nameOverlay.parentNode) nameOverlay.parentNode.removeChild(nameOverlay);
+  }
+  // Drop DuckDB views/files we created for this session so deleted-then-renamed
+  // datasets don't shadow real ones, and so the virtual FS doesn't grow forever.
+  if (App.sqlEditor._plan && App.sqlEditor._plan.length) {
+    App.sqlEditor._plan.forEach(function(p) {
+      // Fire-and-forget; errors are non-fatal cleanup noise.
+      try { DuckDBSQL.unregister(p.viewName); } catch (e) {}
+    });
+  }
+  if (App.sqlEditor.cm) {
+    if (App.sqlEditor.cm._sqlChangeHandler) {
+      try { App.sqlEditor.cm.off('change', App.sqlEditor.cm._sqlChangeHandler); } catch(e) {}
+      App.sqlEditor.cm._sqlChangeHandler = null;
+    }
+    try { App.sqlEditor.cm.toTextArea(); } catch(e) {}
+    App.sqlEditor.cm = null;
+  }
+  // Bump session token so any in-flight Run resolves into a no-op.
+  App.sqlEditor._sessionId = (App.sqlEditor._sessionId || 0) + 1;
+  App.sqlEditor.editingDatasetId = null;
+  App.sqlEditor.initialSql = '';
+  App.sqlEditor.lastResult = null;
+  App.sqlEditor.registered = {};
+  App.sqlEditor._plan = null;
+  App.sqlEditor._tableEntryHtml = null;
+  var modalContent = document.getElementById('modalContent');
+  if (modalContent) modalContent.className = 'modal';
+  var el = document.getElementById('modal');
+  if (el) el.classList.remove('show');
+}
+
+function showSqlCloseConfirm() {
+  var modalContent = document.getElementById('modalContent');
+  if (!modalContent || document.getElementById('sqlCloseConfirm')) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'sqlCloseConfirm';
+  overlay.className = 'sql-confirm-overlay';
+  overlay.innerHTML =
+    '<div class="sql-confirm-card" role="alertdialog" aria-modal="true">' +
+      '<h3>Discard unsaved changes?</h3>' +
+      '<p>Your SQL query has unsaved edits. Closing now will lose them.</p>' +
+      '<div class="sql-confirm-actions">' +
+        '<button class="btn btn-ghost" type="button" onclick="hideSqlCloseConfirm()">Keep editing</button>' +
+        '<button class="btn btn-danger" type="button" onclick="closeSqlEditor(true)">Discard &amp; close</button>' +
+      '</div>' +
+    '</div>';
+  modalContent.appendChild(overlay);
+  // Focus the safe option by default so Enter doesn't immediately discard.
+  setTimeout(function() {
+    var keep = overlay.querySelector('.btn-ghost');
+    if (keep) keep.focus();
+  }, 0);
+}
+
+function hideSqlCloseConfirm() {
+  var overlay = document.getElementById('sqlCloseConfirm');
+  if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+}
+
+// Returns true if the SQL editor is currently active in the modal.
+function isSqlEditorOpen() {
+  var content = document.getElementById('modalContent');
+  return !!(content && content.className.indexOf('modal--sql') !== -1);
+}
+
+function setSqlStatus(msg, kind) {
+  var el = document.getElementById('sqlStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'sql-status' + (kind ? ' ' + kind : '');
+}
+
+function escAttr(s) {
+  // Safe to embed inside a single-quoted JS string that is itself inside a
+  // double-quoted HTML attribute, e.g. onclick="f('...')". Order matters:
+  // escape & first so we don't double-encode the entities introduced below.
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;');
+}
+
+function sqlInsertAtCursor(text) {
+  var cm = App.sqlEditor.cm;
+  if (!cm) return;
+  cm.replaceSelection(text);
+  cm.focus();
+}
+
+function runSqlPreview() {
+  var cm = App.sqlEditor.cm;
+  // Fall back to plain textarea if CodeMirror failed to load (CDN blocked etc).
+  var sql;
+  if (cm) sql = cm.getValue();
+  else {
+    var ta = document.getElementById('sqlEditorTA');
+    if (!ta) { toast('Editor not ready', 'warn'); return; }
+    sql = ta.value;
+  }
+  sql = (sql || '').trim();
+  if (!sql) { setSqlStatus('Write a query first', 'err'); return; }
+  setSqlStatus('Running…');
+  var btn = document.getElementById('sqlRunBtn');
+  if (btn) btn.disabled = true;
+  // Capture session token so a late-arriving result from a now-closed editor
+  // doesn't poison the next session's UI / lastResult.
+  var token = App.sqlEditor._sessionId;
+  DuckDBSQL.query(sql).then(function(res) {
+    if (token !== App.sqlEditor._sessionId) return;  // editor was closed / reopened
+    App.sqlEditor.lastResult = res;
+    App.sqlEditor.lastResult.sql = sql;
+    renderSqlResult(res);
+    setSqlStatus(res.rowCount.toLocaleString() + ' row' + (res.rowCount === 1 ? '' : 's') + ' · ' + res.ms + 'ms', 'ok');
+    var save = document.getElementById('sqlSaveBtn');
+    if (save) save.disabled = res.rowCount === 0 && !App.sqlEditor.editingDatasetId;
+    // If the user keeps editing after running, the displayed SQL drifts from
+    // the executed one. Disable Save until they re-run so we never persist a
+    // query that does not match the result.
+    if (cm && !cm._sqlChangeHandler) {
+      cm._sqlChangeHandler = function() {
+        if (App.sqlEditor.lastResult && cm.getValue() !== App.sqlEditor.lastResult.sql) {
+          var s = document.getElementById('sqlSaveBtn');
+          if (s) s.disabled = true;
+          setSqlStatus('Query edited · re-run to enable save', 'err');
+        }
+      };
+      cm.on('change', cm._sqlChangeHandler);
+    }
+  }).catch(function(err) {
+    if (token !== App.sqlEditor._sessionId) return;
+    var msg = (err && err.message) ? err.message : String(err);
+    var wrap = document.getElementById('sqlResultWrap');
+    if (wrap) wrap.innerHTML = '<div class="sql-error">' + escHTML(msg) + '</div>';
+    setSqlStatus('Error', 'err');
+    App.sqlEditor.lastResult = null;
+    var save = document.getElementById('sqlSaveBtn');
+    if (save) save.disabled = true;
+  }).then(function() {
+    if (token !== App.sqlEditor._sessionId) return;
+    if (btn) btn.disabled = false;
+  });
+}
+
+function renderSqlResult(res) {
+  var wrap = document.getElementById('sqlResultWrap');
+  if (!wrap) return;
+  if (!res.rows.length) {
+    wrap.innerHTML = '<div class="sql-result-empty">Query returned no rows.</div>';
+    return;
+  }
+  var previewRows = res.rows.slice(0, 100);
+  var thead = '<tr>' + res.headers.map(function(h){ return '<th>' + escHTML(h) + '</th>'; }).join('') + '</tr>';
+  var tbody = previewRows.map(function(r) {
+    return '<tr>' + r.map(function(v) {
+      return '<td>' + escHTML(v === null || v === undefined ? '' : String(v)) + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  var more = res.rows.length > 100
+    ? '<div style="padding:6px 10px;font-size:11px;color:var(--text-4);background:var(--surface-2);border-top:1px solid var(--border-1)">Showing first 100 of ' + res.rowCount.toLocaleString() + ' rows. All rows will be saved.</div>'
+    : '';
+  wrap.innerHTML = '<table class="sql-result-table"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' + more;
+}
+
+var SQL_MAX_SAVE_ROWS = 500000;
+
+function saveSqlAsDataset() {
+  var res = App.sqlEditor.lastResult;
+  if (!res) { toast('Run the query first', 'warn'); return; }
+  if (res.rows.length > SQL_MAX_SAVE_ROWS) {
+    toast('Result too large to save (' + res.rows.length.toLocaleString() + ' rows). Limit is ' + SQL_MAX_SAVE_ROWS.toLocaleString() + '.', 'error', 6000);
+    return;
+  }
+
+  var editingDs = App.sqlEditor.editingDatasetId
+    ? App.datasets.find(function(d){ return d.id === App.sqlEditor.editingDatasetId; })
+    : null;
+
+  if (editingDs) {
+    // Update existing SQL dataset in place — preserves charts, folder, id.
+    var schema = profileDataset(res.rows, res.headers);
+    editingDs.rows = res.rows;
+    editingDs.schema = schema;
+    editingDs.rowCount = res.rows.length;
+    editingDs.colCount = res.headers.length;
+    editingDs.totalRows = res.rows.length;
+    editingDs.sampleMode = false;
+    editingDs.sql = res.sql;
+    editingDs.sourceDatasetIds = computeSourceDatasetIds(res.sql);
+    editingDs.isStale = false;
+    editingDs.lastRefreshedAt = Date.now();
+    // SQL datasets have no refresh schedule / source url. If a stale record
+    // arrived via project import with those set, normalize them now.
+    editingDs.refreshMode = AUTO_REFRESH_OFF;
+    editingDs.sourceUrl = '';
+    editingDs.sourceMeta = null;
+    normalizeDatasetRecord(editingDs);
+    // Disable save button immediately to prevent double-save on slow IndexedDB writes.
+    var saveBtn = document.getElementById('sqlSaveBtn');
+    if (saveBtn) saveBtn.disabled = true;
+    saveDataset(editingDs).then(function() {
+      toast('Query updated', 'success');
+      closeSqlEditor(true);
+      if (App.activeDatasetId === editingDs.id) setStep('dashboard');
+      else renderSidebar();
+    }).catch(function() {
+      // saveDataset already toasted the error. Re-enable Save so user can retry.
+      if (saveBtn) saveBtn.disabled = false;
+      setSqlStatus('Save failed · changes kept in editor', 'err');
+    });
+    return;
+  }
+
+  // New SQL dataset — ask for a name.
+  promptSqlSaveName('').then(function(name) {
+    if (!name) return;
+    // Disable Save immediately to prevent double-save races on slow IDB writes.
+    var saveBtn = document.getElementById('sqlSaveBtn');
+    if (saveBtn) saveBtn.disabled = true;
+    getOrCreateSqlFolder().then(function(folder) {
+      var schema = profileDataset(res.rows, res.headers);
+      var now = Date.now();
+      var ds = normalizeDatasetRecord({
+        id: genId(),
+        name: name,
+        rows: res.rows,
+        schema: schema,
+        rowCount: res.rows.length,
+        colCount: res.headers.length,
+        totalRows: res.rows.length,
+        sampleMode: false,
+        createdAt: now,
+        fileSizeBytes: 0,
+        sourceType: 'sql',
+        sourceUrl: '',
+        sourceMeta: null,
+        refreshMode: AUTO_REFRESH_OFF,
+        lastRefreshedAt: now,
+        folderId: folder.id,
+        sql: res.sql,
+        sourceDatasetIds: computeSourceDatasetIds(res.sql),
+        isStale: false
+      });
+      App.expandedFolders[folder.id] = true;
+      commitDatasetRecord(ds).then(function() {
+        toast('SQL dataset saved · open from sidebar', 'success', 3000);
+        closeSqlEditor(true);
+      }).catch(function() {
+        // saveDataset already toasted. Re-enable Save so the user can retry.
+        if (saveBtn) saveBtn.disabled = false;
+        setSqlStatus('Save failed · changes kept in editor', 'err');
+      });
+    });
+  });
+}
+
+// Detect which registered tables the SQL string references, then map back to
+// dataset IDs. Strips line/block comments and string literals first so a
+// table name appearing inside a comment or quoted string doesn't register as
+// a real dependency (which would otherwise mark unrelated datasets stale on
+// delete). Accepts an explicit `registered` map so background flows like
+// rerunSqlDataset can pass their own without touching App.sqlEditor state.
+function computeSourceDatasetIds(sql, registered) {
+  var ids = [];
+  registered = registered || App.sqlEditor.registered || {};
+  var cleaned = String(sql)
+    .replace(/--[^\n]*/g, ' ')           // line comments
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')   // block comments
+    .replace(/'(?:[^'\\]|\\.|'')*'/g, ' ') // single-quoted string literals
+    .toLowerCase();
+  Object.keys(registered).forEach(function(name) {
+    // Sanitized names are [a-z0-9_] only, but escape defensively.
+    var re = new RegExp('(^|[^a-z0-9_])' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z0-9_]|$)');
+    if (re.test(cleaned) && ids.indexOf(registered[name]) === -1) ids.push(registered[name]);
+  });
+  return ids;
+}
+
+// Renders the "Save as dataset" prompt as an overlay layered ON TOP of the
+// SQL editor (so the editor state — CM, results, search box — stays intact).
+function promptSqlSaveName(defaultName) {
+  return new Promise(function(resolve) {
+    var modalContent = document.getElementById('modalContent');
+    if (!modalContent) { resolve(null); return; }
+    // Don't double-stack.
+    var prior = document.getElementById('sqlNameOverlay');
+    if (prior && prior.parentNode) prior.parentNode.removeChild(prior);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'sqlNameOverlay';
+    overlay.className = 'sql-confirm-overlay';
+    overlay.innerHTML =
+      '<div class="sql-confirm-card" role="dialog" aria-modal="true" style="max-width:480px">' +
+        '<h3>Save query as dataset</h3>' +
+        '<p style="margin-bottom:10px">Goes to the <strong>SQL Queries</strong> folder. You can move it later from the sidebar.</p>' +
+        '<input class="modal-field-input" id="sqlNameInput" type="text" placeholder="e.g. Revenue by region" value="' + escHTML(defaultName || '') + '" style="margin-bottom:16px" autofocus/>' +
+        '<div class="sql-confirm-actions">' +
+          '<button class="btn btn-ghost" id="sqlNameCancelBtn" type="button">Cancel</button>' +
+          '<button class="btn btn-primary" id="sqlNameSaveBtn" type="button">Save dataset</button>' +
+        '</div>' +
+      '</div>';
+    modalContent.appendChild(overlay);
+
+    function done(val) {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      resolve(val);
+    }
+    function submit() {
+      var input = document.getElementById('sqlNameInput');
+      var v = input && input.value ? input.value.trim() : '';
+      if (!v) { toast('Name is required', 'warn'); return; }
+      done(v);
+    }
+
+    setTimeout(function() {
+      var input = document.getElementById('sqlNameInput');
+      if (input) {
+        input.focus(); input.select();
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); submit(); }
+          else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(null); }
+        });
+      }
+      document.getElementById('sqlNameCancelBtn').onclick = function(){ done(null); };
+      document.getElementById('sqlNameSaveBtn').onclick = submit;
+    }, 0);
+  });
+}
+
+// Re-run an existing SQL dataset's query against current source data.
+function rerunSqlDataset(id) {
+  var ds = App.datasets.find(function(d){ return d.id === id; });
+  if (!ds || ds.sourceType !== 'sql' || !ds.sql) return;
+
+  // If any source is missing, can't re-run.
+  var missing = (ds.sourceDatasetIds || []).filter(function(sid) {
+    return !App.datasets.find(function(d){ return d.id === sid; });
+  });
+  if (missing.length) {
+    toast('Cannot re-run — ' + missing.length + ' source dataset' + (missing.length === 1 ? '' : 's') + ' missing. Edit the SQL to use available tables.', 'error', 5000);
+    openSqlEditor(id);
+    return;
+  }
+
+  toast('Re-running query…', 'info', 1800);
+  // Build a LOCAL registration map. Never touch App.sqlEditor.registered here
+  // because the SQL editor may also be open with a different editingDatasetId,
+  // and stomping its state would scramble computeSourceDatasetIds on Save.
+  var localPlan = [];
+  var localRegistered = {};
+  DuckDBSQL.init().then(function() {
+    var seen = {};
+    localPlan = App.datasets
+      .filter(function(d){ return d.id !== id && Array.isArray(d.rows) && d.rows.length; })
+      .map(function(d) {
+        var safe = sanitizeTableName(d.name, seen);
+        seen[safe] = true;
+        return { ds: d, viewName: safe };
+      });
+    localRegistered = localPlan.reduce(function(acc, p){ acc[p.viewName] = p.ds.id; return acc; }, {});
+    return localPlan.reduce(function(p, item) {
+      return p.then(function(){ return DuckDBSQL.registerDataset(item.ds, item.viewName); });
+    }, Promise.resolve());
+  }).then(function() {
+    return DuckDBSQL.query(ds.sql);
+  }).then(function(res) {
+    var schema = profileDataset(res.rows, res.headers);
+    ds.rows = res.rows;
+    ds.schema = schema;
+    ds.rowCount = res.rows.length;
+    ds.colCount = res.headers.length;
+    ds.totalRows = res.rows.length;
+    ds.sourceDatasetIds = computeSourceDatasetIds(ds.sql, localRegistered);
+    ds.isStale = false;
+    ds.lastRefreshedAt = Date.now();
+    normalizeDatasetRecord(ds);
+    return saveDataset(ds).then(function() {
+      toast('Query refreshed · ' + res.rowCount.toLocaleString() + ' rows', 'success');
+      if (App.activeDatasetId === ds.id) setStep('dashboard');
+      else renderSidebar();
+    });
+  }).catch(function(err) {
+    console.error('[Glimpse] rerun failed:', err);
+    toast('Re-run failed: ' + (err.message || err), 'error', 6000);
+    openSqlEditor(id);
+  });
 }
 
 // Start when DOM is ready
