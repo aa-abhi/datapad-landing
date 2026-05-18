@@ -1,0 +1,12 @@
+{
+  "name": "datapad",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:local": "FORCE_OBFUSCATE=1 node build.mjs"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.1"
+  }
+}

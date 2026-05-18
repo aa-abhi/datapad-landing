@@ -2635,7 +2635,8 @@
       display: none;
     }
 
-    @media (max-width: 768px){
+    /* Block phone-sized screens only. Tablets (≥600px) get the full app. */
+    @media (max-width: 599px){
       .app{display: none}
       .mobile-warning{
         display: flex;
@@ -2645,29 +2646,54 @@
         min-height: 100vh;
         padding: var(--space-8);
         text-align: center;
+        background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%);
       }
       .mobile-warning-icon{
-        width: 64px;
-        height: 64px;
+        width: 72px;
+        height: 72px;
         border-radius: 50%;
-        background: var(--surface-2);
+        background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--accent);
+        color: #6f42c1;
         margin-bottom: var(--space-5);
       }
       .mobile-warning h1{
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
         margin-bottom: var(--space-3);
+        color: var(--text-1);
       }
       .mobile-warning p{
         color: var(--text-3);
-        max-width: 320px;
-        margin-bottom: var(--space-5);
+        max-width: 360px;
+        margin-bottom: var(--space-4);
         line-height: 1.6;
+        font-size: 14px;
       }
+      .mobile-warning .mobile-warning-devices{
+        display: flex; gap: 18px;
+        margin-bottom: var(--space-5);
+        color: var(--text-3);
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .mobile-warning .mobile-warning-devices > div{
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+      }
+      .mobile-warning .mobile-warning-devices svg{
+        color: #6f42c1;
+      }
+      .mobile-warning .mobile-warning-link{
+        font-size: 13px;
+        color: var(--accent);
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 4px;
+      }
+      .mobile-warning .mobile-warning-link:hover{ text-decoration: underline; }
     }
 
     /* ═══════════════════════════════════════════════
@@ -2686,6 +2712,21 @@
       :root{--sidebar-w: 200px}
       .main-inner{padding: var(--space-5)}
       .upload-hero h1{font-size: 28px}
+    }
+
+    /* Tablet portrait (≈600-820px): sidebar narrow, AI drawer nearly full-width,
+       modal padding tightens. We KEEP the sidebar visible — the user can still
+       collapse it manually via the existing sidebar-toggle button. */
+    @media (max-width: 820px){
+      :root{--sidebar-w: 180px}
+      .header{ padding: 0 var(--space-4); gap: var(--space-2); }
+      .header .btn{ padding-left: 10px; padding-right: 10px; }
+      .ai-drawer{ width: min(380px, 92vw); }
+      .ai-ask-bar-input{ font-size: 13px; }
+      .modal{ padding: var(--space-5); }
+      .modal--sql{ padding: var(--space-4); }
+      /* Allow header buttons to wrap if there's no room on iPad portrait. */
+      .header-right{ flex-wrap: wrap; row-gap: 4px; }
     }
 
     /* ─── SQL / data-source icon variants ───────────────────────── */
@@ -2772,6 +2813,336 @@
       padding: 12px 8px; font-size: 11.5px; color: var(--text-4); text-align: center;
     }
 
+    /* ─── AI Insights feed (top-of-dashboard strip) ────────── */
+    .ai-insights-strip {
+      margin-bottom: var(--space-4);
+      border: 1.5px solid #e1d5f5;
+      border-radius: var(--r-md);
+      background: linear-gradient(180deg, #faf7ff 0%, #ffffff 100%);
+      overflow: hidden;
+    }
+    .ai-insights-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #5b2ec2;
+    }
+    .ai-insights-header .ai-insights-header-title {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+    .ai-insights-header svg.spark { color: #6f42c1; }
+    .ai-insights-count {
+      font-size: 11px;
+      background: #ede4fc;
+      color: #6f42c1;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .ai-insights-chevron {
+      transition: transform var(--duration-fast);
+      color: #6f42c1;
+    }
+    .ai-insights-strip.collapsed .ai-insights-chevron { transform: rotate(-90deg); }
+    .ai-insights-action-btn {
+      width: 26px; height: 26px;
+      border-radius: var(--r-sm);
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent;
+      color: #6f42c1;
+      cursor: pointer;
+      transition: background var(--duration-fast);
+    }
+    .ai-insights-action-btn:hover { background: #ede4fc; }
+    .ai-insights-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ai-insights-body {
+      padding: 0 14px 14px 14px;
+    }
+    .ai-insights-strip.collapsed .ai-insights-body { display: none; }
+    .ai-insights-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .ai-insight-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      padding: 12px;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .ai-insight-card:hover {
+      border-color: #b794e6;
+      box-shadow: 0 4px 12px rgba(111,66,193,0.08);
+      transform: translateY(-1px);
+    }
+    .ai-insight-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--text-2);
+    }
+    .ai-insight-icon.kind-trend       { background: #e8f5ec; color: #0f9d58; }
+    .ai-insight-icon.kind-anomaly     { background: #fdecea; color: #b3261e; }
+    .ai-insight-icon.kind-distribution{ background: #eef4fb; color: #2563eb; }
+    .ai-insight-icon.kind-correlation { background: #f0ebfa; color: #6f42c1; }
+    .ai-insight-icon.kind-outlier     { background: #fff3cd; color: #8a6d1c; }
+    .ai-insight-icon.kind-top         { background: #fdf4e6; color: #c98a17; }
+    .ai-insight-icon.kind-summary     { background: var(--surface-2); color: var(--text-2); }
+    .ai-insight-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-1);
+      line-height: 1.35;
+    }
+    .ai-insight-detail {
+      font-size: 12px;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+    .ai-insight-kind {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: var(--text-4);
+    }
+    .ai-insights-skeleton {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .ai-insights-skeleton-card {
+      height: 90px;
+      border-radius: var(--r-md);
+      background: linear-gradient(90deg, #f5f3f0 0%, #ebe6dc 50%, #f5f3f0 100%);
+      background-size: 200% 100%;
+      animation: ai-skel 1.4s ease-in-out infinite;
+    }
+    @keyframes ai-skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .ai-insights-empty {
+      padding: 14px;
+      font-size: 12.5px;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+    .ai-insights-empty .ai-insights-cta {
+      color: #6f42c1; cursor: pointer; font-weight: 600;
+    }
+    .ai-insights-empty .ai-insights-cta:hover { text-decoration: underline; }
+    .ai-insights-error {
+      padding: 12px 14px;
+      background: #fdecea; color: #b3261e;
+      border: 1px solid #f5c6c2;
+      border-radius: var(--r-md);
+      font-size: 12.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ai-insights-meta {
+      font-size: 10.5px;
+      color: var(--text-4);
+      font-family: var(--font-mono);
+      margin-top: 6px;
+    }
+    /* "These insights are 2d old · refresh now" banner shown when cached > 24h */
+    .ai-insights-stale-banner {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff8e1;
+      border: 1px solid #f5d680;
+      color: #8a6d1c;
+      padding: 8px 12px;
+      border-radius: var(--r-md);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .ai-insights-stale-banner svg { flex-shrink: 0; }
+    .ai-insights-stale-banner span { flex: 1; line-height: 1.45; }
+    .ai-insights-stale-banner .btn-sm { padding: 4px 10px; font-size: 11.5px; }
+    /* Tablet header: prevent overflow when count + actions all show */
+    .ai-insights-header-title { min-width: 0; flex: 1 1 auto; }
+    .ai-insights-action-btn { flex-shrink: 0; }
+
+    /* ─── AI Onboarding modal (post-upload starter dashboard) ── */
+    .ai-onboard-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+    }
+    .ai-onboard-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      color: #6f42c1;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ai-onboard-sub {
+      color: var(--text-3); font-size: 13px; line-height: 1.5;
+      margin-bottom: var(--space-4);
+    }
+    .ai-category-chips {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: 6px;
+    }
+    .ai-category-chip {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border-1);
+      border-radius: 999px;
+      background: var(--surface-1);
+      color: var(--text-2);
+      font-size: 12.5px; font-weight: 500;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+    .ai-category-chip:hover {
+      border-color: #b794e6;
+      color: #6f42c1;
+    }
+    .ai-category-chip.selected {
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      border-color: #6f42c1;
+      color: #6f42c1;
+    }
+    .ai-onboard-skip-line {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: var(--space-3);
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border-radius: var(--r-md);
+      font-size: 12px; color: var(--text-3);
+    }
+    .ai-onboard-skip-line svg { color: var(--text-4); flex-shrink: 0; }
+    .ai-onboard-thinking {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 30px 0;
+      text-align: center;
+    }
+    .ai-onboard-thinking-title { font-weight: 600; color: var(--text-1); font-size: 14px; }
+    .ai-onboard-thinking-sub { color: var(--text-3); font-size: 12px; }
+    .ai-onboard-thinking .ai-spinner {
+      width: 22px; height: 22px; border-width: 3px;
+    }
+    /* "What did AI build" success preview inside the modal before proceeding */
+    .ai-onboard-result {
+      background: var(--surface-2); border: 1px solid var(--border-1);
+      border-radius: var(--r-md); padding: 12px; margin: 10px 0;
+    }
+    .ai-onboard-result-title {
+      font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 6px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .ai-onboard-result-charts {
+      display: flex; flex-direction: column; gap: 4px;
+      font-size: 12.5px; color: var(--text-2);
+    }
+    .ai-onboard-result-charts > div { display: flex; align-items: center; gap: 6px; }
+
+    /* ─── Cmd+K command palette ──────────────────────────────── */
+    .cmdk-bg {
+      position: fixed; inset: 0;
+      background: rgba(15, 18, 28, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1200;
+      display: none;
+      align-items: flex-start; justify-content: center;
+      padding-top: 12vh;
+    }
+    .cmdk-bg.open { display: flex; }
+    .cmdk-card {
+      width: min(680px, 92vw);
+      max-height: 70vh;
+      background: var(--surface-1);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-xl);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .cmdk-input-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-1);
+    }
+    .cmdk-input-row svg { color: var(--text-3); flex-shrink: 0; }
+    .cmdk-input {
+      flex: 1;
+      border: 0; outline: none; background: transparent;
+      font-size: 15px; color: var(--text-1);
+      font-family: var(--font-base);
+    }
+    .cmdk-input::placeholder { color: var(--text-4); }
+    .cmdk-kbd {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-4);
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .cmdk-list {
+      overflow-y: auto;
+      padding: 6px 0 10px 0;
+      flex: 1;
+    }
+    .cmdk-group-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-4);
+      padding: 10px 16px 4px 16px;
+    }
+    .cmdk-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 13.5px;
+      color: var(--text-1);
+      border-left: 2px solid transparent;
+    }
+    .cmdk-item .cmdk-item-icon {
+      width: 26px; height: 26px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface-2);
+      color: var(--text-2);
+      flex-shrink: 0;
+    }
+    .cmdk-item .cmdk-item-title { flex: 1; }
+    .cmdk-item .cmdk-item-sub { color: var(--text-4); font-size: 11.5px; margin-top: 2px; }
+    .cmdk-item.active {
+      background: var(--surface-2);
+      border-left-color: var(--accent);
+    }
+    .cmdk-item.active .cmdk-item-icon { background: var(--accent); color: #fff; }
+    .cmdk-item .cmdk-item-hint {
+      font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--text-4);
+    }
+    .cmdk-empty {
+      padding: 24px 16px; text-align: center;
+      color: var(--text-4); font-size: 13px;
+    }
+    .cmdk-trigger-hint {
+      position: fixed; bottom: 18px; right: 20px;
+      z-index: 80;
+      background: var(--surface-1);
+      border: 1px solid var(--border-1);
+      color: var(--text-3);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      opacity: 0.85;
+      transition: opacity var(--duration-fast);
+    }
+    .cmdk-trigger-hint:hover { opacity: 1; }
+    @media (max-width: 700px) { .cmdk-trigger-hint { display: none; } }
+
     /* ─── AI: status dot in sidebar gear ──────────────────────── */
     .ai-status-dot {
       display: inline-block;
@@ -2835,13 +3206,13 @@
     .ai-privacy-note ul { margin: 4px 0 0 16px; padding: 0; }
     .ai-privacy-note li { margin: 2px 0; }
 
-    /* ─── AI: ask bar above charts grid ────────────────────────── */
+    /* ─── AI: "Ask Glimpse" bar above charts grid ─────────────── */
     .ai-ask-bar {
       display: flex; align-items: center; gap: 10px;
       background: linear-gradient(135deg, #f5f0ff 0%, #f0ebfa 100%);
       border: 1.5px solid #d9c9f5;
       border-radius: 999px;
-      padding: 8px 12px 8px 16px;
+      padding: 6px 10px 6px 14px;
       margin-bottom: var(--space-4);
       cursor: text;
       transition: all var(--duration-fast);
@@ -2850,16 +3221,24 @@
       border-color: #b794e6;
       box-shadow: 0 4px 12px rgba(111,66,193,0.08);
     }
-    .ai-ask-bar-icon {
-      width: 20px; height: 20px; color: #6f42c1; flex-shrink: 0;
+    .ai-ask-bar-brand {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #5b2ec2;
+      font-size: 12.5px; font-weight: 700;
+      letter-spacing: 0.01em;
+      flex-shrink: 0;
+      padding-right: 10px;
+      border-right: 1px solid #d9c9f5;
     }
+    .ai-ask-bar-brand svg { width: 16px; height: 16px; color: #6f42c1; }
     .ai-ask-bar-input {
       flex: 1;
       border: 0; background: transparent; outline: none;
       font-size: 14px; color: var(--text-1);
       font-family: var(--font-base);
+      min-width: 0;
     }
-    .ai-ask-bar-input::placeholder { color: #7c5fb0; opacity: 0.85; }
+    .ai-ask-bar-input::placeholder { color: #7c5fb0; opacity: 0.85; font-style: italic; }
     .ai-ask-bar-kbd {
       font-family: var(--font-mono);
       font-size: 10px; color: #6f42c1;
@@ -2867,16 +3246,65 @@
       padding: 2px 6px; border-radius: 4px;
       flex-shrink: 0;
     }
+    .ai-ask-bar-insights-toggle {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(111,66,193,0.08);
+      border: 1px solid #d9c9f5;
+      color: #5b2ec2;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all var(--duration-fast);
+    }
+    .ai-ask-bar-insights-toggle:hover { background: rgba(111,66,193,0.15); }
     .ai-ask-bar-cta {
       background: #6f42c1; color: #fff; border: 0;
       border-radius: 999px;
       padding: 6px 14px;
       font-size: 12.5px; font-weight: 600;
       cursor: pointer;
-      display: flex; align-items: center; gap: 4px;
+      display: flex; align-items: center; gap: 5px;
+      flex-shrink: 0;
     }
     .ai-ask-bar-cta:hover { background: #5b2ec2; }
     .ai-ask-bar-cta:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Tablet portrait: hide the kbd hint to free room for the brand + insights toggle. */
+    @media (max-width: 820px) {
+      .ai-ask-bar-kbd { display: none; }
+      .ai-ask-bar-brand span { display: none; }
+    }
+
+    /* AI elements are a "viewing" experience — editing dashboards is a focused
+       task and AI clutter is distracting in that mode. Hide both the Ask
+       Glimpse bar and the Insights strip whenever the user is in edit mode. */
+    body.edit-mode .ai-ask-bar,
+    body.edit-mode #aiInsightsStrip,
+    body.edit-mode .ai-disclaimer { display: none !important; }
+
+    /* "AI makes mistakes" disclaimer under the ask bar. Muted, italic, low-key
+       — should be informative without competing with the dashboard. */
+    .ai-disclaimer {
+      font-size: 11px;
+      color: var(--text-4);
+      font-style: italic;
+      text-align: left;
+      margin: -8px 0 var(--space-3) 14px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .ai-disclaimer svg { color: var(--text-4); }
+
+    /* Disabled states for the Ask Glimpse + Show Insights buttons. */
+    .ai-ask-bar-cta:disabled,
+    .ai-ask-bar-insights-toggle:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .ai-ask-bar-cta:disabled:hover { background: #6f42c1; }
+    .ai-ask-bar-insights-toggle:disabled:hover { background: rgba(111,66,193,0.08); }
 
     /* ─── AI: right-side chat drawer ───────────────────────────── */
     .ai-drawer {
@@ -3222,11 +3650,22 @@
 <!-- Mobile fallback -->
 <div class="mobile-warning">
   <div class="mobile-warning-icon">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>
   </div>
-  <h1>Best on desktop</h1>
-  <p>Glimpse is designed for screens 768px and wider - you'll get the full dashboard experience there. Open this URL on a laptop or desktop to continue.</p>
-  <a href="/" style="font-size:13px;color:var(--accent)">← Back to Datapad</a>
+  <h1>Try Glimpse on a bigger screen</h1>
+  <p>Glimpse is a full dashboard builder — charts, filters, SQL editor, and AI chat — and it really shines on a tablet or laptop. We've designed it to feel great on iPad-sized screens and above.</p>
+  <div class="mobile-warning-devices">
+    <div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="14" rx="2"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      <span>Laptop</span>
+    </div>
+    <div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+      <span>Tablet</span>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--text-4);margin-top:-12px">Bookmark this page and come back when you're on a bigger device.</p>
+  <a href="/" class="mobile-warning-link">← Back to Datapad</a>
 </div>
 
 <a href="#main" class="skip-link">Skip to main content</a>
@@ -3241,8 +3680,8 @@
 <div class="drop-overlay" id="dropOverlay" aria-hidden="true">
   <div class="drop-overlay-card">
     <svg class="drop-overlay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    <div class="drop-overlay-title">Drop your CSV anywhere</div>
-    <div class="drop-overlay-sub">.csv, .tsv, or .txt - auto-detected</div>
+    <div class="drop-overlay-title">Drop your file anywhere</div>
+    <div class="drop-overlay-sub">CSV, TSV, TXT, Excel (.xlsx, .xls) or Parquet — auto-detected</div>
   </div>
 </div>
 
@@ -3366,6 +3805,24 @@
   <div class="modal" id="modalContent"></div>
 </div>
 
+<!-- Cmd+K command palette -->
+<div class="cmdk-bg" id="cmdkBg" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="cmdk-card" id="cmdkCard">
+    <div class="cmdk-input-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="cmdk-input" id="cmdkInput" type="text" placeholder="Type a command or search…" autocomplete="off" spellcheck="false"/>
+      <span class="cmdk-kbd">esc</span>
+    </div>
+    <div class="cmdk-list" id="cmdkList" role="listbox"></div>
+  </div>
+</div>
+
+<!-- Floating hint (bottom-right) — only on dashboard/schema views -->
+<button type="button" class="cmdk-trigger-hint" id="cmdkTriggerHint" onclick="openCommandPalette()" title="Open command palette" hidden>
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <span id="cmdkTriggerHintKbd">⌘K</span>
+</button>
+
 <!-- Preview drawer -->
 <aside class="preview-drawer" id="previewDrawer" aria-label="Column inspector"></aside>
 
@@ -3373,7 +3830,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- Hidden file input -->
-<input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none" aria-hidden="true"/>
+<input type="file" id="fileInput" accept=".csv,.tsv,.txt,.xlsx,.xls,.parquet" style="display:none" aria-hidden="true"/>
 
 <script>
 'use strict';
@@ -3386,12 +3843,13 @@ var DB_NAME      = 'glimpse-v1';
 // History: v1 had datasets+dashboards. v2 added folders. v3/v4 were transient
 // versions during a buggy self-heal in earlier dev. v5 is the canonical schema -
 // any existing DB at any earlier version migrates cleanly via `onupgradeneeded`.
-var DB_VERSION   = 6;
+var DB_VERSION   = 7;
 var STORE_DS       = 'datasets';
 var STORE_DASH     = 'dashboards';
 var STORE_FOLDER   = 'folders';
 var STORE_SETTINGS = 'settings';
 var STORE_CHAT     = 'chat';      // {id: <datasetId>, messages: [...]}
+var STORE_INSIGHTS = 'insights';  // {id: <datasetId>, items: [...], generatedAt, fingerprint}
 var MAX_FILE_MB = 250;
 var WARN_FILE_MB = 25;
 var MAX_ROWS_DEFAULT = 1000000;
@@ -3450,7 +3908,10 @@ var App = {
   expandedFolders: {},     // {[folderId]: bool} - UI-only expansion state
   aiSettings: null,        // {provider, model, apiKey, createdAt, lastUsedAt} or null
   chatHistory: {},         // {[datasetId]: [{role, content, ts, chart?, sql?, error?}]}
-  aiBusy: false            // true while an AI request is in flight
+  aiBusy: false,           // true while an AI request is in flight
+  insights: {},            // {[datasetId]: {items, generatedAt, fingerprint}} in-memory cache
+  insightsBusy: {},        // {[datasetId]: bool} — prevent double-fetch
+  insightsCollapsed: {}    // {[datasetId]: bool} — per-dataset UI collapse state (persisted to localStorage)
 };
 
 // Kick off IndexedDB open IMMEDIATELY when the script parses, not inside init().
@@ -3507,6 +3968,9 @@ function dbOpen() {
       }
       if (!db.objectStoreNames.contains(STORE_CHAT)) {
         db.createObjectStore(STORE_CHAT, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_INSIGHTS)) {
+        db.createObjectStore(STORE_INSIGHTS, { keyPath: 'id' });
       }
     };
     req.onblocked = function() {
@@ -6259,6 +6723,12 @@ function toggleMode() {
   App.isEditMode = !App.isEditMode;
   syncModeUI();
   if (App.step === 'dashboard') setStep('dashboard');
+  // Coming back to view mode? Restart the placeholder animation so the ask bar
+  // feels alive again. Going to edit mode? The CSS hides it; the anim's own
+  // guard will see isEditMode and stop on the next tick.
+  if (!App.isEditMode && App.step === 'dashboard' && typeof refreshAskBarTypingAnim === 'function') {
+    setTimeout(refreshAskBarTypingAnim, 30);
+  }
 }
 
 // Global drag-and-drop: drop a CSV anywhere on the page.
@@ -6512,7 +6982,7 @@ function renderHome() {
         '</div>' +
         '<div class="home-action-text">' +
           '<div class="home-action-title">Upload a CSV</div>' +
-          '<div class="home-action-sub">Drag, drop, or browse - works with .csv, .tsv, .txt</div>' +
+          '<div class="home-action-sub">CSV, TSV, TXT, Excel (.xlsx, .xls) or Parquet — drag, drop, or browse</div>' +
         '</div>' +
       '</button>' +
       '<button type="button" class="home-action" onclick="setStep(\'upload\')">' +
@@ -6608,7 +7078,7 @@ function renderUpload() {
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
       '</div>' +
       '<div class="upload-title">Drop your CSV here</div>' +
-      '<div class="upload-sub">or click to browse - CSV, TSV, or TXT</div>' +
+      '<div class="upload-sub">or click to browse — CSV, TSV, TXT, Excel (.xlsx, .xls), Parquet</div>' +
       '<button class="btn btn-primary" style="margin-bottom:var(--space-5)" onclick="event.stopPropagation();triggerFileInput()">Browse files</button>' +
       '<div class="upload-info">' +
         '<span class="upload-info-item">Up to 250 MB</span>' +
@@ -7084,26 +7554,42 @@ function handleFile(file) {
 
   // Validate extension
   var ext = (file.name || '').split('.').pop().toLowerCase();
-  if (!['csv','tsv','txt'].includes(ext)) {
-    toast('Unsupported file type. Please use CSV, TSV, or TXT.', 'error', 4000);
+  if (!['csv','tsv','txt','xlsx','xls','parquet'].includes(ext)) {
+    toast('Unsupported file type. Use CSV, TSV, TXT, Excel (.xlsx, .xls), or Parquet.', 'error', 4500);
     return;
   }
 
-  // Size check
+  // Size check. Excel needs a TIGHTER cap because SheetJS has to fully parse
+  // the workbook (decompressed XML) into JS objects before we can sample rows —
+  // a 100 MB .xlsx typically expands to 1-3 GB in memory and crashes the tab.
   var sizeMB = file.size / 1048576;
+  var MAX_XLSX_MB = 50;
+  if ((ext === 'xlsx' || ext === 'xls') && sizeMB > MAX_XLSX_MB) {
+    toast('Excel files are capped at ' + MAX_XLSX_MB + ' MB (yours is ' + fmtBytes(file.size) + '). Convert to CSV or Parquet for larger data.', 'error', 6500);
+    return;
+  }
   if (sizeMB > MAX_FILE_MB) {
     toast('File exceeds ' + MAX_FILE_MB + ' MB limit (' + fmtBytes(file.size) + '). Please use a smaller file.', 'error', 5000);
     return;
   }
 
   if (sizeMB > WARN_FILE_MB) {
-    // Show warning + confirm
+    // Tailor the warn message per format. CSV/Parquet sample at MAX_ROWS_DEFAULT;
+    // Excel must parse the full workbook into memory regardless of row cap.
+    var warnBody;
+    if (ext === 'xlsx' || ext === 'xls') {
+      warnBody = 'This Excel file is ' + fmtBytes(file.size) + '. Excel parsing keeps the whole workbook in memory — large files may slow or crash the tab. We will keep the first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' rows.';
+    } else if (ext === 'parquet') {
+      warnBody = 'This Parquet file is ' + fmtBytes(file.size) + '. Glimpse will load up to ' + MAX_ROWS_DEFAULT.toLocaleString() + ' rows via DuckDB. Very large files may still be limited by browser memory.';
+    } else {
+      warnBody = 'This file is ' + fmtBytes(file.size) + '. Glimpse will load up to ' + MAX_ROWS_DEFAULT.toLocaleString() + ' rows. Very large files may still be limited by your browser memory.';
+    }
     openModal(
-      '<button class="modal-close" onclick="closeModal()">✕</button>' +
+      '<button class="modal-close" onclick="cancelLargeFile()">✕</button>' +
       '<h2>Large file detected</h2>' +
-      '<p>This file is ' + fmtBytes(file.size) + '. Glimpse will load up to ' + MAX_ROWS_DEFAULT.toLocaleString() + ' rows. Very large files may still be limited by your browser memory.</p>' +
+      '<p>' + warnBody + '</p>' +
       '<div class="modal-actions">' +
-        '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+        '<button class="btn btn-ghost" onclick="cancelLargeFile()">Cancel</button>' +
         '<button class="btn btn-primary" onclick="closeModal();proceedWithFile()">Continue</button>' +
       '</div>'
     );
@@ -7115,6 +7601,13 @@ function handleFile(file) {
   proceedWithFile();
 }
 
+// Cancel handler for the large-file warn modal: also clears App.pendingFile so
+// a subsequent code path can't accidentally pick up the cancelled file.
+function cancelLargeFile() {
+  App.pendingFile = null;
+  closeModal();
+}
+
 function proceedWithFile() {
   var file = App.pendingFile;
   if (!file) return;
@@ -7122,10 +7615,16 @@ function proceedWithFile() {
 }
 
 function parseFile(file) {
+  var ext  = (file.name || '').split('.').pop().toLowerCase();
+
+  // Binary formats route through dedicated parsers (DuckDB / SheetJS) instead
+  // of the CSV text decoder path below. Each shows its own progress overlay.
+  if (ext === 'xlsx' || ext === 'xls') return parseExcelFile(file);
+  if (ext === 'parquet')                return parseParquetFile(file);
+
   showParseOverlay('Reading your file…', 'Detecting delimiter and encoding');
 
   // Detect delimiter from extension + sniff
-  var ext  = (file.name || '').split('.').pop().toLowerCase();
   var delim = ext === 'tsv' ? '\t' : undefined; // undefined = PapaParse auto-detect
 
   // BOM-aware reading: sniff the first bytes to pick UTF-8 / UTF-16 LE / UTF-16 BE,
@@ -7156,6 +7655,228 @@ function parseFile(file) {
     parseCSVText(text, file.name, file.size, delim).catch(function() {});
   };
   bomReader.readAsArrayBuffer(file);
+}
+
+// ─── Excel (.xlsx / .xls) ingest via SheetJS, lazy-loaded ───────────
+var SHEETJS_CDN = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+var _sheetjsLoadPromise = null;
+function loadSheetJS() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (_sheetjsLoadPromise) return _sheetjsLoadPromise;
+  _sheetjsLoadPromise = new Promise(function(res, rej) {
+    var s = document.createElement('script');
+    s.src = SHEETJS_CDN;
+    s.async = false;
+    s.onload  = function() { res(window.XLSX); };
+    s.onerror = function() {
+      _sheetjsLoadPromise = null; // allow retry
+      rej(new Error('Could not load Excel parser (offline or CDN blocked).'));
+    };
+    document.head.appendChild(s);
+  });
+  return _sheetjsLoadPromise;
+}
+
+function parseExcelFile(file) {
+  showParseOverlay('Reading Excel file…', 'Loading parser & detecting sheets');
+  loadSheetJS().then(function(XLSX) {
+    updateParseOverlay('Parsing sheet…', 'Converting to table');
+    var reader = new FileReader();
+    reader.onerror = function() {
+      hideParseOverlay();
+      toast('Failed to read Excel file', 'error', 4000);
+    };
+    reader.onload = function(e) {
+      var buf = new Uint8Array(e.target.result);
+      var wb;
+      try {
+        wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      } catch (err) {
+        hideParseOverlay();
+        toast('Could not parse Excel: ' + (err.message || err), 'error', 5000);
+        return;
+      }
+      if (!wb.SheetNames || !wb.SheetNames.length) {
+        hideParseOverlay();
+        toast('No sheets found in this Excel file', 'error', 4000);
+        return;
+      }
+      // If multiple sheets, ask which one. If only one, proceed directly.
+      if (wb.SheetNames.length > 1) {
+        hideParseOverlay();
+        promptExcelSheetChoice(wb, file);
+      } else {
+        finalizeExcelSheet(wb, wb.SheetNames[0], file);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }).catch(function(err) {
+    hideParseOverlay();
+    toast(err.message || String(err), 'error', 5500);
+  });
+}
+
+function promptExcelSheetChoice(wb, file) {
+  var rows = wb.SheetNames.map(function(name, i) {
+    var rangeRef = wb.Sheets[name] && wb.Sheets[name]['!ref'];
+    var rangeText = rangeRef ? rangeRef : '';
+    return '<label class="move-folder-option' + (i === 0 ? ' checked' : '') + '">' +
+      '<input type="radio" name="xlsxSheet" value="' + escHTML(name) + '"' + (i === 0 ? ' checked' : '') + '/>' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' +
+      '<span>' + escHTML(name) + '<span style="color:var(--text-4);margin-left:8px;font-family:var(--font-mono);font-size:11px">' + escHTML(rangeText) + '</span></span>' +
+    '</label>';
+  }).join('');
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Pick a sheet</h2>' +
+    '<p>This workbook has ' + wb.SheetNames.length + ' sheets. Choose one to import as a dataset.</p>' +
+    '<div class="modal-field">' +
+      '<div class="move-folder-list">' + rows + '</div>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" id="xlsxSheetGoBtn">Import sheet</button>' +
+    '</div>'
+  );
+  setTimeout(function() {
+    var btn = document.getElementById('xlsxSheetGoBtn');
+    if (btn) btn.onclick = function() {
+      var picked = document.querySelector('input[name="xlsxSheet"]:checked');
+      var name = picked ? picked.value : wb.SheetNames[0];
+      closeModal();
+      showParseOverlay('Importing "' + name + '"…', 'Building dataset');
+      setTimeout(function(){ finalizeExcelSheet(wb, name, file); }, 30);
+    };
+  }, 0);
+}
+
+function finalizeExcelSheet(wb, sheetName, file) {
+  try {
+    var sheet = wb.Sheets[sheetName];
+    // Pull as an array of arrays so the first row is treated as headers, like CSV.
+    // raw:true preserves typed cells (dates as JS Date, numbers as Number) so
+    // profileDataset can infer types correctly. defval keeps empty strings ('').
+    var rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: '', blankrows: false });
+    if (!rows.length) {
+      hideParseOverlay();
+      toast('Sheet "' + sheetName + '" is empty', 'warn', 4000);
+      return;
+    }
+    var headers = (rows[0] || []).map(function(h, i) {
+      var s = h == null ? '' : String(h).trim();
+      return s || ('Column ' + (i + 1));
+    });
+    // Dedupe duplicates → "X", "X_2", "X_3" — consistent with the CSV path.
+    var seen = {};
+    headers = headers.map(function(h) {
+      if (seen[h]) { var k = 2; while (seen[h + '_' + k]) k++; h = h + '_' + k; }
+      seen[h] = true; return h;
+    });
+    // Coerce every cell to a string-or-empty (mirrors the CSV path's invariant
+    // that ds.rows[i][j] is always a string). Otherwise downstream filters,
+    // CSV export, and share-link round-trip silently misbehave on xlsx data.
+    var dataRows = rows.slice(1, MAX_ROWS_DEFAULT + 1).map(function(r) {
+      var out = new Array(headers.length);
+      for (var i = 0; i < headers.length; i++) {
+        var v = r[i];
+        if (v === undefined || v === null || v === '') {
+          out[i] = '';
+        } else if (v instanceof Date && !isNaN(v.getTime())) {
+          var iso = v.toISOString();
+          out[i] = (iso.indexOf('T00:00:00') > -1 ? iso.slice(0, 10) : iso);
+        } else if (typeof v === 'number' || typeof v === 'boolean') {
+          out[i] = String(v);
+        } else if (typeof v === 'string') {
+          out[i] = v.trim();
+        } else {
+          out[i] = String(v);
+        }
+      }
+      return out;
+    });
+    var totalRows = rows.length - 1;
+    var datasetName = file.name.replace(/\.(xlsx|xls)$/i, '') + (wb.SheetNames.length > 1 ? ' · ' + sheetName : '');
+    var ds = buildDatasetRecord(dataRows, headers, {
+      name: datasetName,
+      sizeBytes: file.size,
+      totalRows: totalRows,
+      sampleMode: totalRows > MAX_ROWS_DEFAULT,
+      sourceType: 'file',
+      sourceMeta: { fileFormat: 'xlsx', sheet: sheetName }
+    });
+    commitDatasetRecord(ds).then(function() {
+      if (totalRows > MAX_ROWS_DEFAULT) {
+        toast('Imported first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + totalRows.toLocaleString() + ' rows', 'warn', 5000);
+      } else {
+        toast('Excel sheet imported', 'success', 2500);
+      }
+    }).catch(function(err) {
+      hideParseOverlay();
+      toast('Excel saved in memory but local storage failed: ' + (err.message || err), 'error', 5500);
+    });
+  } catch (err) {
+    hideParseOverlay();
+    toast('Could not import sheet "' + sheetName + '": ' + (err.message || err), 'error', 5500);
+  }
+}
+
+// ─── Parquet ingest via DuckDB-WASM (already loaded for SQL mode) ───
+function parseParquetFile(file) {
+  showParseOverlay('Reading Parquet…', 'Loading DuckDB engine');
+  DuckDBSQL.init().then(function() {
+    var reader = new FileReader();
+    reader.onerror = function() {
+      hideParseOverlay();
+      toast('Failed to read Parquet file', 'error', 4000);
+    };
+    reader.onload = async function(e) {
+      var buf = new Uint8Array(e.target.result);
+      // Random suffix prevents collisions between rapid concurrent uploads
+      // (Date.now() is not unique enough for back-to-back FileReader callbacks).
+      var fileName = '__pq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.parquet';
+      try {
+        updateParseOverlay('Parsing Parquet…', 'Reading columnar data');
+        // Register the binary file into DuckDB's virtual FS.
+        await DuckDBSQL.registerFileBuffer(fileName, buf);
+        // Pull all rows up to the cap.
+        var res = await DuckDBSQL.query("SELECT * FROM read_parquet('" + fileName + "') LIMIT " + MAX_ROWS_DEFAULT);
+        updateParseOverlay('Counting rows…', 'Reading total row count from Parquet metadata');
+        var totalCountRes = null;
+        try {
+          totalCountRes = await DuckDBSQL.query("SELECT COUNT(*) AS c FROM read_parquet('" + fileName + "')");
+        } catch (_) {}
+        // Cleanup virtual file.
+        await DuckDBSQL.dropFile(fileName);
+
+        var headers = res.headers.slice();
+        var dataRows = res.rows;
+        var totalRows = (totalCountRes && totalCountRes.rows[0] && Number(totalCountRes.rows[0][0])) || dataRows.length;
+        var datasetName = file.name.replace(/\.parquet$/i, '');
+        var ds = buildDatasetRecord(dataRows, headers, {
+          name: datasetName,
+          sizeBytes: file.size,
+          totalRows: totalRows,
+          sampleMode: totalRows > MAX_ROWS_DEFAULT,
+          sourceType: 'file',
+          sourceMeta: { fileFormat: 'parquet' }
+        });
+        await commitDatasetRecord(ds);
+        if (totalRows > MAX_ROWS_DEFAULT) {
+          toast('Imported first ' + MAX_ROWS_DEFAULT.toLocaleString() + ' of ' + totalRows.toLocaleString() + ' rows', 'warn', 5000);
+        } else {
+          toast('Parquet imported', 'success', 2500);
+        }
+      } catch (err) {
+        hideParseOverlay();
+        try { await DuckDBSQL.dropFile(fileName); } catch (_) {}
+        toast('Could not parse Parquet: ' + (err.message || err), 'error', 5500);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }).catch(function(err) {
+    hideParseOverlay();
+    toast('DuckDB engine failed to load: ' + (err.message || err), 'error', 5500);
+  });
 }
 
 function normalizeDatasetRecord(ds) {
@@ -7528,6 +8249,9 @@ function commitDatasetRecord(ds, options) {
       } else if (ds.sourceType === 'google_sheet') {
         toast('Google Sheet imported', 'success');
       }
+      // After the schema page is up, offer to have AI build a tailored starter
+      // dashboard. Heuristic charts are already saved as a baseline fallback.
+      try { if (typeof maybeShowAiOnboarding === 'function') maybeShowAiOnboarding(ds, options); } catch (e) {}
     }
     return ds;
   }).finally(function() {
@@ -8202,28 +8926,159 @@ function renderDashboard() {
     '</div>' +
     filterBarHtml +
     renderAiAskBar() +
+    renderAiInsightsStrip() +
     '<div class="dashboard" id="dashboard">' +
       chartsHtml + addCardHtml +
     '</div>' +
   '</div>';
 }
 
-// "Ask AI" bar rendered above the charts grid. Submitting opens the chat drawer
-// pre-populated with the question and fires the NL->chart pipeline.
+// "Ask Glimpse" bar rendered above the charts grid (view mode only). Layout:
+//   | brand | input | Ask Glimpse (disabled when empty) | Show insights (disabled when strip already showing) |
+// Followed by a small "AI makes mistakes — please validate" disclaimer.
 function renderAiAskBar() {
   return '<div class="ai-ask-bar" id="aiAskBar" onclick="document.getElementById(\'aiAskBarInput\').focus()">' +
-    '<svg class="ai-ask-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-      '<path d="M12 2l2.39 6.76L21 9.18l-5.18 4.27L17.27 21 12 17l-5.27 4 1.45-7.55L3 9.18l6.61-.42L12 2z"/>' +
-    '</svg>' +
+    '<div class="ai-ask-bar-brand" title="Ask Glimpse — your data co-pilot">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l-7 7v8l3 0 7-7"/><path d="M14 4l3 3L9 15"/><path d="M19 11l1 1"/><path d="M18 6l1.5-1.5"/><path d="M21 8l1 0"/></svg>' +
+      '<span>Ask Glimpse</span>' +
+    '</div>' +
     '<input class="ai-ask-bar-input" id="aiAskBarInput" type="text" ' +
-      'placeholder="Ask anything about this data… e.g. \"revenue by region last quarter\"" ' +
+      'placeholder="" autocomplete="off" ' +
+      'oninput="updateAskBarSubmitState()" ' +
       'onkeydown="if(event.key===\'Enter\'){event.preventDefault();aiAskBarSubmit()}"/>' +
-    '<span class="ai-ask-bar-kbd">Enter</span>' +
-    '<button class="ai-ask-bar-cta" onclick="aiAskBarSubmit();event.stopPropagation()">' +
+    '<button class="ai-ask-bar-cta" id="aiAskBarSubmitBtn" disabled ' +
+      'onclick="aiAskBarSubmit();event.stopPropagation()">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
-      'Ask' +
+      'Ask Glimpse' +
     '</button>' +
+    '<button class="ai-ask-bar-insights-toggle" id="aiAskBarInsightsToggle" ' +
+      'title="Show AI insights — enabled when insights are hidden" ' +
+      'onclick="event.stopPropagation();reEnableInsightsFromAskBar()">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+      'Show insights' +
+    '</button>' +
+  '</div>' +
+  '<div class="ai-disclaimer" title="Always sanity-check AI output before relying on it">' +
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<span>AI makes mistakes — please validate the output before acting on it.</span>' +
   '</div>';
+}
+
+// Enable the "Ask Glimpse" submit button only when the input has non-whitespace
+// content. Cleanly disables the empty-prompt → useless-AI-call path.
+function updateAskBarSubmitState() {
+  var input = document.getElementById('aiAskBarInput');
+  var btn = document.getElementById('aiAskBarSubmitBtn');
+  if (!input || !btn) return;
+  btn.disabled = !input.value || !input.value.trim();
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Magic-typing animation in the ask bar's placeholder. Cycles through a
+// small set of example prompts. Paused when the input is focused or has
+// any user-typed value — typing into the input shouldn't fight the bot.
+// ──────────────────────────────────────────────────────────────────
+var ASK_BAR_PROMPTS = [
+  'revenue by region last quarter',
+  'top 10 customers by lifetime value',
+  'what changed in the last 7 days?',
+  'forecast next 3 months',
+  'find anomalies in conversion rate',
+  'average tenure by department'
+];
+App._askBarAnim = App._askBarAnim || { running: false, idx: 0, char: 0, mode: 'type', timer: null };
+
+function startAskBarTypingAnim() {
+  var anim = App._askBarAnim;
+  if (anim.running) return;
+  anim.running = true;
+  function tick() {
+    var input = document.getElementById('aiAskBarInput');
+    if (!input) { anim.running = false; return; } // ask bar unmounted
+    // Edit mode hides the ask bar entirely → stop animating (no CPU waste).
+    if (App.isEditMode) { anim.running = false; return; }
+    // Pause when user is actively engaging.
+    if (document.activeElement === input || (input.value && input.value.length)) {
+      anim.timer = setTimeout(tick, 400);
+      return;
+    }
+    var phrase = ASK_BAR_PROMPTS[anim.idx % ASK_BAR_PROMPTS.length];
+    if (anim.mode === 'type') {
+      anim.char++;
+      input.placeholder = phrase.slice(0, anim.char) + '▍';
+      if (anim.char >= phrase.length) {
+        anim.mode = 'pause-full';
+        anim.timer = setTimeout(tick, 1600);
+        return;
+      }
+      anim.timer = setTimeout(tick, 38);
+    } else if (anim.mode === 'pause-full') {
+      anim.mode = 'erase';
+      input.placeholder = phrase + ' ';
+      anim.timer = setTimeout(tick, 30);
+    } else if (anim.mode === 'erase') {
+      anim.char--;
+      input.placeholder = phrase.slice(0, anim.char) + '▍';
+      if (anim.char <= 0) {
+        anim.mode = 'type';
+        anim.idx++;
+        anim.char = 0;
+        anim.timer = setTimeout(tick, 220);
+        return;
+      }
+      anim.timer = setTimeout(tick, 22);
+    }
+  }
+  tick();
+}
+
+function stopAskBarTypingAnim() {
+  var anim = App._askBarAnim;
+  anim.running = false;
+  if (anim.timer) { clearTimeout(anim.timer); anim.timer = null; }
+}
+
+// Wire after each dashboard mount so the animation restarts cleanly when the
+// ask bar is recreated by setStep('dashboard').
+function refreshAskBarTypingAnim() {
+  stopAskBarTypingAnim();
+  var anim = App._askBarAnim;
+  anim.idx = 0; anim.char = 0; anim.mode = 'type';
+  startAskBarTypingAnim();
+}
+
+// "Show insights" button on the ask bar is ALWAYS visible, but only ENABLED
+// when the insights strip has been dismissed/closed for the active dataset.
+// When the strip is already showing on screen, the button is disabled (greyed)
+// because there's nothing to re-show — visual feedback that the action isn't
+// available right now.
+function updateAskBarInsightsToggle() {
+  var btn = document.getElementById('aiAskBarInsightsToggle');
+  if (!btn) return;
+  var ds = activeDataset();
+  if (!ds) { btn.disabled = true; return; }
+  var dismissed = !!(App._insightsDismissedThisSession && App._insightsDismissedThisSession[ds.id]);
+  var collapsedHard = !!App.insightsCollapsed[ds.id];
+  // Enabled iff insights are currently hidden / collapsed for this dataset.
+  btn.disabled = !(dismissed || collapsedHard);
+  btn.title = btn.disabled
+    ? 'AI insights are already visible above'
+    : 'Show AI insights';
+}
+
+// Called by the Ask bar's "Show insights" button: undismiss + un-collapse and
+// repaint. Does NOT auto-fire AI — paint will surface the Generate CTA if
+// there's no cache (user must explicitly click Generate).
+function reEnableInsightsFromAskBar() {
+  var ds = activeDataset();
+  if (!ds) return;
+  if (App._insightsDismissedThisSession) delete App._insightsDismissedThisSession[ds.id];
+  App.insightsCollapsed[ds.id] = false;
+  persistInsightsCollapsedPref();
+  var strip = document.getElementById('aiInsightsStrip');
+  if (strip) { strip.classList.remove('collapsed'); strip.hidden = false; }
+  paintAiInsightsStrip();
+  updateAskBarInsightsToggle();
 }
 
 function renderFilterBar(schema) {
@@ -9271,19 +10126,25 @@ function renderSidebar() {
 
 function switchDataset(id) {
   if (id === App.activeDatasetId) {
-    // Already active - go to dashboard if we have charts
+    // Already active - go to dashboard if we have charts. Still force VIEW mode
+    // so re-clicking the active dataset doesn't stay in edit if the user
+    // toggled it earlier.
+    if (App.isEditMode) { App.isEditMode = false; syncModeUI(); }
     if (App.dashboards[id] && App.dashboards[id].length) setStep('dashboard');
     return;
   }
   App.activeDatasetId = id;
   App.filters = [];
+  // Switching datasets always lands on the VIEW experience — AI insights /
+  // Ask Glimpse / chart actions all assume "I'm exploring", not "I'm
+  // configuring". Edit mode stays sticky within a single dataset only.
+  if (App.isEditMode) { App.isEditMode = false; syncModeUI(); }
   var ds = activeDataset();
   if (!ds) return;
   if (!App.dashboards[id]) App.dashboards[id] = suggestCharts(ds.schema);
   // If the AI chat drawer is open, re-render it against the new dataset's history.
   var drawer = document.getElementById('aiDrawer');
   if (drawer && drawer.classList.contains('open')) {
-    // Lazy-load history for this dataset if not yet in memory.
     if (!App.chatHistory[id]) {
       loadChatHistory(id).then(function(hist) {
         App.chatHistory[id] = hist;
@@ -9376,7 +10237,20 @@ function confirmDeleteDataset(id) {
     }
   } catch (e) { /* non-fatal */ }
 
-  Promise.all([dbDelete(STORE_DS, id), dbDelete(STORE_DASH, id)].concat(savePromises)).then(function() {
+  // Best-effort cleanup of all per-dataset AI state for the deleted ds.
+  delete App.insights[id];
+  delete App.insightsBusy[id];
+  delete App.insightsCollapsed[id];
+  if (App._insightsBuildToken) delete App._insightsBuildToken[id];
+  if (App._insightsDismissedThisSession) delete App._insightsDismissedThisSession[id];
+  if (App._aiOnboardingShownFor) delete App._aiOnboardingShownFor[id];
+  persistInsightsCollapsedPref();
+  var extraCleanup = [
+    dbDelete(STORE_INSIGHTS, id).catch(function(){}),
+    dbDelete(STORE_CHAT, id).catch(function(){})
+  ];
+
+  Promise.all([dbDelete(STORE_DS, id), dbDelete(STORE_DASH, id)].concat(savePromises).concat(extraCleanup)).then(function() {
     if (staleSnapshot.length) {
       toast('Dataset deleted · ' + staleSnapshot.length + ' SQL dataset' + (staleSnapshot.length === 1 ? '' : 's') + ' marked stale', 'success', 4000);
     } else {
@@ -9902,7 +10776,9 @@ async function applyProjectBundle(bundle, mode) {
 function tryHandleProjectFile(file) {
   if (!file) return false;
   var name = (file.name || '').toLowerCase();
-  if (name.indexOf('.glimpse.json') === -1 && name.indexOf('.glimpse') === -1) return false;
+  // Suffix match: `.glimpse.json` or `.glimpse`. Substring match would wrongly
+  // route files like `revenue.glimpse.xlsx` here, then readAsText() on binary.
+  if (!/\.glimpse(\.json)?$/i.test(name)) return false;
   var reader = new FileReader();
   reader.onload = function(e) {
     importProjectFromText(String(e.target.result || ''), file.name);
@@ -9962,8 +10838,13 @@ function init() {
   syncModeUI();
   restoreSidebarState();
   loadExpandedFoldersPref();
+  loadInsightsCollapsedPref();
   // Load AI settings (BYOK) - does not block init; the status dot updates when done.
   loadAiSettings().catch(function(e){ console.warn('[Glimpse AI] settings load failed:', e); });
+  // Command palette: bind events once, install global shortcut, sync floating hint.
+  bindCommandPaletteOnce();
+  bindCommandPaletteShortcut();
+  updateCmdkTriggerHint();
 
   // Render the home/landing page IMMEDIATELY so the user is never staring at a
   // blank main area while IndexedDB does its (sometimes slow) open + migration
@@ -10315,7 +11196,24 @@ var DuckDBSQL = (function() {
     };
   }
 
-  return { init: init, registerDataset: registerDataset, unregister: unregister, query: query };
+  // Direct virtual-FS helpers (used by Parquet ingest path).
+  async function registerFileBuffer(name, buf) {
+    if (!conn) await init();
+    try { await db.dropFile(name); } catch (e) {}
+    await db.registerFileBuffer(name, buf);
+  }
+  async function dropFile(name) {
+    if (!db) return;
+    try { await db.dropFile(name); } catch (e) {}
+  }
+  return {
+    init: init,
+    registerDataset: registerDataset,
+    unregister: unregister,
+    query: query,
+    registerFileBuffer: registerFileBuffer,
+    dropFile: dropFile
+  };
 })();
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -11412,6 +12310,7 @@ function aiAskBarSubmit() {
   var q = (input.value || '').trim();
   if (!q) return;
   input.value = '';
+  updateAskBarSubmitState(); // clear → button disables again
   ensureAiConfiguredThen(function() {
     openAiDrawerWithQuestion(q);
   });
@@ -12025,15 +12924,1231 @@ function aiNlSqlInsertAtCursor() {
   var originalCloseModal = closeModal;
   closeModal = function() {
     var wasSetupModal = !!document.getElementById('aiSetupSaveBtn');
+    // Closing the modal (X, ESC, backdrop, anything) must also cancel any
+    // pending onboarding auto-advance — otherwise it fires 3.5s later and
+    // yanks the user from schema → dashboard after they explicitly dismissed.
+    if (App._aiOnboardingAutoAdvanceTimer) {
+      clearTimeout(App._aiOnboardingAutoAdvanceTimer);
+      App._aiOnboardingAutoAdvanceTimer = null;
+    }
     originalCloseModal();
     if (!wasSetupModal) return;
     if (App._aiSetupJustSucceeded) {
       App._aiSetupJustSucceeded = false;
+      App._pendingAiCancelAction = null;
       if (App._pendingAiAction) setTimeout(aiFirePendingAction, 80);
     } else {
-      // User cancelled or backdrop-closed the setup modal → drop pending action.
+      // User cancelled or backdrop-closed the setup modal. Drop the pending
+      // "on success" action, but fire any "on cancel" callback that was set.
       App._pendingAiAction = null;
+      var cancelFn = App._pendingAiCancelAction;
+      App._pendingAiCancelAction = null;
+      if (typeof cancelFn === 'function') setTimeout(cancelFn, 80);
     }
+  };
+})();
+
+// ════════════════════════════════════════════════════════════════════
+// ─── AI ONBOARDING (post-upload starter dashboard) ──────────────────
+// ════════════════════════════════════════════════════════════════════
+
+// Track which dataset IDs we've already shown the onboarding for so the modal
+// doesn't re-appear if the user re-renders the schema page.
+App._aiOnboardingShownFor = {};
+// User-disabled this session? (Don't re-prompt every upload during one visit.)
+App._aiOnboardingSilenced = false;
+
+var AI_ONBOARD_CATEGORIES = ['Sales', 'Marketing', 'Finance', 'People', 'Product', 'Operations'];
+
+function maybeShowAiOnboarding(ds, options) {
+  if (!ds || !ds.id) return;
+  if (options && options.isRefresh) return;
+  if (App._aiOnboardingShownFor[ds.id]) return;
+  if (App._aiOnboardingSilenced) return;
+  if (ds.sourceType === 'sample' || ds.sourceType === 'sql') return;
+  if (!Array.isArray(ds.rows) || !ds.rows.length) return;
+  if (!Array.isArray(ds.schema) || !ds.schema.length) return;
+  // Avoid stacking modals when several datasets land back-to-back (multi-sheet
+  // Excel, multi-file paste): only the FIRST dataset in a burst gets prompted,
+  // and the flag is set in openAiOnboardingModal so a failed open lets the user
+  // re-trigger via Cmd+K → Rebuild.
+  if (App._aiOnboardingPending) return;
+  if (document.getElementById('aiOnboardDescInput')) return; // modal already on-screen
+  App._aiOnboardingPending = true;
+  // Defer one tick so the schema page paint completes first.
+  setTimeout(function(){
+    App._aiOnboardingPending = false;
+    openAiOnboardingModal(ds);
+  }, 60);
+}
+
+function openAiOnboardingModal(ds) {
+  // Mark "shown" here (not in maybeShowAiOnboarding) so an early throw doesn't
+  // permanently burn the flag without the user ever seeing the modal.
+  App._aiOnboardingShownFor[ds.id] = true;
+  var hasAi = !!(App.aiSettings && App.aiSettings.apiKey);
+  var chipsHtml = AI_ONBOARD_CATEGORIES.map(function(cat) {
+    return '<button type="button" class="ai-category-chip" data-cat="' + escAttr(cat) + '" onclick="aiOnboardingToggleChip(this)">' + escHTML(cat) + '</button>';
+  }).join('');
+
+  var primaryButton = hasAi
+    ? '<button class="btn btn-primary" id="aiOnboardSubmitBtn" onclick="aiOnboardingSubmit()">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+        ' Build my dashboard' +
+      '</button>'
+    : '<button class="btn btn-primary" onclick="aiOnboardingConnectAi()">' +
+        'Connect AI →' +
+      '</button>';
+
+  var skipLabel = hasAi ? 'Skip — use default charts' : 'Skip for now';
+
+  openModal(
+    '<button class="modal-close" onclick="aiOnboardingSkip()">✕</button>' +
+    '<div class="ai-onboard-header">' +
+      '<div class="ai-onboard-icon">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+      '</div>' +
+      '<h2 style="margin:0">Tell us about your data</h2>' +
+    '</div>' +
+    '<div class="ai-onboard-sub">' +
+      (hasAi
+        ? 'A short description helps AI build a starter dashboard that actually answers your question — instead of generic charts.'
+        : 'Optional — connect an AI provider (BYOK) and AI will tailor a starter dashboard to your data. You can also skip and use the default charts.') +
+    '</div>' +
+
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">What is this data about? (optional)</label>' +
+      '<input class="modal-field-input" id="aiOnboardDescInput" type="text" autocomplete="off" placeholder="e.g. Q3 revenue by region · Marketing campaign performance · Employee tenure"/>' +
+    '</div>' +
+
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Category (optional)</label>' +
+      '<div class="ai-category-chips" id="aiOnboardChips">' + chipsHtml + '</div>' +
+    '</div>' +
+
+    '<div class="ai-onboard-skip-line">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
+      '<span>Skipping is fine — Glimpse already auto-built ' + (App.dashboards[ds.id] || []).length + ' default charts. You can also ask AI anytime from the dashboard.</span>' +
+    '</div>' +
+
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="aiOnboardingSkip()">' + escHTML(skipLabel) + '</button>' +
+      primaryButton +
+    '</div>'
+  );
+
+  // Stash the dataset id so submit handlers know which ds to build for.
+  App._aiOnboardingDatasetId = ds.id;
+  setTimeout(function() {
+    var input = document.getElementById('aiOnboardDescInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && hasAi) { e.preventDefault(); aiOnboardingSubmit(); }
+      });
+    }
+  }, 0);
+}
+
+function aiOnboardingToggleChip(btn) {
+  // Only one chip at a time selected.
+  var wasSelected = btn.classList.contains('selected');
+  var chips = document.querySelectorAll('#aiOnboardChips .ai-category-chip');
+  chips.forEach(function(c){ c.classList.remove('selected'); });
+  if (!wasSelected) btn.classList.add('selected');
+}
+
+function aiOnboardingSkip() {
+  App._aiOnboardingDatasetId = null;
+  closeModal();
+}
+
+function aiOnboardingConnectAi() {
+  // Open the AI setup modal. Either path returns to onboarding:
+  //  - Success: re-open onboarding (the new modal will show "Build with AI").
+  //  - Cancel:  re-open onboarding in its "not connected yet" state so the user
+  //             isn't stranded; they can still pick Skip from there.
+  var dsId = App._aiOnboardingDatasetId;
+  function reopen() {
+    var ds = App.datasets.find(function(d){ return d.id === dsId; });
+    if (!ds) return;
+    delete App._aiOnboardingShownFor[dsId];
+    openAiOnboardingModal(ds);
+  }
+  App._pendingAiAction = reopen;
+  App._pendingAiCancelAction = reopen;  // also reopen on cancel — see closeModal wrapper
+  openAiSetupModal();
+}
+
+async function aiOnboardingSubmit() {
+  var dsId = App._aiOnboardingDatasetId;
+  var ds = App.datasets.find(function(d){ return d.id === dsId; });
+  if (!ds) { closeModal(); return; }
+  var input = document.getElementById('aiOnboardDescInput');
+  var description = input ? (input.value || '').trim() : '';
+  var chip = document.querySelector('#aiOnboardChips .ai-category-chip.selected');
+  var category = chip ? chip.getAttribute('data-cat') : '';
+
+  // Tag the modal with this session's dsId so a later-arriving promise from a
+  // stale onboarding can't overwrite a fresh modal's content.
+  var modalContent = document.getElementById('modalContent');
+  if (modalContent) {
+    modalContent.setAttribute('data-ai-onboard-id', dsId);
+    modalContent.innerHTML =
+      '<div class="ai-onboard-thinking">' +
+        '<span class="ai-spinner"></span>' +
+        '<div class="ai-onboard-thinking-title">AI is designing your dashboard…</div>' +
+        '<div class="ai-onboard-thinking-sub">Analyzing schema, picking the best chart mix · usually 5-10s</div>' +
+      '</div>';
+  }
+
+  // Guard: only mutate the modal if it's still ours.
+  function modalIsStillOurs() {
+    var m = document.getElementById('modalContent');
+    return m && m.getAttribute('data-ai-onboard-id') === dsId;
+  }
+
+  try {
+    var charts = await aiBuildStarterDashboard(ds, description, category);
+    if (!charts || !charts.length) throw new Error('AI returned no usable charts');
+    var prev = App.dashboards[dsId] ? App.dashboards[dsId].slice() : [];
+    await saveDashboard(dsId, charts);
+    App.dashboards[dsId] = charts;
+    if (modalIsStillOurs()) aiOnboardingShowResult(charts);
+    // Auto-advance to dashboard ~3.5s later so the user has time to read the
+    // chart list. Tracked via _aiOnboardingAutoAdvanceTimer so click-outside
+    // (which fires closeModal) can cancel it cleanly.
+    if (App._aiOnboardingAutoAdvanceTimer) clearTimeout(App._aiOnboardingAutoAdvanceTimer);
+    App._aiOnboardingAutoAdvanceTimer = setTimeout(function() {
+      App._aiOnboardingAutoAdvanceTimer = null;
+      if (App.activeDatasetId === dsId && App.step === 'schema' && modalIsStillOurs()) {
+        closeModal();
+        setStep('dashboard');
+      }
+    }, 3500);
+  } catch (err) {
+    console.error('[Glimpse AI] onboarding build failed:', err);
+    if (!modalIsStillOurs()) return; // a newer modal is on screen — don't stomp it
+    var modalContent2 = document.getElementById('modalContent');
+    if (modalContent2) {
+      modalContent2.innerHTML =
+        '<button class="modal-close" onclick="aiOnboardingSkip()">✕</button>' +
+        '<h2>AI couldn\'t build the dashboard</h2>' +
+        '<p>' + escHTML(sanitizeForDisplay((err && err.message) || String(err))) + '</p>' +
+        '<p style="font-size:12px;color:var(--text-4)">Don\'t worry — the default charts are already in place. You can ask AI again later from the dashboard.</p>' +
+        '<div class="modal-actions">' +
+          '<button class="btn btn-primary" onclick="aiOnboardingSkip()">Continue with defaults</button>' +
+        '</div>';
+    }
+  }
+}
+
+function aiOnboardingShowResult(charts) {
+  var modalContent = document.getElementById('modalContent');
+  if (!modalContent) return;
+  var chartsHtml = charts.map(function(c) {
+    return '<div>' +
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0f9d58" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+      escHTML(c.title || c.type) +
+      '<span style="color:var(--text-4);font-size:11px;margin-left:6px">· ' + escHTML(c.type) + '</span>' +
+    '</div>';
+  }).join('');
+  modalContent.innerHTML =
+    '<button class="modal-close" onclick="aiOnboardingFinish()">✕</button>' +
+    '<div class="ai-onboard-header">' +
+      '<div class="ai-onboard-icon" style="background:#e8f5ec;color:#0f9d58">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
+      '</div>' +
+      '<h2 style="margin:0">Dashboard ready</h2>' +
+    '</div>' +
+    '<div class="ai-onboard-sub">AI built ' + charts.length + ' chart' + (charts.length === 1 ? '' : 's') + ' tailored to your data. Opening dashboard in a few seconds…</div>' +
+    '<div class="ai-onboard-result">' +
+      '<div class="ai-onboard-result-title">What AI built</div>' +
+      '<div class="ai-onboard-result-charts">' + chartsHtml + '</div>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-primary" onclick="aiOnboardingFinish()">Open dashboard now</button>' +
+    '</div>';
+}
+
+// Manual finish (X button, "Open dashboard now" button, or click-outside).
+// Cancels the auto-advance timer so we don't double-fire setStep, then closes.
+function aiOnboardingFinish() {
+  if (App._aiOnboardingAutoAdvanceTimer) {
+    clearTimeout(App._aiOnboardingAutoAdvanceTimer);
+    App._aiOnboardingAutoAdvanceTimer = null;
+  }
+  var dsId = App._aiOnboardingDatasetId;
+  closeModal();
+  if (dsId && App.activeDatasetId === dsId && App.step === 'schema') {
+    setStep('dashboard');
+  }
+}
+
+// Send schema + samples + description to the AI provider and parse a list of
+// chart specs back. Reuses the same validation invariants as aiNlToChart.
+async function aiBuildStarterDashboard(ds, description, category) {
+  // Compact schema description: only included fields, with indexes.
+  var schemaForLlm = ds.schema.filter(function(f){ return f.included !== false; }).map(function(f) {
+    return { idx: f.index, name: f.label, type: f.type };
+  });
+  var sampleRows = (ds.rows || []).slice(0, 5).map(function(row) {
+    var obj = {};
+    ds.schema.forEach(function(f, i) { obj[f.label] = row[i]; });
+    return obj;
+  });
+
+  var systemPrompt = [
+    'You are an expert data analyst designing the FIRST dashboard a user will see for their data.',
+    'Propose 4-6 charts that together tell a useful story. Mix chart types for variety.',
+    '',
+    'Available chart types: "kpi" (single big number), "bar" (categories vs numeric), "line" (date vs numeric),',
+    '"pie" (parts of whole, ≤8 slices), "scatter" (numeric vs numeric), "table" (raw rows).',
+    'Available aggregations: "sum", "avg", "count", "min", "max", "median", or "none".',
+    '',
+    'Respond with a SINGLE JSON object — no prose, no markdown fences. Schema:',
+    '{',
+    '  "summary": "1-2 sentence overview of what this dashboard shows.",',
+    '  "charts": [',
+    '    {',
+    '      "type":   "kpi" | "bar" | "line" | "pie" | "scatter" | "table",',
+    '      "title":  "human title (5-8 words)",',
+    '      "xField": <column INDEX from schema, or null>,',
+    '      "yField": <column INDEX from schema, or null>,',
+    '      "agg":    "sum" | "avg" | "count" | "min" | "max" | "median" | "none",',
+    '      "span":   3 | 4 | 6 | 8 | 12,        // dashboard grid columns (12 = full row)',
+    '      "limit":  <int 5-30 for bar/table>,',
+    '      "sortDir":"asc" | "desc"',
+    '    }',
+    '  ]',
+    '}',
+    '',
+    'Rules:',
+    '- Use column INDEXES, not names, in xField/yField.',
+    '- The FIRST chart should be a KPI or summary (span 3 or 4) highlighting the headline number.',
+    '- Mix chart types — avoid 4 bars in a row.',
+    '- If a date column exists, include at least one time-series chart.',
+    '- "kpi" requires yField + agg; "scatter" requires two NUMERIC fields; "bar"/"line" require xField.',
+    '- Span sum across charts should fill ~2 rows (e.g. 4+4+4 then 6+6 then 12).',
+    '- Never invent columns. Only use schema indexes that exist.'
+  ].join('\n');
+
+  var ctxParts = [
+    'DATASET: ' + ds.name,
+    'ROW COUNT: ' + ds.rowCount.toLocaleString()
+  ];
+  if (description) ctxParts.push('USER DESCRIPTION: ' + description);
+  if (category)    ctxParts.push('CATEGORY: ' + category);
+  ctxParts.push('SCHEMA (column index, name, type):');
+  ctxParts.push(schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'));
+  ctxParts.push('');
+  ctxParts.push('SAMPLE ROWS (first 5):');
+  ctxParts.push(JSON.stringify(sampleRows, null, 2));
+
+  var res = await callAI({
+    system: systemPrompt,
+    messages: [{ role: 'user', content: ctxParts.join('\n') }],
+    maxTokens: 2200
+  });
+  var parsed = extractJson(res.text);
+  if (!parsed || !Array.isArray(parsed.charts)) throw new Error('AI response was not a valid dashboard spec');
+
+  // Validate every chart with the same rules used by aiNlToChart.
+  var validTypes = ['bar', 'line', 'pie', 'scatter', 'table', 'kpi', 'hbar', 'doughnut', 'histogram'];
+  var validAggs  = ['sum','avg','count','min','max','median','none'];
+
+  function isNumericField(idx) {
+    if (idx === null) return false;
+    var t = ds.schema[idx] && ds.schema[idx].type;
+    return t === 'integer' || t === 'decimal';
+  }
+  function checkField(v) {
+    if (v === null || v === undefined) return null;
+    var n = Math.floor(Number(v));
+    if (!isFinite(n) || n < 0 || n >= ds.schema.length) return null;
+    return n;
+  }
+
+  var out = [];
+  for (var i = 0; i < parsed.charts.length && i < 8; i++) {
+    var c = parsed.charts[i] || {};
+    if (validTypes.indexOf(c.type) === -1) c.type = 'bar';
+    var xF = checkField(c.xField);
+    var yF = checkField(c.yField);
+    var agg = validAggs.indexOf(c.agg) > -1 ? c.agg : 'sum';
+    var span = (typeof c.span === 'number' && c.span >= 3 && c.span <= 12) ? Math.floor(c.span) : 6;
+
+    // Per-type fallbacks (mirrors aiNlToChart logic).
+    if (c.type === 'kpi') {
+      if (yF === null || agg === 'none') {
+        // Find first numeric field; if none, degrade to table.
+        var firstNum = -1;
+        for (var j = 0; j < ds.schema.length; j++) { if (isNumericField(j)) { firstNum = j; break; } }
+        if (firstNum >= 0) { yF = firstNum; if (agg === 'none') agg = 'sum'; }
+        else c.type = 'table';
+      }
+    } else if (c.type === 'scatter') {
+      if (!isNumericField(xF) || !isNumericField(yF)) c.type = 'bar';
+    } else if (c.type === 'bar' || c.type === 'hbar' || c.type === 'line' || c.type === 'histogram') {
+      if (xF === null) c.type = 'table';
+    } else if (c.type === 'pie' || c.type === 'doughnut') {
+      if (xF === null) c.type = 'table';
+      if (typeof c.limit !== 'number' || c.limit > 8 || c.limit < 2) c.limit = 8;
+    }
+    // Type-specific limit clamp — kept as separate branches so a future edit
+    // can't accidentally bump pies up to the 5-min of regular charts.
+    var limit;
+    if (c.type === 'pie' || c.type === 'doughnut') {
+      limit = Math.min(8, Math.max(2, Math.floor(c.limit) || 8));
+    } else {
+      limit = (typeof c.limit === 'number') ? Math.max(5, Math.min(50, Math.floor(c.limit))) : 20;
+    }
+
+    out.push({
+      id:        genId(),
+      type:      c.type,
+      title:     typeof c.title === 'string' && c.title ? c.title : ('Chart ' + (i + 1)),
+      xField:    xF,
+      yField:    yF,
+      agg:       agg === 'none' ? null : agg,
+      span:      span,
+      limit:     limit,
+      sortDir:   c.sortDir === 'asc' ? 'asc' : 'desc'
+    });
+  }
+  if (!out.length) throw new Error('AI returned no usable charts');
+  return out;
+}
+
+
+// ════════════════════════════════════════════════════════════════════
+// ─── AI INSIGHTS FEED (top-of-dashboard "5 surprising things") ──────
+// ════════════════════════════════════════════════════════════════════
+
+// SVG icons per insight kind — keeps the strip consistent with the rest of the
+// product (the original emoji versions felt out of place next to inline SVG UI).
+var INSIGHTS_KIND_ICON = {
+  trend:        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  anomaly:      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  distribution: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6"  y1="20" x2="6"  y2="14"/></svg>',
+  correlation:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  outlier:      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  top:          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  summary:      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8"  x2="12.01" y2="8"/></svg>'
+};
+function insightIcon(kind) { return INSIGHTS_KIND_ICON[kind] || INSIGHTS_KIND_ICON.summary; }
+var COLLAPSED_KEY = 'glimpse:insights:collapsed';
+var INSIGHTS_STALE_MS = 24 * 60 * 60 * 1000;
+
+function loadInsightsCollapsedPref() {
+  try {
+    var raw = localStorage.getItem(COLLAPSED_KEY);
+    if (raw) App.insightsCollapsed = JSON.parse(raw) || {};
+  } catch (e) { App.insightsCollapsed = {}; }
+}
+function persistInsightsCollapsedPref() {
+  try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(App.insightsCollapsed)); } catch (e) {}
+}
+
+// Stable fingerprint per dataset: changes when SHAPE changes. Excludes rowCount
+// so auto-refreshing Google Sheets don't churn one paid AI call per refresh —
+// the user can hit the manual Refresh button when they want a re-roll.
+function datasetFingerprint(ds) {
+  if (!ds || !ds.schema) return '';
+  return ds.schema.map(function(f){
+    return (f.label || f.rawName || '') + ':' + (f.type || '');
+  }).join('|');
+}
+
+// Generate the static HTML that lives inside renderDashboard. The actual
+// content is filled in by paintAiInsightsStrip() once the dataset / cache is
+// known (called after the dashboard mounts via afterRenderDashboardForAi()).
+function renderAiInsightsStrip() {
+  return '<div class="ai-insights-strip" id="aiInsightsStrip" hidden>' +
+    '<div class="ai-insights-header">' +
+      '<div class="ai-insights-header-title" onclick="toggleInsightsCollapse()">' +
+        '<svg class="spark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+        '<span>AI Insights</span>' +
+        '<span class="ai-insights-count" id="aiInsightsCount" hidden></span>' +
+        '<svg class="ai-insights-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</div>' +
+      '<button class="ai-insights-action-btn" id="aiInsightsRefreshBtn" title="Regenerate insights" onclick="refreshAiInsights()" hidden>' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+      '</button>' +
+      '<button class="ai-insights-action-btn" title="Hide insights" onclick="dismissInsightsForSession()">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="ai-insights-body" id="aiInsightsBody"></div>' +
+  '</div>';
+}
+
+// Called after renderDashboard() mounts. Loads cached insights from IDB if any
+// (cheap, no AI call) and paints the strip. Does NOT auto-fire AI — that only
+// happens when the user clicks Generate / Refresh.
+async function afterRenderDashboardForAi() {
+  var strip = document.getElementById('aiInsightsStrip');
+  if (!strip) return;
+  var ds = activeDataset();
+  if (!ds) { strip.hidden = true; return; }
+  // Session-dismiss wins: user hid the strip this session. Show the "re-enable"
+  // button on the ask bar in that case (see updateAskBarInsightsToggle).
+  if (App._insightsDismissedThisSession && App._insightsDismissedThisSession[ds.id]) {
+    strip.hidden = true;
+    updateAskBarInsightsToggle();
+    return;
+  }
+  if (App.insightsCollapsed[ds.id]) strip.classList.add('collapsed');
+  else strip.classList.remove('collapsed');
+  strip.hidden = false;
+
+  // Best-effort cache load from IDB if we don't already have it in memory. This
+  // is the ONLY automatic path — no AI call.
+  try {
+    if (!App.insights[ds.id]) {
+      var rec = await dbGet(STORE_INSIGHTS, ds.id);
+      var fp = datasetFingerprint(ds);
+      if (rec && rec.fingerprint === fp && Array.isArray(rec.items) && rec.items.length) {
+        App.insights[ds.id] = rec;
+      }
+    }
+  } catch (e) { /* missing IDB or store — paint will show empty CTA */ }
+
+  paintAiInsightsStrip();
+  updateAskBarInsightsToggle();
+  updateAskBarSubmitState();
+}
+
+function toggleInsightsCollapse() {
+  var ds = activeDataset();
+  if (!ds) return;
+  App.insightsCollapsed[ds.id] = !App.insightsCollapsed[ds.id];
+  persistInsightsCollapsedPref();
+  var strip = document.getElementById('aiInsightsStrip');
+  if (strip) strip.classList.toggle('collapsed', App.insightsCollapsed[ds.id]);
+}
+
+// Session-only soft hide. Uses a non-persisted flag so reloading the page
+// brings the strip back (intentional — most users won't remember the toggle).
+// To regenerate / surface again right now: Cmd+K → "Refresh AI insights".
+App._insightsDismissedThisSession = App._insightsDismissedThisSession || {};
+function dismissInsightsForSession() {
+  var ds = activeDataset();
+  if (!ds) return;
+  App._insightsDismissedThisSession[ds.id] = true;
+  var strip = document.getElementById('aiInsightsStrip');
+  if (strip) strip.hidden = true;
+}
+
+// PURE paint. Reads state, writes DOM — never triggers an AI call. The only
+// functions that fire AI are triggerInsightsBuild + refreshAiInsights.
+function paintAiInsightsStrip() {
+  var ds = activeDataset();
+  if (!ds) return;
+  var body = document.getElementById('aiInsightsBody');
+  var countEl = document.getElementById('aiInsightsCount');
+  var refreshBtn = document.getElementById('aiInsightsRefreshBtn');
+  if (!body) return;
+
+  var hasAi = !!(App.aiSettings && App.aiSettings.apiKey);
+
+  // No AI configured → show CTA, hide refresh button.
+  if (!hasAi) {
+    if (countEl) countEl.hidden = true;
+    if (refreshBtn) refreshBtn.hidden = true;
+    body.innerHTML =
+      '<div class="ai-insights-empty">' +
+        'Surface 3-5 things AI thinks are most interesting about this dataset. ' +
+        '<span class="ai-insights-cta" onclick="openAiSettings()">Connect AI to enable →</span>' +
+      '</div>';
+    return;
+  }
+
+  // Build in flight → skeleton.
+  if (App.insightsBusy[ds.id]) {
+    if (refreshBtn) refreshBtn.hidden = true; // disable spam-click during build
+    if (countEl) countEl.hidden = true;
+    body.innerHTML = '<div class="ai-insights-skeleton">' +
+      '<div class="ai-insights-skeleton-card"></div>' +
+      '<div class="ai-insights-skeleton-card"></div>' +
+      '<div class="ai-insights-skeleton-card"></div>' +
+    '</div>';
+    return;
+  }
+
+  var cached = App.insights[ds.id];
+  var fp = datasetFingerprint(ds);
+  var hasCache = cached && cached.fingerprint === fp && Array.isArray(cached.items) && cached.items.length;
+
+  // Cache present → show cards. If older than 24h, show a "regenerate?" banner
+  // ABOVE the cards (no auto-API hit).
+  if (hasCache) {
+    if (refreshBtn) refreshBtn.hidden = false;
+    if (countEl) { countEl.textContent = cached.items.length; countEl.hidden = false; }
+    var staleBanner = '';
+    var ageMs = Date.now() - (cached.generatedAt || 0);
+    if (ageMs > INSIGHTS_STALE_MS) {
+      staleBanner =
+        '<div class="ai-insights-stale-banner">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          '<span>These insights are <strong>' + escHTML(fmtRelativeTime(cached.generatedAt)) + '</strong>. Refresh to regenerate with the latest data.</span>' +
+          '<button class="btn btn-ghost btn-sm" onclick="refreshAiInsights()">Refresh now</button>' +
+        '</div>';
+    }
+    body.innerHTML = staleBanner + renderInsightCardsHtml(cached.items, cached.generatedAt);
+    return;
+  }
+
+  // AI configured but no cache and no build in flight → show the Generate CTA.
+  // This is the change the user asked for: never auto-fire AI on dashboard open.
+  if (refreshBtn) refreshBtn.hidden = true;
+  if (countEl) countEl.hidden = true;
+  body.innerHTML =
+    '<div class="ai-insights-empty">' +
+      'No AI insights yet for this dataset. Generating uses one call to your AI provider.' +
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+        '<button class="btn btn-primary btn-sm" onclick="refreshAiInsights()">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+          ' Generate insights' +
+        '</button>' +
+        '<span style="font-size:11px;color:var(--text-4)">Stays cached until you refresh.</span>' +
+      '</div>' +
+    '</div>';
+}
+
+function renderInsightCardsHtml(items, generatedAt) {
+  var cards = items.map(function(it) {
+    var icon = insightIcon(it.kind); // returns an SVG string now
+    var detail = it.detail || '';
+    var title  = it.title || '';
+    var kindClass = 'kind-' + (it.kind || 'summary');
+    return '<div class="ai-insight-card" onclick="onInsightClick(\'' + escAttr(title) + '\')">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span class="ai-insight-icon ' + kindClass + '">' + icon + '</span>' +
+        '<span class="ai-insight-kind">' + escHTML(it.kind || 'insight') + '</span>' +
+      '</div>' +
+      '<div class="ai-insight-title">' + escHTML(title) + '</div>' +
+      '<div class="ai-insight-detail">' + escHTML(detail) + '</div>' +
+    '</div>';
+  }).join('');
+  var meta = generatedAt ? '<div class="ai-insights-meta">Generated ' + escHTML(fmtRelativeTime(generatedAt)) + '</div>' : '';
+  return '<div class="ai-insights-cards">' + cards + '</div>' + meta;
+}
+
+function fmtRelativeTime(ts) {
+  var diff = Date.now() - ts;
+  // Clock skew / cached-future ts → don't render "-2m ago".
+  if (diff < 60 * 1000) return 'just now';
+  if (diff < 60 * 60 * 1000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / 3600000) + 'h ago';
+  var days = Math.floor(diff / 86400000);
+  return days + 'd ago';
+}
+
+// Click on an insight card → open AI drawer with that insight as the seed
+// question so the user can dig deeper.
+function onInsightClick(titleKey) {
+  var ds = activeDataset();
+  if (!ds) return;
+  var cached = App.insights[ds.id];
+  if (!cached || !Array.isArray(cached.items)) return;
+  var it = cached.items.find(function(x){ return x && x.title === titleKey; });
+  if (!it) { toast('Insight no longer available — try refreshing', 'warn', 2500); return; }
+  var q = 'Tell me more about this insight: "' + it.title + '" — ' + (it.detail || '') +
+          '\n\nWalk me through why and recommend one chart that visualizes it.';
+  ensureAiConfiguredThen(function() {
+    openAiDrawer();
+    setTimeout(function(){ aiSendQuestion(q); }, 60);
+  });
+}
+
+// Per-dataset build token: refreshAiInsights bumps it so an in-flight build
+// started before the refresh discards its result on completion.
+App._insightsBuildToken = App._insightsBuildToken || {};
+
+// The ONLY function that calls the AI provider for insights. Synchronously
+// sets the busy flag (before the first await) so concurrent callers can't
+// race-trigger two parallel AI calls.
+async function triggerInsightsBuild(ds) {
+  if (!ds || !ds.id) return;
+  if (!App.aiSettings || !App.aiSettings.apiKey) return;
+  if (App.insightsBusy[ds.id]) return;
+  App.insightsBusy[ds.id] = true;            // SYNCHRONOUS — closes race window
+  paintAiInsightsStrip();
+
+  if (App._insightsBuildToken[ds.id] == null) App._insightsBuildToken[ds.id] = 0;
+  var token = App._insightsBuildToken[ds.id];
+  var fp = datasetFingerprint(ds);
+
+  try {
+    var items = await aiBuildInsights(ds);
+    if (!items || !items.length) throw new Error('No insights returned');
+    if (App._insightsBuildToken[ds.id] !== token) return; // a refresh raced past us
+    var rec = { id: ds.id, items: items, generatedAt: Date.now(), fingerprint: fp };
+    App.insights[ds.id] = rec;
+    try { await dbPut(STORE_INSIGHTS, rec); } catch (e) { /* best-effort cache write */ }
+  } catch (err) {
+    if (App._insightsBuildToken[ds.id] !== token) return;
+    console.warn('[Glimpse insights] build failed:', err);
+    if (App.activeDatasetId === ds.id && App.step === 'dashboard') {
+      var body = document.getElementById('aiInsightsBody');
+      if (body) {
+        body.innerHTML = '<div class="ai-insights-error">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          '<span>Couldn\'t generate insights: ' + escHTML(sanitizeForDisplay((err && err.message) || String(err))) + '</span>' +
+          '<button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="refreshAiInsights()">Retry</button>' +
+        '</div>';
+      }
+    }
+  } finally {
+    // Guard against late-arriving finally from a stale build: only clear+repaint
+    // if we're still the current build.
+    if (App._insightsBuildToken[ds.id] === token) {
+      delete App.insightsBusy[ds.id];
+      if (App.activeDatasetId === ds.id && App.step === 'dashboard') paintAiInsightsStrip();
+    }
+  }
+}
+
+async function refreshAiInsights() {
+  var ds = activeDataset();
+  if (!ds) return;
+  if (!App.aiSettings || !App.aiSettings.apiKey) {
+    ensureAiConfiguredThen(function(){ refreshAiInsights(); });
+    return;
+  }
+  // Bump token AND clear caches. Any in-flight build will see token mismatch.
+  App._insightsBuildToken[ds.id] = (App._insightsBuildToken[ds.id] || 0) + 1;
+  delete App.insights[ds.id];
+  delete App.insightsBusy[ds.id];
+  try { await dbDelete(STORE_INSIGHTS, ds.id); } catch (e) {}
+  // Refresh also un-collapses and un-dismisses (user explicitly asked).
+  App.insightsCollapsed[ds.id] = false;
+  persistInsightsCollapsedPref();
+  if (App._insightsDismissedThisSession) delete App._insightsDismissedThisSession[ds.id];
+  var strip = document.getElementById('aiInsightsStrip');
+  if (strip) { strip.classList.remove('collapsed'); strip.hidden = false; }
+  updateAskBarInsightsToggle();
+  // Fire the new build. triggerInsightsBuild paints the skeleton.
+  triggerInsightsBuild(ds);
+}
+
+async function aiBuildInsights(ds) {
+  // Guard: a partially-loaded SQL-derived dataset can hit this without schema.
+  if (!ds || !Array.isArray(ds.schema) || !ds.schema.length) {
+    throw new Error('Dataset is not ready yet');
+  }
+  if (!ds.rowCount && !(ds.rows && ds.rows.length)) {
+    throw new Error('Dataset has no rows to analyze');
+  }
+  // Only include columns the user marked as relevant. Sample rows must use the
+  // SAME set of columns — otherwise the AI sees fields the schema doesn't list,
+  // and produces insights about hidden data.
+  var includedFields = ds.schema.filter(function(f){ return f.included !== false; });
+  var schemaForLlm = includedFields.map(function(f) {
+    return { idx: f.index, name: f.label, type: f.type };
+  });
+  function trimCell(v) {
+    // Long string columns (comments, descriptions, URLs) blow past max_tokens
+    // and cost a lot. 200 chars per cell is plenty for the LLM to spot patterns.
+    // Also collapse line-breaks — embedded "Ignore previous instructions"-style
+    // injections in user cells become flat strings that the model treats as data.
+    if (v === null || v === undefined) return '';
+    var s = String(v).replace(/[\r\n]+/g, ' ');
+    if (s.length > 200) return s.slice(0, 200) + '…';
+    return s;
+  }
+  var sampleRows = (ds.rows || []).slice(0, 8).map(function(row) {
+    var obj = {};
+    includedFields.forEach(function(f) { obj[f.label] = trimCell(row[f.index]); });
+    return obj;
+  });
+
+  var systemPrompt = [
+    'You are an expert data analyst surfacing the most interesting things about a dataset.',
+    'Given the schema and a sample of rows, produce 3-5 SHORT, SPECIFIC insights that the user would find SURPRISING or actionable.',
+    '',
+    'Each insight must:',
+    '- Reference specific values, columns, or numbers visible in the sample (or reasonably inferable).',
+    '- Be concrete — avoid generic statements like "the data has many rows" or "there are categorical columns".',
+    '- Have a short title (5-10 words) and a 1-2 sentence detail.',
+    '- Have a kind label from: "trend" (over time), "anomaly" (unusual value), "distribution" (concentration/skew), "correlation" (between fields), "outlier" (single odd row), "top" (highest/lowest), "summary" (headline number).',
+    '',
+    'Respond with a SINGLE JSON object — no prose, no markdown:',
+    '{',
+    '  "insights": [',
+    '    {',
+    '      "kind": "trend"|"anomaly"|"distribution"|"correlation"|"outlier"|"top"|"summary",',
+    '      "title": "5-10 word headline",',
+    '      "detail": "1-2 sentence specific explanation with numbers or values"',
+    '    }',
+    '  ]',
+    '}',
+    '',
+    'Rules:',
+    '- 3-5 insights total. Diverse kinds.',
+    '- Lead with the most surprising / actionable one.',
+    '- Numbers in detail should be plausible given the sample (don\'t invent precise stats from 8 rows; speak in ranges or specific row values).'
+  ].join('\n');
+
+  // Defensive: rowCount can be undefined on partially-built SQL-derived datasets.
+  var rowCountForPrompt = ds.rowCount || (ds.rows && ds.rows.length) || 0;
+  var ctxParts = [
+    'DATASET: ' + ds.name,
+    'ROW COUNT: ' + rowCountForPrompt.toLocaleString(),
+    'SCHEMA (index, name, type):',
+    schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'),
+    '',
+    'SAMPLE ROWS:',
+    JSON.stringify(sampleRows, null, 2)
+  ];
+
+  var res = await callAI({
+    system: systemPrompt,
+    messages: [{ role: 'user', content: ctxParts.join('\n') }],
+    maxTokens: 1400
+  });
+  var parsed = extractJson(res.text);
+  if (!parsed || !Array.isArray(parsed.insights)) throw new Error('AI response was not valid insights JSON');
+
+  var validKinds = ['trend','anomaly','distribution','correlation','outlier','top','summary'];
+  var out = [];
+  for (var i = 0; i < parsed.insights.length && i < 5; i++) {
+    var it = parsed.insights[i] || {};
+    var kind = validKinds.indexOf(it.kind) > -1 ? it.kind : 'summary';
+    var title = typeof it.title === 'string' ? it.title.trim() : '';
+    var detail = typeof it.detail === 'string' ? it.detail.trim() : '';
+    if (!title) continue;
+    out.push({ kind: kind, title: title, detail: detail });
+  }
+  return out;
+}
+
+// Hook into the dashboard render so the strip mounts after each setStep('dashboard').
+(function patchRenderForInsights() {
+  var originalSetStep = setStep;
+  setStep = function(step) {
+    var r = originalSetStep(step);
+    if (step === 'dashboard') {
+      // Defer so renderDashboard's innerHTML has settled before we query DOM.
+      setTimeout(function() {
+        afterRenderDashboardForAi();
+        refreshAskBarTypingAnim();
+      }, 0);
+    } else {
+      // Leaving the dashboard view → stop the typing animation to save CPU.
+      stopAskBarTypingAnim();
+    }
+    return r;
+  };
+})();
+
+// ════════════════════════════════════════════════════════════════════
+// ─── COMMAND PALETTE (Cmd/Ctrl + K) ────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+
+var IS_MAC = /Mac|iPad|iPhone|iPod/.test(navigator.platform || '');
+var CMDK_RECENT_KEY = 'glimpse:cmdk:recent';
+var CMDK_RECENT_MAX = 5;
+
+App.cmdk = {
+  open: false,
+  query: '',
+  filtered: [],   // flat array of command objects after current filter
+  activeIdx: 0    // index into filtered
+};
+
+// Build the full list of commands from current app state. Each command:
+//   { id, title, sub?, group, kbd?, icon, keywords?, when?, run }
+// `when` is an optional predicate — if false, the command is hidden in this context.
+function buildCommandList() {
+  var cmds = [];
+
+  // ── Navigation ────────────────────────────────────────────
+  cmds.push({ id: 'nav-home', group: 'Navigate', title: 'Go to Home', icon: iconHome, keywords: 'home landing start',
+              when: function(){ return App.step !== 'home'; },
+              run: function(){ setStep('home'); } });
+  cmds.push({ id: 'nav-upload', group: 'Navigate', title: 'Upload a new file', sub: 'CSV, Excel, Parquet',
+              icon: iconUpload, keywords: 'upload csv xlsx parquet new file',
+              run: function(){ setStep('upload'); } });
+  cmds.push({ id: 'nav-dashboard', group: 'Navigate', title: 'Open current dashboard',
+              icon: iconDashboard, keywords: 'dashboard charts',
+              when: function(){ return !!App.activeDatasetId && App.step !== 'dashboard'; },
+              run: function(){ setStep('dashboard'); } });
+  cmds.push({ id: 'nav-schema', group: 'Navigate', title: 'Configure column types',
+              icon: iconColumns, keywords: 'schema columns types fields',
+              when: function(){ return !!App.activeDatasetId; },
+              run: function(){ setStep('schema'); } });
+
+  // ── Actions ───────────────────────────────────────────────
+  cmds.push({ id: 'act-new-sql', group: 'Actions', title: 'New SQL query',
+              sub: 'Write SQL across your datasets', icon: iconDb, keywords: 'sql query duckdb new',
+              when: function(){ return App.datasets.length > 0; },
+              run: function(){ openSqlEditor(); } });
+  cmds.push({ id: 'act-new-folder', group: 'Actions', title: 'New folder',
+              icon: iconFolder, keywords: 'folder collection organize',
+              run: function(){ createFolder(); } });
+  cmds.push({ id: 'act-ask-ai', group: 'Actions', title: 'Ask AI about this data',
+              sub: 'Natural language → chart', icon: iconSparkle, keywords: 'ai ask claude gpt nl chart',
+              when: function(){ return !!App.activeDatasetId; },
+              run: function(){ ensureAiConfiguredThen(function(){ openAiDrawer(); setTimeout(function(){ var ta = document.getElementById('aiDrawerInput'); if (ta) ta.focus(); }, 100); }); } });
+  cmds.push({ id: 'act-ai-build-dashboard', group: 'Actions', title: 'Rebuild dashboard with AI',
+              sub: 'Replace current charts with a new AI-built starter', icon: iconSparkle, keywords: 'ai build dashboard starter rebuild',
+              when: function(){ return !!App.activeDatasetId && !!activeDataset(); },
+              run: function(){
+                var ds = activeDataset();
+                if (!ds) return;
+                delete App._aiOnboardingShownFor[ds.id];
+                ensureAiConfiguredThen(function(){ openAiOnboardingModal(ds); });
+              } });
+  cmds.push({ id: 'act-ai-refresh-insights', group: 'Actions', title: 'Refresh AI insights',
+              sub: 'Regenerate the "5 surprising things" strip', icon: iconSparkle, keywords: 'ai insights refresh regenerate surface',
+              when: function(){ return !!App.activeDatasetId && App.step === 'dashboard'; },
+              run: function(){ refreshAiInsights(); } });
+  cmds.push({ id: 'act-add-chart', group: 'Actions', title: 'Add a chart',
+              icon: iconPlus, keywords: 'chart new add',
+              when: function(){ return App.step === 'dashboard' && !!App.activeDatasetId; },
+              run: function(){ if (typeof openAddChartModal === 'function') openAddChartModal(); } });
+  cmds.push({ id: 'act-toggle-edit', group: 'Actions', title: function(){ return App.isEditMode ? 'Switch to view mode' : 'Switch to edit mode'; },
+              icon: iconEdit, keywords: 'edit view mode toggle',
+              when: function(){ return App.step === 'dashboard'; },
+              run: function(){ if (typeof toggleMode === 'function') toggleMode(); } });
+
+  // ── Datasets (switch) ─────────────────────────────────────
+  App.datasets.slice().sort(function(a, b){ return (b.createdAt||0) - (a.createdAt||0); }).forEach(function(ds) {
+    if (ds.id === App.activeDatasetId) return;
+    var info = (typeof datasetSourceInfo === 'function') ? datasetSourceInfo(ds) : { label: 'Dataset' };
+    cmds.push({
+      id: 'ds-' + ds.id,
+      group: 'Datasets',
+      title: ds.name,
+      sub: ds.rowCount.toLocaleString() + ' rows · ' + info.label,
+      icon: iconTable,
+      keywords: 'open switch dataset ' + ds.name + ' ' + info.label,
+      run: function(){ switchDataset(ds.id); }
+    });
+  });
+
+  // ── Sharing / Export ─────────────────────────────────────
+  cmds.push({ id: 'share-link', group: 'Share', title: 'Copy share link',
+              icon: iconShare, keywords: 'share link copy url',
+              when: function(){ return App.datasets.length > 0 && typeof openShareModal === 'function'; },
+              run: function(){ openShareModal(); } });
+  cmds.push({ id: 'share-export', group: 'Share', title: 'Export project file',
+              icon: iconDownload, keywords: 'export download project json glimpse',
+              when: function(){ return App.datasets.length > 0 && typeof exportProjectFile === 'function'; },
+              run: function(){ exportProjectFile(); } });
+
+  // ── Settings / Misc ──────────────────────────────────────
+  cmds.push({ id: 'settings-ai', group: 'Settings', title: function(){ return App.aiSettings && App.aiSettings.apiKey ? 'AI settings' : 'Connect an AI provider'; },
+              sub: 'BYOK · Anthropic or OpenAI', icon: iconKey, keywords: 'ai settings claude gpt anthropic openai key configure',
+              run: function(){ openAiSettings(); } });
+  cmds.push({ id: 'settings-clear', group: 'Settings', title: 'Clear all data',
+              sub: 'Removes datasets, dashboards, AI key from this browser',
+              icon: iconTrash, keywords: 'reset clear delete data',
+              run: function(){ if (typeof resetAll === 'function') resetAll(); } });
+
+  // Filter out commands whose `when` returns false.
+  return cmds.filter(function(c) {
+    if (typeof c.when === 'function') return !!c.when();
+    return true;
+  }).map(function(c) {
+    // Resolve function titles now so the active list is stable.
+    var resolved = Object.assign({}, c);
+    resolved.title = (typeof c.title === 'function') ? c.title() : c.title;
+    return resolved;
+  });
+}
+
+// Minimal SVG icons used across the palette items.
+var iconHome = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg>';
+var iconUpload = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+var iconDashboard = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
+var iconColumns = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>';
+var iconDb = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>';
+var iconFolder = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+var iconSparkle = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>';
+var iconPlus = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+var iconEdit = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+var iconTable = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+var iconShare = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+var iconDownload = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+var iconKey = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><line x1="15.5" y1="7.5" x2="19.5" y2="11.5"/></svg>';
+var iconTrash = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+var iconClock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+
+// Persisted: ids of last N executed commands, in most-recent-first order.
+function loadCmdkRecents() {
+  try {
+    var raw = localStorage.getItem(CMDK_RECENT_KEY);
+    return raw ? JSON.parse(raw) || [] : [];
+  } catch (e) { return []; }
+}
+function pushCmdkRecent(id) {
+  // We persist by id, not full command, because the command list rebuilds
+  // every open (state-dependent: e.g. dataset list changes).
+  var list = loadCmdkRecents().filter(function(x){ return x !== id; });
+  list.unshift(id);
+  list = list.slice(0, CMDK_RECENT_MAX);
+  try { localStorage.setItem(CMDK_RECENT_KEY, JSON.stringify(list)); } catch (e) {}
+}
+
+// Simple match scorer: title prefix > title substring > keywords substring.
+// Returns null if no match, otherwise a number (higher = better).
+function cmdkScore(cmd, q) {
+  if (!q) return 1; // everything matches with low priority when query empty
+  q = q.toLowerCase();
+  var t = (cmd.title || '').toLowerCase();
+  var kw = (cmd.keywords || '').toLowerCase();
+  if (t === q) return 1000;
+  if (t.indexOf(q) === 0) return 800;
+  if (t.indexOf(q) > -1) return 500;
+  if (kw.indexOf(q) > -1) return 300;
+  // Fuzzy fallback: are all letters of q present in order in t?
+  var ti = 0, qi = 0;
+  while (ti < t.length && qi < q.length) {
+    if (t[ti] === q[qi]) qi++;
+    ti++;
+  }
+  if (qi === q.length) return 100;
+  return null;
+}
+
+function openCommandPalette() {
+  var bg = document.getElementById('cmdkBg');
+  var input = document.getElementById('cmdkInput');
+  if (!bg || !input) return;
+  // Don't layer over a modal — its focus trap fights with us, and clicks on
+  // palette commands that open ANOTHER modal would leave both stacked.
+  var modal = document.getElementById('modal');
+  if (modal && modal.classList.contains('show')) {
+    toast('Close the open dialog first', 'warn', 2000);
+    return;
+  }
+  // Same logic for the AI chat drawer — Cmd+K from there should not jump out.
+  var aiDrawer = document.getElementById('aiDrawer');
+  if (aiDrawer && aiDrawer.classList.contains('open')) {
+    // The drawer is non-modal; we tolerate stacking, but skip if the SQL editor
+    // modal is also open beneath. Otherwise just allow it.
+  }
+  App.cmdk.open = true;
+  App.cmdk.query = '';
+  App.cmdk.activeIdx = 0;
+  input.value = '';
+  bg.classList.add('open');
+  refreshCommandPaletteList();
+  updateCmdkTriggerHint();
+  setTimeout(function(){ input.focus(); }, 0);
+}
+
+function closeCommandPalette() {
+  var bg = document.getElementById('cmdkBg');
+  if (!bg) return;
+  App.cmdk.open = false;
+  bg.classList.remove('open');
+  updateCmdkTriggerHint();
+}
+
+function toggleCommandPalette() {
+  if (App.cmdk.open) closeCommandPalette();
+  else openCommandPalette();
+}
+
+function refreshCommandPaletteList() {
+  var all = buildCommandList();
+  var q = App.cmdk.query;
+  var recents = loadCmdkRecents();
+  var filtered;
+  if (q) {
+    filtered = all.map(function(c){ return { c: c, score: cmdkScore(c, q) }; })
+                  .filter(function(x){ return x.score !== null; })
+                  .sort(function(a, b){ return b.score - a.score; })
+                  .map(function(x){ return x.c; });
+  } else {
+    // No query → show recents (by id) at top, then everything else by group.
+    var byId = {};
+    all.forEach(function(c){ byId[c.id] = c; });
+    var resolvedRecents = recents.map(function(id){ return byId[id] ? id : null; }).filter(Boolean);
+    // If any recent id was stale (e.g. dataset deleted), persist the pruned
+    // list so it doesn't keep displacing real recents.
+    if (resolvedRecents.length !== recents.length) {
+      try { localStorage.setItem(CMDK_RECENT_KEY, JSON.stringify(resolvedRecents)); } catch (e) {}
+    }
+    var recentCmds = resolvedRecents.map(function(id){ return byId[id]; });
+    var rest = all.filter(function(c){ return resolvedRecents.indexOf(c.id) === -1; });
+    recentCmds.forEach(function(c){ c._isRecent = true; });
+    filtered = recentCmds.concat(rest);
+  }
+  App.cmdk.filtered = filtered;
+  if (App.cmdk.activeIdx >= filtered.length) App.cmdk.activeIdx = 0;
+  paintCommandPaletteList();
+}
+
+function paintCommandPaletteList() {
+  var list = document.getElementById('cmdkList');
+  if (!list) return;
+  var items = App.cmdk.filtered;
+  if (!items.length) {
+    list.innerHTML = '<div class="cmdk-empty">No commands match "' + escHTML(App.cmdk.query) + '"</div>';
+    return;
+  }
+  var html = '';
+  var lastGroup = null;
+  items.forEach(function(c, i) {
+    var groupLabel = c._isRecent ? 'Recent' : c.group;
+    if (groupLabel !== lastGroup) {
+      html += '<div class="cmdk-group-label">' + escHTML(groupLabel) + '</div>';
+      lastGroup = groupLabel;
+    }
+    var active = i === App.cmdk.activeIdx;
+    var iconHtml = c._isRecent ? iconClock : (c.icon || iconHome);
+    var hint = (i < 9 && !App.cmdk.query) ? (IS_MAC ? '⌘' : 'Ctrl+') + (i + 1) : '';
+    html += '<div class="cmdk-item' + (active ? ' active' : '') + '" data-idx="' + i + '" role="option" aria-selected="' + active + '">' +
+      '<span class="cmdk-item-icon">' + iconHtml + '</span>' +
+      '<div class="cmdk-item-title">' + escHTML(c.title) +
+        (c.sub ? '<div class="cmdk-item-sub">' + escHTML(c.sub) + '</div>' : '') +
+      '</div>' +
+      (hint ? '<span class="cmdk-item-hint">' + hint + '</span>' : '') +
+    '</div>';
+  });
+  list.innerHTML = html;
+  // Scroll the active item into view.
+  var active = list.querySelector('.cmdk-item.active');
+  if (active && active.scrollIntoView) active.scrollIntoView({ block: 'nearest' });
+}
+
+function runCommandPaletteItem(idx) {
+  var cmd = App.cmdk.filtered[idx];
+  if (!cmd) return;
+  closeCommandPalette();
+  pushCmdkRecent(cmd.id);
+  // Use rAF (not setTimeout) so the palette has visually closed but the user
+  // cannot re-toggle Cmd+K between close and run — eliminates a race where
+  // the next palette opens BENEATH a modal the command was about to spawn.
+  requestAnimationFrame(function() {
+    try { cmd.run(); }
+    catch (err) {
+      console.error('[Glimpse] cmdk run failed:', err);
+      toast('Command failed: ' + (err.message || err), 'error', 4000);
+    }
+  });
+}
+
+// Wire the input + list events ONCE on first init.
+function bindCommandPaletteOnce() {
+  var bg = document.getElementById('cmdkBg');
+  var input = document.getElementById('cmdkInput');
+  var list = document.getElementById('cmdkList');
+  if (!bg || !input || !list) return;
+  if (bg._bound) return;
+  bg._bound = true;
+
+  input.addEventListener('input', function() {
+    App.cmdk.query = input.value;
+    App.cmdk.activeIdx = 0;
+    refreshCommandPaletteList();
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      App.cmdk.activeIdx = Math.min(App.cmdk.filtered.length - 1, App.cmdk.activeIdx + 1);
+      paintCommandPaletteList();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      App.cmdk.activeIdx = Math.max(0, App.cmdk.activeIdx - 1);
+      paintCommandPaletteList();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      runCommandPaletteItem(App.cmdk.activeIdx);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeCommandPalette();
+    } else if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key) && !App.cmdk.query) {
+      // Only intercept Cmd/Ctrl + digit if there's actually a command at that
+      // slot — otherwise let the browser's normal shortcut (tab-switch) win.
+      var quickIdx = parseInt(e.key, 10) - 1;
+      if (quickIdx < App.cmdk.filtered.length) {
+        e.preventDefault();
+        runCommandPaletteItem(quickIdx);
+      }
+    }
+  });
+
+  list.addEventListener('click', function(e) {
+    var item = e.target.closest('.cmdk-item');
+    if (!item) return;
+    var idx = parseInt(item.getAttribute('data-idx'), 10);
+    if (!isNaN(idx)) runCommandPaletteItem(idx);
+  });
+
+  // Track actual cursor movement so a touchpad jitter or scroll-induced
+  // mousemove doesn't stomp on the user's keyboard selection.
+  var lastMouseX = null, lastMouseY = null;
+  list.addEventListener('mousemove', function(e) {
+    if (lastMouseX === e.clientX && lastMouseY === e.clientY) return;
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+    var item = e.target.closest('.cmdk-item');
+    if (!item) return;
+    var idx = parseInt(item.getAttribute('data-idx'), 10);
+    if (!isNaN(idx) && idx !== App.cmdk.activeIdx) {
+      App.cmdk.activeIdx = idx;
+      paintCommandPaletteList();
+    }
+  });
+
+  // Click on backdrop closes (clicking the card itself doesn't).
+  bg.addEventListener('click', function(e) {
+    if (e.target === bg) closeCommandPalette();
+  });
+}
+
+// Global keyboard shortcut: Cmd+K (Mac) / Ctrl+K (others). Single binding —
+// we install it in init() after the rest of the app is wired so it can't
+// stomp on input-focused keystrokes outside Glimpse.
+function bindCommandPaletteShortcut() {
+  document.addEventListener('keydown', function(e) {
+    // Cmd/Ctrl + K (and not Shift, so we don't fight browser's location-bar)
+    if (!((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K') && !e.shiftKey)) return;
+    // If palette is already open, Cmd+K closes it (regardless of focus target).
+    if (App.cmdk.open) { e.preventDefault(); closeCommandPalette(); return; }
+    // Don't hijack typing inside inputs / textareas / contentEditable / CodeMirror.
+    // (User can still type Cmd+K to open palette by clicking the floating hint
+    //  or losing focus first — far less surprising than killing mid-word edits.)
+    var t = e.target;
+    if (t) {
+      var tag = t.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (t.isContentEditable) return;
+      if (typeof t.closest === 'function' && t.closest('.CodeMirror')) return;
+    }
+    e.preventDefault();
+    openCommandPalette();
+  });
+}
+
+// Show/hide the floating bottom-right hint based on app step.
+function updateCmdkTriggerHint() {
+  var el = document.getElementById('cmdkTriggerHint');
+  if (!el) return;
+  var kbd = document.getElementById('cmdkTriggerHintKbd');
+  if (kbd) kbd.textContent = IS_MAC ? '⌘K' : 'Ctrl+K';
+  // Hide while a modal or AI drawer is open so it doesn't compete visually.
+  var modalOpen = document.getElementById('modal') && document.getElementById('modal').classList.contains('show');
+  var cmdkOpen  = App.cmdk && App.cmdk.open;
+  // Only show on actual workspace views, not the home/landing.
+  var onWorkspace = App.step === 'dashboard' || App.step === 'schema' || App.step === 'upload';
+  el.hidden = !onWorkspace || modalOpen || cmdkOpen;
+}
+
+// Patch setStep so the floating hint reacts to view changes without us having
+// to thread updateCmdkTriggerHint() through every caller of setStep.
+(function patchSetStepForCmdk() {
+  var originalSetStep = setStep;
+  setStep = function(step) {
+    var r = originalSetStep(step);
+    try { updateCmdkTriggerHint(); } catch (e) {}
+    return r;
   };
 })();
 
