@@ -2772,6 +2772,282 @@
       padding: 12px 8px; font-size: 11.5px; color: var(--text-4); text-align: center;
     }
 
+    /* ─── AI: status dot in sidebar gear ──────────────────────── */
+    .ai-status-dot {
+      display: inline-block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #cbd1da;
+      margin-left: auto;
+    }
+    .ai-status-dot.connected { background: #0f9d58; box-shadow: 0 0 0 2px rgba(15,157,88,0.15); }
+    #aiSettingsBtn { position: relative; }
+
+    /* ─── AI: provider tabs in setup modal ────────────────────── */
+    .ai-provider-tabs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-bottom: var(--space-4);
+    }
+    .ai-provider-tab {
+      padding: 12px;
+      border: 1.5px solid var(--border-1);
+      border-radius: var(--r-md);
+      background: var(--surface-1);
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--duration-fast);
+    }
+    .ai-provider-tab:hover { border-color: var(--border-2); }
+    .ai-provider-tab.selected {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+    .ai-provider-tab-name {
+      font-weight: 700; font-size: 13px; color: var(--text-1);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ai-provider-tab-sub {
+      font-size: 11px; color: var(--text-3); margin-top: 4px;
+    }
+    .ai-radio-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1.5px solid var(--border-2);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .ai-provider-tab.selected .ai-radio-dot {
+      border-color: var(--accent);
+    }
+    .ai-provider-tab.selected .ai-radio-dot::after {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .ai-privacy-note {
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: var(--text-3);
+      line-height: 1.5;
+      margin: var(--space-3) 0;
+    }
+    .ai-privacy-note strong { color: var(--text-2); }
+    .ai-privacy-note ul { margin: 4px 0 0 16px; padding: 0; }
+    .ai-privacy-note li { margin: 2px 0; }
+
+    /* ─── AI: ask bar above charts grid ────────────────────────── */
+    .ai-ask-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, #f5f0ff 0%, #f0ebfa 100%);
+      border: 1.5px solid #d9c9f5;
+      border-radius: 999px;
+      padding: 8px 12px 8px 16px;
+      margin-bottom: var(--space-4);
+      cursor: text;
+      transition: all var(--duration-fast);
+    }
+    .ai-ask-bar:hover, .ai-ask-bar:focus-within {
+      border-color: #b794e6;
+      box-shadow: 0 4px 12px rgba(111,66,193,0.08);
+    }
+    .ai-ask-bar-icon {
+      width: 20px; height: 20px; color: #6f42c1; flex-shrink: 0;
+    }
+    .ai-ask-bar-input {
+      flex: 1;
+      border: 0; background: transparent; outline: none;
+      font-size: 14px; color: var(--text-1);
+      font-family: var(--font-base);
+    }
+    .ai-ask-bar-input::placeholder { color: #7c5fb0; opacity: 0.85; }
+    .ai-ask-bar-kbd {
+      font-family: var(--font-mono);
+      font-size: 10px; color: #6f42c1;
+      background: rgba(111,66,193,0.1);
+      padding: 2px 6px; border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .ai-ask-bar-cta {
+      background: #6f42c1; color: #fff; border: 0;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .ai-ask-bar-cta:hover { background: #5b2ec2; }
+    .ai-ask-bar-cta:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ─── AI: right-side chat drawer ───────────────────────────── */
+    .ai-drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: min(440px, 95vw);
+      height: 100vh;
+      background: var(--surface-1);
+      border-left: 1px solid var(--border-2);
+      box-shadow: -8px 0 24px rgba(0,0,0,0.08);
+      z-index: 900;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .ai-drawer.open { transform: translateX(0); }
+    .ai-drawer-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-1);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ai-drawer-title {
+      font-weight: 700; font-size: 14px; color: var(--text-1);
+      display: flex; align-items: center; gap: 6px;
+      flex: 1;
+    }
+    .ai-drawer-sub {
+      font-size: 11px; color: var(--text-3);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+    .ai-drawer-close {
+      width: 28px; height: 28px; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-3); cursor: pointer;
+    }
+    .ai-drawer-close:hover { background: var(--surface-3); color: var(--text-1); }
+    .ai-drawer-messages {
+      flex: 1; overflow-y: auto;
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .ai-drawer-empty {
+      text-align: center; padding: 40px 16px;
+      color: var(--text-4);
+    }
+    .ai-drawer-empty-icon {
+      font-size: 28px; margin-bottom: 8px;
+    }
+    .ai-drawer-empty-title {
+      font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 4px;
+    }
+    .ai-drawer-empty-sub {
+      font-size: 12px; line-height: 1.5;
+    }
+    .ai-suggestion-chip {
+      display: inline-block;
+      margin: 4px 4px 0 0;
+      padding: 5px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: 999px;
+      font-size: 11.5px;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+    .ai-suggestion-chip:hover {
+      border-color: var(--accent); color: var(--accent);
+    }
+
+    .ai-msg {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .ai-msg-role {
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-4);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ai-msg-role-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .ai-msg.user .ai-msg-role-dot { background: #6f42c1; }
+    .ai-msg.assistant .ai-msg-role-dot { background: var(--accent); }
+    .ai-msg-body {
+      font-size: 13px; line-height: 1.55; color: var(--text-1);
+      white-space: pre-wrap;
+    }
+    .ai-msg.user .ai-msg-body {
+      background: var(--surface-2);
+      padding: 8px 12px;
+      border-radius: var(--r-md);
+    }
+    .ai-msg-error {
+      background: #fdecea; color: #b3261e;
+      border: 1px solid #f5c6c2;
+      padding: 8px 10px; border-radius: var(--r-md);
+      font-size: 12px;
+    }
+    .ai-msg-actions {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+    }
+    .ai-msg-actions .btn { padding: 4px 10px; font-size: 11.5px; }
+    .ai-msg-chart-card {
+      border: 1px solid var(--border-1);
+      border-radius: var(--r-md);
+      padding: 8px;
+      background: var(--surface-2);
+      font-size: 11.5px;
+      color: var(--text-3);
+    }
+    .ai-msg-chart-spec {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
+    .ai-msg-chart-spec strong { color: var(--text-1); font-weight: 600; }
+
+    .ai-drawer-input-wrap {
+      border-top: 1px solid var(--border-1);
+      padding: 12px 14px;
+      background: var(--surface-1);
+    }
+    .ai-drawer-input-wrap textarea {
+      width: 100%;
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-md);
+      padding: 8px 10px;
+      font-family: var(--font-base);
+      font-size: 13px;
+      resize: none;
+      min-height: 36px; max-height: 140px;
+      color: var(--text-1);
+      background: var(--surface-1);
+    }
+    .ai-drawer-input-wrap textarea:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .ai-drawer-input-row {
+      display: flex; align-items: center; gap: 8px; margin-top: 6px;
+    }
+    .ai-drawer-input-row .spacer { flex: 1; }
+    .ai-drawer-input-meta {
+      font-size: 10.5px; color: var(--text-4);
+      font-family: var(--font-mono);
+    }
+    .ai-spinner {
+      display: inline-block;
+      width: 11px; height: 11px;
+      border: 2px solid var(--border-2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: ai-spin 0.7s linear infinite;
+      vertical-align: -1px;
+    }
+    @keyframes ai-spin { to { transform: rotate(360deg); } }
+
+    /* AI chip inside SQL editor toolbar */
+    .sql-ai-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      border: 1px solid #d9c9f5;
+      color: #6f42c1;
+      padding: 5px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 600;
+      cursor: pointer;
+    }
+    .sql-ai-chip:hover { border-color: #b794e6; }
+    .sql-ai-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+
     /* ─── SQL editor: unsaved-changes inline confirm overlay ─────── */
     .sql-confirm-overlay {
       position: absolute; inset: 0;
@@ -3052,6 +3328,11 @@
         <div class="dataset-list" id="datasetList" role="list"></div>
       </div>
       <div class="sidebar-section" style="border-top:1px solid var(--border-1)">
+        <button class="sidebar-button-block" id="aiSettingsBtn" onclick="openAiSettings()" title="Configure AI provider" style="margin-bottom:6px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          AI settings
+          <span id="aiStatusDot" class="ai-status-dot" aria-hidden="true"></span>
+        </button>
         <button class="sidebar-button-block" id="resetAllBtn" title="Clear all stored data">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
           Clear all data
@@ -3105,10 +3386,12 @@ var DB_NAME      = 'glimpse-v1';
 // History: v1 had datasets+dashboards. v2 added folders. v3/v4 were transient
 // versions during a buggy self-heal in earlier dev. v5 is the canonical schema -
 // any existing DB at any earlier version migrates cleanly via `onupgradeneeded`.
-var DB_VERSION   = 5;
-var STORE_DS     = 'datasets';
-var STORE_DASH   = 'dashboards';
-var STORE_FOLDER = 'folders';
+var DB_VERSION   = 6;
+var STORE_DS       = 'datasets';
+var STORE_DASH     = 'dashboards';
+var STORE_FOLDER   = 'folders';
+var STORE_SETTINGS = 'settings';
+var STORE_CHAT     = 'chat';      // {id: <datasetId>, messages: [...]}
 var MAX_FILE_MB = 250;
 var WARN_FILE_MB = 25;
 var MAX_ROWS_DEFAULT = 1000000;
@@ -3164,7 +3447,10 @@ var App = {
   refreshInFlight: false,
   sheetSourceMode: 'public',
   pendingSheetImport: null,
-  expandedFolders: {}      // {[folderId]: bool} - UI-only expansion state
+  expandedFolders: {},     // {[folderId]: bool} - UI-only expansion state
+  aiSettings: null,        // {provider, model, apiKey, createdAt, lastUsedAt} or null
+  chatHistory: {},         // {[datasetId]: [{role, content, ts, chart?, sql?, error?}]}
+  aiBusy: false            // true while an AI request is in flight
 };
 
 // Kick off IndexedDB open IMMEDIATELY when the script parses, not inside init().
@@ -3215,6 +3501,12 @@ function dbOpen() {
       }
       if (!db.objectStoreNames.contains(STORE_FOLDER)) {
         db.createObjectStore(STORE_FOLDER, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_SETTINGS)) {
+        db.createObjectStore(STORE_SETTINGS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_CHAT)) {
+        db.createObjectStore(STORE_CHAT, { keyPath: 'id' });
       }
     };
     req.onblocked = function() {
@@ -7909,9 +8201,28 @@ function renderDashboard() {
       '</div>' +
     '</div>' +
     filterBarHtml +
+    renderAiAskBar() +
     '<div class="dashboard" id="dashboard">' +
       chartsHtml + addCardHtml +
     '</div>' +
+  '</div>';
+}
+
+// "Ask AI" bar rendered above the charts grid. Submitting opens the chat drawer
+// pre-populated with the question and fires the NL->chart pipeline.
+function renderAiAskBar() {
+  return '<div class="ai-ask-bar" id="aiAskBar" onclick="document.getElementById(\'aiAskBarInput\').focus()">' +
+    '<svg class="ai-ask-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      '<path d="M12 2l2.39 6.76L21 9.18l-5.18 4.27L17.27 21 12 17l-5.27 4 1.45-7.55L3 9.18l6.61-.42L12 2z"/>' +
+    '</svg>' +
+    '<input class="ai-ask-bar-input" id="aiAskBarInput" type="text" ' +
+      'placeholder="Ask anything about this data… e.g. \"revenue by region last quarter\"" ' +
+      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();aiAskBarSubmit()}"/>' +
+    '<span class="ai-ask-bar-kbd">Enter</span>' +
+    '<button class="ai-ask-bar-cta" onclick="aiAskBarSubmit();event.stopPropagation()">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+      'Ask' +
+    '</button>' +
   '</div>';
 }
 
@@ -7968,6 +8279,9 @@ function renderChartCard(ch, schema) {
         '</div>' +
       '</div>' +
       '<div class="chart-card-actions">' +
+        '<button class="chart-action-btn" onclick="aiExplainChart(\'' + ch.id + '\')" title="Explain this chart with AI" aria-label="Explain with AI" style="color:#6f42c1">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+        '</button>' +
         '<button class="chart-action-btn edit-only" onclick="openEditChartModal(\'' + ch.id + '\')" title="Edit chart" aria-label="Edit chart">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
         '</button>' +
@@ -8966,6 +9280,19 @@ function switchDataset(id) {
   var ds = activeDataset();
   if (!ds) return;
   if (!App.dashboards[id]) App.dashboards[id] = suggestCharts(ds.schema);
+  // If the AI chat drawer is open, re-render it against the new dataset's history.
+  var drawer = document.getElementById('aiDrawer');
+  if (drawer && drawer.classList.contains('open')) {
+    // Lazy-load history for this dataset if not yet in memory.
+    if (!App.chatHistory[id]) {
+      loadChatHistory(id).then(function(hist) {
+        App.chatHistory[id] = hist;
+        if (App.activeDatasetId === id) renderAiDrawer();
+      });
+    } else {
+      renderAiDrawer();
+    }
+  }
   setStep('dashboard');
 }
 
@@ -9635,6 +9962,8 @@ function init() {
   syncModeUI();
   restoreSidebarState();
   loadExpandedFoldersPref();
+  // Load AI settings (BYOK) - does not block init; the status dot updates when done.
+  loadAiSettings().catch(function(e){ console.warn('[Glimpse AI] settings load failed:', e); });
 
   // Render the home/landing page IMMEDIATELY so the user is never staring at a
   // blank main area while IndexedDB does its (sometimes slow) open + migration
@@ -9707,11 +10036,12 @@ function init() {
       // then the discard-changes confirm. Both are dismissed without closing the editor.
       var nameOverlay = document.getElementById('sqlNameOverlay');
       if (nameOverlay) {
-        // Click the Cancel button so the awaiting promise resolves cleanly.
         var cancelBtn = nameOverlay.querySelector('#sqlNameCancelBtn');
         if (cancelBtn) cancelBtn.click();
         return;
       }
+      // NL→SQL overlay dismiss
+      if (document.getElementById('aiNlSqlOverlay')) { aiNlSqlCancel(); return; }
       if (document.getElementById('sqlCloseConfirm')) { hideSqlCloseConfirm(); return; }
       // If the SQL editor is open, route through its own close-flow so the
       // unsaved-changes prompt is honored. Otherwise behave as before.
@@ -9790,7 +10120,7 @@ function loadCodeMirror() {
     .then(function() { return window.CodeMirror; })
     .catch(function(err) {
       // Reset so a retry (close + re-open editor) can attempt the download again
-      // — otherwise the rejected promise is permanently cached.
+      // - otherwise the rejected promise is permanently cached.
       _cmLoadPromise = null;
       throw err;
     });
@@ -9924,7 +10254,7 @@ var DuckDBSQL = (function() {
       catch (e) { return String(ms); }
     }
 
-    // Date types — return YYYY-MM-DD so the type-detector classifies them as 'date'.
+    // Date types - return YYYY-MM-DD so the type-detector classifies them as 'date'.
     if (isDate) {
       // Default to DAY when unit is not exposed (Date32 most common path).
       var isDayUnit = unit === 0 || /Day|DAY/.test(ctor) || /<DAY/.test(typeStr);
@@ -9938,7 +10268,7 @@ var DuckDBSQL = (function() {
       };
     }
 
-    // Timestamp — return full ISO string so it's classified as 'datetime'.
+    // Timestamp - return full ISO string so it's classified as 'datetime'.
     if (isTimestamp) {
       return function(v) {
         if (v == null) return null;
@@ -9962,7 +10292,7 @@ var DuckDBSQL = (function() {
       };
     }
 
-    // Time — pass through as Number (BigInt loses meaning here without unit context).
+    // Time - pass through as Number (BigInt loses meaning here without unit context).
     if (isTime) {
       return function(v) {
         if (v == null) return null;
@@ -10081,7 +10411,7 @@ function openSqlEditor(editingDatasetId) {
       '</div>'
     : '';
 
-  var title = editingDs ? 'Edit SQL query — ' + escHTML(editingDs.name) : 'New SQL query';
+  var title = editingDs ? 'Edit SQL query - ' + escHTML(editingDs.name) : 'New SQL query';
   var saveLabel = editingDs ? 'Save & re-run' : 'Save as dataset';
 
   // Render modal with the wider modal--sql class.
@@ -10092,7 +10422,7 @@ function openSqlEditor(editingDatasetId) {
   modalContent.innerHTML =
     '<button class="modal-close" onclick="closeSqlEditor()">✕</button>' +
     '<h2>' + title + '</h2>' +
-    '<div class="sql-modal-sub">Write SQL against your datasets. Powered by DuckDB-WASM — runs 100% in your browser. Click a table to expand columns; double-click any column or table name to insert. <strong>Tip:</strong> dates are stored as text — use <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">CAST(col AS DATE)</code> or <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">STRPTIME(col, \'%Y-%m-%d\')</code> when you need real date typing.</div>' +
+    '<div class="sql-modal-sub">Write SQL against your datasets. Powered by DuckDB-WASM - runs 100% in your browser. Click a table to expand columns; double-click any column or table name to insert. <strong>Tip:</strong> dates are stored as text - use <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">CAST(col AS DATE)</code> or <code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:11px">STRPTIME(col, \'%Y-%m-%d\')</code> when you need real date typing.</div>' +
     staleBanner +
     '<div class="sql-layout">' +
       '<div class="sql-tables-panel" id="sqlTablesPanel">' +
@@ -10112,6 +10442,10 @@ function openSqlEditor(editingDatasetId) {
             ' Run' +
           '</button>' +
           '<button class="btn btn-ghost btn-sm" onclick="closeSqlEditor()">Cancel</button>' +
+          '<button class="sql-ai-chip" type="button" onclick="aiGenerateSql()" title="Describe your query in plain English and let AI write the SQL">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+            'Generate from text' +
+          '</button>' +
           '<span class="spacer"></span>' +
           '<span class="sql-status" id="sqlStatus">Ctrl/Cmd+Enter to run</span>' +
           '<button class="btn btn-primary btn-sm" id="sqlSaveBtn" onclick="saveSqlAsDataset()" disabled>' +
@@ -10318,7 +10652,10 @@ function escAttr(s) {
   // Safe to embed inside a single-quoted JS string that is itself inside a
   // double-quoted HTML attribute, e.g. onclick="f('...')". Order matters:
   // escape & first so we don't double-encode the entities introduced below.
+  // Strip U+2028/U+2029 which terminate JS string literals - LLMs occasionally
+  // emit them when generating multilingual followups.
   return String(s)
+    .replace(/[\u2028\u2029]/g, '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -10423,7 +10760,7 @@ function saveSqlAsDataset() {
     : null;
 
   if (editingDs) {
-    // Update existing SQL dataset in place — preserves charts, folder, id.
+    // Update existing SQL dataset in place - preserves charts, folder, id.
     var schema = profileDataset(res.rows, res.headers);
     editingDs.rows = res.rows;
     editingDs.schema = schema;
@@ -10457,7 +10794,7 @@ function saveSqlAsDataset() {
     return;
   }
 
-  // New SQL dataset — ask for a name.
+  // New SQL dataset - ask for a name.
   promptSqlSaveName('').then(function(name) {
     if (!name) return;
     // Disable Save immediately to prevent double-save races on slow IDB writes.
@@ -10523,7 +10860,7 @@ function computeSourceDatasetIds(sql, registered) {
 }
 
 // Renders the "Save as dataset" prompt as an overlay layered ON TOP of the
-// SQL editor (so the editor state — CM, results, search box — stays intact).
+// SQL editor (so the editor state - CM, results, search box - stays intact).
 function promptSqlSaveName(defaultName) {
   return new Promise(function(resolve) {
     var modalContent = document.getElementById('modalContent');
@@ -10583,7 +10920,7 @@ function rerunSqlDataset(id) {
     return !App.datasets.find(function(d){ return d.id === sid; });
   });
   if (missing.length) {
-    toast('Cannot re-run — ' + missing.length + ' source dataset' + (missing.length === 1 ? '' : 's') + ' missing. Edit the SQL to use available tables.', 'error', 5000);
+    toast('Cannot re-run - ' + missing.length + ' source dataset' + (missing.length === 1 ? '' : 's') + ' missing. Edit the SQL to use available tables.', 'error', 5000);
     openSqlEditor(id);
     return;
   }
@@ -10631,6 +10968,1074 @@ function rerunSqlDataset(id) {
     openSqlEditor(id);
   });
 }
+
+// ════════════════════════════════════════════════════════════════════
+// ─── AI LAYER (BYOK: Bring Your Own Key) ────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+
+var AI_PROVIDERS = {
+  anthropic: {
+    name: 'Anthropic',
+    sub: 'Claude · best for SQL & chart-spec generation',
+    keyPlaceholder: 'sk-ant-api03-…',
+    keyDocsUrl: 'https://console.anthropic.com/',
+    defaultModel: 'claude-sonnet-4-5-20250929',
+    models: [
+      { id: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (recommended)' },
+      { id: 'claude-opus-4-1-20250805',    label: 'Claude Opus 4.1 (highest quality)' },
+      { id: 'claude-haiku-4-5-20251001',  label: 'Claude Haiku 4.5 (fastest, cheapest)' }
+    ]
+  },
+  openai: {
+    name: 'OpenAI',
+    sub: 'GPT · familiar models',
+    keyPlaceholder: 'sk-proj-…',
+    keyDocsUrl: 'https://platform.openai.com/api-keys',
+    defaultModel: 'gpt-4o-mini',
+    models: [
+      { id: 'gpt-4o-mini', label: 'GPT-4o mini (recommended)' },
+      { id: 'gpt-4o',      label: 'GPT-4o (higher quality)' },
+      { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' }
+    ]
+  }
+};
+
+// ─── Load + persist AI settings + chat history ──────────────────────
+async function loadAiSettings() {
+  try {
+    var rec = await dbGet(STORE_SETTINGS, 'ai');
+    App.aiSettings = rec || null;
+  } catch (e) {
+    console.warn('[Glimpse AI] could not load settings:', e);
+    App.aiSettings = null;
+  }
+  reflectAiStatusDot();
+}
+
+async function saveAiSettings(settings) {
+  var rec = Object.assign({ id: 'ai' }, settings);
+  await dbPut(STORE_SETTINGS, rec);
+  App.aiSettings = rec;
+  reflectAiStatusDot();
+}
+
+async function clearAiSettings() {
+  try { await dbDelete(STORE_SETTINGS, 'ai'); } catch (e) {}
+  App.aiSettings = null;
+  reflectAiStatusDot();
+}
+
+function reflectAiStatusDot() {
+  var dot = document.getElementById('aiStatusDot');
+  if (!dot) return;
+  dot.classList.toggle('connected', !!(App.aiSettings && App.aiSettings.apiKey));
+}
+
+// dbGet helper (used here + can be reused). Tolerates null db (private mode,
+// blocked-upgrade, etc.) and missing stores (legacy version still mid-upgrade)
+// by returning null instead of throwing.
+function dbGet(store, id) {
+  return withDb(function(db) {
+    if (!db) return Promise.resolve(null);
+    if (!db.objectStoreNames || !db.objectStoreNames.contains(store)) return Promise.resolve(null);
+    return new Promise(function(resolve, reject) {
+      try {
+        var tx = db.transaction(store, 'readonly');
+        var req = tx.objectStore(store).get(id);
+        req.onsuccess = function() { resolve(req.result || null); };
+        req.onerror = function() { reject(req.error); };
+      } catch (e) { reject(e); }
+    });
+  });
+}
+
+async function loadChatHistory(datasetId) {
+  if (!datasetId) return [];
+  try {
+    var rec = await dbGet(STORE_CHAT, datasetId);
+    return (rec && rec.messages) || [];
+  } catch (e) { return []; }
+}
+
+async function saveChatHistory(datasetId, messages) {
+  if (!datasetId) return;
+  try {
+    await dbPut(STORE_CHAT, { id: datasetId, messages: messages.slice(-50) });
+  } catch (e) {
+    console.warn('[Glimpse AI] could not save chat history:', e);
+  }
+}
+
+// ─── Provider abstraction ───────────────────────────────────────────
+async function callAI(opts) {
+  var s = App.aiSettings;
+  if (!s || !s.apiKey) throw new Error('AI provider not configured');
+  if (s.provider === 'anthropic') return callAnthropic(s, opts);
+  if (s.provider === 'openai')    return callOpenAI(s, opts);
+  throw new Error('Unknown provider: ' + s.provider);
+}
+
+async function callAnthropic(s, opts) {
+  var body = {
+    model:      opts.model || s.model || AI_PROVIDERS.anthropic.defaultModel,
+    max_tokens: opts.maxTokens || 2048,
+    system:     opts.system || '',
+    messages:   opts.messages || []
+  };
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': s.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    var errJson = await res.json().catch(function(){ return {}; });
+    var msg = (errJson && errJson.error && errJson.error.message) || ('HTTP ' + res.status);
+    throw new AiError(msg, res.status);
+  }
+  var data = await res.json();
+  var text = (data.content || []).map(function(c){ return c.type === 'text' ? c.text : ''; }).join('');
+  // Map Anthropic's stop_reason into a friendlier error when there is no text.
+  if (!text) {
+    if (data.stop_reason === 'refusal') {
+      throw new AiError('Claude declined to answer this prompt. Try rephrasing.', 0);
+    }
+    if (data.stop_reason === 'max_tokens') {
+      throw new AiError('Response was cut off (max_tokens). Ask a more focused question.', 0);
+    }
+    throw new AiError('AI returned an empty response.', 0);
+  }
+  return { text: text, usage: data.usage || null };
+}
+
+async function callOpenAI(s, opts) {
+  var messages = [];
+  if (opts.system) messages.push({ role: 'system', content: opts.system });
+  (opts.messages || []).forEach(function(m){ messages.push(m); });
+  var body = {
+    model:      opts.model || s.model || AI_PROVIDERS.openai.defaultModel,
+    max_tokens: opts.maxTokens || 2048,
+    messages:   messages
+  };
+  var res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'authorization': 'Bearer ' + s.apiKey
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    var errJson = await res.json().catch(function(){ return {}; });
+    var msg = (errJson && errJson.error && errJson.error.message) || ('HTTP ' + res.status);
+    throw new AiError(msg, res.status);
+  }
+  var data = await res.json();
+  var choice = data.choices && data.choices[0];
+  var text = (choice && choice.message && choice.message.content) || '';
+  if (!text) {
+    if (choice && choice.finish_reason === 'content_filter') {
+      throw new AiError('OpenAI declined this prompt (content filter). Try rephrasing.', 0);
+    }
+    if (choice && choice.finish_reason === 'length') {
+      throw new AiError('Response was cut off (max_tokens). Ask a more focused question.', 0);
+    }
+    throw new AiError('AI returned an empty response.', 0);
+  }
+  return { text: text, usage: data.usage || null };
+}
+
+function AiError(message, status) {
+  var e = new Error(message);
+  e.name = 'AiError';
+  e.status = status;
+  return e;
+}
+
+// Strip any tokens that look like API keys from a string before we surface it
+// to the user or write it to logs. Anthropic/OpenAI error messages sometimes
+// echo a prefix of the offending key - we never want that visible in toasts,
+// screenshots, screen-recordings, or shoulder-surf range.
+function sanitizeForDisplay(s) {
+  if (!s) return s;
+  return String(s)
+    .replace(/sk-[A-Za-z0-9_\-]{6,}/g, 'sk-***')
+    .replace(/(Bearer\s+)[A-Za-z0-9_\-\.]+/g, '$1***');
+}
+
+// Try to extract a JSON object from an LLM response (handles ```json fences,
+// stray prose around the JSON, etc.).
+function extractJson(text) {
+  if (!text) return null;
+  // ```json ... ``` fence
+  var fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    try { return JSON.parse(fenceMatch[1].trim()); } catch (e) {}
+  }
+  // First {...} balanced block
+  var start = text.indexOf('{');
+  var end = text.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    try { return JSON.parse(text.slice(start, end + 1)); } catch (e) {}
+  }
+  return null;
+}
+
+// ─── AI Setup / Settings modals ─────────────────────────────────────
+function openAiSettings() {
+  if (App.aiSettings && App.aiSettings.apiKey) renderAiSettingsPanel();
+  else openAiSetupModal();
+}
+
+function openAiSetupModal(opts) {
+  opts = opts || {};
+  var current = opts.preserve && App.aiSettings ? App.aiSettings : null;
+  var selectedProvider = (current && current.provider) || 'anthropic';
+  App._aiSetupProvider = selectedProvider;
+
+  function tab(id) {
+    var p = AI_PROVIDERS[id];
+    var selected = id === selectedProvider;
+    return '<div class="ai-provider-tab' + (selected ? ' selected' : '') + '" onclick="aiSetupSelectProvider(\'' + id + '\')">' +
+      '<div class="ai-provider-tab-name">' +
+        '<span class="ai-radio-dot"></span>' + escHTML(p.name) +
+      '</div>' +
+      '<div class="ai-provider-tab-sub">' + escHTML(p.sub) + '</div>' +
+    '</div>';
+  }
+
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Connect an AI provider</h2>' +
+    '<p>Glimpse uses your own API key - keys and data never route through Glimpse servers. Browser → provider, directly.</p>' +
+    '<div class="ai-provider-tabs">' + tab('anthropic') + tab('openai') + '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">API key</label>' +
+      // Never pre-fill the actual key into a DOM attribute even when updating.
+      // Show a masked hint instead so the user knows there is a key on file.
+      '<input class="modal-field-input" id="aiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="' + (current && current.apiKey ? maskKey(current.apiKey) : AI_PROVIDERS[selectedProvider].keyPlaceholder) + '"/>' +
+      '<div class="modal-field-hint">' +
+        (current ? 'Leave blank to keep the current key. ' : '') +
+        'Get a key from <a href="' + AI_PROVIDERS[selectedProvider].keyDocsUrl + '" target="_blank" rel="noopener" id="aiKeyDocsLink" style="color:var(--accent)">' + AI_PROVIDERS[selectedProvider].keyDocsUrl.replace(/^https?:\/\//, '') + '</a>' +
+      '</div>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Model</label>' +
+      '<select class="modal-field-select" id="aiModelSelect">' + aiModelOptions(selectedProvider, current && current.model) + '</select>' +
+    '</div>' +
+    '<div class="ai-privacy-note">' +
+      '<strong>Privacy</strong>' +
+      '<ul>' +
+        '<li>Keys are stored only in your browser\'s IndexedDB.</li>' +
+        '<li>Questions + a small data sample (column names, types, ~5 rows) are sent <em>directly</em> from your browser to ' + escHTML(AI_PROVIDERS[selectedProvider].name) + '.</li>' +
+        '<li>Glimpse servers never see your data or your key.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-primary" id="aiSetupSaveBtn" onclick="aiSetupSubmit()">Connect &amp; test</button>' +
+    '</div>'
+  );
+  setTimeout(function() {
+    var input = document.getElementById('aiKeyInput');
+    if (input && !current) input.focus();
+  }, 0);
+}
+
+function aiModelOptions(provider, currentModel) {
+  var models = AI_PROVIDERS[provider].models;
+  var def = currentModel || AI_PROVIDERS[provider].defaultModel;
+  return models.map(function(m) {
+    return '<option value="' + escHTML(m.id) + '"' + (m.id === def ? ' selected' : '') + '>' + escHTML(m.label) + '</option>';
+  }).join('');
+}
+
+function aiSetupSelectProvider(id) {
+  if (App._aiSetupProvider === id) return; // no-op on same-tab click - don't wipe typed key
+  App._aiSetupProvider = id;
+  document.querySelectorAll('.ai-provider-tab').forEach(function(el, idx) {
+    var providerId = idx === 0 ? 'anthropic' : 'openai';
+    el.classList.toggle('selected', providerId === id);
+  });
+  var input = document.getElementById('aiKeyInput');
+  if (input) {
+    input.placeholder = AI_PROVIDERS[id].keyPlaceholder;
+    input.value = '';  // switching provider invalidates whatever was typed
+  }
+  var sel = document.getElementById('aiModelSelect');
+  if (sel) sel.innerHTML = aiModelOptions(id);
+  var link = document.getElementById('aiKeyDocsLink');
+  if (link) {
+    link.href = AI_PROVIDERS[id].keyDocsUrl;
+    link.textContent = AI_PROVIDERS[id].keyDocsUrl.replace(/^https?:\/\//, '');
+  }
+}
+
+// Show a key as `sk-ant-…XYZ` for placeholders, summaries, etc.
+function maskKey(k) {
+  if (!k) return '';
+  var s = String(k);
+  if (s.length <= 14) return '••••';
+  return s.slice(0, 10) + '••••' + s.slice(-4);
+}
+
+async function aiSetupSubmit() {
+  var rawKey = (document.getElementById('aiKeyInput') || {}).value || '';
+  var modelEl = document.getElementById('aiModelSelect');
+  var model = modelEl ? modelEl.value : '';
+  var provider = App._aiSetupProvider || 'anthropic';
+  // Collapse all whitespace - keys are sometimes pasted with stray newlines.
+  var key = rawKey.replace(/\s+/g, '');
+  var prev = App.aiSettings;
+
+  // "Update key" flow: empty input means "keep existing key, only change model".
+  if (!key && prev && prev.apiKey) {
+    key = prev.apiKey;
+  }
+  if (!key) { toast('API key is required', 'warn'); return; }
+
+  var btn = document.getElementById('aiSetupSaveBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="ai-spinner"></span> Testing…'; }
+
+  App.aiSettings = { id: 'ai', provider: provider, model: model, apiKey: key, createdAt: (prev && prev.createdAt) || Date.now(), lastUsedAt: 0 };
+  try {
+    await callAI({
+      system: 'You are a connection test. Respond with the single word: OK',
+      messages: [{ role: 'user', content: 'ping' }],
+      maxTokens: 8
+    });
+  } catch (err) {
+    App.aiSettings = prev;
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Connect &amp; test'; }
+    var msg = sanitizeForDisplay((err && err.message) ? err.message : String(err));
+    // Map common upstream errors to friendlier text.
+    if (err && err.status === 401) msg = 'Your API key was rejected by ' + AI_PROVIDERS[provider].name + '.';
+    else if (err && err.status === 429) msg = AI_PROVIDERS[provider].name + ' rate-limited the request. Try again in a moment.';
+    toast('Connection failed: ' + msg, 'error', 6000);
+    return;
+  }
+
+  // Test succeeded - persist + remember explicit success.
+  try {
+    await saveAiSettings(App.aiSettings);
+    App._aiSetupJustSucceeded = true;
+    closeModal();
+    toast('Connected to ' + AI_PROVIDERS[provider].name + ' · ' + (AI_PROVIDERS[provider].models.find(function(m){return m.id===model;}) || {label: model}).label, 'success', 3500);
+  } catch (err) {
+    App.aiSettings = prev;
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Connect &amp; test'; }
+    toast('Saved key but local storage failed: ' + sanitizeForDisplay(err.message || err), 'error', 6000);
+  }
+}
+
+function renderAiSettingsPanel() {
+  var s = App.aiSettings;
+  var p = AI_PROVIDERS[s.provider] || AI_PROVIDERS.anthropic;
+  var modelLabel = (p.models.find(function(m){ return m.id === s.model; }) || { label: s.model }).label;
+  var maskedKey = maskKey(s.apiKey);
+  var added = s.createdAt ? new Date(s.createdAt).toLocaleDateString() : '-';
+
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>AI settings</h2>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' +
+      '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0f9d58"></span>' +
+      '<span style="font-size:13px;font-weight:600">Connected</span>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Provider</label>' +
+      '<div style="font-size:13.5px;color:var(--text-1);font-weight:600">' + escHTML(p.name) + '</div>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">Model</label>' +
+      '<select class="modal-field-select" id="aiSettingsModelSelect" onchange="aiSettingsChangeModel(this.value)">' + aiModelOptions(s.provider, s.model) + '</select>' +
+    '</div>' +
+    '<div class="modal-field">' +
+      '<label class="modal-field-label">API key</label>' +
+      '<div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px">' +
+        '<span style="flex:1;color:var(--text-2)">' + escHTML(maskedKey) + '</span>' +
+        '<button class="btn btn-ghost btn-sm" onclick="openAiSetupModal({preserve:true})">Update key</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ai-privacy-note">' +
+      '<strong>What happens when you ask AI?</strong>' +
+      '<ul>' +
+        '<li>The active dataset\'s column names, types, and 5 sample rows are sent directly to ' + escHTML(p.name) + '.</li>' +
+        '<li>Your question goes with that context.</li>' +
+        '<li>The response comes back to your browser only.</li>' +
+      '</ul>' +
+      '<div style="margin-top:6px;color:var(--text-4)">Added ' + escHTML(added) + '</div>' +
+    '</div>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-danger" onclick="aiDisconnectConfirm()">Disconnect</button>' +
+      '<span style="flex:1"></span>' +
+      '<button class="btn btn-primary" onclick="closeModal()">Done</button>' +
+    '</div>'
+  );
+}
+
+async function aiSettingsChangeModel(newModel) {
+  if (!App.aiSettings || App.aiSettings.model === newModel) return;
+  App.aiSettings.model = newModel;
+  try {
+    await saveAiSettings(App.aiSettings);
+    toast('Model changed to ' + newModel, 'success', 2000);
+  } catch (e) {}
+}
+
+function aiDisconnectConfirm() {
+  openModal(
+    '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '<h2>Disconnect AI?</h2>' +
+    '<p>Your API key will be removed from this browser. Chat history stays. You can reconnect anytime.</p>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn btn-danger" onclick="aiDisconnect()">Disconnect</button>' +
+    '</div>'
+  );
+}
+
+async function aiDisconnect() {
+  await clearAiSettings();
+  closeModal();
+  toast('AI disconnected', 'success', 2000);
+}
+
+// ─── Ask bar submit + drawer + chat ─────────────────────────────────
+function aiAskBarSubmit() {
+  var input = document.getElementById('aiAskBarInput');
+  if (!input) return;
+  var q = (input.value || '').trim();
+  if (!q) return;
+  input.value = '';
+  ensureAiConfiguredThen(function() {
+    openAiDrawerWithQuestion(q);
+  });
+}
+
+// Calls fn() if AI is configured; otherwise opens the setup modal first and
+// runs fn() once the user finishes setup.
+function ensureAiConfiguredThen(fn) {
+  if (App.aiSettings && App.aiSettings.apiKey) { fn(); return; }
+  App._pendingAiAction = fn;
+  openAiSetupModal();
+}
+
+// When the setup modal closes successfully, fire any pending action.
+function aiFirePendingAction() {
+  var fn = App._pendingAiAction;
+  App._pendingAiAction = null;
+  if (typeof fn === 'function') fn();
+}
+
+function openAiDrawer() {
+  ensureAiDrawerInDom();
+  var drawer = document.getElementById('aiDrawer');
+  drawer.classList.add('open');
+  // Refresh content
+  renderAiDrawer();
+}
+
+function closeAiDrawer() {
+  var drawer = document.getElementById('aiDrawer');
+  if (drawer) drawer.classList.remove('open');
+}
+
+function ensureAiDrawerInDom() {
+  if (document.getElementById('aiDrawer')) return;
+  var drawer = document.createElement('div');
+  drawer.id = 'aiDrawer';
+  drawer.className = 'ai-drawer';
+  drawer.innerHTML =
+    '<div class="ai-drawer-header">' +
+      '<div class="ai-drawer-title">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f42c1" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
+        '<span>Ask AI</span>' +
+        '<div class="ai-drawer-sub" id="aiDrawerSub"></div>' +
+      '</div>' +
+      '<button class="ai-drawer-close" onclick="closeAiDrawer()" title="Close" aria-label="Close">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="ai-drawer-messages" id="aiDrawerMessages"></div>' +
+    '<div class="ai-drawer-input-wrap">' +
+      '<textarea id="aiDrawerInput" rows="1" placeholder="Ask a follow-up… (Enter to send, Shift+Enter for newline)"></textarea>' +
+      '<div class="ai-drawer-input-row">' +
+        '<span class="ai-drawer-input-meta" id="aiDrawerInputMeta"></span>' +
+        '<span class="spacer"></span>' +
+        '<button class="btn btn-ghost btn-sm" onclick="aiClearChat()" title="Clear conversation">Clear</button>' +
+        '<button class="btn btn-primary btn-sm" id="aiDrawerSendBtn" onclick="aiDrawerSend()">Send</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(drawer);
+  // Wire Enter to send (Shift+Enter for newline), auto-grow textarea.
+  setTimeout(function() {
+    var ta = document.getElementById('aiDrawerInput');
+    if (ta) {
+      ta.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          aiDrawerSend();
+        }
+      });
+      ta.addEventListener('input', function() {
+        ta.style.height = '36px';
+        ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+      });
+    }
+  }, 0);
+}
+
+function renderAiDrawer() {
+  var ds = activeDataset();
+  var sub = document.getElementById('aiDrawerSub');
+  if (sub) {
+    var modelLabel = (App.aiSettings && App.aiSettings.model) || '';
+    sub.textContent = (ds ? ds.name : '-') + ' · ' + modelLabel;
+  }
+  renderAiMessages();
+}
+
+function renderAiMessages() {
+  var wrap = document.getElementById('aiDrawerMessages');
+  if (!wrap) return;
+  var datasetId = App.activeDatasetId;
+  if (!datasetId) {
+    wrap.innerHTML = '<div class="ai-drawer-empty"><div class="ai-drawer-empty-icon">💭</div><div class="ai-drawer-empty-title">Open a dataset first</div><div class="ai-drawer-empty-sub">Select a dataset from the sidebar to start asking questions.</div></div>';
+    return;
+  }
+  var msgs = App.chatHistory[datasetId] || [];
+  if (!msgs.length) {
+    wrap.innerHTML =
+      '<div class="ai-drawer-empty">' +
+        '<div class="ai-drawer-empty-icon">✨</div>' +
+        '<div class="ai-drawer-empty-title">Ask anything about this dataset</div>' +
+        '<div class="ai-drawer-empty-sub">Try one of these:</div>' +
+        '<div style="margin-top:10px">' +
+          aiSuggestions().map(function(s) {
+            return '<span class="ai-suggestion-chip" onclick="aiSendQuestion(\'' + escAttr(s) + '\')">' + escHTML(s) + '</span>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    return;
+  }
+  wrap.innerHTML = msgs.map(function(m, i){ return renderAiMessageHtml(m, i, msgs); }).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function aiSuggestions() {
+  var ds = activeDataset();
+  if (!ds || !ds.schema) return ['What does this data contain?'];
+  var dates = ds.schema.filter(function(f){ return f.type === 'date' || f.type === 'datetime'; });
+  var nums  = ds.schema.filter(function(f){ return f.type === 'integer' || f.type === 'decimal'; });
+  var cats  = ds.schema.filter(function(f){ return f.type === 'categorical' || f.type === 'boolean'; });
+  var s = [];
+  if (cats.length && nums.length) s.push((nums[0].label) + ' by ' + (cats[0].label));
+  if (dates.length && nums.length) s.push('Trend of ' + nums[0].label + ' over time');
+  if (cats.length) s.push('Top categories in ' + cats[0].label);
+  s.push('What are the most interesting patterns?');
+  return s.slice(0, 4);
+}
+
+function renderAiMessageHtml(m, idx, allMsgs) {
+  if (m.role === 'user') {
+    return '<div class="ai-msg user">' +
+      '<div class="ai-msg-role"><span class="ai-msg-role-dot"></span>You</div>' +
+      '<div class="ai-msg-body">' + escHTML(m.content) + '</div>' +
+    '</div>';
+  }
+  // Walk back to find the user message that triggered this assistant reply so
+  // we can hide "Try a variation" for synthetic Explain turns (where varying
+  // makes no sense - there's no chart to re-propose).
+  var triggeringOrigin = 'user';
+  for (var i = idx - 1; i >= 0; i--) {
+    if (allMsgs[i].role === 'user') { triggeringOrigin = allMsgs[i].origin || 'user'; break; }
+  }
+  var msgId = m.id || ('m' + idx); // legacy messages won't have id - fall back
+  var body = '';
+  var label = (App.aiSettings && App.aiSettings.provider === 'openai') ? 'GPT' : 'Claude';
+  if (m.error) {
+    body = '<div class="ai-msg-error">' + escHTML(m.error) + '</div>';
+  } else if (m.pending) {
+    body = '<div class="ai-msg-body"><span class="ai-spinner"></span> Thinking…</div>';
+  } else {
+    body = '<div class="ai-msg-body">' + escHTML(m.content || '') + '</div>';
+    if (m.chart) {
+      var chartSummary =
+        '<strong>' + escHTML(m.chart.type || 'chart') + '</strong>' +
+        (m.chart.xField !== undefined && m.chart.xField !== null ? ' · x: <strong>' + escHTML(m.chart.xLabel || String(m.chart.xField)) + '</strong>' : '') +
+        (m.chart.yField !== undefined && m.chart.yField !== null ? ' · y: <strong>' + escHTML(m.chart.yLabel || String(m.chart.yField)) + '</strong>' : '') +
+        (m.chart.agg ? ' · agg: <strong>' + escHTML(m.chart.agg) + '</strong>' : '');
+      body += '<div class="ai-msg-chart-card">' +
+        'Proposed chart' +
+        '<div class="ai-msg-chart-spec">' + chartSummary + '</div>' +
+      '</div>';
+      body += '<div class="ai-msg-actions">' +
+        '<button class="btn btn-primary" onclick="aiAddProposedChartById(\'' + escAttr(msgId) + '\')">+ Add to dashboard</button>' +
+        (triggeringOrigin !== 'explain'
+          ? '<button class="btn btn-ghost" onclick="aiTryVariationById(\'' + escAttr(msgId) + '\')">↻ Try a variation</button>'
+          : '') +
+      '</div>';
+    }
+    if (m.followups && m.followups.length) {
+      body += '<div style="margin-top:10px;font-size:11px;color:var(--text-4);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Follow-ups</div>' +
+        '<div>' + m.followups.map(function(f){
+          return '<span class="ai-suggestion-chip" onclick="aiSendQuestion(\'' + escAttr(f) + '\')">' + escHTML(f) + '</span>';
+        }).join('') + '</div>';
+    }
+  }
+  return '<div class="ai-msg assistant">' +
+    '<div class="ai-msg-role"><span class="ai-msg-role-dot"></span>' + label + '</div>' +
+    body +
+  '</div>';
+}
+
+function aiDrawerSend() {
+  var ta = document.getElementById('aiDrawerInput');
+  if (!ta) return;
+  var q = (ta.value || '').trim();
+  if (!q) return;
+  ta.value = '';
+  ta.style.height = '36px';
+  aiSendQuestion(q);
+}
+
+function openAiDrawerWithQuestion(q) {
+  openAiDrawer();
+  setTimeout(function(){ aiSendQuestion(q); }, 60);
+}
+
+async function aiSendQuestion(q, opts) {
+  opts = opts || {};
+  var datasetId = App.activeDatasetId;
+  if (!datasetId) { toast('Open a dataset first', 'warn'); return; }
+  // Per-dataset busy lock so a long request on dataset A doesn't block dataset B.
+  if (App.aiBusy && App.aiBusy[datasetId]) { toast('Already thinking about this dataset - wait a moment', 'warn', 2000); return; }
+  ensureAiConfiguredThen(function() { _aiSendQuestionImpl(q, datasetId, opts); });
+}
+
+async function _aiSendQuestionImpl(q, datasetId, opts) {
+  opts = opts || {};
+  if (!App.aiBusy || typeof App.aiBusy !== 'object') App.aiBusy = {};
+  if (!App.chatHistory[datasetId]) {
+    App.chatHistory[datasetId] = await loadChatHistory(datasetId);
+  }
+  var msgs = App.chatHistory[datasetId];
+  var userMsg = { id: genId(), role: 'user', content: q, ts: Date.now(), origin: opts.origin || 'user' };
+  msgs.push(userMsg);
+
+  // Placeholder assistant message with a stable id we can rewrite in place.
+  var thinking = { id: genId(), role: 'assistant', content: '…', ts: Date.now(), pending: true };
+  msgs.push(thinking);
+  openAiDrawer();
+  if (App.activeDatasetId === datasetId) renderAiMessages();
+  App.aiBusy[datasetId] = true;
+  if (App.activeDatasetId === datasetId) setAiSendBusy(true);
+
+  try {
+    var resp = await aiNlToChart(q, datasetId);
+    thinking.pending = false;
+    thinking.content = resp.explanation || '';
+    if (resp.chart) thinking.chart = resp.chart;
+    if (resp.followups) thinking.followups = resp.followups;
+  } catch (err) {
+    thinking.pending = false;
+    var rawMsg = sanitizeForDisplay((err && err.message) ? err.message : String(err));
+    if (err && err.status === 401) rawMsg = 'Your API key was rejected. Update it in AI settings.';
+    else if (err && err.status === 429) rawMsg = 'Rate-limited by the AI provider. Try again in a moment.';
+    thinking.error = rawMsg;
+  } finally {
+    delete App.aiBusy[datasetId];
+    // Only update UI if the user is still looking at this dataset; otherwise
+    // they'd see another dataset's messages flash into the drawer.
+    if (App.activeDatasetId === datasetId) {
+      setAiSendBusy(false);
+      renderAiMessages();
+    }
+    await saveChatHistory(datasetId, msgs);
+    if (App.aiSettings) {
+      App.aiSettings.lastUsedAt = Date.now();
+      try { await saveAiSettings(App.aiSettings); } catch (e) {}
+    }
+  }
+}
+
+function setAiSendBusy(busy) {
+  var btn = document.getElementById('aiDrawerSendBtn');
+  if (!btn) return;
+  btn.disabled = busy;
+  btn.innerHTML = busy ? '<span class="ai-spinner"></span>' : 'Send';
+}
+
+async function aiClearChat() {
+  var datasetId = App.activeDatasetId;
+  if (!datasetId) return;
+  App.chatHistory[datasetId] = [];
+  try { await dbDelete(STORE_CHAT, datasetId); } catch (e) {}
+  renderAiMessages();
+}
+
+// ─── NL → chart pipeline ────────────────────────────────────────────
+async function aiNlToChart(question, datasetId) {
+  var ds = App.datasets.find(function(d){ return d.id === datasetId; });
+  if (!ds || !ds.schema) throw new Error('Dataset not found');
+
+  // Compact schema description + sample rows for the LLM.
+  var schemaForLlm = ds.schema.filter(function(f){ return f.included !== false; }).map(function(f, i) {
+    return { idx: i, name: f.label, type: f.type };
+  });
+  var sampleRows = (ds.rows || []).slice(0, 5).map(function(row) {
+    var obj = {};
+    ds.schema.forEach(function(f, i) { obj[f.label] = row[i]; });
+    return obj;
+  });
+
+  // Recent chat turns for context (last 3 user + assistant pairs, content only).
+  var history = (App.chatHistory[datasetId] || []).filter(function(m){ return !m.pending && !m.error; }).slice(-7);
+
+  var systemPrompt = [
+    'You are an expert data analyst. Given a dataset and a question, propose ONE chart that answers it.',
+    '',
+    'Available chart types: "bar" (categories vs numeric), "line" (date vs numeric), "pie" (parts of whole, ≤8 slices), "scatter" (numeric vs numeric), "table" (raw rows), "kpi" (single big number).',
+    '',
+    'Available aggregations: "sum", "avg", "count", "min", "max", "median", or "none" (for raw rows or KPI).',
+    '',
+    'Respond with a SINGLE JSON object - no prose, no markdown fences. Schema:',
+    '{',
+    '  "explanation": "1-2 sentences summarising what this chart shows.",',
+    '  "chart": {',
+    '    "type":   "bar" | "line" | "pie" | "scatter" | "table" | "kpi",',
+    '    "title":  "human title",',
+    '    "xField": <column INDEX from schema, or null>,',
+    '    "yField": <column INDEX from schema, or null>,',
+    '    "agg":    "sum" | "avg" | "count" | "min" | "max" | "median" | "none",',
+    '    "limit":  <integer 5-50, optional, for bar/table>,',
+    '    "sortDir":"asc" | "desc" (optional)',
+    '  },',
+    '  "followups": ["3 short follow-up questions the user might ask next"]',
+    '}',
+    '',
+    'Rules:',
+    '- Use column INDEXES, not names, in xField/yField.',
+    '- If the question asks for a single number, use "kpi" with yField + agg.',
+    '- If a date column exists and the question is about a trend, prefer "line".',
+    '- Never invent columns. Only use indexes that exist in the schema.'
+  ].join('\n');
+
+  var contextBlock = [
+    'DATASET: ' + ds.name,
+    'ROW COUNT: ' + ds.rowCount,
+    'SCHEMA (column index, name, type):',
+    schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'),
+    '',
+    'SAMPLE ROWS (first 5):',
+    JSON.stringify(sampleRows, null, 2)
+  ].join('\n');
+
+  var conversation = history.map(function(m) {
+    return { role: m.role, content: typeof m.content === 'string' ? m.content : '' };
+  }).filter(function(m){ return m.content; });
+
+  conversation.push({ role: 'user', content: contextBlock + '\n\nQUESTION: ' + question });
+
+  var res = await callAI({
+    system: systemPrompt,
+    messages: conversation,
+    maxTokens: 1200
+  });
+  var parsed = extractJson(res.text);
+  if (!parsed || !parsed.chart) throw new Error('AI response could not be parsed as a chart spec');
+
+  // Validate + normalize the chart spec the LLM returned. We're defensive here
+  // because LLMs occasionally violate the schema we asked for.
+  var c = parsed.chart;
+  var validTypes = ['bar', 'line', 'pie', 'scatter', 'table', 'kpi', 'hbar', 'doughnut', 'histogram'];
+  if (validTypes.indexOf(c.type) === -1) c.type = 'bar';
+
+  function checkField(v) {
+    if (v === null || v === undefined) return null;
+    var n = Math.floor(Number(v));
+    if (!isFinite(n) || n < 0 || n >= ds.schema.length) return null;
+    return n;
+  }
+  c.xField = checkField(c.xField);
+  c.yField = checkField(c.yField);
+  if (c.xField !== null) c.xLabel = ds.schema[c.xField].label;
+  if (c.yField !== null) c.yLabel = ds.schema[c.yField].label;
+  c.agg = ['sum','avg','count','min','max','median','none'].indexOf(c.agg) > -1 ? c.agg : 'sum';
+
+  function isNumericField(idx) {
+    if (idx === null) return false;
+    var t = ds.schema[idx].type;
+    return t === 'integer' || t === 'decimal';
+  }
+
+  // Per-type minima. Fall back to a sensible chart type when the LLM picked
+  // one that can't be rendered with the fields it chose.
+  if (c.type === 'kpi') {
+    if (c.yField === null || c.agg === 'none') {
+      // Pick the first numeric field if available, else degrade to a table.
+      var firstNum = -1;
+      for (var i = 0; i < ds.schema.length; i++) { if (isNumericField(i)) { firstNum = i; break; } }
+      if (firstNum >= 0) { c.yField = firstNum; c.yLabel = ds.schema[firstNum].label; if (c.agg === 'none') c.agg = 'sum'; }
+      else { c.type = 'table'; }
+    }
+  } else if (c.type === 'scatter') {
+    if (!isNumericField(c.xField) || !isNumericField(c.yField)) c.type = 'bar';
+  } else if (c.type === 'bar' || c.type === 'hbar' || c.type === 'line' || c.type === 'histogram') {
+    if (c.xField === null) { c.type = 'table'; }
+  } else if (c.type === 'pie' || c.type === 'doughnut') {
+    if (c.xField === null) c.type = 'table';
+    // Clamp slices - pie charts beyond ~8 categories are unreadable.
+    if (typeof c.limit !== 'number' || c.limit > 8 || c.limit < 2) c.limit = 8;
+  }
+  // Clamp limit to sane range for non-pie types too.
+  if (c.type !== 'pie' && c.type !== 'doughnut') {
+    if (typeof c.limit === 'number') c.limit = Math.max(5, Math.min(50, Math.floor(c.limit)));
+  }
+
+  return {
+    explanation: typeof parsed.explanation === 'string' ? parsed.explanation : '',
+    chart: c,
+    followups: Array.isArray(parsed.followups) ? parsed.followups.slice(0, 4).filter(function(s){ return typeof s === 'string'; }) : []
+  };
+}
+
+// Locate a message by stable id within the active dataset's chat history.
+function findChatMessage(msgId) {
+  var datasetId = App.activeDatasetId;
+  var msgs = App.chatHistory[datasetId] || [];
+  for (var i = 0; i < msgs.length; i++) if (msgs[i].id === msgId) return { msg: msgs[i], idx: i, msgs: msgs, datasetId: datasetId };
+  return null;
+}
+
+// Add a chart proposed by AI into the active dashboard.
+function aiAddProposedChartById(msgId) {
+  var found = findChatMessage(msgId);
+  if (!found || !found.msg.chart) { toast('Proposal no longer available', 'warn'); return; }
+  var ds = activeDataset();
+  if (!ds || ds.id !== found.datasetId) {
+    toast('Switch back to the original dataset to add this chart', 'warn', 4000);
+    return;
+  }
+  var c = found.msg.chart;
+  var charts = App.dashboards[found.datasetId] || (App.dashboards[found.datasetId] = []);
+  var newChart = {
+    id:        genId(),
+    type:      c.type,
+    title:     c.title || 'AI: ' + (c.xLabel || '') + (c.yLabel ? ' vs ' + c.yLabel : ''),
+    xField:    c.xField,
+    yField:    c.yField,
+    agg:       c.agg === 'none' ? null : c.agg,
+    span:      6,
+    limit:     c.limit || 20,
+    sortDir:   c.sortDir || 'desc'
+  };
+  charts.push(newChart);
+  saveDashboard(found.datasetId, charts);
+  toast('Chart added to dashboard', 'success', 2500);
+  if (App.step === 'dashboard') setStep('dashboard');
+}
+
+function aiTryVariationById(msgId) {
+  var found = findChatMessage(msgId);
+  if (!found) return;
+  var question = null;
+  for (var i = found.idx - 1; i >= 0; i--) {
+    if (found.msgs[i].role === 'user') { question = found.msgs[i].content; break; }
+  }
+  if (!question) return;
+  aiSendQuestion(question + ' (try a different chart style or grouping)');
+}
+
+// ─── Explain this chart ────────────────────────────────────────────
+async function aiExplainChart(chartId) {
+  ensureAiConfiguredThen(async function() {
+    var datasetId = App.activeDatasetId;
+    if (!datasetId) return;
+    var ds = activeDataset();
+    var ch = (App.dashboards[datasetId] || []).find(function(c){ return c.id === chartId; });
+    if (!ch || !ds) return;
+
+    // Compose a question that triggers an "explanation" turn.
+    var xLabel = ch.xField != null ? ds.schema[ch.xField].label : '';
+    var yLabel = ch.yField != null ? ds.schema[ch.yField].label : '';
+    var question = 'Explain this chart titled "' + (ch.title || '') + '" - a ' + ch.type + ' chart' +
+                   (xLabel ? ' of ' + yLabel + ' by ' + xLabel : '') +
+                   (ch.agg ? ' (aggregated by ' + ch.agg + ')' : '') +
+                   '. What does it show? What stands out? Any caveats?';
+    aiSendQuestion(question, { origin: 'explain' });
+  });
+}
+
+// ─── NL → SQL (inside the SQL editor) ───────────────────────────────
+async function aiGenerateSql() {
+  ensureAiConfiguredThen(function() {
+    var modalContent = document.getElementById('modalContent');
+    if (!modalContent) return;
+    // Build an in-editor overlay (like the close-confirm) - keep CodeMirror alive.
+    if (document.getElementById('aiNlSqlOverlay')) return;
+    var overlay = document.createElement('div');
+    overlay.id = 'aiNlSqlOverlay';
+    overlay.className = 'sql-confirm-overlay';
+    overlay.innerHTML =
+      '<div class="sql-confirm-card" style="max-width:520px">' +
+        '<h3>✨ Describe your query</h3>' +
+        '<p style="margin-bottom:10px">Tell AI what you want. It will generate SQL using the currently-registered tables.</p>' +
+        '<textarea id="aiNlSqlInput" class="modal-field-input" rows="3" placeholder="e.g. Top 10 customers by total revenue last quarter" style="margin-bottom:12px;resize:vertical"></textarea>' +
+        '<div class="sql-confirm-actions">' +
+          '<button class="btn btn-ghost" type="button" onclick="aiNlSqlCancel()">Cancel</button>' +
+          '<button class="btn btn-primary" id="aiNlSqlGoBtn" type="button" onclick="aiNlSqlGo()">Generate</button>' +
+        '</div>' +
+      '</div>';
+    modalContent.appendChild(overlay);
+    setTimeout(function() {
+      var input = document.getElementById('aiNlSqlInput');
+      if (input) {
+        input.focus();
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); aiNlSqlGo(); }
+          else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); aiNlSqlCancel(); }
+        });
+      }
+    }, 0);
+  });
+}
+
+function aiNlSqlCancel() {
+  var o = document.getElementById('aiNlSqlOverlay');
+  if (o && o.parentNode) o.parentNode.removeChild(o);
+}
+
+async function aiNlSqlGo() {
+  var input = document.getElementById('aiNlSqlInput');
+  var btn = document.getElementById('aiNlSqlGoBtn');
+  if (!input) return;
+  var q = (input.value || '').trim();
+  if (!q) { toast('Describe what you want', 'warn'); return; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="ai-spinner"></span> Generating…'; }
+  try {
+    var plan = App.sqlEditor._plan || [];
+    if (!plan.length) throw new Error('No tables registered yet - wait for the engine to load.');
+    var tableList = plan.map(function(p) {
+      var cols = (p.ds.schema || []).map(function(f){ return (f.label || f.rawName) + ' (' + f.type + ')'; }).join(', ');
+      return p.viewName + ': ' + cols;
+    }).join('\n');
+    var systemPrompt = [
+      'You are an expert DuckDB SQL writer. Generate a single DuckDB SELECT query that answers the user\'s question, using only the registered tables below.',
+      '',
+      'TABLES (name → columns):',
+      tableList,
+      '',
+      'Rules:',
+      '- Output ONLY the SQL. No prose, no markdown fences, no explanation.',
+      '- DuckDB dialect. Date columns are stored as VARCHAR - use CAST(col AS DATE) when needed.',
+      '- Always include LIMIT 1000 unless the user asks for a single aggregate.',
+      '- Use double-quotes around column names that contain spaces or special characters.',
+      '- Never reference tables or columns that aren\'t in the schema above.'
+    ].join('\n');
+    var res = await callAI({
+      system: systemPrompt,
+      messages: [{ role: 'user', content: q }],
+      maxTokens: 800
+    });
+    var raw = (res.text || '').trim();
+    // Prefer the first fenced ```sql ... ``` block (handles prose around it).
+    var fenced = raw.match(/```(?:sql)?\s*([\s\S]*?)```/i);
+    var sql = (fenced ? fenced[1] : raw).trim();
+    if (!sql) throw new Error('Empty response from AI');
+
+    // If the editor already has non-trivial content, don't blow it away -
+    // confirm with the user inside the same overlay.
+    var existing = App.sqlEditor.cm ? App.sqlEditor.cm.getValue() : (document.getElementById('sqlEditorTA') || {}).value || '';
+    if (existing && existing.trim() && existing.trim() !== sql.trim()) {
+      aiNlSqlShowReplaceConfirm(sql);
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Generate'; }
+      return;
+    }
+    aiNlSqlApply(sql);
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Generate'; }
+    toast('AI generation failed: ' + sanitizeForDisplay(err.message || err), 'error', 6000);
+  }
+}
+
+function aiNlSqlApply(sql) {
+  if (App.sqlEditor.cm) {
+    App.sqlEditor.cm.setValue(sql);
+    App.sqlEditor.cm.focus();
+  } else {
+    var ta = document.getElementById('sqlEditorTA');
+    if (ta) ta.value = sql;
+  }
+  aiNlSqlCancel();
+  setSqlStatus('AI generated · review and Run', 'ok');
+}
+
+function aiNlSqlShowReplaceConfirm(sql) {
+  var overlay = document.getElementById('aiNlSqlOverlay');
+  if (!overlay) { aiNlSqlApply(sql); return; }
+  // Stash the candidate SQL on the overlay element so the inline handlers can grab it.
+  overlay._pendingSql = sql;
+  var card = overlay.querySelector('.sql-confirm-card');
+  if (!card) { aiNlSqlApply(sql); return; }
+  card.innerHTML =
+    '<h3>Replace existing SQL?</h3>' +
+    '<p style="margin-bottom:10px">Your editor already has a query. The AI proposes this instead:</p>' +
+    '<pre style="background:var(--surface-2);border:1px solid var(--border-1);padding:8px 10px;border-radius:6px;font-size:11.5px;font-family:var(--font-mono);max-height:160px;overflow:auto;white-space:pre-wrap">' + escHTML(sql) + '</pre>' +
+    '<div class="sql-confirm-actions" style="margin-top:14px">' +
+      '<button class="btn btn-ghost" type="button" onclick="aiNlSqlCancel()">Keep mine</button>' +
+      '<button class="btn btn-ghost" type="button" onclick="aiNlSqlInsertAtCursor()">Insert at cursor</button>' +
+      '<button class="btn btn-primary" type="button" onclick="aiNlSqlReplaceConfirmed()">Replace</button>' +
+    '</div>';
+}
+
+function aiNlSqlReplaceConfirmed() {
+  var overlay = document.getElementById('aiNlSqlOverlay');
+  var sql = overlay && overlay._pendingSql;
+  if (sql) aiNlSqlApply(sql);
+  else aiNlSqlCancel();
+}
+
+function aiNlSqlInsertAtCursor() {
+  var overlay = document.getElementById('aiNlSqlOverlay');
+  var sql = overlay && overlay._pendingSql;
+  if (!sql) { aiNlSqlCancel(); return; }
+  if (App.sqlEditor.cm) {
+    App.sqlEditor.cm.replaceSelection(sql);
+    App.sqlEditor.cm.focus();
+  } else {
+    var ta = document.getElementById('sqlEditorTA');
+    if (ta) ta.value += '\n' + sql;
+  }
+  aiNlSqlCancel();
+  setSqlStatus('AI inserted · review and Run', 'ok');
+}
+
+// ─── Hook into modal close ──────────────────────────────────────────
+// We wrap closeModal so that when the setup-modal closes *successfully*, any
+// pending AI action (the thing the user was trying to do when we intercepted)
+// fires. On cancel we discard the pending action so a stale callback can't
+// fire weeks later when a different setup eventually succeeds.
+(function patchCloseModalForAi() {
+  var originalCloseModal = closeModal;
+  closeModal = function() {
+    var wasSetupModal = !!document.getElementById('aiSetupSaveBtn');
+    originalCloseModal();
+    if (!wasSetupModal) return;
+    if (App._aiSetupJustSucceeded) {
+      App._aiSetupJustSucceeded = false;
+      if (App._pendingAiAction) setTimeout(aiFirePendingAction, 80);
+    } else {
+      // User cancelled or backdrop-closed the setup modal → drop pending action.
+      App._pendingAiAction = null;
+    }
+  };
+})();
 
 // Start when DOM is ready
 if (document.readyState === 'loading') {
