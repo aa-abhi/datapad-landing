@@ -1618,6 +1618,16 @@
       border-color: rgba(34,197,94,0.18);
       color: #15803d;
     }
+    .source-badge.sql{
+      background: rgba(111,66,193,0.08);
+      border-color: rgba(111,66,193,0.18);
+      color: #5b2ec2;
+    }
+    .source-badge.pasted{
+      background: rgba(201,138,23,0.08);
+      border-color: rgba(201,138,23,0.20);
+      color: #8a6d1c;
+    }
 
     /* Sample data section */
     .samples{
@@ -1752,7 +1762,24 @@
     .page-title-btn:hover svg{color: var(--accent)}
     .page-sub{
       color: var(--text-3);
-      font-size: 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .page-sub-item{ display: inline-flex; align-items: center; gap: 4px; }
+    .page-sub-item strong{ color: var(--text-1); font-weight: 600; }
+    .page-sub-sep{ color: var(--text-4); font-weight: 500; }
+    .page-sub-warn{
+      background: #fff8e1;
+      border: 1px solid #f5d680;
+      color: #8a6d1c;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
     }
 
     .page-actions{
@@ -2006,11 +2033,12 @@
       display: flex;
       flex-direction: column;
       min-height: 360px;
-      transition: border-color var(--duration), box-shadow var(--duration);
+      transition: border-color var(--duration), box-shadow var(--duration), transform var(--duration);
     }
     .chart-card:hover{
       border-color: var(--border-2);
       box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
     }
     .chart-card[draggable="true"]{cursor: grab}
     .chart-card[draggable="true"]:active{cursor: grabbing}
@@ -2030,21 +2058,21 @@
     .chart-card.span-9{grid-column: span 9}
     .chart-resize-handle{
       position: absolute;
-      right: 4px;
-      bottom: 4px;
-      width: 18px;
-      height: 18px;
+      right: 6px;
+      bottom: 6px;
+      width: 16px;
+      height: 16px;
       cursor: se-resize;
-      opacity: 0;
-      transition: opacity var(--duration-fast);
-      color: var(--text-3);
+      opacity: 0.35;
+      transition: opacity var(--duration-fast), color var(--duration-fast);
+      color: var(--text-4);
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
       z-index: 5;
     }
     .chart-card{ position: relative; }
-    .chart-card:hover .chart-resize-handle{ opacity: 0.7; }
+    .chart-card:hover .chart-resize-handle{ opacity: 0.9; color: var(--text-2); }
     .chart-resize-handle:hover{ opacity: 1 !important; color: var(--accent); }
     body.view-mode .chart-resize-handle{ display: none; }
     .chart-card.resizing{
@@ -2060,73 +2088,104 @@
     }
 
     .chart-card-head{
-      padding: var(--space-4) var(--space-5);
+      padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
       border-bottom: 1px solid var(--border-1);
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: var(--space-3);
+      background: var(--surface-1);
     }
     .chart-card-head-main{
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: var(--space-2);
       flex: 1;
       min-width: 0;
     }
-    .chart-card-title-area{flex: 1; min-width: 0}
+    .chart-card-title-area{ flex: 1; min-width: 0; }
     .chart-card-title{
       font-size: 14px;
       font-weight: 600;
       color: var(--text-1);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      letter-spacing: -0.1px;
     }
     .chart-card-sub{
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-3);
       font-family: var(--font-mono);
+      letter-spacing: 0.01em;
     }
     .chart-card-actions{
       display: flex;
-      gap: 2px;
+      gap: 3px;
       flex-shrink: 0;
+      padding: 2px;
+      background: var(--surface-2);
+      border-radius: var(--r-md);
     }
     .chart-action-btn{
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--r-sm);
       color: var(--text-3);
+      background: transparent;
       transition: all var(--duration-fast);
+      cursor: pointer;
     }
     .chart-action-btn:hover{
-      background: var(--surface-3);
+      background: var(--surface-1);
       color: var(--text-1);
+      box-shadow: 0 1px 2px rgba(29,39,52,0.06);
+    }
+    .chart-action-btn:focus-visible{
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
     }
     .chart-action-btn.danger:hover{
-      background: rgba(var(--error-rgb), 0.1);
-      color: var(--error);
+      background: #fdecea;
+      color: #b3261e;
+      box-shadow: 0 1px 2px rgba(179,38,30,0.12);
+    }
+    /* AI Explain button — purple branding, dedicated class (no inline color). */
+    .chart-action-btn.ai-explain{
+      color: #6f42c1;
+    }
+    .chart-action-btn.ai-explain:hover{
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      color: #5b2ec2;
+      box-shadow: 0 1px 2px rgba(111,66,193,0.18);
+    }
+    /* Show-values toggle pressed state — visible "on" affordance. */
+    .chart-action-btn[aria-pressed="true"]{
+      background: var(--surface-1);
+      color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
     }
     .drag-handle{
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border-radius: var(--r-sm);
       color: var(--text-4);
       flex-shrink: 0;
       transition: all var(--duration-fast);
+      cursor: grab;
     }
     .drag-handle:hover{
       background: var(--surface-2);
       color: var(--text-2);
     }
+    .drag-handle:active{ cursor: grabbing; }
 
     .chart-card-body{
       padding: var(--space-4) var(--space-5);
@@ -2285,12 +2344,12 @@
       padding: var(--space-6);
     }
 
-    /* Add chart card */
+    /* Add chart card — the dashed placeholder shown in edit mode. */
     .add-chart-card{
       grid-column: span 6;
-      min-height: 200px;
-      background: transparent;
-      border: 2px dashed var(--border-2);
+      min-height: 220px;
+      background: var(--surface-1);
+      border: 1.5px dashed var(--border-2);
       border-radius: var(--r-lg);
       display: flex;
       flex-direction: column;
@@ -2300,24 +2359,52 @@
       cursor: pointer;
       transition: all var(--duration);
       color: var(--text-3);
+      padding: var(--space-5);
     }
     .add-chart-card:hover{
       border-color: var(--accent);
-      background: rgba(var(--accent-rgb), 0.03);
+      border-style: solid;
+      background: rgba(15,159,184,0.04);
       color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .add-chart-card:hover .add-chart-icon{
+      background: var(--accent);
+      color: #fff;
     }
     .add-chart-icon{
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--surface-2);
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--text-3);
+      transition: all var(--duration);
     }
     body.view-mode .edit-only{display: none !important}
     body.view-mode .add-chart-card{display: none !important}
     body.view-mode .chart-card[draggable="true"]{cursor: default}
+
+    /* Edit-mode ambient cue — a quiet accent stripe at the top of every chart
+       card so the user always knows charts are interactive right now, without
+       overwhelming the rest of the UI. */
+    body.edit-mode .chart-card::before{
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(15,159,184,0.5) 50%, transparent 100%);
+      z-index: 4;
+      pointer-events: none;
+    }
+    body.edit-mode .chart-card:hover{
+      border-color: var(--accent);
+    }
+    body.edit-mode .chart-card:hover::before{
+      background: var(--accent);
+    }
 
     /* ═══════════════════════════════════════════════
        FILTER BAR
@@ -2344,15 +2431,18 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px 4px 12px;
-      background: var(--surface-3);
-      border-radius: 20px;
+      padding: 5px 6px 5px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-1);
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 500;
+      color: var(--text-1);
+      line-height: 1.2;
     }
     .filter-pill-x{
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: var(--surface-4);
       display: flex;
@@ -2360,26 +2450,38 @@
       justify-content: center;
       color: var(--text-3);
       transition: all var(--duration-fast);
+      font-size: 14px;
+      line-height: 1;
     }
     .filter-pill-x:hover{
-      background: var(--error);
+      background: #b3261e;
       color: #fff;
     }
 
     .filter-add-btn{
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
+      gap: 5px;
+      padding: 5px 12px;
       border: 1px dashed var(--border-2);
-      border-radius: 20px;
+      border-radius: 999px;
       font-size: 12px;
+      font-weight: 500;
       color: var(--text-3);
+      background: transparent;
       transition: all var(--duration-fast);
+      cursor: pointer;
+      line-height: 1.2;
     }
     .filter-add-btn:hover{
       border-color: var(--accent);
+      border-style: solid;
       color: var(--accent);
+      background: rgba(15,159,184,0.04);
+    }
+    /* Empty-filters helper text — make it a quiet inline note, not loose text. */
+    .filter-bar > span[style]:last-child{
+      font-style: italic;
     }
 
     /* ═══════════════════════════════════════════════
@@ -2701,11 +2803,23 @@
        ═══════════════════════════════════════════════ */
     @media (max-width: 1100px){
       :root{--sidebar-w: 220px}
-      .chart-card{grid-column: span 12 !important}
-      .add-chart-card{grid-column: span 12 !important}
+      /* 2-column dashboard at tablet/medium widths — half-width cards (span 6,
+         span 4, span 8) all snap to a row of 2, full-width (span 12) stays full. */
+      .chart-card.span-3, .chart-card.span-4, .chart-card.span-6, .chart-card.span-9 {
+        grid-column: span 6 !important;
+      }
+      .chart-card.span-8 { grid-column: span 12 !important; }
+      .add-chart-card{ grid-column: span 6 !important; }
       .schema-table-head, .schema-row{
         grid-template-columns: 36px 1fr 160px 160px 100px 36px;
       }
+    }
+
+    /* Below 760px (small tablet portrait), drop to single column. */
+    @media (max-width: 760px){
+      .chart-card.span-3, .chart-card.span-4, .chart-card.span-6,
+      .chart-card.span-8, .chart-card.span-9 { grid-column: span 12 !important; }
+      .add-chart-card{ grid-column: span 12 !important; }
     }
 
     @media (max-width: 900px){
@@ -3416,6 +3530,50 @@
       font-size: 11.5px;
       color: var(--text-3);
     }
+
+    /* "Direct answer" hero block in the chat drawer. Shows the actual computed
+       KPI / top-N value so the user sees the answer immediately — no need to
+       click "Add to dashboard" just to see a number. */
+    .ai-direct-answer {
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede4fc 100%);
+      border: 1px solid #d9c9f5;
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+      margin: 4px 0 8px 0;
+    }
+    .ai-direct-answer-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #6f42c1;
+      margin-bottom: 4px;
+    }
+    .ai-direct-answer-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-1);
+      font-family: var(--font-mono);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .ai-direct-answer-sub {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .ai-direct-answer-list .ai-direct-answer-row {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 4px 0;
+      border-top: 1px solid rgba(111,66,193,0.12);
+      font-size: 13px;
+    }
+    .ai-direct-answer-list .ai-direct-answer-row:first-of-type { border-top: 0; padding-top: 2px; }
+    .ai-direct-answer-rank {
+      font-family: var(--font-mono); color: #6f42c1; font-weight: 700; min-width: 18px;
+    }
+    .ai-direct-answer-key { flex: 1; color: var(--text-1); font-weight: 500; }
+    .ai-direct-answer-val { font-family: var(--font-mono); color: var(--text-2); font-weight: 600; }
     .ai-msg-chart-spec {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -5607,6 +5765,29 @@ function renderChart(canvasId, chartDef, ds, filteredRows) {
     config.options.plugins = Object.assign({}, config.options.plugins, {
       glimpseValueLabels: { enabled: !!chartDef.showValues }
     });
+    // When data labels are enabled, the topmost (and rightmost on horizontal
+    // bar charts) labels get clipped because Chart.js sizes the canvas tight
+    // to the data extent. Reserve outer padding so the labels render fully.
+    if (chartDef.showValues) {
+      config.options.layout = config.options.layout || {};
+      var existingPad = config.options.layout.padding;
+      // Normalize existing padding to an object so we can merge.
+      var pad;
+      if (typeof existingPad === 'number') {
+        pad = { top: existingPad, right: existingPad, bottom: existingPad, left: existingPad };
+      } else if (existingPad && typeof existingPad === 'object') {
+        pad = Object.assign({}, existingPad);
+      } else {
+        pad = {};
+      }
+      // Vertical chart labels render ABOVE the point at y - 10, so top padding
+      // is critical. Horizontal bar labels render to the RIGHT at x + 10.
+      pad.top = Math.max(pad.top || 0, 22);
+      if (config.options.indexAxis === 'y') {
+        pad.right = Math.max(pad.right || 0, 36);
+      }
+      config.options.layout.padding = pad;
+    }
     App.charts[chartDef.id] = new Chart(canvas, config);
 
   } catch(err) {
@@ -6785,7 +6966,7 @@ function bindGlobalDropAndPaste() {
     e.preventDefault();
     var delim = hasTab ? '\t' : ',';
     showParseOverlay('Importing pasted data…', 'Detecting columns and types');
-    parseCSVText(text, 'pasted-data.csv', text.length, delim, { name: 'Pasted data' }).catch(function(){});
+    parseCSVText(text, 'pasted-data.csv', text.length, delim, { name: 'Pasted data', sourceMeta: { fromPaste: true } }).catch(function(){});
   });
 }
 
@@ -8864,7 +9045,23 @@ function renderDashboard() {
   if (!ds) return '<p style="color:var(--text-3);padding:var(--space-8)">No dataset loaded.</p>';
   var charts  = activeDashboard();
   var schema  = ds.schema;
-  var sourceBadge = ds.sourceType === 'google_sheet' ? '<span class="source-badge sheet">Google Sheet</span>' : ds.sourceType === 'sample' ? '<span class="source-badge">Sample</span>' : '<span class="source-badge">CSV</span>';
+  // Build the source badge per dataset type. Pasted data deserves its own
+  // label (showing "CSV" was misleading — the user never uploaded a CSV).
+  // SQL-derived datasets get a purple "SQL" badge so they're visually distinct.
+  var sourceBadge;
+  if (ds.sourceType === 'google_sheet') {
+    sourceBadge = '<span class="source-badge sheet">Google Sheet</span>';
+  } else if (ds.sourceType === 'sample') {
+    sourceBadge = '<span class="source-badge">Sample</span>';
+  } else if (ds.sourceType === 'sql') {
+    sourceBadge = '<span class="source-badge sql">SQL Query</span>';
+  } else if (ds.sourceMeta && ds.sourceMeta.fromPaste) {
+    sourceBadge = '<span class="source-badge pasted">Pasted</span>';
+  } else if (ds.sourceMeta && (ds.sourceMeta.fileFormat === 'xlsx' || ds.sourceMeta.fileFormat === 'parquet')) {
+    sourceBadge = '<span class="source-badge">' + (ds.sourceMeta.fileFormat === 'parquet' ? 'Parquet' : 'Excel') + '</span>';
+  } else {
+    sourceBadge = '<span class="source-badge">CSV</span>';
+  }
   var refreshText = 'Auto refresh: ' + refreshOptionFor(ds.refreshMode).short;
   var lastRefreshText = ds.sourceType === 'google_sheet' && ds.lastRefreshedAt ? ' · updated ' + escHTML(fmtDateTime(ds.lastRefreshedAt)) : '';
 
@@ -8899,9 +9096,15 @@ function renderDashboard() {
           '<span class="page-title">' + escHTML(ds.name) + '</span>' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
         '</button>' +
-        '<div class="page-sub">' + ds.rowCount.toLocaleString() + ' rows · ' + ds.colCount + ' columns' +
-          (ds.sampleMode ? ' · <span style="color:var(--warn)">Sample mode</span>' : '') +
-          ' · ' + sourceBadge + lastRefreshText + '</div>' +
+        '<div class="page-sub">' +
+          '<span class="page-sub-item"><strong>' + ds.rowCount.toLocaleString() + '</strong> rows</span>' +
+          '<span class="page-sub-sep">·</span>' +
+          '<span class="page-sub-item"><strong>' + ds.colCount + '</strong> columns</span>' +
+          (ds.sampleMode ? '<span class="page-sub-sep">·</span><span class="page-sub-item page-sub-warn">Sample mode</span>' : '') +
+          '<span class="page-sub-sep">·</span>' +
+          '<span class="page-sub-item">' + sourceBadge + '</span>' +
+          (lastRefreshText ? '<span class="page-sub-sep">·</span><span class="page-sub-item">' + lastRefreshText.replace(/^[\s·]+/, '') + '</span>' : '') +
+        '</div>' +
       '</div>' +
       '<div class="page-actions">' +
         (ds.sourceType === 'google_sheet' ? '<button class="btn btn-ghost btn-sm" onclick="refreshActiveSheetDataset(false)" title="Fetch latest rows from Google Sheets">' +
@@ -9134,7 +9337,7 @@ function renderChartCard(ch, schema) {
         '</div>' +
       '</div>' +
       '<div class="chart-card-actions">' +
-        '<button class="chart-action-btn" onclick="aiExplainChart(\'' + ch.id + '\')" title="Explain this chart with AI" aria-label="Explain with AI" style="color:#6f42c1">' +
+        '<button class="chart-action-btn ai-explain" onclick="aiExplainChart(\'' + ch.id + '\')" title="Explain this chart with AI" aria-label="Explain with AI">' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 14.39 8.76 21 9.18 15.82 13.45 17.27 21 12 17 6.73 21 8.18 13.45 3 9.18 9.61 8.76 12 2"/></svg>' +
         '</button>' +
         '<button class="chart-action-btn edit-only" onclick="openEditChartModal(\'' + ch.id + '\')" title="Edit chart" aria-label="Edit chart">' +
@@ -11898,6 +12101,210 @@ var AI_PROVIDERS = {
   }
 };
 
+// ════════════════════════════════════════════════════════════════════
+// ─── GLIMPSE_PROMPTS · all AI prompts in one editable place ────────
+// ════════════════════════════════════════════════════════════════════
+// Every AI feature (Ask Glimpse, post-upload onboarding, Insights, NL→SQL,
+// Explain-chart, connection ping) pulls its system + user message from here.
+// To iterate on a prompt: edit the string below and reload — no other code
+// changes required. To A/B test: swap the whole object at runtime before any
+// AI call fires.
+// ════════════════════════════════════════════════════════════════════
+
+var GLIMPSE_PROMPTS = {
+
+  // ── Connection test fired by aiSetupSubmit when the user pastes a key.
+  ping: {
+    system: 'You are a connection test. Reply with exactly: OK',
+    userText: 'ping',
+    maxTokens: 8
+  },
+
+  // ── Ask Glimpse → propose ONE chart that answers the user's question.
+  // Output: { explanation, chart, followups }
+  // For factual single-value questions we compute the actual answer client-side
+  // (Glimpse already has the rows) and surface it as the "direct answer" hero.
+  nlToChart: {
+    system: [
+      'You are a senior data analyst helping a user explore their dataset. The user just asked a question. Propose ONE chart that answers it precisely.',
+      '',
+      'Chart types:',
+      '  bar     — categories vs a numeric value (default for "by category" questions)',
+      '  line    — trend of a numeric value over time (use whenever the question implies change / over time / trend)',
+      '  pie     — share of a whole (max 8 slices; only when the question is about composition)',
+      '  scatter — relationship between two numeric columns',
+      '  table   — raw rows (only when no aggregation makes sense, e.g. "show me the rows where …")',
+      '  kpi     — a single headline number (use for "what is the total/count/average/max/min …" or any single-value question)',
+      '',
+      'Aggregations: sum | avg | count | min | max | median | none',
+      '',
+      'Return ONLY a single JSON object. No prose, no markdown fences:',
+      '{',
+      '  "explanation": "1-2 short sentences answering the user CONVERSATIONALLY. For factual questions phrase it as a DIRECT answer (\\"The total count of phone numbers is shown in the KPI below\\"), not as a chart description. Reference specific column names.",',
+      '  "chart": {',
+      '    "type":    <chart type>,',
+      '    "title":   <human title, 4-8 words, specific to this question — NOT generic>,',
+      '    "xField":  <column INDEX from the schema below, or null>,',
+      '    "yField":  <column INDEX from the schema below, or null>,',
+      '    "agg":     <aggregation>,',
+      '    "limit":   <int 5-50, optional, for bar/table>,',
+      '    "sortDir": "asc" | "desc",',
+      '    "filters": [ optional — only when the question targets specific rows, e.g. "for INDIA SATCOM" or "in California". Format: {"field": <col index>, "op": "=" | "!=" | ">" | "<" | ">=" | "<=" | "contains", "value": <string or number>} ]',
+      '  },',
+      '  "followups": ["three short follow-up questions the user might ask next — different angles, not rewords"]',
+      '}',
+      '',
+      'Rules:',
+      '- xField and yField are column INDEXES (numbers), never names. filters[].field is also an INDEX.',
+      '- Pick the SIMPLEST chart that answers the question. Don\'t use scatter for a "by category" question.',
+      '- "What / how many / total / count / sum / average / max / min …" with no grouping → kpi (Glimpse will compute and show the actual number).',
+      '- "X for Y" or "X in Z" (filter language) → add a "filters" entry naming the field index + value to match.',
+      '- "Top N" questions → bar + sortDir desc + limit.',
+      '- "Trend / over time / change" + a date column exists → line.',
+      '- Title must be SPECIFIC to the question. "Total revenue in Q3" beats "Sum chart".',
+      '- Never invent columns. Only use INDEXES present in the schema below.',
+      '- Follow-ups must be different angles ("break by channel", "show last 30 days only"), not rewordings.',
+      '',
+      'EXAMPLES (assuming a hypothetical schema with: 0.id, 1.date, 2.region, 3.product, 4.revenue, 5.units):',
+      '',
+      'Q: "What is the total revenue?"',
+      'A: {"explanation":"Total revenue across all rows is shown below.","chart":{"type":"kpi","title":"Total revenue","xField":null,"yField":4,"agg":"sum"},"followups":["Total revenue by region","Revenue trend over time","Revenue per unit sold"]}',
+      '',
+      'Q: "Show me revenue by region last quarter"',
+      'A: {"explanation":"Revenue per region, summed across the latest quarter of data.","chart":{"type":"bar","title":"Revenue by region (last quarter)","xField":2,"yField":4,"agg":"sum"},"followups":["Break down by product within each region","Revenue trend per region over time","Show units sold by region instead"]}',
+      '',
+      'Q: "Top 5 products by units sold"',
+      'A: {"explanation":"Five products with the highest total units sold, ranked descending.","chart":{"type":"bar","title":"Top 5 products by units sold","xField":3,"yField":5,"agg":"sum","sortDir":"desc","limit":5},"followups":["Top 5 products by revenue","Units sold trend for the top product","Compare top 5 across regions"]}',
+      '',
+      'Q: "What is the average revenue in North America?"',
+      'A: {"explanation":"Average revenue across rows where region is North America.","chart":{"type":"kpi","title":"Average revenue (North America)","xField":null,"yField":4,"agg":"avg","filters":[{"field":2,"op":"=","value":"North America"}]},"followups":["Average revenue by region","Median revenue overall","Total revenue in North America"]}',
+      '',
+      'Q: "How is revenue trending over time?"',
+      'A: {"explanation":"Revenue summed per date — shows the trend across the full period.","chart":{"type":"line","title":"Revenue trend over time","xField":1,"yField":4,"agg":"sum"},"followups":["Revenue trend by region","Weekly average revenue","Compare to previous period"]}'
+    ].join('\n'),
+    buildMessages: function(schemaForLlm, sampleRows, history, ctxHeader, question) {
+      var convo = (history || []).slice();
+      convo.push({ role: 'user', content: ctxHeader + '\n\nQUESTION: ' + question });
+      return convo;
+    }
+  },
+
+  // ── Post-upload onboarding → build the FIRST dashboard the user sees.
+  // Output: { summary, charts: [4-6] }
+  starterDashboard: {
+    system: [
+      'You are a senior data analyst designing the very first dashboard a user will see for their dataset. They have not used this tool before, so make it land.',
+      'Goal: 4 to 6 charts that together give the user a confident first read of their data.',
+      '',
+      'Chart types: kpi | bar | line | pie | scatter | table',
+      'Aggregations: sum | avg | count | min | max | median | none',
+      'Span values: 3 (quarter row) | 4 (third row) | 6 (half row) | 8 (two-thirds) | 12 (full row)',
+      '',
+      'Return ONLY a single JSON object. No prose, no markdown:',
+      '{',
+      '  "summary": "1-2 sentence overview of what this dashboard shows.",',
+      '  "charts": [',
+      '    { "type": ..., "title": ..., "xField": ..., "yField": ..., "agg": ..., "span": ..., "limit": ..., "sortDir": ... }',
+      '  ]',
+      '}',
+      '',
+      'Rules:',
+      '- xField / yField are column INDEXES, not names.',
+      '- The FIRST chart MUST be a kpi or summary — the single most important headline number for this dataset.',
+      '- Mix chart types. Never four bars in a row.',
+      '- If a date column exists, include at least one line (trend) chart.',
+      '- Span sums per row should hit 12 cleanly: 4+4+4, 3+3+3+3, 6+6, 8+4, or 12.',
+      '- Titles must be SPECIFIC. "Revenue by region in last 90 days" beats "Sales".',
+      '- If the user provided a DESCRIPTION or CATEGORY, every chart should serve that lens.',
+      '- Never invent columns. Only use indexes present in the schema below.',
+      '',
+      'EXAMPLE (hypothetical schema: 0.id, 1.date, 2.region, 3.product, 4.revenue, 5.units):',
+      '{',
+      '  "summary": "Snapshot of revenue health: totals, regional split, and trend over time.",',
+      '  "charts": [',
+      '    {"type":"kpi","title":"Total revenue","xField":null,"yField":4,"agg":"sum","span":4},',
+      '    {"type":"kpi","title":"Total units sold","xField":null,"yField":5,"agg":"sum","span":4},',
+      '    {"type":"kpi","title":"Average revenue per order","xField":null,"yField":4,"agg":"avg","span":4},',
+      '    {"type":"line","title":"Revenue trend over time","xField":1,"yField":4,"agg":"sum","span":12},',
+      '    {"type":"bar","title":"Revenue by region","xField":2,"yField":4,"agg":"sum","sortDir":"desc","limit":10,"span":6},',
+      '    {"type":"bar","title":"Top 5 products by units","xField":3,"yField":5,"agg":"sum","sortDir":"desc","limit":5,"span":6}',
+      '  ]',
+      '}'
+    ].join('\n'),
+    buildMessages: function(ctxBlock) {
+      return [{ role: 'user', content: ctxBlock }];
+    }
+  },
+
+  // ── Insights feed → 3 to 5 specific observations a senior analyst would notice.
+  // Output: { insights: [{ kind, title, detail }] }
+  insights: {
+    system: [
+      'You are a senior data analyst skimming a dataset for the first 60 seconds. Surface the 3 to 5 most interesting things — what a manager would want to know first.',
+      '',
+      'Each insight must:',
+      '- Reference a specific column, value, or pattern visible in the sample rows.',
+      '- Be concrete and SPECIFIC. Bad: "the data has many categories". Good: "Engineering accounts for 38% of headcount, nearly 2× Product".',
+      '- Have a short title (5-10 words) + a 1-2 sentence detail that names the column or value.',
+      '- Pick a kind from: trend | anomaly | distribution | correlation | outlier | top | summary',
+      '',
+      'Return ONLY a single JSON object. No prose, no markdown:',
+      '{',
+      '  "insights": [',
+      '    { "kind": ..., "title": "...", "detail": "..." }',
+      '  ]',
+      '}',
+      '',
+      'Rules:',
+      '- 3 to 5 insights. Diverse kinds — don\'t return all "distribution".',
+      '- Lead with the most surprising / actionable insight, not the most obvious.',
+      '- Don\'t fabricate precise stats from 8 sample rows — use ranges, ratios, or named row values.',
+      '- Avoid filler ("the dataset contains rows", "there are numeric columns"). Cut anything generic.'
+    ].join('\n'),
+    buildMessages: function(ctxBlock) {
+      return [{ role: 'user', content: ctxBlock }];
+    }
+  },
+
+  // ── NL → DuckDB SQL inside the SQL editor.
+  // Output: raw SQL string only (no fences, no prose).
+  nlToSql: {
+    buildSystem: function(tableList) {
+      return [
+        'You write DuckDB SQL. Given a question and a list of registered tables, output ONE SELECT query that answers it.',
+        '',
+        'TABLES (name → columns):',
+        tableList,
+        '',
+        'Rules:',
+        '- Output ONLY the SQL. No prose, no markdown fences, no explanation, no "Here is your query:".',
+        '- DuckDB dialect.',
+        '- Date columns are stored as VARCHAR. Use CAST(col AS DATE) or STRPTIME(col, format) when you need real date semantics.',
+        '- Use double-quotes around any column name that contains spaces or special characters.',
+        '- Always include LIMIT 1000 unless the user explicitly asks for a single aggregate (COUNT, SUM, AVG, MAX, MIN).',
+        '- Never reference tables or columns that are not in the schema above.',
+        '- Prefer explicit JOINs (LEFT/INNER) over implicit cross products. Always alias tables.'
+      ].join('\n');
+    },
+    buildMessages: function(question) {
+      return [{ role: 'user', content: question }];
+    }
+  },
+
+  // ── "Explain this chart" feeds back through aiNlToChart. We build a richer
+  //    question so the resulting explanation field is actually useful.
+  explainChartQuestion: function(chart, xLabel, yLabel) {
+    var parts = [
+      'Explain this chart titled "' + (chart.title || '') + '" (' + chart.type + ' chart',
+      xLabel ? 'of ' + yLabel + ' by ' + xLabel : '',
+      chart.agg ? 'aggregated by ' + chart.agg : '',
+      ').'
+    ].filter(Boolean).join(' ');
+    return parts +
+      ' Walk me through three things: (1) what the chart actually shows, (2) what stands out — the biggest values, gaps, or surprises, (3) any caveats or things to double-check before trusting it.';
+  }
+};
+
 // ─── Load + persist AI settings + chat history ──────────────────────
 async function loadAiSettings() {
   try {
@@ -11980,6 +12387,14 @@ async function callAnthropic(s, opts) {
     system:     opts.system || '',
     messages:   opts.messages || []
   };
+  // Anthropic accepts temperature 0.0–1.0. Lower = more deterministic; we use
+  // 0.2 for analytical prompts (chart specs, insights) where consistency wins
+  // over creativity. Only set when caller specifies a finite number — NaN slips
+  // past typeof === 'number' otherwise and serializes to null, which OpenAI
+  // rejects with HTTP 400.
+  if (typeof opts.temperature === 'number' && isFinite(opts.temperature)) {
+    body.temperature = Math.max(0, Math.min(1, opts.temperature));
+  }
   var res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -12019,6 +12434,12 @@ async function callOpenAI(s, opts) {
     max_tokens: opts.maxTokens || 2048,
     messages:   messages
   };
+  // OpenAI accepts temperature 0.0–2.0. We clamp to 0–1 to match Anthropic's
+  // range — keeps prompt tuning portable across providers. NaN guard same as
+  // the Anthropic branch above.
+  if (typeof opts.temperature === 'number' && isFinite(opts.temperature)) {
+    body.temperature = Math.max(0, Math.min(1, opts.temperature));
+  }
   var res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -12081,6 +12502,163 @@ function extractJson(text) {
     try { return JSON.parse(text.slice(start, end + 1)); } catch (e) {}
   }
   return null;
+}
+
+// Call an AI that's expected to return JSON. If the first response can't be
+// parsed, fire a SINGLE repair turn — send the broken text back + ask for the
+// JSON only. Recovers ~80% of malformed responses with one extra call.
+// Returns { parsed, text, repaired? } or throws on persistent failure.
+async function callAIExpectJson(opts) {
+  var res = await callAI(opts);
+  var parsed = extractJson(res.text);
+  if (parsed) return { parsed: parsed, text: res.text, repaired: false };
+
+  // Repair attempt — show the model its own bad output and ask for JSON only.
+  // Temperature pinned to 0 so the repair is deterministic.
+  if (!res.text) throw new AiError('AI returned an empty response.', 0);
+  var repairMessages = (opts.messages || []).slice();
+  repairMessages.push({ role: 'assistant', content: res.text });
+  repairMessages.push({ role: 'user', content:
+    'Your previous response was not a single parseable JSON object. ' +
+    'Re-emit ONLY the JSON object matching the schema described in your system instructions. ' +
+    'No prose, no markdown fences, no commentary — just the JSON, starting with `{` and ending with `}`.'
+  });
+  var repair;
+  try {
+    repair = await callAI(Object.assign({}, opts, {
+      messages: repairMessages,
+      temperature: 0,
+      maxTokens: opts.maxTokens || 2048
+    }));
+  } catch (e) {
+    var sanitize = (typeof sanitizeForDisplay === 'function') ? sanitizeForDisplay : function(x){ return String(x); };
+    throw new AiError('AI parse failed twice (first response snippet: "' +
+      sanitize(String(res.text).slice(0, 120)) + '…" · retry error: ' + (e.message || e) + ')', 0);
+  }
+  var repaired = extractJson(repair.text);
+  if (repaired) return { parsed: repaired, text: repair.text, repaired: true };
+
+  // Include short snippets of both responses so the user / dev can diagnose.
+  var sanitize2 = (typeof sanitizeForDisplay === 'function') ? sanitizeForDisplay : function(x){ return String(x); };
+  throw new AiError(
+    'AI returned malformed output twice. First: "' + sanitize2(String(res.text).slice(0, 100)) +
+    '…" · Retry: "' + sanitize2(String(repair.text || '').slice(0, 100)) + '…"',
+    0
+  );
+}
+
+// ─── Per-column profile (cached per dataset fingerprint) ────────────
+// Pre-computed once and cached on the dataset record. Adds min/max/avg for
+// numeric columns, cardinality + top 3 values for categorical, date range
+// for dates. Lets the LLM reason about real values, not just types.
+function buildColumnProfile(ds) {
+  if (!ds || !Array.isArray(ds.schema) || !Array.isArray(ds.rows)) return [];
+  // Schema fingerprint alone misses row-data updates (e.g. Google Sheet refresh
+  // adds rows). Include rowCount so a refresh invalidates the profile cache.
+  var fp = ((typeof datasetFingerprint === 'function') ? datasetFingerprint(ds) : '') + ':' + (ds.rows.length || 0);
+  if (ds._columnProfile && ds._columnProfile._fp === fp) return ds._columnProfile;
+
+  var profile = ds.schema.filter(function(f){ return f.included !== false; }).map(function(f) {
+    var idx = f.index;
+    var raw = ds.rows.map(function(r){ return r[idx]; });
+    var nonNull = raw.filter(function(v){ return v !== null && v !== undefined && String(v).trim() !== ''; });
+    var summary = { idx: idx, name: f.label, type: f.type, nullCount: raw.length - nonNull.length };
+
+    if (f.type === 'integer' || f.type === 'decimal') {
+      // Single-pass min/max/sum. Avoid Math.min.apply(null, arr) — that spreads
+      // every value as a function argument and overflows the call stack on
+      // datasets with ~100k+ rows (RangeError on most browsers).
+      var mn = Infinity, mx = -Infinity, sum = 0, count = 0;
+      for (var i = 0; i < nonNull.length; i++) {
+        var n = Number(nonNull[i]);
+        if (!isFinite(n)) continue;
+        if (n < mn) mn = n;
+        if (n > mx) mx = n;
+        sum += n;
+        count++;
+      }
+      if (count) {
+        summary.min = mn;
+        summary.max = mx;
+        summary.mean = sum / count;
+      }
+    } else if (f.type === 'date' || f.type === 'datetime') {
+      // Parse via Date.parse so non-ISO formats (MM/DD/YYYY, DD-MMM-YYYY) sort
+      // correctly. Lexical sort only works for ISO; Glimpse's type detector
+      // accepts many formats. Fall back to lexical when parse fails.
+      var minTs = Infinity, maxTs = -Infinity, minStr = null, maxStr = null;
+      for (var di = 0; di < nonNull.length; di++) {
+        var s = String(nonNull[di]).trim();
+        if (!s) continue;
+        var ts = Date.parse(s);
+        if (!isFinite(ts)) continue;
+        if (ts < minTs) { minTs = ts; minStr = s; }
+        if (ts > maxTs) { maxTs = ts; maxStr = s; }
+      }
+      if (minStr !== null) {
+        summary.min = minStr;
+        summary.max = maxStr;
+      } else {
+        // No parseable dates — fall back to lexical sort on raw strings.
+        var dates = nonNull.map(function(v){ return String(v).trim(); }).filter(Boolean).sort();
+        if (dates.length) { summary.min = dates[0]; summary.max = dates[dates.length - 1]; }
+      }
+    } else if (f.type === 'boolean') {
+      var counts = { true: 0, false: 0 };
+      nonNull.forEach(function(v) {
+        var k = String(v).toLowerCase().trim();
+        if (k === 'true' || k === '1' || k === 'yes') counts['true']++;
+        else if (k === 'false' || k === '0' || k === 'no') counts['false']++;
+      });
+      summary.trueCount  = counts['true'];
+      summary.falseCount = counts['false'];
+    } else {
+      // categorical / text / identifier / empty
+      var keyCounts = {};
+      nonNull.forEach(function(v) {
+        var k = String(v).trim();
+        if (!k) return;
+        keyCounts[k] = (keyCounts[k] || 0) + 1;
+      });
+      var keys = Object.keys(keyCounts);
+      summary.cardinality = keys.length;
+      summary.topValues = keys
+        .sort(function(a, b){ return keyCounts[b] - keyCounts[a]; })
+        .slice(0, 3)
+        .map(function(k){ return { value: k, count: keyCounts[k] }; });
+    }
+    return summary;
+  });
+  profile._fp = fp;
+  try { ds._columnProfile = profile; } catch (e) { /* frozen dataset? ignore */ }
+  return profile;
+}
+
+// Format a profile for inclusion in an LLM context block. One line per column.
+function formatColumnProfileForPrompt(profile) {
+  return profile.map(function(p) {
+    var line = p.idx + '. ' + p.name + ' (' + p.type + ')';
+    if (typeof p.min === 'number' && typeof p.max === 'number') {
+      var meanStr = typeof p.mean === 'number' ? ', avg ' + fmtNum(p.mean) : '';
+      line += '  [min ' + fmtNum(p.min) + ', max ' + fmtNum(p.max) + meanStr + ']';
+    } else if (typeof p.min === 'string') {
+      line += '  [range ' + p.min + ' → ' + p.max + ']';
+    } else if (typeof p.cardinality === 'number') {
+      line += '  [' + p.cardinality + ' unique';
+      if (p.topValues && p.topValues.length) {
+        // JSON.stringify handles embedded quotes / backslashes / unicode safely
+        // so a value like   Sam "the man"   doesn't break the LLM's JSON parser.
+        line += ', top: ' + p.topValues.map(function(t) {
+          return JSON.stringify(String(t.value).slice(0, 30)) + ' x' + t.count;
+        }).join(', ');
+      }
+      line += ']';
+    } else if (typeof p.trueCount === 'number') {
+      line += '  [' + p.trueCount + ' true / ' + p.falseCount + ' false]';
+    }
+    if (p.nullCount > 0) line += '  (' + p.nullCount + ' null)';
+    return line;
+  }).join('\n');
 }
 
 // ─── AI Setup / Settings modals ─────────────────────────────────────
@@ -12202,9 +12780,9 @@ async function aiSetupSubmit() {
   App.aiSettings = { id: 'ai', provider: provider, model: model, apiKey: key, createdAt: (prev && prev.createdAt) || Date.now(), lastUsedAt: 0 };
   try {
     await callAI({
-      system: 'You are a connection test. Respond with the single word: OK',
-      messages: [{ role: 'user', content: 'ping' }],
-      maxTokens: 8
+      system: GLIMPSE_PROMPTS.ping.system,
+      messages: [{ role: 'user', content: GLIMPSE_PROMPTS.ping.userText }],
+      maxTokens: GLIMPSE_PROMPTS.ping.maxTokens
     });
   } catch (err) {
     App.aiSettings = prev;
@@ -12440,6 +13018,42 @@ function aiSuggestions() {
   return s.slice(0, 4);
 }
 
+// Build the hero "direct answer" block — the big number / top-N text the user
+// actually asked for. Computed client-side after the AI returns a chart spec,
+// so it's accurate to the row data (not the LLM's guess).
+function renderDirectAnswerHtml(d) {
+  if (!d) return '';
+  if (d.kind === 'kpi') {
+    var aggLabel = ({
+      sum: 'Total', avg: 'Average', count: 'Count', min: 'Minimum',
+      max: 'Maximum', median: 'Median'
+    })[d.agg] || 'Value';
+    var filterNote = '';
+    if (typeof d.filteredRows === 'number' && d.filteredRows !== d.totalRows) {
+      filterNote = '<div class="ai-direct-answer-sub">From <strong>' + d.filteredRows.toLocaleString() + '</strong> of ' + d.totalRows.toLocaleString() + ' rows after filters.</div>';
+    }
+    return '<div class="ai-direct-answer">' +
+      '<div class="ai-direct-answer-label">' + escHTML(aggLabel) + ' of ' + escHTML(d.label) + '</div>' +
+      '<div class="ai-direct-answer-value">' + escHTML(fmtNum(d.value)) + '</div>' +
+      filterNote +
+    '</div>';
+  }
+  if (d.kind === 'topN') {
+    var rows = d.items.map(function(it, i) {
+      return '<div class="ai-direct-answer-row">' +
+        '<span class="ai-direct-answer-rank">' + (i + 1) + '.</span>' +
+        '<span class="ai-direct-answer-key">' + escHTML(it.key) + '</span>' +
+        '<span class="ai-direct-answer-val">' + escHTML(fmtNum(it.value)) + '</span>' +
+      '</div>';
+    }).join('');
+    return '<div class="ai-direct-answer ai-direct-answer-list">' +
+      '<div class="ai-direct-answer-label">Top by ' + escHTML(d.label) + '</div>' +
+      rows +
+    '</div>';
+  }
+  return '';
+}
+
 function renderAiMessageHtml(m, idx, allMsgs) {
   if (m.role === 'user') {
     return '<div class="ai-msg user">' +
@@ -12462,19 +13076,36 @@ function renderAiMessageHtml(m, idx, allMsgs) {
   } else if (m.pending) {
     body = '<div class="ai-msg-body"><span class="ai-spinner"></span> Thinking…</div>';
   } else {
-    body = '<div class="ai-msg-body">' + escHTML(m.content || '') + '</div>';
+    // Direct answer FIRST (when present) — the hero number/text the user asked for.
+    if (m.directAnswer) body += renderDirectAnswerHtml(m.directAnswer);
+    body += '<div class="ai-msg-body">' + escHTML(m.content || '') + '</div>';
     if (m.chart) {
       var chartSummary =
         '<strong>' + escHTML(m.chart.type || 'chart') + '</strong>' +
         (m.chart.xField !== undefined && m.chart.xField !== null ? ' · x: <strong>' + escHTML(m.chart.xLabel || String(m.chart.xField)) + '</strong>' : '') +
         (m.chart.yField !== undefined && m.chart.yField !== null ? ' · y: <strong>' + escHTML(m.chart.yLabel || String(m.chart.yField)) + '</strong>' : '') +
         (m.chart.agg ? ' · agg: <strong>' + escHTML(m.chart.agg) + '</strong>' : '');
-      body += '<div class="ai-msg-chart-card">' +
-        'Proposed chart' +
-        '<div class="ai-msg-chart-spec">' + chartSummary + '</div>' +
-      '</div>';
+      // Surface AI-emitted filters in the chart spec card so the user can
+      // verify the "for INDIA SATCOM" filter was actually applied.
+      var filtersLine = '';
+      if (Array.isArray(m.chart.filters) && m.chart.filters.length) {
+        filtersLine = ' · filters: <strong>' + m.chart.filters.map(function(f) {
+          return escHTML((f.fieldLabel || ('col ' + f.field)) + ' ' + f.op + ' ' + f.value);
+        }).join(', ') + '</strong>';
+      }
+      // For a KPI with a direct-answer hero, hide the redundant "Proposed chart"
+      // spec block — the user already sees the value at the top.
+      var heroIsKpi = m.directAnswer && m.directAnswer.kind === 'kpi' && m.chart.type === 'kpi';
+      if (!heroIsKpi) {
+        body += '<div class="ai-msg-chart-card">' +
+          'Proposed chart' +
+          '<div class="ai-msg-chart-spec">' + chartSummary + filtersLine + '</div>' +
+        '</div>';
+      }
       body += '<div class="ai-msg-actions">' +
-        '<button class="btn btn-primary" onclick="aiAddProposedChartById(\'' + escAttr(msgId) + '\')">+ Add to dashboard</button>' +
+        '<button class="btn btn-primary" onclick="aiAddProposedChartById(\'' + escAttr(msgId) + '\')">' +
+          (heroIsKpi ? '+ Add this KPI to dashboard' : '+ Add to dashboard') +
+        '</button>' +
         (triggeringOrigin !== 'explain'
           ? '<button class="btn btn-ghost" onclick="aiTryVariationById(\'' + escAttr(msgId) + '\')">↻ Try a variation</button>'
           : '') +
@@ -12540,6 +13171,7 @@ async function _aiSendQuestionImpl(q, datasetId, opts) {
     thinking.pending = false;
     thinking.content = resp.explanation || '';
     if (resp.chart) thinking.chart = resp.chart;
+    if (resp.directAnswer) thinking.directAnswer = resp.directAnswer;
     if (resp.followups) thinking.followups = resp.followups;
   } catch (err) {
     thinking.pending = false;
@@ -12583,9 +13215,12 @@ async function aiNlToChart(question, datasetId) {
   var ds = App.datasets.find(function(d){ return d.id === datasetId; });
   if (!ds || !ds.schema) throw new Error('Dataset not found');
 
-  // Compact schema description + sample rows for the LLM.
-  var schemaForLlm = ds.schema.filter(function(f){ return f.included !== false; }).map(function(f, i) {
-    return { idx: i, name: f.label, type: f.type };
+  // Compact schema description + sample rows for the LLM. CRITICAL: use the
+  // field's REAL index (`f.index`), not its position in the filtered array.
+  // When the user has excluded columns, position diverges from real index and
+  // the LLM hands back chart specs pointing at the wrong column.
+  var schemaForLlm = ds.schema.filter(function(f){ return f.included !== false; }).map(function(f) {
+    return { idx: f.index, name: f.label, type: f.type };
   });
   var sampleRows = (ds.rows || []).slice(0, 5).map(function(row) {
     var obj = {};
@@ -12593,60 +13228,35 @@ async function aiNlToChart(question, datasetId) {
     return obj;
   });
 
-  // Recent chat turns for context (last 3 user + assistant pairs, content only).
-  var history = (App.chatHistory[datasetId] || []).filter(function(m){ return !m.pending && !m.error; }).slice(-7);
+  // Pre-computed column profile (cached). Gives the LLM real ranges + top
+  // values so it stops guessing aggregations and groupings.
+  var profile = buildColumnProfile(ds);
+  var profileBlock = formatColumnProfileForPrompt(profile);
 
-  var systemPrompt = [
-    'You are an expert data analyst. Given a dataset and a question, propose ONE chart that answers it.',
-    '',
-    'Available chart types: "bar" (categories vs numeric), "line" (date vs numeric), "pie" (parts of whole, ≤8 slices), "scatter" (numeric vs numeric), "table" (raw rows), "kpi" (single big number).',
-    '',
-    'Available aggregations: "sum", "avg", "count", "min", "max", "median", or "none" (for raw rows or KPI).',
-    '',
-    'Respond with a SINGLE JSON object - no prose, no markdown fences. Schema:',
-    '{',
-    '  "explanation": "1-2 sentences summarising what this chart shows.",',
-    '  "chart": {',
-    '    "type":   "bar" | "line" | "pie" | "scatter" | "table" | "kpi",',
-    '    "title":  "human title",',
-    '    "xField": <column INDEX from schema, or null>,',
-    '    "yField": <column INDEX from schema, or null>,',
-    '    "agg":    "sum" | "avg" | "count" | "min" | "max" | "median" | "none",',
-    '    "limit":  <integer 5-50, optional, for bar/table>,',
-    '    "sortDir":"asc" | "desc" (optional)',
-    '  },',
-    '  "followups": ["3 short follow-up questions the user might ask next"]',
-    '}',
-    '',
-    'Rules:',
-    '- Use column INDEXES, not names, in xField/yField.',
-    '- If the question asks for a single number, use "kpi" with yField + agg.',
-    '- If a date column exists and the question is about a trend, prefer "line".',
-    '- Never invent columns. Only use indexes that exist in the schema.'
-  ].join('\n');
+  // Recent chat turns for context (last 3 user + assistant pairs, content only).
+  var history = (App.chatHistory[datasetId] || [])
+    .filter(function(m){ return !m.pending && !m.error; })
+    .slice(-7)
+    .map(function(m) { return { role: m.role, content: typeof m.content === 'string' ? m.content : '' }; })
+    .filter(function(m){ return m.content; });
 
   var contextBlock = [
     'DATASET: ' + ds.name,
-    'ROW COUNT: ' + ds.rowCount,
-    'SCHEMA (column index, name, type):',
-    schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'),
+    'ROW COUNT: ' + (ds.rowCount || 0).toLocaleString(),
+    'SCHEMA (column index, name, type) with stats:',
+    profileBlock,
     '',
     'SAMPLE ROWS (first 5):',
     JSON.stringify(sampleRows, null, 2)
   ].join('\n');
 
-  var conversation = history.map(function(m) {
-    return { role: m.role, content: typeof m.content === 'string' ? m.content : '' };
-  }).filter(function(m){ return m.content; });
-
-  conversation.push({ role: 'user', content: contextBlock + '\n\nQUESTION: ' + question });
-
-  var res = await callAI({
-    system: systemPrompt,
-    messages: conversation,
-    maxTokens: 1200
+  var result = await callAIExpectJson({
+    system:      GLIMPSE_PROMPTS.nlToChart.system,
+    messages:    GLIMPSE_PROMPTS.nlToChart.buildMessages(schemaForLlm, sampleRows, history, contextBlock, question),
+    maxTokens:   1200,
+    temperature: 0.2
   });
-  var parsed = extractJson(res.text);
+  var parsed = result.parsed;
   if (!parsed || !parsed.chart) throw new Error('AI response could not be parsed as a chart spec');
 
   // Validate + normalize the chart spec the LLM returned. We're defensive here
@@ -12697,11 +13307,115 @@ async function aiNlToChart(question, datasetId) {
     if (typeof c.limit === 'number') c.limit = Math.max(5, Math.min(50, Math.floor(c.limit)));
   }
 
+  // Validate the OPTIONAL filters array. Drops anything that doesn't conform.
+  // We keep filters on the chart spec so "Add to dashboard" preserves them.
+  var validOps = ['=','!=','>','<','>=','<=','contains'];
+  if (Array.isArray(c.filters)) {
+    c.filters = c.filters.filter(function(f) {
+      if (!f || typeof f !== 'object') return false;
+      var idx = checkField(f.field);
+      if (idx === null) return false;
+      if (validOps.indexOf(f.op) === -1) return false;
+      if (f.value === undefined || f.value === null) return false;
+      f.field = idx;
+      f.fieldLabel = ds.schema[idx].label;
+      return true;
+    });
+    if (!c.filters.length) c.filters = null;
+  } else {
+    c.filters = null;
+  }
+
+  // For factual single-value charts (KPI), compute the actual answer now and
+  // attach as a "direct answer" the chat drawer can render as a hero block.
+  // For top-N bars, snapshot the top-3 categories + values as a text summary.
+  var directAnswer = computeDirectAnswerForChart(ds, c);
+
   return {
     explanation: typeof parsed.explanation === 'string' ? parsed.explanation : '',
     chart: c,
+    directAnswer: directAnswer,    // {kind:'kpi'|'topN'|null, label, value, items}
     followups: Array.isArray(parsed.followups) ? parsed.followups.slice(0, 4).filter(function(s){ return typeof s === 'string'; }) : []
   };
+}
+
+// Apply chart-level filters (returned by the LLM) to a row set BEFORE aggregation.
+// Mirrors the operators allowed in the prompt: = != > < >= <= contains.
+function applyChartFilters(rows, schema, filters) {
+  if (!Array.isArray(filters) || !filters.length) return rows;
+  return rows.filter(function(row) {
+    return filters.every(function(f) {
+      var cell = row[f.field];
+      if (cell === undefined || cell === null) return false;
+      var cellStr = String(cell);
+      var fieldType = schema[f.field] && schema[f.field].type;
+      var isNumericField = (fieldType === 'integer' || fieldType === 'decimal');
+      // "contains" is always a case-insensitive substring match on the stringified cell.
+      if (f.op === 'contains') return cellStr.toLowerCase().indexOf(String(f.value).toLowerCase()) !== -1;
+      // Equality on non-numeric fields is case-insensitive — LLMs sometimes lowercase values.
+      if (f.op === '=' && !isNumericField) return cellStr.toLowerCase() === String(f.value).toLowerCase();
+      if (f.op === '!=' && !isNumericField) return cellStr.toLowerCase() !== String(f.value).toLowerCase();
+      // Numeric / date comparisons go through Number when both sides parse.
+      var lhs = isNumericField ? Number(cellStr) : cellStr;
+      var rhs = isNumericField ? Number(f.value) : String(f.value);
+      if (f.op === '=')  return lhs === rhs;
+      if (f.op === '!=') return lhs !== rhs;
+      if (f.op === '>')  return lhs >  rhs;
+      if (f.op === '<')  return lhs <  rhs;
+      if (f.op === '>=') return lhs >= rhs;
+      if (f.op === '<=') return lhs <= rhs;
+      return false;
+    });
+  });
+}
+
+// Compute the "direct answer" for a chart spec — the number/text Glimpse can
+// show without waiting for the user to click "Add to dashboard". Returns null
+// when the chart isn't naturally a single-value lookup or top-N.
+function computeDirectAnswerForChart(ds, c) {
+  if (!c || !ds || !Array.isArray(ds.rows)) return null;
+  var rows = applyChartFilters(ds.rows, ds.schema, c.filters);
+
+  // KPI — single aggregated value.
+  if (c.type === 'kpi' && c.yField !== null) {
+    var yField = ds.schema[c.yField];
+    var values;
+    if (c.agg === 'count') {
+      values = rows.map(function(){ return 1; });
+    } else {
+      values = rows.map(function(r) { return r[c.yField]; });
+    }
+    var v = aggregateValues(values, c.agg || 'sum');
+    if (typeof v !== 'number' || !isFinite(v)) return null;
+    return {
+      kind:   'kpi',
+      value:  v,
+      label:  c.yLabel || yField.label,
+      agg:    c.agg || 'sum',
+      filteredRows: rows.length,
+      totalRows: ds.rows.length
+    };
+  }
+
+  // Top-N — bar chart with sortDir desc + limit. Show top 3 in text.
+  if ((c.type === 'bar' || c.type === 'hbar') &&
+      c.xField !== null && c.yField !== null &&
+      c.sortDir === 'desc' && typeof c.limit === 'number' && c.limit <= 20) {
+    var buckets = {};
+    rows.forEach(function(r) {
+      var key = String(r[c.xField] !== undefined && r[c.xField] !== null ? r[c.xField] : '(blank)').trim() || '(blank)';
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(r[c.yField]);
+    });
+    var items = Object.keys(buckets).map(function(k) {
+      return { key: k, value: aggregateValues(buckets[k], c.agg || 'sum') };
+    }).filter(function(it) {
+      return typeof it.value === 'number' && isFinite(it.value);
+    }).sort(function(a, b) { return b.value - a.value; }).slice(0, 3);
+    if (!items.length) return null;
+    return { kind: 'topN', items: items, label: c.yLabel || (c.yField !== null ? ds.schema[c.yField].label : '') };
+  }
+  return null;
 }
 
 // Locate a message by stable id within the active dataset's chat history.
@@ -12736,7 +13450,21 @@ function aiAddProposedChartById(msgId) {
   };
   charts.push(newChart);
   saveDashboard(found.datasetId, charts);
-  toast('Chart added to dashboard', 'success', 2500);
+  // If the AI used filters to answer the question (e.g. "for INDIA SATCOM"),
+  // the dashboard chart engine doesn't honor per-chart filters yet — apply them
+  // as dashboard-wide filters so the visualisation matches what was asked.
+  if (Array.isArray(c.filters) && c.filters.length) {
+    var existing = (App.filters || []).map(function(f){ return f.field + ':' + f.op + ':' + f.value; });
+    c.filters.forEach(function(f) {
+      var key = f.field + ':' + f.op + ':' + f.value;
+      if (existing.indexOf(key) === -1) {
+        App.filters.push({ field: f.field, op: f.op, value: String(f.value) });
+      }
+    });
+    toast('Chart added · ' + c.filters.length + ' filter' + (c.filters.length === 1 ? '' : 's') + ' applied to dashboard', 'success', 3500);
+  } else {
+    toast('Chart added to dashboard', 'success', 2500);
+  }
   if (App.step === 'dashboard') setStep('dashboard');
 }
 
@@ -12763,10 +13491,7 @@ async function aiExplainChart(chartId) {
     // Compose a question that triggers an "explanation" turn.
     var xLabel = ch.xField != null ? ds.schema[ch.xField].label : '';
     var yLabel = ch.yField != null ? ds.schema[ch.yField].label : '';
-    var question = 'Explain this chart titled "' + (ch.title || '') + '" - a ' + ch.type + ' chart' +
-                   (xLabel ? ' of ' + yLabel + ' by ' + xLabel : '') +
-                   (ch.agg ? ' (aggregated by ' + ch.agg + ')' : '') +
-                   '. What does it show? What stands out? Any caveats?';
+    var question = GLIMPSE_PROMPTS.explainChartQuestion(ch, xLabel, yLabel);
     aiSendQuestion(question, { origin: 'explain' });
   });
 }
@@ -12824,23 +13549,11 @@ async function aiNlSqlGo() {
       var cols = (p.ds.schema || []).map(function(f){ return (f.label || f.rawName) + ' (' + f.type + ')'; }).join(', ');
       return p.viewName + ': ' + cols;
     }).join('\n');
-    var systemPrompt = [
-      'You are an expert DuckDB SQL writer. Generate a single DuckDB SELECT query that answers the user\'s question, using only the registered tables below.',
-      '',
-      'TABLES (name → columns):',
-      tableList,
-      '',
-      'Rules:',
-      '- Output ONLY the SQL. No prose, no markdown fences, no explanation.',
-      '- DuckDB dialect. Date columns are stored as VARCHAR - use CAST(col AS DATE) when needed.',
-      '- Always include LIMIT 1000 unless the user asks for a single aggregate.',
-      '- Use double-quotes around column names that contain spaces or special characters.',
-      '- Never reference tables or columns that aren\'t in the schema above.'
-    ].join('\n');
     var res = await callAI({
-      system: systemPrompt,
-      messages: [{ role: 'user', content: q }],
-      maxTokens: 800
+      system:      GLIMPSE_PROMPTS.nlToSql.buildSystem(tableList),
+      messages:    GLIMPSE_PROMPTS.nlToSql.buildMessages(q),
+      maxTokens:   800,
+      temperature: 0.1   // SQL generation should be highly deterministic
     });
     var raw = (res.text || '').trim();
     // Prefer the first fenced ```sql ... ``` block (handles prose around it).
@@ -13198,59 +13911,28 @@ async function aiBuildStarterDashboard(ds, description, category) {
     return obj;
   });
 
-  var systemPrompt = [
-    'You are an expert data analyst designing the FIRST dashboard a user will see for their data.',
-    'Propose 4-6 charts that together tell a useful story. Mix chart types for variety.',
-    '',
-    'Available chart types: "kpi" (single big number), "bar" (categories vs numeric), "line" (date vs numeric),',
-    '"pie" (parts of whole, ≤8 slices), "scatter" (numeric vs numeric), "table" (raw rows).',
-    'Available aggregations: "sum", "avg", "count", "min", "max", "median", or "none".',
-    '',
-    'Respond with a SINGLE JSON object — no prose, no markdown fences. Schema:',
-    '{',
-    '  "summary": "1-2 sentence overview of what this dashboard shows.",',
-    '  "charts": [',
-    '    {',
-    '      "type":   "kpi" | "bar" | "line" | "pie" | "scatter" | "table",',
-    '      "title":  "human title (5-8 words)",',
-    '      "xField": <column INDEX from schema, or null>,',
-    '      "yField": <column INDEX from schema, or null>,',
-    '      "agg":    "sum" | "avg" | "count" | "min" | "max" | "median" | "none",',
-    '      "span":   3 | 4 | 6 | 8 | 12,        // dashboard grid columns (12 = full row)',
-    '      "limit":  <int 5-30 for bar/table>,',
-    '      "sortDir":"asc" | "desc"',
-    '    }',
-    '  ]',
-    '}',
-    '',
-    'Rules:',
-    '- Use column INDEXES, not names, in xField/yField.',
-    '- The FIRST chart should be a KPI or summary (span 3 or 4) highlighting the headline number.',
-    '- Mix chart types — avoid 4 bars in a row.',
-    '- If a date column exists, include at least one time-series chart.',
-    '- "kpi" requires yField + agg; "scatter" requires two NUMERIC fields; "bar"/"line" require xField.',
-    '- Span sum across charts should fill ~2 rows (e.g. 4+4+4 then 6+6 then 12).',
-    '- Never invent columns. Only use schema indexes that exist.'
-  ].join('\n');
+  var profile = buildColumnProfile(ds);
+  var profileBlock = formatColumnProfileForPrompt(profile);
 
   var ctxParts = [
     'DATASET: ' + ds.name,
-    'ROW COUNT: ' + ds.rowCount.toLocaleString()
+    'ROW COUNT: ' + (ds.rowCount || 0).toLocaleString()
   ];
   if (description) ctxParts.push('USER DESCRIPTION: ' + description);
   if (category)    ctxParts.push('CATEGORY: ' + category);
-  ctxParts.push('SCHEMA (column index, name, type):');
-  ctxParts.push(schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'));
+  ctxParts.push('SCHEMA (column index, name, type) with stats:');
+  ctxParts.push(profileBlock);
   ctxParts.push('');
   ctxParts.push('SAMPLE ROWS (first 5):');
   ctxParts.push(JSON.stringify(sampleRows, null, 2));
 
-  var res = await callAI({
-    system: systemPrompt,
-    messages: [{ role: 'user', content: ctxParts.join('\n') }],
-    maxTokens: 2200
+  var result = await callAIExpectJson({
+    system:      GLIMPSE_PROMPTS.starterDashboard.system,
+    messages:    GLIMPSE_PROMPTS.starterDashboard.buildMessages(ctxParts.join('\n')),
+    maxTokens:   2200,
+    temperature: 0.2
   });
-  var parsed = extractJson(res.text);
+  var parsed = result.parsed;
   if (!parsed || !Array.isArray(parsed.charts)) throw new Error('AI response was not a valid dashboard spec');
 
   // Validate every chart with the same rules used by aiNlToChart.
@@ -13352,11 +14034,13 @@ function persistInsightsCollapsedPref() {
 
 // Stable fingerprint per dataset: changes when SHAPE changes. Excludes rowCount
 // so auto-refreshing Google Sheets don't churn one paid AI call per refresh —
-// the user can hit the manual Refresh button when they want a re-roll.
+// the user can hit the manual Refresh button when they want a re-roll. Includes
+// the `included` flag so toggling a column on/off invalidates the column-profile
+// cache (otherwise the LLM keeps seeing excluded columns).
 function datasetFingerprint(ds) {
   if (!ds || !ds.schema) return '';
   return ds.schema.map(function(f){
-    return (f.label || f.rawName || '') + ':' + (f.type || '');
+    return (f.included === false ? '!' : '') + (f.label || f.rawName || '') + ':' + (f.type || '');
   }).join('|');
 }
 
@@ -13664,51 +14348,26 @@ async function aiBuildInsights(ds) {
     return obj;
   });
 
-  var systemPrompt = [
-    'You are an expert data analyst surfacing the most interesting things about a dataset.',
-    'Given the schema and a sample of rows, produce 3-5 SHORT, SPECIFIC insights that the user would find SURPRISING or actionable.',
-    '',
-    'Each insight must:',
-    '- Reference specific values, columns, or numbers visible in the sample (or reasonably inferable).',
-    '- Be concrete — avoid generic statements like "the data has many rows" or "there are categorical columns".',
-    '- Have a short title (5-10 words) and a 1-2 sentence detail.',
-    '- Have a kind label from: "trend" (over time), "anomaly" (unusual value), "distribution" (concentration/skew), "correlation" (between fields), "outlier" (single odd row), "top" (highest/lowest), "summary" (headline number).',
-    '',
-    'Respond with a SINGLE JSON object — no prose, no markdown:',
-    '{',
-    '  "insights": [',
-    '    {',
-    '      "kind": "trend"|"anomaly"|"distribution"|"correlation"|"outlier"|"top"|"summary",',
-    '      "title": "5-10 word headline",',
-    '      "detail": "1-2 sentence specific explanation with numbers or values"',
-    '    }',
-    '  ]',
-    '}',
-    '',
-    'Rules:',
-    '- 3-5 insights total. Diverse kinds.',
-    '- Lead with the most surprising / actionable one.',
-    '- Numbers in detail should be plausible given the sample (don\'t invent precise stats from 8 rows; speak in ranges or specific row values).'
-  ].join('\n');
-
   // Defensive: rowCount can be undefined on partially-built SQL-derived datasets.
   var rowCountForPrompt = ds.rowCount || (ds.rows && ds.rows.length) || 0;
-  var ctxParts = [
+  var profileBlock = formatColumnProfileForPrompt(buildColumnProfile(ds));
+  var ctxBlock = [
     'DATASET: ' + ds.name,
     'ROW COUNT: ' + rowCountForPrompt.toLocaleString(),
-    'SCHEMA (index, name, type):',
-    schemaForLlm.map(function(c){ return c.idx + '. ' + c.name + ' (' + c.type + ')'; }).join('\n'),
+    'SCHEMA (index, name, type) with stats:',
+    profileBlock,
     '',
     'SAMPLE ROWS:',
     JSON.stringify(sampleRows, null, 2)
-  ];
+  ].join('\n');
 
-  var res = await callAI({
-    system: systemPrompt,
-    messages: [{ role: 'user', content: ctxParts.join('\n') }],
-    maxTokens: 1400
+  var result = await callAIExpectJson({
+    system:      GLIMPSE_PROMPTS.insights.system,
+    messages:    GLIMPSE_PROMPTS.insights.buildMessages(ctxBlock),
+    maxTokens:   1400,
+    temperature: 0.3   // slight bump from 0.2 — insights benefit from a little variety
   });
-  var parsed = extractJson(res.text);
+  var parsed = result.parsed;
   if (!parsed || !Array.isArray(parsed.insights)) throw new Error('AI response was not valid insights JSON');
 
   var validKinds = ['trend','anomaly','distribution','correlation','outlier','top','summary'];
