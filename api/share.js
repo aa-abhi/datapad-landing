@@ -3,8 +3,8 @@ export const config = { runtime: 'edge' };
 // Allowed sources — gate which Datapad tools can create shares.
 const ALLOWED_SOURCES = new Set(['glimpse', 'ab-test', 'pre-post', 'rice', 'json-studio']);
 
-// Loose origin allowlist. Empty = allow all (useful in preview deploys).
-const ALLOWED_ORIGIN = /(^https?:\/\/(datapad\.in|.*\.vercel\.app)$)|^http:\/\/localhost(:\d+)?$/i;
+// Same-origin only: the request must come from the same host that's serving
+// this endpoint. Cross-site form attacks blocked; any deploy talks to itself.
 
 function json(body, status, extra) {
   return new Response(JSON.stringify(body), {
@@ -18,9 +18,15 @@ function json(body, status, extra) {
 }
 
 function checkOrigin(req) {
-  const origin = req.headers.get('origin') || '';
-  if (!origin) return true; // server-to-server / curl — allow
-  return ALLOWED_ORIGIN.test(origin);
+  const origin = req.headers.get('origin');
+  if (!origin) return true; // server-to-server / curl / same-tab navigations
+  try {
+    const originHost = new URL(origin).host;
+    const requestHost = new URL(req.url).host;
+    return originHost === requestHost;
+  } catch {
+    return false;
+  }
 }
 
 export default async function handler(req) {
