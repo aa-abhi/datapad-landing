@@ -3988,7 +3988,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- Hidden file input -->
-<input type="file" id="fileInput" accept=".csv,.tsv,.txt,.xlsx,.xls,.parquet" style="display:none" aria-hidden="true"/>
+<input type="file" id="fileInput" accept=".csv,.tsv,.txt,.xlsx,.xls,.parquet,.json,.glimpse" style="display:none" aria-hidden="true"/>
 
 <script>
 'use strict';
@@ -11095,7 +11095,12 @@ function init() {
   if (fileInput) {
     fileInput.addEventListener('change', function(e) {
       var file = e.target.files && e.target.files[0];
-      if (file) handleFile(file);
+      if (!file) return;
+      // Project files take priority - mirrors the drag-drop handler so picking
+      // a .glimpse.json from the OS file picker imports it instead of failing
+      // the CSV extension check in handleFile().
+      if (tryHandleProjectFile(file)) { e.target.value = ''; return; }
+      handleFile(file);
     });
   }
 
