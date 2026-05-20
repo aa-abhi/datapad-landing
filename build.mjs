@@ -33,6 +33,17 @@ const TARGET = 'glimpse/index.html';
 const onVercel = !!process.env.VERCEL;
 const forced   = !!process.env.FORCE_OBFUSCATE;
 
+// TEMPORARILY DISABLED: javascript-obfuscator is producing "ReferenceError: x
+// is not defined" at runtime regardless of identifier-naming-generator setting.
+// Re-enable once we've isolated the offending source pattern. Tracking issue:
+// disabled 2026-05-20 after share-link feature ship.
+const OBFUSCATION_DISABLED = true;
+
+if (OBFUSCATION_DISABLED) {
+  console.log('[build] Obfuscation temporarily disabled — shipping plain source.');
+  process.exit(0);
+}
+
 if (!onVercel && !forced) {
   console.log('[build] Not on Vercel — skipping obfuscation.');
   console.log('[build] To test locally:  FORCE_OBFUSCATE=1 npm run build');
