@@ -23,30 +23,6 @@ function checkOrigin(req) {
   }
 }
 
-// Apps Script doPost is fronted by a 302 to script.googleusercontent.com, which
-// triggers POST→GET method downgrade in standards-compliant fetch — the body is
-// lost and Apps Script's doPost never sees the payload. Workaround: follow the
-// redirect MANUALLY and re-POST with the original body+headers to the final URL.
-async function postFollowRedirect(apiUrl, body) {
-  let url = apiUrl;
-  for (let hop = 0; hop < 5; hop++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'text/plain;charset=utf-8' },
-      body,
-      redirect: 'manual',
-    });
-    if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get('location');
-      if (!loc) return res;
-      url = new URL(loc, url).toString();
-      continue;
-    }
-    return res;
-  }
-  throw new Error('too many redirects');
-}
-
 async function readResponseSafely(res) {
   const text = await res.text();
   if (!text) return { parsed: null, raw: '', empty: true };
@@ -104,8 +80,13 @@ export default async function handler(req) {
     if (state.length > 45000) return json({ ok: false, error: 'state too large' }, 413);
 
     try {
-      const upstreamBody = JSON.stringify({ action: 'create_share', source, name, state });
-      const upstream = await postFollowRedirect(apiUrl, upstreamBody);
+      // Apps Script: POST → 302 → GET /usercontent (response is pre-computed
+      // server-side from the POST body, so default redirect:follow is correct).
+      const upstream = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'content-type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'create_share', source, name, state }),
+      });
       const { parsed, raw, empty } = await readResponseSafely(upstream);
       if (empty) return json({ ok: false, error: 'upstream returned empty body', status: upstream.status }, 502);
       if (!parsed) return json({ ok: false, error: 'upstream returned non-JSON', preview: raw, status: upstream.status }, 502);

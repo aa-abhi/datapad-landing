@@ -10701,7 +10701,12 @@ async function openShareModal() {
       throw new Error('Server returned ' + resp.status + ' with non-JSON body (' + (respText.slice(0,80) || 'empty') + ')');
     }
     if (!data) throw new Error('Server returned ' + resp.status + ' with empty body');
-    if (!data.ok) throw new Error(data.error || ('Server returned ' + resp.status));
+    if (!data.ok) {
+      var detail = data.error || 'Server returned ' + resp.status;
+      if (data.preview) detail += '\n\nUpstream preview: ' + String(data.preview).slice(0, 200);
+      if (data.status) detail += '\n(upstream status: ' + data.status + ')';
+      throw new Error(detail);
+    }
 
     var shortUrl = location.origin + location.pathname + '?s=' + data.key;
     var sub = document.getElementById('shortShareSub');
