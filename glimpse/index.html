@@ -14963,7 +14963,7 @@ function updateCmdkTriggerHint() {
   var originalSetStep = setStep;
   setStep = function(step) {
     var r = originalSetStep(step);
-    try { updateCmdkTriggerHint(); } catch (e) {}x
+    try { updateCmdkTriggerHint(); } catch (e) {}
     return r;
   };
 })();
