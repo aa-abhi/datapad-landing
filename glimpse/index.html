@@ -3884,14 +3884,6 @@
               <div class="dropdown-item-sub">Underlying rows, with header overrides</div>
             </div>
           </button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item" type="button" role="menuitem" onclick="exportProjectFile();closeDownloadMenu()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13l-2 2 2 2M14 13l2 2-2 2"/></svg>
-            <div class="dropdown-item-text">
-              <div class="dropdown-item-label">Export project file</div>
-              <div class="dropdown-item-sub">Single .glimpse.json - share via Slack / email / Drive</div>
-            </div>
-          </button>
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" id="shareBtn" hidden type="button" onclick="openShareModal()" title="Share this project">
@@ -6878,9 +6870,10 @@ function updateHeaderButtons() {
   // Download dropdown is only useful when on dashboard.
   var downloadDropdown = document.getElementById('downloadDropdown');
   if (downloadDropdown) downloadDropdown.hidden = !hasDash;
-  // Share button: any time the user has at least one dataset, sharing makes sense.
+  // Share button: only on the dashboard view — sharing scopes to the active
+  // dashboard, not the whole project.
   var shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) shareBtn.hidden = !App.datasets.length;
+  if (shareBtn) shareBtn.hidden = !(App.datasets.length && hasDash && App.activeDatasetId);
   // Crumb shows the active dataset name once one is loaded.
   var crumb = document.getElementById('headerCrumb');
   var crumbSep = document.getElementById('headerCrumbSep');
@@ -6977,9 +6970,6 @@ function toggleDownloadMenu(e) {
   if (!dd) return;
   var open = dd.classList.toggle('open');
   if (trigger) trigger.setAttribute('aria-expanded', String(open));
-  // Re-encode the project on every open so the displayed size is accurate
-  // for the current state. Cheap when nothing changed (signature cache hits).
-  if (open) refreshShareLinkSize();
 }
 function closeDownloadMenu() {
   var dd = document.getElementById('downloadDropdown');
@@ -10508,17 +10498,14 @@ function confirmResetAll() {
 // Bundle shape stays simple and forward-compatible: bump `version` if the
 // schema changes and add a migration in applyProjectBundle().
 var PROJECT_BUNDLE_VERSION = 1;
-// Threshold above which we hide the share link option. Slack truncates ~10k,
-// most browsers cope until ~32k, but multi-line URLs in chat are user-hostile
-// long before then. 25k characters of base64 is roughly 17KB compressed payload.
-var SHARE_URL_MAX_CHARS = 25000;
 // Hosted short-link share — proxied via Vercel edge fn at /api/share. The
 // Apps Script URL stays server-side in SHEETS_API_URL env var; clients never see it.
 var SHORT_SHARE_API = '/api/share';
 // Apps Script cell limit is ~50k; we hold headroom for safety.
 var SHORT_SHARE_MAX_CHARS = 45000;
-var SHORT_SHARE_ACK_KEY = 'datapad.glimpse.shortShareAck.v1';
 
+// Whole-project bundle — kept for the legacy #p=… inline share that older
+// recipients may still hold. New share UI uses buildDashboardShareBundle.
 function buildProjectBundle() {
   return {
     version: PROJECT_BUNDLE_VERSION,
@@ -10531,6 +10518,25 @@ function buildProjectBundle() {
       out[k] = (App.dashboards[k] || []).slice();
       return out;
     }, {})
+  };
+}
+
+// Focused bundle for sharing: only the active dataset + its charts. Same shape
+// as the full bundle so importProjectFromText handles it identically.
+function buildDashboardShareBundle(datasetId) {
+  var ds = (App.datasets || []).find(function(d){ return d.id === datasetId; });
+  if (!ds) return null;
+  var charts = (App.dashboards && App.dashboards[datasetId]) || [];
+  var dashboards = {};
+  dashboards[datasetId] = charts.slice();
+  return {
+    version: PROJECT_BUNDLE_VERSION,
+    name: ds.name + ' dashboard',
+    exportedAt: Date.now(),
+    activeDatasetId: datasetId,
+    folders: [],
+    datasets: [serializeDataset(ds)],
+    dashboards: dashboards
   };
 }
   
@@ -10570,32 +10576,9 @@ function serializeDataset(ds) {
   };
 }
 
-// ─── File export ──────────────────────────────────────────────────
-function exportProjectFile() {
-  if (!App.datasets.length) {
-    toast('Nothing to export - add a dataset first', 'warn');
-    return;
-  }
-  var bundle = buildProjectBundle();
-  var json = JSON.stringify(bundle);
-  var safeName = (bundle.name || 'glimpse-project').replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
-  var blob = new Blob([json], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = safeName + '.glimpse.json';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function() {
-    if (a.parentNode) a.parentNode.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 200);
-  toast('Project exported (' + fmtBytes(blob.size) + ')', 'success', 2200);
-}
-
-// ─── Share link (URL fragment) ────────────────────────────────────
-// Browser-native gzip + base64-url. No third-party server involved - the
-// payload travels in `location.hash`, which is never sent to any HTTP server.
+// ─── Share link encoding (gzip + base64-url) ──────────────────────
+// Used for both the hosted short-link payload AND the legacy #p=… fragment
+// path that older recipients may still have bookmarked.
 async function gzipToBase64Url(text) {
   if (typeof CompressionStream === 'undefined') {
     throw new Error('Your browser does not support compression for share links - use the file export instead.');
@@ -10631,271 +10614,99 @@ function base64UrlToBytes(b64url) {
   return out;
 }
 
-// Cached size estimate so we don't re-encode on every dropdown render.
+// Cached encoded payload — avoids re-gzipping if user re-opens the share modal
+// without changes. Cache key = projectSignature().
 var _shareSizeCache = { signature: null, chars: 0, payload: null, name: '' };
 
 function projectSignature() {
-  // Cheap fingerprint - total dataset + dashboard counts and the most recent
-  // touch time. Enough to invalidate the cache on any meaningful change.
   var lastTouched = (App.datasets || []).reduce(function(m, d){ return Math.max(m, d.lastRefreshedAt || d.createdAt || 0); }, 0);
   var dashTouched = Object.keys(App.dashboards || {}).reduce(function(m, k){ return m + (App.dashboards[k] || []).length; }, 0);
   return (App.datasets || []).length + ':' + (App.folders || []).length + ':' + dashTouched + ':' + lastTouched + ':' + (App.activeDatasetId || '');
 }
 
-async function refreshShareLinkSize() {
-  var sub = document.getElementById('copyShareLinkSub');
-  var item = document.getElementById('copyShareLinkItem');
-  if (!sub || !item) return;
-  if (!App.datasets.length) {
-    sub.textContent = 'Add a dataset first';
-    item.classList.add('is-disabled');
-    return;
-  }
-  var sig = projectSignature();
-  if (_shareSizeCache.signature === sig && _shareSizeCache.payload) {
-    applyShareSizeUI(_shareSizeCache.chars);
-    return;
-  }
-  try {
-    var bundle = buildProjectBundle();
-    var json = JSON.stringify(bundle);
-    var encoded = await gzipToBase64Url(json);
-    _shareSizeCache = { signature: sig, chars: encoded.length, payload: encoded, name: bundle.name };
-    applyShareSizeUI(encoded.length);
-  } catch (err) {
-    sub.textContent = err && err.message ? err.message : 'Cannot encode share link';
-    item.classList.add('is-disabled');
-  }
-}
-function applyShareSizeUI(chars) {
-  var sub = document.getElementById('copyShareLinkSub');
-  var item = document.getElementById('copyShareLinkItem');
-  if (!sub || !item) return;
-  if (chars > SHARE_URL_MAX_CHARS) {
-    sub.textContent = 'Too large for a link (' + fmtCompactBytes(chars) + ') - use file export';
-    item.classList.add('is-disabled');
-  } else {
-    sub.textContent = 'Self-contained URL (' + fmtCompactBytes(chars) + ', ~' + Math.ceil(chars / 1024) + ' KB)';
-    item.classList.remove('is-disabled');
-  }
-}
 function fmtCompactBytes(chars) {
   if (chars < 1024) return chars + ' chars';
   return (chars / 1024).toFixed(1) + ' KB';
 }
 
+// One-click share: open modal, encode, POST to /api/share, render the short URL.
+// No T&C interstitial; the description in the modal explains the upload.
 async function openShareModal() {
-  if (!App.datasets.length) { toast('Nothing to share - add a dataset first', 'warn'); return; }
-  // Open the modal with a loading state, then encode in the background.
+  if (!App.datasets.length || !App.activeDatasetId) {
+    toast('Open a dashboard first - share scopes to the active dashboard', 'warn');
+    return;
+  }
+  var activeDsId = App.activeDatasetId;
+  var activeDs = App.datasets.find(function(d){ return d.id === activeDsId; });
+  var dsName = activeDs ? activeDs.name : 'this dashboard';
+
   openModal(
     '<button class="modal-close" onclick="closeModal()">✕</button>' +
-    '<h2>Share this project</h2>' +
+    '<h2>Share <span style="color:var(--text-2)">' + escHTML(dsName) + '</span></h2>' +
     '<p style="color:var(--text-3);font-size:13px;line-height:1.6;margin-bottom:var(--space-5)">' +
-      'Anyone who opens the link will see the same datasets, dashboards, and folders. ' +
-      'The data travels inside the URL - nothing is uploaded to any server.' +
+      'A short link is generated and stored privately on Datapad. The recipient sees this dashboard with the same data. Link expires in 30 days.' +
     '</p>' +
     '<div class="share-modal-body" id="shareModalBody">' +
-      '<div class="share-modal-loading">Encoding project…</div>' +
+      '<div class="share-card share-card--link" id="shortShareCard">' +
+        '<div class="share-card-head">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
+          '<div><div class="share-card-title">Short link</div><div class="share-card-sub" id="shortShareSub">Preparing your link…</div></div>' +
+        '</div>' +
+        '<div class="share-card-actions" id="shortShareActions">' +
+          '<div class="share-modal-loading" style="padding:8px 0">Encoding & uploading…</div>' +
+        '</div>' +
+      '</div>' +
     '</div>'
   );
+
   try {
-    var bundle = buildProjectBundle();
-    var json = JSON.stringify(bundle);
-    var encoded = await gzipToBase64Url(json);
-    _shareSizeCache = { signature: projectSignature(), chars: encoded.length, payload: encoded, name: bundle.name };
-    renderShareModalBody(bundle, encoded);
-  } catch (err) {
-    var body = document.getElementById('shareModalBody');
-    if (body) body.innerHTML = '<div class="share-modal-error">' + escHTML(err && err.message ? err.message : 'Could not encode project') + '</div>';
-  }
-}
-
-function renderShareModalBody(bundle, encoded) {
-  var body = document.getElementById('shareModalBody');
-  if (!body) return;
-  var fits = encoded.length <= SHARE_URL_MAX_CHARS;
-  var url  = location.origin + location.pathname + location.search + '#p=' + encoded;
-  var sizeLabel = fmtCompactBytes(encoded.length);
-  var bytesNote = '~' + Math.ceil(encoded.length / 1024) + ' KB compressed';
-
-  if (fits) {
-    body.innerHTML =
-      '<div class="share-card share-card--link">' +
-        '<div class="share-card-head">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
-          '<div><div class="share-card-title">Share via link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' · ' + escHTML(bytesNote) + ' · stays in your browser</div></div>' +
-        '</div>' +
-        '<div class="share-link-row">' +
-          '<input class="modal-field-input share-link-input" id="shareLinkUrl" type="text" readonly value="' + escHTML(url) + '" onclick="this.select()"/>' +
-          '<button class="btn btn-primary share-copy-btn" type="button" onclick="copyShareLinkFromModal()">' +
-            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
-            'Copy' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      renderShortShareSection(encoded) +
-      renderShareFileSection(bundle);
-  } else {
-    body.innerHTML =
-      '<div class="share-card share-card--disabled">' +
-        '<div class="share-card-head">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>' +
-          '<div><div class="share-card-title">Project too large for an inline link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' - inline links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
-        '</div>' +
-        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Try a short link below (hosted on Datapad) or download the project file.</div>' +
-      '</div>' +
-      renderShortShareSection(encoded) +
-      renderShareFileSection(bundle);
-  }
-}
-
-function renderShortShareSection(encoded) {
-  if (!SHORT_SHARE_API) return '';
-  if (!encoded || encoded.length > SHORT_SHARE_MAX_CHARS) return '';
-  return '<div class="share-card share-card--link" id="shortShareCard">' +
-    '<div class="share-card-head">' +
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
-      '<div><div class="share-card-title">Short link</div><div class="share-card-sub">Hosted on Datapad · expires in 30 days · ~5-char URL</div></div>' +
-    '</div>' +
-    '<div class="share-card-actions" id="shortShareActions">' +
-      '<button class="btn btn-primary btn-sm" type="button" id="shortShareBtn" onclick="createShortShareLink()">Create short link</button>' +
-      '<span class="share-card-hint">Uploads your project to a private Datapad sheet so the URL stays tiny.</span>' +
-    '</div>' +
-  '</div>';
-}
-
-function renderShareFileSection(bundle) {
-  var dsCount = (bundle && bundle.datasets || []).length;
-  var dashCount = bundle && bundle.dashboards ? Object.keys(bundle.dashboards).length : 0;
-  return '<div class="share-card share-card--file">' +
-    '<div class="share-card-head">' +
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
-      '<div><div class="share-card-title">Download project file</div><div class="share-card-sub">' + dsCount + ' dataset' + (dsCount === 1 ? '' : 's') + ' · ' + dashCount + ' dashboard' + (dashCount === 1 ? '' : 's') + ' · works for any size</div></div>' +
-    '</div>' +
-    '<div class="share-card-actions">' +
-      '<button class="btn btn-ghost btn-sm" type="button" onclick="exportProjectFile()">Download .glimpse.json</button>' +
-      '<span class="share-card-hint">Recipients drop the file onto Glimpse to open it.</span>' +
-    '</div>' +
-  '</div>';
-}
-
-async function copyShareLinkFromModal() {
-  var input = document.getElementById('shareLinkUrl');
-  if (!input) return;
-  var url = input.value;
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(url);
+    var sig = projectSignature();
+    var encoded;
+    var name;
+    // Cache key includes active dataset so the modal re-encodes when the user
+    // switches dashboards (each dashboard ships its own bundle).
+    sig = activeDsId + '|' + sig;
+    if (_shareSizeCache.signature === sig && _shareSizeCache.payload) {
+      encoded = _shareSizeCache.payload;
+      name = _shareSizeCache.name;
     } else {
-      input.select();
-      document.execCommand('copy');
+      var bundle = buildDashboardShareBundle(activeDsId);
+      if (!bundle) { showShortShareError('Could not find the active dashboard'); return; }
+      encoded = await gzipToBase64Url(JSON.stringify(bundle));
+      name = bundle.name;
+      _shareSizeCache = { signature: sig, chars: encoded.length, payload: encoded, name: name };
     }
-    toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2200);
-  } catch (err) {
-    toast('Could not copy - select the URL and copy manually', 'warn', 4000);
-  }
-}
 
-async function copyShareLink() {
-  if (!App.datasets.length) { toast('Nothing to share - add a dataset first', 'warn'); return; }
-  try {
-    if (!_shareSizeCache.payload || _shareSizeCache.signature !== projectSignature()) {
-      await refreshShareLinkSize();
-    }
-    if (!_shareSizeCache.payload) throw new Error('Could not build share payload');
-    if (_shareSizeCache.chars > SHARE_URL_MAX_CHARS) {
-      toast('Project too large for a share link - use Export project file instead', 'warn', 5000);
+    if (encoded.length > SHORT_SHARE_MAX_CHARS) {
+      var rowCount = activeDs && activeDs.rowCount ? activeDs.rowCount.toLocaleString() : '?';
+      showShortShareError(
+        'This dataset is too large to share via a short link.\n\n' +
+        'Dataset: ' + dsName + ' (' + rowCount + ' rows, ~' + fmtCompactBytes(encoded.length) + ' compressed)\n' +
+        'Limit: ' + Math.round(SHORT_SHARE_MAX_CHARS/1024) + ' KB compressed.\n\n' +
+        'Short links embed the full dataset so the recipient sees the same data. Try a smaller dataset, or sample the rows down before sharing.'
+      );
       return;
     }
-    var base = location.origin + location.pathname + location.search;
-    var url  = base + '#p=' + _shareSizeCache.payload;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(url);
-      toast('Share link copied (' + fmtCompactBytes(url.length) + ')', 'success', 2500);
-    } else {
-      // Fallback - show in a modal so the user can copy manually.
-      openModal(
-        '<button class="modal-close" onclick="closeModal()">✕</button>' +
-        '<h2>Share link</h2>' +
-        '<p>Copy this URL and paste it anywhere - recipients open it to see the same project.</p>' +
-        '<textarea class="modal-field-input" rows="6" readonly onclick="this.select()">' + escHTML(url) + '</textarea>' +
-        '<div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">Done</button></div>'
-      );
-    }
-  } catch (err) {
-    console.error('[Glimpse] share link failed:', err);
-    toast(err && err.message ? err.message : 'Could not build share link', 'error', 5000);
-  }
-}
 
-// ─── Hosted short link (opt-in upload to Datapad sheet) ──────────
-function hasShortShareConsent() {
-  try { return localStorage.getItem(SHORT_SHARE_ACK_KEY) === '1'; } catch (_) { return false; }
-}
-function setShortShareConsent() {
-  try { localStorage.setItem(SHORT_SHARE_ACK_KEY, '1'); } catch (_) {}
-}
-
-function askShortShareConsent() {
-  return new Promise(function(resolve) {
-    openModal(
-      '<button class="modal-close" onclick="closeModal()">✕</button>' +
-      '<h2>Use a short link?</h2>' +
-      '<p style="color:var(--text-3);font-size:13px;line-height:1.65;margin-bottom:var(--space-4)">' +
-        'Short links work by <b>uploading your project</b> (compressed) to a private Datapad-owned Google Sheet so the URL can stay tiny (~5 characters). ' +
-        'Only the Datapad maintainer has access to that sheet. The link auto-expires in 30 days.' +
-      '</p>' +
-      '<p style="color:var(--text-3);font-size:13px;line-height:1.65;margin-bottom:var(--space-5)">' +
-        '<b>Inline share links</b> (the one above) and <b>file exports</b> never upload anything - they stay 100% in your browser. ' +
-        'Pick whichever fits your data sensitivity.' +
-      '</p>' +
-      '<div class="modal-actions">' +
-        '<button class="btn btn-ghost" id="shortShareCancel">Cancel</button>' +
-        '<button class="btn btn-primary" id="shortShareAccept">Got it · continue</button>' +
-      '</div>'
-    );
-    var done = false;
-    function finish(ok) { if (done) return; done = true; closeModal(); resolve(ok); }
-    document.getElementById('shortShareAccept').onclick = function() { setShortShareConsent(); finish(true); };
-    document.getElementById('shortShareCancel').onclick = function() { finish(false); };
-  });
-}
-
-async function createShortShareLink() {
-  if (!SHORT_SHARE_API) { toast('Short links are not configured', 'warn', 4000); return; }
-  if (!_shareSizeCache.payload || _shareSizeCache.signature !== projectSignature()) {
-    await refreshShareLinkSize();
-  }
-  if (!_shareSizeCache.payload) { toast('Could not prepare project payload', 'error', 4000); return; }
-  if (_shareSizeCache.chars > SHORT_SHARE_MAX_CHARS) {
-    toast('Project too large even for a short link - use file export', 'warn', 5000);
-    return;
-  }
-  if (!hasShortShareConsent()) {
-    var ok = await askShortShareConsent();
-    if (!ok) return;
-    // Re-open the share modal — it was closed by askShortShareConsent
-    await openShareModal();
-    return;
-  }
-
-  var btn = document.getElementById('shortShareBtn');
-  var actions = document.getElementById('shortShareActions');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
-
-  try {
     var resp = await fetch(SHORT_SHARE_API, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source: 'glimpse',
-        name: _shareSizeCache.name || 'Glimpse project',
-        state: _shareSizeCache.payload,
-      }),
+      // text/plain is a "simple" CORS content-type — no preflight OPTIONS.
+      // Server still parses the body as JSON regardless of header.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ source: 'glimpse', name: name || 'Glimpse project', state: encoded }),
     });
-    var data = await resp.json();
-    if (!data || !data.ok) throw new Error((data && data.error) || ('Server returned ' + resp.status));
+    var respText = await resp.text();
+    var data;
+    try { data = respText ? JSON.parse(respText) : null; } catch (e) {
+      throw new Error('Server returned ' + resp.status + ' with non-JSON body (' + (respText.slice(0,80) || 'empty') + ')');
+    }
+    if (!data) throw new Error('Server returned ' + resp.status + ' with empty body');
+    if (!data.ok) throw new Error(data.error || ('Server returned ' + resp.status));
+
     var shortUrl = location.origin + location.pathname + '?s=' + data.key;
+    var sub = document.getElementById('shortShareSub');
+    var actions = document.getElementById('shortShareActions');
+    if (sub) sub.textContent = fmtCompactBytes(encoded.length) + ' · expires ' + new Date(data.expires_at).toLocaleDateString();
     if (actions) {
       actions.innerHTML =
         '<div class="share-link-row" style="width:100%">' +
@@ -10904,14 +10715,30 @@ async function createShortShareLink() {
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
             'Copy' +
           '</button>' +
-        '</div>' +
-        '<span class="share-card-hint">Expires ' + new Date(data.expires_at).toLocaleDateString() + ' · key <code>' + escHTML(data.key) + '</code></span>';
+        '</div>';
     }
+    // Auto-select + copy attempt so the user can paste immediately. Some
+    // browsers block clipboard writes without a user gesture — we silently
+    // ignore the rejection and rely on the Copy button.
+    setTimeout(function() {
+      var input = document.getElementById('shortShareUrl');
+      if (input && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shortUrl).then(function() {
+          toast('Short link copied', 'success', 1800);
+        }).catch(function(){});
+      }
+    }, 50);
   } catch (err) {
-    console.error('[Glimpse] short share failed:', err);
-    if (btn) { btn.disabled = false; btn.textContent = 'Create short link'; }
-    toast('Could not create short link: ' + (err.message || err), 'error', 5000);
+    console.error('[Glimpse] share failed:', err);
+    showShortShareError(err && err.message ? err.message : 'Could not create short link');
   }
+}
+
+function showShortShareError(msg) {
+  var sub = document.getElementById('shortShareSub');
+  var actions = document.getElementById('shortShareActions');
+  if (sub) sub.textContent = 'Failed';
+  if (actions) actions.innerHTML = '<div class="share-modal-error" style="white-space:pre-line;line-height:1.55">' + escHTML(msg) + '</div>';
 }
 
 async function copyShortShareUrl() {
@@ -14646,14 +14473,10 @@ function buildCommandList() {
   });
 
   // ── Sharing / Export ─────────────────────────────────────
-  cmds.push({ id: 'share-link', group: 'Share', title: 'Copy share link',
-              icon: iconShare, keywords: 'share link copy url',
+  cmds.push({ id: 'share-link', group: 'Share', title: 'Share project',
+              icon: iconShare, keywords: 'share link copy url short',
               when: function(){ return App.datasets.length > 0 && typeof openShareModal === 'function'; },
               run: function(){ openShareModal(); } });
-  cmds.push({ id: 'share-export', group: 'Share', title: 'Export project file',
-              icon: iconDownload, keywords: 'export download project json glimpse',
-              when: function(){ return App.datasets.length > 0 && typeof exportProjectFile === 'function'; },
-              run: function(){ exportProjectFile(); } });
 
   // ── Settings / Misc ──────────────────────────────────────
   cmds.push({ id: 'settings-ai', group: 'Settings', title: function(){ return App.aiSettings && App.aiSettings.apiKey ? 'AI settings' : 'Connect an AI provider'; },
