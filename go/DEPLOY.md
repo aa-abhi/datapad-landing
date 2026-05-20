@@ -7,13 +7,20 @@ Serverless short links at `datapad.in/go/<key>` powered by Vercel Edge + Google 
 ```
 Browser → /go/<key>
    ↓ (Vercel rewrite)
-/api/go?key=<key>  ← Edge Function (api/go.js)
-   ↓ fetches map (cached 60s at edge)
-Apps Script Web App (doGet) → Google Sheet "links" tab
+/api/go?key=<key>  ← Edge Function
    ↓
-Bot UA → 302 to destination
-Browser → interstitial HTML (3s countdown + ad slot + skip)
-   ↓ sendBeacon to Apps Script (doPost) → "clicks" tab
+Bot UA?
+   ├─ Yes → fetch map → 302 to destination
+   └─ No  → return interstitial HTML INSTANTLY (no Sheet call)
+              ↓
+            JS in page calls /api/resolve?key=<key>
+              ↓ (cached 60s at edge)
+            Apps Script doGet → "links" tab (filters by active + expires_at)
+              ↓
+            destination returned → countdown finishes → redirect
+            sendBeacon → Apps Script doPost → "clicks" tab
+
+Nightly: rollupDaily trigger → aggregates "clicks" into "daily_stats", purges old rows
 ```
 
 ## One-time setup (per environment)
@@ -24,20 +31,28 @@ You need **two Sheets** — one for Preview, one for Production.
 
 Add a tab named `links` with this header row:
 
-| key     | destination_url        | active | created_at |
-| ------- | ---------------------- | ------ | ---------- |
-| abc123  | https://example.com    | TRUE   | 2026-05-20 |
+| key     | destination_url        | active | created_at | expires_at |
+| ------- | ---------------------- | ------ | ---------- | ---------- |
+| abc123  | https://example.com    | TRUE   | 2026-05-20 |            |
+| docs    | https://docs.foo.com   | TRUE   | 2026-05-20 | permanent  |
+| promo   | https://shop.foo.com   | TRUE   | 2026-05-20 | 2026-06-30 |
 
-The `clicks` tab is auto-created on first click.
+**`expires_at` rules:**
+- blank → defaults to `created_at + 30 days`
+- `permanent` or `never` → no expiry
+- a date → use that date
+
+The `clicks` and `daily_stats` tabs are auto-created.
 
 ### 2. Deploy the Apps Script
 
 1. In the Sheet: **Extensions → Apps Script**
 2. Paste contents of [`apps-script/Code.gs`](../apps-script/Code.gs)
-3. **Deploy → New deployment → Web app**
+3. In the editor, select function `setupTriggers` and click **Run** once (grant permissions). This installs the nightly roll-up trigger.
+4. **Deploy → New deployment → Web app**
    - Execute as: **Me**
    - Who has access: **Anyone**
-4. Copy the deployment URL (looks like `https://script.google.com/macros/s/.../exec`)
+5. Copy the deployment URL (looks like `https://script.google.com/macros/s/.../exec`)
 
 Repeat for the second (Production) sheet.
 
@@ -70,15 +85,32 @@ Vercel builds and exposes `/go/:key`.
 
 ## How redirects work
 
-- **Real browsers** see a 3-second branded interstitial with a "Skip ahead" button (ad slot reserved on the page).
+- **Real browsers** see the interstitial **instantly** (no Sheet wait). The page renders, then JS fetches the destination from `/api/resolve` in the background. Countdown runs in parallel; redirect happens when both finish.
 - **Bots/crawlers** (`facebookexternalhit`, `slackbot`, `curl`, etc.) get a clean 302 so social unfurls and link checkers keep working.
-- **Invalid/inactive keys** → `/go/404.html` styled in Datapad's theme.
+- **Invalid/inactive/expired keys** → `/go/404.html` styled in Datapad's theme.
 
 ## Caching
 
-- Edge cache: 60s (`s-maxage=60`, `stale-while-revalidate=300`)
+- Interstitial HTML: cached 1h at edge (no per-key data in it)
+- `/api/resolve` JSON: cached 60s at edge (`s-maxage=60`, `stale-while-revalidate=300`)
 - Apps Script cache: 50s (avoids stale-chain on edge refresh)
 - Sheet change → live within ~60s
+
+## Expiry
+
+- Default: links expire 30 days after `created_at`
+- Set `expires_at = permanent` (or `never`) to disable expiry
+- Set `expires_at` to a date to override the default
+- Expired links are filtered out in Apps Script, so they immediately 404 (after cache refresh)
+
+## Daily roll-up
+
+A nightly trigger (`rollupDaily`, set up by `setupTriggers`) runs at ~01:00:
+
+1. Aggregates yesterday's rows from `clicks` into `daily_stats` (date, key, clicks)
+2. Purges rows from `clicks` older than 30 days
+
+So `clicks` stays small (rolling 30-day raw log) and `daily_stats` is your long-term analytics surface.
 
 ## Click tracking
 
