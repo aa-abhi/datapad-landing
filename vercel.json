@@ -2,5 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".",
   "framework": null,
-  "rewrites": []
+  "rewrites": [
+    { "source": "/go/:key", "destination": "/api/go?key=:key" }
+  ]
 }
