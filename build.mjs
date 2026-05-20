@@ -67,7 +67,11 @@ const obfuscated = JavaScriptObfuscator.obfuscate(main[2], {
   stringArray: true,
   stringArrayEncoding: ['base64'],
   stringArrayThreshold: 0.75,
-  identifierNamesGenerator: 'mangled',
+  // 'hexadecimal' (_0x1a2b3c…) is collision-safe with un-renamed globals;
+  // 'mangled' (a, b, c, …, x, y, z, aa…) cycles through letters and can
+  // emit a local name that collides with a global the obfuscator left alone,
+  // producing "ReferenceError: x is not defined" at runtime.
+  identifierNamesGenerator: 'hexadecimal',
   selfDefending: true,
   splitStrings: false,
   unicodeEscapeSequence: false,
