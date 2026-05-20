@@ -10512,6 +10512,12 @@ var PROJECT_BUNDLE_VERSION = 1;
 // most browsers cope until ~32k, but multi-line URLs in chat are user-hostile
 // long before then. 25k characters of base64 is roughly 17KB compressed payload.
 var SHARE_URL_MAX_CHARS = 25000;
+// Hosted short-link share — proxied via Vercel edge fn at /api/share. The
+// Apps Script URL stays server-side in SHEETS_API_URL env var; clients never see it.
+var SHORT_SHARE_API = '/api/share';
+// Apps Script cell limit is ~50k; we hold headroom for safety.
+var SHORT_SHARE_MAX_CHARS = 45000;
+var SHORT_SHARE_ACK_KEY = 'datapad.glimpse.shortShareAck.v1';
 
 function buildProjectBundle() {
   return {
@@ -10716,7 +10722,7 @@ function renderShareModalBody(bundle, encoded) {
       '<div class="share-card share-card--link">' +
         '<div class="share-card-head">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
-          '<div><div class="share-card-title">Share via link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' · ' + escHTML(bytesNote) + '</div></div>' +
+          '<div><div class="share-card-title">Share via link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' · ' + escHTML(bytesNote) + ' · stays in your browser</div></div>' +
         '</div>' +
         '<div class="share-link-row">' +
           '<input class="modal-field-input share-link-input" id="shareLinkUrl" type="text" readonly value="' + escHTML(url) + '" onclick="this.select()"/>' +
@@ -10726,18 +10732,35 @@ function renderShareModalBody(bundle, encoded) {
           '</button>' +
         '</div>' +
       '</div>' +
+      renderShortShareSection(encoded) +
       renderShareFileSection(bundle);
   } else {
     body.innerHTML =
       '<div class="share-card share-card--disabled">' +
         '<div class="share-card-head">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>' +
-          '<div><div class="share-card-title">Project too large for a link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' - links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
+          '<div><div class="share-card-title">Project too large for an inline link</div><div class="share-card-sub">' + escHTML(sizeLabel) + ' - inline links cap at ' + Math.round(SHARE_URL_MAX_CHARS/1024) + ' KB</div></div>' +
         '</div>' +
-        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Use the file export below instead - it has no size limit.</div>' +
+        '<div class="share-card-help">URLs above this size break in chat apps and browsers. Try a short link below (hosted on Datapad) or download the project file.</div>' +
       '</div>' +
+      renderShortShareSection(encoded) +
       renderShareFileSection(bundle);
   }
+}
+
+function renderShortShareSection(encoded) {
+  if (!SHORT_SHARE_API) return '';
+  if (!encoded || encoded.length > SHORT_SHARE_MAX_CHARS) return '';
+  return '<div class="share-card share-card--link" id="shortShareCard">' +
+    '<div class="share-card-head">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
+      '<div><div class="share-card-title">Short link</div><div class="share-card-sub">Hosted on Datapad · expires in 30 days · ~5-char URL</div></div>' +
+    '</div>' +
+    '<div class="share-card-actions" id="shortShareActions">' +
+      '<button class="btn btn-primary btn-sm" type="button" id="shortShareBtn" onclick="createShortShareLink()">Create short link</button>' +
+      '<span class="share-card-hint">Uploads your project to a private Datapad sheet so the URL stays tiny.</span>' +
+    '</div>' +
+  '</div>';
 }
 
 function renderShareFileSection(bundle) {
@@ -10802,6 +10825,129 @@ async function copyShareLink() {
     console.error('[Glimpse] share link failed:', err);
     toast(err && err.message ? err.message : 'Could not build share link', 'error', 5000);
   }
+}
+
+// ─── Hosted short link (opt-in upload to Datapad sheet) ──────────
+function hasShortShareConsent() {
+  try { return localStorage.getItem(SHORT_SHARE_ACK_KEY) === '1'; } catch (_) { return false; }
+}
+function setShortShareConsent() {
+  try { localStorage.setItem(SHORT_SHARE_ACK_KEY, '1'); } catch (_) {}
+}
+
+function askShortShareConsent() {
+  return new Promise(function(resolve) {
+    openModal(
+      '<button class="modal-close" onclick="closeModal()">✕</button>' +
+      '<h2>Use a short link?</h2>' +
+      '<p style="color:var(--text-3);font-size:13px;line-height:1.65;margin-bottom:var(--space-4)">' +
+        'Short links work by <b>uploading your project</b> (compressed) to a private Datapad-owned Google Sheet so the URL can stay tiny (~5 characters). ' +
+        'Only the Datapad maintainer has access to that sheet. The link auto-expires in 30 days.' +
+      '</p>' +
+      '<p style="color:var(--text-3);font-size:13px;line-height:1.65;margin-bottom:var(--space-5)">' +
+        '<b>Inline share links</b> (the one above) and <b>file exports</b> never upload anything - they stay 100% in your browser. ' +
+        'Pick whichever fits your data sensitivity.' +
+      '</p>' +
+      '<div class="modal-actions">' +
+        '<button class="btn btn-ghost" id="shortShareCancel">Cancel</button>' +
+        '<button class="btn btn-primary" id="shortShareAccept">Got it · continue</button>' +
+      '</div>'
+    );
+    var done = false;
+    function finish(ok) { if (done) return; done = true; closeModal(); resolve(ok); }
+    document.getElementById('shortShareAccept').onclick = function() { setShortShareConsent(); finish(true); };
+    document.getElementById('shortShareCancel').onclick = function() { finish(false); };
+  });
+}
+
+async function createShortShareLink() {
+  if (!SHORT_SHARE_API) { toast('Short links are not configured', 'warn', 4000); return; }
+  if (!_shareSizeCache.payload || _shareSizeCache.signature !== projectSignature()) {
+    await refreshShareLinkSize();
+  }
+  if (!_shareSizeCache.payload) { toast('Could not prepare project payload', 'error', 4000); return; }
+  if (_shareSizeCache.chars > SHORT_SHARE_MAX_CHARS) {
+    toast('Project too large even for a short link - use file export', 'warn', 5000);
+    return;
+  }
+  if (!hasShortShareConsent()) {
+    var ok = await askShortShareConsent();
+    if (!ok) return;
+    // Re-open the share modal — it was closed by askShortShareConsent
+    await openShareModal();
+    return;
+  }
+
+  var btn = document.getElementById('shortShareBtn');
+  var actions = document.getElementById('shortShareActions');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+
+  try {
+    var resp = await fetch(SHORT_SHARE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'glimpse',
+        name: _shareSizeCache.name || 'Glimpse project',
+        state: _shareSizeCache.payload,
+      }),
+    });
+    var data = await resp.json();
+    if (!data || !data.ok) throw new Error((data && data.error) || ('Server returned ' + resp.status));
+    var shortUrl = location.origin + location.pathname + '?s=' + data.key;
+    if (actions) {
+      actions.innerHTML =
+        '<div class="share-link-row" style="width:100%">' +
+          '<input class="modal-field-input share-link-input" id="shortShareUrl" type="text" readonly value="' + escHTML(shortUrl) + '" onclick="this.select()"/>' +
+          '<button class="btn btn-primary share-copy-btn" type="button" onclick="copyShortShareUrl()">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            'Copy' +
+          '</button>' +
+        '</div>' +
+        '<span class="share-card-hint">Expires ' + new Date(data.expires_at).toLocaleDateString() + ' · key <code>' + escHTML(data.key) + '</code></span>';
+    }
+  } catch (err) {
+    console.error('[Glimpse] short share failed:', err);
+    if (btn) { btn.disabled = false; btn.textContent = 'Create short link'; }
+    toast('Could not create short link: ' + (err.message || err), 'error', 5000);
+  }
+}
+
+async function copyShortShareUrl() {
+  var input = document.getElementById('shortShareUrl');
+  if (!input) return;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(input.value);
+    } else {
+      input.select(); document.execCommand('copy');
+    }
+    toast('Short link copied', 'success', 2000);
+  } catch (_) {
+    toast('Could not copy - select and copy manually', 'warn', 4000);
+  }
+}
+
+async function consumeShortShareKey(key) {
+  if (!SHORT_SHARE_API) return false;
+  try {
+    var resp = await fetch(SHORT_SHARE_API + '?key=' + encodeURIComponent(key));
+    var data = await resp.json();
+    // Strip ?s= so reloads don't re-fetch and the user can save the URL clean.
+    var clean = location.pathname + (location.hash || '');
+    history.replaceState(null, '', clean);
+    if (!data || !data.ok) {
+      var msg = data && data.error === 'expired' ? 'This short link has expired.' : 'Short link not found.';
+      toast(msg, 'error', 5000);
+      return true;
+    }
+    var json = await base64UrlToText(data.state);
+    importProjectFromText(json, 'short link');
+  } catch (err) {
+    console.error('[Glimpse] short link load failed:', err);
+    toast('Could not load shared project: ' + (err.message || err), 'error', 5000);
+  }
+  return true;
 }
 
 // ─── Importing a project bundle (from file OR fragment) ──────────
@@ -10991,8 +11137,13 @@ function tryHandleProjectFile(file) {
   return true;
 }
 
-// Read location.hash on init - if it carries a #p=… payload, decode + prompt.
+// Read location on init - handle ?s=KEY (hosted short link) or #p=… (inline).
 async function tryConsumeShareLinkFromUrl() {
+  var params = new URLSearchParams(location.search);
+  var shortKey = params.get('s');
+  if (shortKey) {
+    return await consumeShortShareKey(shortKey);
+  }
   var hash = location.hash || '';
   if (hash.indexOf('#p=') !== 0) return false;
   var payload = hash.slice(3);
@@ -14811,7 +14962,7 @@ function updateCmdkTriggerHint() {
   var originalSetStep = setStep;
   setStep = function(step) {
     var r = originalSetStep(step);
-    try { updateCmdkTriggerHint(); } catch (e) {}
+    try { updateCmdkTriggerHint(); } catch (e) {}x
     return r;
   };
 })();
