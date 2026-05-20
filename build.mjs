@@ -60,7 +60,8 @@ const main = matches.reduce((a, b) => (b[2].length > a[2].length ? b : a));
 const beforeBytes = Buffer.byteLength(main[2], 'utf8');
 console.log('[build] Obfuscating ' + beforeBytes.toLocaleString() + ' bytes of inline JS…');
 
-const obfuscated = JavaScriptObfuscator.obfuscate(main[2], {
+// Wrap the obfuscator call so we can post-process its output below.
+const obfuscatedRaw = JavaScriptObfuscator.obfuscate(main[2], {
   // Safe defaults: compact output, string array with base64 encoding,
   // mangled identifier names. Anti-reformat self-defense ON.
   compact: true,
@@ -89,6 +90,16 @@ const obfuscated = JavaScriptObfuscator.obfuscate(main[2], {
   // breaks in production. We're hiding code, not telemetry.
   disableConsoleOutput: false
 }).getObfuscatedCode();
+
+// Escape any literal `</script` (and `<!--`) that the obfuscator's
+// selfDefending template may emit inside string literals. The browser's
+// HTML parser would otherwise terminate the surrounding <script> tag,
+// dumping the rest of the bundle into the DOM as text. JS treats `</`
+// and `<\/` identically inside strings, so this is a safe no-op for
+// runtime behavior.
+const obfuscated = obfuscatedRaw
+  .replace(/<\/script/gi, '<\\/script')
+  .replace(/<!--/g, '<\\!--');
 
 const afterBytes = Buffer.byteLength(obfuscated, 'utf8');
 const newHtml = html.replace(main[0], '<script' + main[1] + '>' + obfuscated + '</script>');
