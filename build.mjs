@@ -60,8 +60,7 @@ const main = matches.reduce((a, b) => (b[2].length > a[2].length ? b : a));
 const beforeBytes = Buffer.byteLength(main[2], 'utf8');
 console.log('[build] Obfuscating ' + beforeBytes.toLocaleString() + ' bytes of inline JS…');
 
-// Wrap the obfuscator call so we can post-process its output below.
-const obfuscatedRaw = JavaScriptObfuscator.obfuscate(main[2], {
+const obfuscated = JavaScriptObfuscator.obfuscate(main[2], {
   // Safe defaults: compact output, string array with base64 encoding,
   // mangled identifier names. Anti-reformat self-defense ON.
   compact: true,
@@ -91,18 +90,14 @@ const obfuscatedRaw = JavaScriptObfuscator.obfuscate(main[2], {
   disableConsoleOutput: false
 }).getObfuscatedCode();
 
-// Escape any literal `</script` (and `<!--`) that the obfuscator's
-// selfDefending template may emit inside string literals. The browser's
-// HTML parser would otherwise terminate the surrounding <script> tag,
-// dumping the rest of the bundle into the DOM as text. JS treats `</`
-// and `<\/` identically inside strings, so this is a safe no-op for
-// runtime behavior.
-const obfuscated = obfuscatedRaw
-  .replace(/<\/script/gi, '<\\/script')
-  .replace(/<!--/g, '<\\!--');
-
 const afterBytes = Buffer.byteLength(obfuscated, 'utf8');
-const newHtml = html.replace(main[0], '<script' + main[1] + '>' + obfuscated + '</script>');
+// CRITICAL: pass a function (not a string) to String.replace, otherwise `$&`,
+// `$'`, `$\``, `$1`-`$9` inside `obfuscated` get interpreted as replacement
+// patterns. The obfuscator's selfDefending output ends a regex with `$'`, which
+// would otherwise inject the source HTML's tail (`</body></html>...`) into the
+// bundle and corrupt it.
+const replacement = '<script' + main[1] + '>' + obfuscated + '</script>';
+const newHtml = html.replace(main[0], () => replacement);
 
 fs.writeFileSync(TARGET, newHtml);
 
