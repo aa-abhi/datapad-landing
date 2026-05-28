@@ -46,7 +46,7 @@
   {
     "@context": "https://schema.org",
     "@graph": [
-      {"@type":"WebApplication","@id":"https://datapad.in/age-calculator#app","name":"Age Calculator","alternateName":["DOB Calculator","Birthday Countdown","Exact Age Calculator"],"url":"https://datapad.in/age-calculator","description":"Free age calculator: exact years, months, days, hours, minutes plus next birthday countdown, zodiac, Chinese zodiac, birthstone, generation, life-expectancy progress, heartbeats, breaths, age on other planets and milestone dates.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser-based)","browserRequirements":"Modern browser with JavaScript enabled","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["Exact age in years, months, days","Time-of-birth precision (HH:MM)","Total months, weeks, days, hours, minutes","Next birthday countdown","Custom target date","Western zodiac sign","Chinese zodiac animal","Birthstone and birth flower","Generation (Gen Z, Millennial, etc.)","Day of week born","Life-expectancy progress","Heartbeats, breaths, blinks estimate","Age on Mercury, Venus, Mars, Jupiter, Saturn","Milestone dates (half-birthday, 10k days, billion seconds)","100% client-side processing","No sign-up, no tracking"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in","logo":"https://datapad.in/logo.png"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"112","bestRating":"5","worstRating":"1"}},
+      {"@type":"WebApplication","@id":"https://datapad.in/age-calculator#app","name":"Age Calculator","alternateName":["DOB Calculator","Birthday Countdown","Exact Age Calculator"],"url":"https://datapad.in/age-calculator","description":"Free age calculator: exact years, months, days, hours, minutes plus next birthday countdown, zodiac, Chinese zodiac, birthstone, generation, life-expectancy progress, heartbeats, breaths, age on other planets and milestone dates.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser-based)","browserRequirements":"Modern browser with JavaScript enabled","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"featureList":["Exact age in years, months, days","Time-of-birth precision (HH:MM)","Total months, weeks, days, hours, minutes","Next birthday countdown","Custom target date","Western zodiac sign","Chinese zodiac animal","Birthstone and birth flower","Generation (Gen Z, Millennial, etc.)","Day of week born","Life-expectancy progress","Heartbeats, breaths, blinks estimate","Age on Mercury, Venus, Mars, Jupiter, Saturn","Milestone dates (half-birthday, 10k days, billion seconds)","100% client-side processing","No sign-up, no tracking"],"provider":{"@type":"Organization","name":"Datapad","url":"https://datapad.in","logo":"https://datapad.in/logo.png"}},
       {"@type":"FAQPage","mainEntity":[
         {"@type":"Question","name":"How is exact age calculated?","acceptedAnswer":{"@type":"Answer","text":"We compare your date and time of birth to the target date (today by default), walking forward year-by-year, then month-by-month, then day-by-day - accounting for leap years and varying month lengths. The result is the precise breakdown most people mean by 'age'."}},
         {"@type":"Question","name":"Why do you ask for time of birth?","acceptedAnswer":{"@type":"Answer","text":"Time of birth makes the day count exact down to the minute. If you were born at 23:59 yesterday, you're 'one day old' only after that moment passes - not at midnight. Set 00:00 if you don't know your exact time."}},
@@ -277,8 +277,33 @@
       padding:11px 18px;border-radius:9px;font-family:var(--font);font-size:13px;font-weight:600;
       cursor:pointer;border:2px solid transparent;transition:all .25s var(--ease);letter-spacing:.1px;
     }
-    .btn-primary{background:var(--pri);color:var(--bg0);border-color:var(--pri)}
-    .btn-primary:hover{background:transparent;color:var(--pri);box-shadow:0 0 24px rgba(var(--pri-rgb),0.2)}
+    .btn-primary{
+      background:linear-gradient(135deg,var(--pri) 0%,#00e8b0 100%);
+      color:var(--bg0);border-color:var(--pri);
+      font-weight:700;letter-spacing:.2px;
+      box-shadow:
+        0 6px 18px rgba(var(--pri-rgb),0.32),
+        0 0 0 1px rgba(var(--pri-rgb),0.25),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      position:relative;overflow:hidden;
+    }
+    .btn-primary::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);
+      transform:translateX(-100%);
+      transition:transform .6s var(--ease);
+      pointer-events:none;
+    }
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      box-shadow:
+        0 10px 28px rgba(var(--pri-rgb),0.45),
+        0 0 0 1px rgba(var(--pri-rgb),0.4),
+        0 0 32px rgba(var(--pri-rgb),0.3),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+    .btn-primary:hover::before{transform:translateX(100%)}
+    .btn-primary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(var(--pri-rgb),0.4),0 8px 24px rgba(var(--pri-rgb),0.4)}
     .btn-ghost{background:transparent;color:var(--t1);border:1px solid var(--brd);font-weight:500}
     .btn-ghost:hover{color:var(--t0);background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.15)}
     .btn:active{transform:translateY(1px)}
@@ -293,7 +318,7 @@
     .icon-btn svg{width:14px;height:14px}
 
     /* RIGHT COLUMN */
-    .results{display:flex;flex-direction:column;gap:16px}
+    .results{display:flex;flex-direction:column;gap:24px}
 
     /* HEADLINE */
     .headline{padding:22px 24px 20px}
@@ -325,7 +350,7 @@
     .hl-meta strong{color:var(--t1);font-weight:600}
 
     /* FACTS STRIP - 4 chips */
-    .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
     .chip{
       padding:12px 14px;background:rgba(255,255,255,.018);
       border:1px solid rgba(255,255,255,.05);border-radius:11px;
@@ -349,7 +374,7 @@
     .chip-sub{font-family:var(--mono);font-size:9.5px;color:var(--t2);margin-top:2px;letter-spacing:.2px}
 
     /* TOTALS */
-    .totals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}
+    .totals{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
     .tot{padding:12px 14px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.05);border-radius:10px;transition:all .25s var(--ease)}
     .tot:hover{border-color:rgba(var(--pri-rgb),.18);background:rgba(var(--pri-rgb),.025);transform:translateY(-2px)}
     .tot-lbl{font-family:var(--mono);font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1.3px;font-weight:600;margin-bottom:6px}
@@ -357,20 +382,35 @@
     .tot-sub{font-family:var(--mono);font-size:9.5px;color:var(--t2);margin-top:4px;letter-spacing:.2px}
 
     /* LIFE PROGRESS */
-    .life{padding:16px 18px}
-    .life-top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px}
-    .life-l{font-family:var(--mono);font-size:11px;color:var(--t1)}
+    .life{padding:18px 20px}
+    .life-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+    .life-l{font-family:var(--mono);font-size:11.5px;color:var(--t1)}
     .life-l strong{color:var(--t0);font-weight:600}
-    .life-r{font-family:var(--mono);font-size:11px;color:var(--t2)}
-    .life-r .pct{color:var(--pri);font-weight:600;font-size:13px}
-    .progress{height:10px;border-radius:999px;background:rgba(255,255,255,0.04);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .life-r{font-family:var(--mono);font-size:11px;color:var(--t2);display:flex;align-items:center;gap:10px}
+    .life-r .pct{color:var(--pri);font-weight:600;font-size:14px}
+    .baseline-pick{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:5px 10px 5px 12px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--brd);
+      border-radius:999px;
+      font-family:var(--mono);font-size:11px;color:var(--t1);
+      cursor:pointer;transition:all .2s;
+    }
+    .baseline-pick:hover{border-color:rgba(var(--pri-rgb),.3);background:rgba(var(--pri-rgb),.04);color:var(--pri)}
+    .baseline-pick select{
+      appearance:none;-webkit-appearance:none;background:transparent;border:none;outline:none;
+      color:inherit;font:inherit;cursor:pointer;padding-right:4px;
+    }
+    .baseline-pick svg{width:10px;height:10px;color:var(--t2)}
+    .progress{height:12px;border-radius:999px;background:rgba(255,255,255,0.04);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
     .progress-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--pri),var(--acc) 60%,var(--purple));transition:width .8s var(--ease)}
     .progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmer 2.4s infinite}
     @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-    .life-note{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:10px;letter-spacing:.3px}
+    .life-note{font-family:var(--mono);font-size:10.5px;color:var(--t3);margin-top:12px;letter-spacing:.3px;line-height:1.55}
 
     /* CURIOUS - 5 col grid */
-    .curious{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px}
+    .curious{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:18px}
     @media (max-width:900px){.curious{grid-template-columns:repeat(3,1fr)}}
     @media (max-width:520px){.curious{grid-template-columns:repeat(2,1fr)}}
     .cur{padding:12px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.05);border-radius:10px;transition:all .25s var(--ease)}
@@ -382,7 +422,7 @@
     .cur-val.acc{color:var(--acc)}
 
     /* PLANETS */
-    .planets{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px}
+    .planets{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:18px}
     @media (max-width:900px){.planets{grid-template-columns:repeat(3,1fr)}}
     @media (max-width:520px){.planets{grid-template-columns:repeat(2,1fr)}}
     .planet{padding:12px;background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.05);border-radius:10px;display:flex;align-items:center;gap:11px;transition:all .25s var(--ease)}
@@ -427,6 +467,73 @@
     .stagger > *:nth-child(3){animation-delay:.09s}
     .stagger > *:nth-child(4){animation-delay:.12s}
     .stagger > *:nth-child(5){animation-delay:.15s}
+
+    /* TICK ANIMATION (live counters) */
+    .tick-up{animation:tickUp .35s var(--ease)}
+    @keyframes tickUp{0%{transform:translateY(2px);color:var(--pri);text-shadow:0 0 12px rgba(var(--pri-rgb),.4)}100%{transform:translateY(0);color:var(--t0)}}
+    .cur-val{transition:color .35s}
+
+    /* BIRTHDAY BANNER */
+    .bday-banner{
+      position:relative;overflow:hidden;
+      padding:18px 22px;
+      background:linear-gradient(135deg,rgba(var(--pri-rgb),.12),rgba(var(--purple-rgb),.10) 60%,rgba(var(--acc-rgb),.10));
+      border:1px solid rgba(var(--pri-rgb),.25);
+      border-radius:14px;
+      display:flex;align-items:center;gap:16px;
+      animation:bdayPulse 3s ease-in-out infinite;
+    }
+    @keyframes bdayPulse{
+      0%,100%{box-shadow:0 0 0 0 rgba(var(--pri-rgb),0)}
+      50%{box-shadow:0 0 32px rgba(var(--pri-rgb),0.18)}
+    }
+    .bday-emoji{font-size:36px;line-height:1;animation:bdayWobble 2.4s ease-in-out infinite}
+    @keyframes bdayWobble{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.08)}}
+    .bday-text{flex:1;min-width:0}
+    .bday-title{font-family:var(--font);font-size:18px;font-weight:700;letter-spacing:-.4px;color:var(--t0);margin-bottom:3px}
+    .bday-sub{font-family:var(--mono);font-size:11.5px;color:var(--t1);letter-spacing:.2px}
+
+    /* WITNESS CARD (cosmic + cultural) */
+    .witness{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px}
+    @media (max-width:900px){.witness{grid-template-columns:repeat(2,1fr)}}
+    .wit{
+      padding:14px;background:rgba(255,255,255,.018);
+      border:1px solid rgba(255,255,255,.05);border-radius:11px;
+      transition:all .25s var(--ease);position:relative;overflow:hidden;
+    }
+    .wit:hover{border-color:rgba(var(--acc-rgb),.22);background:rgba(var(--acc-rgb),.03);transform:translateY(-2px)}
+    .wit-lbl{font-family:var(--mono);font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:1.3px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .wit-lbl .ico{font-size:14px;line-height:1}
+    .wit-val{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--t0);letter-spacing:-.5px;line-height:1;font-variant-numeric:tabular-nums}
+    .wit-val .unit{color:var(--acc);font-size:13px;font-weight:500;margin-left:3px}
+    .wit-sub{font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:5px;letter-spacing:.2px;line-height:1.4}
+
+    /* COMPARE CARD (older/younger than) */
+    .compare{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width:768px){.compare{grid-template-columns:1fr}}
+    .cmp-col{display:flex;flex-direction:column;gap:8px}
+    .cmp-head{font-family:var(--mono);font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1.3px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+    .cmp-head .badge{padding:2px 8px;border-radius:999px;font-size:9.5px;letter-spacing:1px;font-weight:700}
+    .cmp-head.older .badge{background:rgba(var(--pri-rgb),.12);color:var(--pri);border:1px solid rgba(var(--pri-rgb),.25)}
+    .cmp-head.younger .badge{background:rgba(var(--purple-rgb),.12);color:var(--purple);border:1px solid rgba(var(--purple-rgb),.28)}
+    .cmp-row{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      padding:9px 12px;background:rgba(255,255,255,.018);
+      border:1px solid rgba(255,255,255,.04);border-radius:9px;
+      transition:all .2s var(--ease);
+    }
+    .cmp-row:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1)}
+    .cmp-name{font-family:var(--body-font);font-size:13px;color:var(--t1);font-weight:500;min-width:0;display:flex;align-items:center;gap:8px}
+    .cmp-name .emo{font-size:14px;line-height:1}
+    .cmp-when{font-family:var(--mono);font-size:10.5px;color:var(--t2);white-space:nowrap}
+
+    /* CONFETTI */
+    .confetti-host{position:fixed;inset:0;pointer-events:none;z-index:300;overflow:hidden}
+    .confetti{position:absolute;top:-20px;width:10px;height:14px;opacity:0;animation:confettiFall linear forwards;border-radius:2px}
+    @keyframes confettiFall{
+      0%{transform:translate3d(0,-30px,0) rotate(0deg);opacity:1}
+      100%{transform:translate3d(var(--dx,0px),105vh,0) rotate(720deg);opacity:0}
+    }
 
     /* FAQ */
     .faq-section{margin-top:48px}
@@ -475,37 +582,142 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
     /* FOOTER */
-    footer{position:relative;z-index:2;border-top:1px solid var(--brd);padding:20px 32px;margin-top:48px}
-    .footer-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-    .footer-left{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t2);font-family:var(--mono)}
-    .footer-left a{color:var(--t0);text-decoration:none;font-weight:600}
-    .footer-left a:hover{color:var(--pri)}
-    .footer-right{display:flex;gap:18px;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.2px}
-    .footer-right a{color:var(--t2);text-decoration:none;transition:color .2s}
-    .footer-right a:hover{color:var(--pri)}
+    footer{position:relative;z-index:2;border-top:1px solid var(--brd);margin-top:56px;background:linear-gradient(180deg,transparent,rgba(var(--pri-rgb),0.02))}
+    .footer-inner{max-width:1280px;margin:0 auto;padding:36px 32px 24px}
+    .footer-top{
+      display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;
+      padding-bottom:28px;border-bottom:1px solid var(--brd);
+    }
+    .footer-brand{min-width:0}
+    .footer-brand-row{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+    .footer-brand-row img{width:32px;height:32px}
+    .footer-brand-name{font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:1px}
+    .footer-brand-tag{font-family:var(--mono);font-size:9px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;padding:3px 7px;border-radius:5px;background:rgba(var(--acc-rgb),.06);border:1px solid rgba(var(--acc-rgb),.12);font-weight:600}
+    .footer-tagline{font-size:13px;color:var(--t2);line-height:1.65;max-width:340px;margin-bottom:14px}
+    .footer-status{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:999px;background:rgba(var(--pri-rgb),.05);border:1px solid rgba(var(--pri-rgb),.18);font-family:var(--mono);font-size:10.5px;color:var(--t2);letter-spacing:.5px}
+    .footer-status .dot{width:6px;height:6px;border-radius:50%;background:var(--pri);box-shadow:0 0 6px rgba(var(--pri-rgb),.6);animation:pulse 2s infinite}
+    .footer-col-head{font-family:var(--mono);font-size:10px;color:var(--t0);text-transform:uppercase;letter-spacing:1.6px;font-weight:700;margin-bottom:14px}
+    .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+    .footer-col a{font-size:13px;color:var(--t2);text-decoration:none;transition:color .2s;display:inline-flex;align-items:center;gap:6px}
+    .footer-col a:hover{color:var(--pri)}
+    .footer-col a .new{font-family:var(--mono);font-size:8.5px;background:rgba(var(--pri-rgb),.1);color:var(--pri);padding:1.5px 6px;border-radius:4px;letter-spacing:.8px;font-weight:600;border:1px solid rgba(var(--pri-rgb),.2)}
+    .footer-bottom{
+      display:flex;align-items:center;justify-content:space-between;
+      padding-top:20px;gap:16px;flex-wrap:wrap;
+    }
+    .footer-copy{font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:.3px}
+    .footer-copy a{color:var(--t1);text-decoration:none;font-weight:600}
+    .footer-copy a:hover{color:var(--pri)}
+    .footer-meta{display:flex;gap:16px;font-family:var(--mono);font-size:10.5px;color:var(--t3);letter-spacing:.5px}
+    .footer-meta span{display:inline-flex;align-items:center;gap:6px}
+    .footer-meta .check{color:var(--pri)}
 
     /* RESPONSIVE */
     @media (max-width:1024px){
-      .grid{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr;gap:22px}
       .chips{grid-template-columns:repeat(2,1fr)}
+      .results{gap:22px}
+      .witness{grid-template-columns:repeat(2,1fr)}
     }
     @media (max-width:768px){
-      header{padding:0 18px}
-      main{padding:24px 18px 32px}
-      footer{padding:16px 18px}
-      h1.title{font-size:28px}
-      .ymd{gap:14px}
-      .totals{grid-template-columns:repeat(2,1fr)}
+      header{padding:0 16px;height:60px}
+      main{padding:20px 16px 28px}
+      footer{margin-top:36px}
+      .footer-inner{padding:28px 18px 20px}
+      .footer-top{grid-template-columns:1fr 1fr;gap:24px;padding-bottom:22px}
+      .footer-brand{grid-column:1 / -1}
+      .footer-bottom{flex-direction:column;align-items:flex-start;gap:10px}
+      .results{gap:18px}
+      .grid{gap:18px}
+      .page-head{margin-bottom:16px}
+      h1.title{font-size:26px;letter-spacing:-1px;margin-bottom:6px}
+      .subtitle{font-size:13.5px;line-height:1.55}
+      .eyebrow{margin-bottom:10px;font-size:10px;padding:3px 10px}
       .nav-link{display:none}
-      .logo-name{font-size:18px}
-      .enhanced-logo{width:38px;height:38px}
-      .dob-row{grid-template-columns:1fr 1.3fr 1fr}
-      .headline{padding:18px}
+      .logo-name{font-size:17px;letter-spacing:.8px}
+      .enhanced-logo{width:36px;height:36px}
+      .logo{gap:9px}
+
+      .card-head{padding:9px 14px}
+      .card-body{padding:14px}
+      .dob-row{grid-template-columns:1fr 1.3fr 1fr;gap:6px}
+      select.fld, input.fld{padding:10px 28px 10px 11px;font-size:12.5px}
+      .select-wrap::after{right:11px}
+      .toggle-row{padding:10px 12px;margin-bottom:12px}
+      .field{margin-bottom:12px}
+      .actions{grid-template-columns:1fr 1fr}
+
+      .headline{padding:16px}
+      .hl-top{margin-bottom:10px}
+      .ymd{gap:18px;margin-bottom:10px}
+      .ymd-num{font-size:38px;letter-spacing:-1.4px}
+      .ymd-lbl{font-size:9px}
+      .hl-meta{gap:6px 16px;font-size:10.5px;padding-top:10px}
+      .hl-meta > div{flex:1 1 100%}
+      #liveClock{margin-left:0 !important;font-size:10px}
+
+      .chips{gap:10px}
+      .chip{padding:11px 12px;gap:10px}
+      .chip-icon{width:30px;height:30px;font-size:16px;border-radius:8px}
+      .chip-val{font-size:13px}
+      .chip-lbl{font-size:8.5px;letter-spacing:1.1px}
+      .chip-sub{font-size:9px}
+
+      .totals{grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+      .tot{padding:11px 12px}
+      .tot-val{font-size:17px}
+      .tot-lbl{font-size:8.5px}
+      .tot-sub{font-size:9px}
+
+      .life{padding:14px}
+      .life-top{margin-bottom:10px;gap:6px}
+      .life-l, .life-r{font-size:10.5px}
+      .progress{height:8px}
+      .life-note{font-size:9.5px;margin-top:8px;line-height:1.45}
+
+      .curious{grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+      .cur{padding:11px}
+      .cur-val{font-size:14px}
+
+      .planets{grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+      .planet{padding:11px;gap:10px}
+
+      .witness{grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+      .wit{padding:12px}
+      .wit-val{font-size:20px}
+
+      .bday-banner{padding:14px 16px;gap:12px}
+      .bday-emoji{font-size:30px}
+      .bday-title{font-size:16px}
+      .bday-sub{font-size:11px}
+      .planet-orb{width:28px;height:28px}
+      .planet-age{font-size:13px}
+
+      .faq-section{margin-top:32px}
+      .section-head{margin-bottom:14px}
+      .section-title{font-size:22px;letter-spacing:-.6px}
+      .section-sub{font-size:13px}
+      .faq{gap:8px}
+      .faq summary{padding:12px 14px;font-size:13px}
+      .faq .q-body{padding:0 14px 14px;font-size:12.5px}
+
     }
     @media (max-width:420px){
       .logo-tag{display:none}
-      .ymd-num{font-size:36px}
-      .chips{grid-template-columns:1fr}
+      main{padding:16px 14px 24px}
+      header{padding:0 14px}
+      h1.title{font-size:23px}
+      .subtitle{font-size:13px}
+      .ymd-num{font-size:34px;letter-spacing:-1.2px}
+      .ymd{gap:14px}
+      .chips{grid-template-columns:1fr;gap:9px}
+      .totals{gap:9px;padding:12px}
+      .curious{padding:12px;gap:9px}
+      .planets{padding:12px;gap:9px}
+      .witness{padding:12px;gap:9px}
+      .card-body{padding:12px}
+      .dob-row{gap:5px}
+      .actions{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -706,19 +918,45 @@
             </div>
           </div>
 
+          <!-- BIRTHDAY BANNER (only when next birthday is today) -->
+          <div id="bdayBanner" class="bday-banner fade-in" style="display:none">
+            <div class="bday-emoji">🎂</div>
+            <div class="bday-text">
+              <div class="bday-title" id="bdayTitle">Happy birthday!</div>
+              <div class="bday-sub" id="bdaySub">You completed another orbit around the sun today.</div>
+            </div>
+          </div>
+
           <!-- LIFE PROGRESS -->
           <div class="card fade-in">
             <div class="card-head">
-              <div class="card-head-l"><div class="card-title">LIFE PROGRESS · 80-YEAR BASELINE</div></div>
+              <div class="card-head-l"><div class="card-title" id="lifeHeadLbl">LIFE PROGRESS · 80-YEAR BASELINE</div></div>
               <div class="card-title" id="lifeRemaining">-</div>
             </div>
             <div class="life">
               <div class="life-top">
-                <div class="life-l"><strong id="lifeYears">0</strong> of 80 years lived · birthday <strong id="bdayInline">-</strong></div>
-                <div class="life-r"><span class="pct" id="lifePct">0%</span> · <span id="lifeDaysLeft">- days left</span></div>
+                <div class="life-l"><strong id="lifeYears">0</strong> of <strong id="lifeBaseLbl">80</strong> years lived · birthday <strong id="bdayInline">-</strong></div>
+                <div class="life-r">
+                  <span class="pct" id="lifePct">0%</span>
+                  <span id="lifeDaysLeft">- days left</span>
+                  <label class="baseline-pick" title="Change baseline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h6"/><path d="M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>
+                    <select id="baselineSel" aria-label="Life expectancy baseline">
+                      <option value="55">55 yrs · low-income</option>
+                      <option value="60">60 yrs · pre-modern</option>
+                      <option value="65">65 yrs · retirement</option>
+                      <option value="70">70 yrs · global low</option>
+                      <option value="75">75 yrs · world avg</option>
+                      <option value="80" selected>80 yrs · WHO avg</option>
+                      <option value="85">85 yrs · developed</option>
+                      <option value="90">90 yrs · long-lived</option>
+                      <option value="100">100 yrs · centenarian</option>
+                    </select>
+                  </label>
+                </div>
               </div>
               <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Life expectancy progress"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-              <div class="life-note">Global average life expectancy ~80 years (WHO). Varies by country, gender, lifestyle.</div>
+              <div class="life-note" id="lifeNote">Global average life expectancy ~80 years (WHO). Varies by country, gender, lifestyle.</div>
             </div>
           </div>
 
@@ -763,6 +1001,42 @@
               <div class="planet">
                 <div class="planet-orb" style="background:radial-gradient(circle at 35% 30%,#ead2a3,#9c7745)"></div>
                 <div class="planet-body"><div class="planet-name">Saturn</div><div class="planet-age" id="ageSaturn">-</div><div class="planet-sub">29.5 yrs</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COSMIC WITNESS -->
+          <div class="card fade-in">
+            <div class="card-head">
+              <div class="card-head-l"><div class="card-title">EVENTS YOU'VE WITNESSED</div></div>
+              <div class="card-title" style="color:var(--t3)">SINCE YOU WERE BORN</div>
+            </div>
+            <div class="witness stagger">
+              <div class="wit"><div class="wit-lbl"><span class="ico">🌕</span>Full moons</div><div class="wit-val" id="witMoons">0</div><div class="wit-sub">one every ~29.5 days</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">📆</span>Leap days</div><div class="wit-val" id="witLeap">0</div><div class="wit-sub">Feb 29s lived through</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">🏅</span>Olympic games</div><div class="wit-val" id="witOlympics">0</div><div class="wit-sub">summer + winter combined</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">🌗</span>Solar eclipses</div><div class="wit-val" id="witEclipses">0</div><div class="wit-sub">~2.4 worldwide / year</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">⚽</span>World Cups</div><div class="wit-val" id="witWorldCups">0</div><div class="wit-sub">FIFA, every 4 years</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">☄️</span>Halley's returns</div><div class="wit-val" id="witHalley">0</div><div class="wit-sub">comes back every 75 yrs</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">🌸</span>Seasons</div><div class="wit-val" id="witSeasons">0</div><div class="wit-sub">complete cycles</div></div>
+              <div class="wit"><div class="wit-lbl"><span class="ico">🎉</span>New Year's Eves</div><div class="wit-val" id="witNYE">0</div><div class="wit-sub">midnight rollovers</div></div>
+            </div>
+          </div>
+
+          <!-- OLDER / YOUNGER COMPARE -->
+          <div class="card fade-in">
+            <div class="card-head">
+              <div class="card-head-l"><div class="card-title">CULTURAL TIME-WARP</div></div>
+              <div class="card-title" style="color:var(--t3)">YOU vs. THE WORLD</div>
+            </div>
+            <div class="compare">
+              <div class="cmp-col">
+                <div class="cmp-head older">You're older than <span class="badge">YOUNGER THAN YOU</span></div>
+                <div id="olderList"></div>
+              </div>
+              <div class="cmp-col">
+                <div class="cmp-head younger">You're younger than <span class="badge">OLDER THAN YOU</span></div>
+                <div id="youngerList"></div>
               </div>
             </div>
           </div>
@@ -820,15 +1094,49 @@
 
   <footer>
     <div class="footer-inner">
-      <div class="footer-left">
-        <img src="/logo.png" alt="" class="enhanced-logo" style="width:22px;height:22px" aria-hidden="true"/>
-        <span>Built by <a href="https://datapad.in">Datapad</a> · 100% in-browser · zero tracking</span>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-brand-row">
+            <img src="/logo.png" alt="Datapad" class="enhanced-logo" style="width:32px;height:32px"/>
+            <span class="footer-brand-name">DATAPAD</span>
+            <span class="footer-brand-tag">TOOLKIT</span>
+          </div>
+          <p class="footer-tagline">A growing suite of free, browser-based tools for developers, analysts, and product managers. Zero sign-up. Zero tracking. Zero limits.</p>
+          <div class="footer-status"><span class="dot"></span> All systems live · v2.0</div>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">PM Tools</div>
+          <ul>
+            <li><a href="https://datapad.in/rice-calculator">RICE Calculator</a></li>
+            <li><a href="https://datapad.in/ab-test-calculator">A/B Test Calculator</a></li>
+            <li><a href="https://datapad.in/pre-post-analyzer">Pre/Post Analyzer</a></li>
+            <li><a href="https://datapad.in/age-calculator">Age Calculator <span class="new">NEW</span></a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Dev &amp; Data</div>
+          <ul>
+            <li><a href="https://datapad.in/json-studio">JSON Studio</a></li>
+            <li><a href="https://datapad.in/glimpse">Glimpse · CSV → Dashboard</a></li>
+            <li><a href="https://datapad.in/csv-merger">CSV Merger</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Datapad</div>
+          <ul>
+            <li><a href="https://datapad.in">Home</a></li>
+            <li><a href="https://datapad.in#about">About</a></li>
+            <li><a href="mailto:hello.datapad@gmail.com">Contact</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="footer-right">
-        <a href="https://datapad.in/rice-calculator">RICE</a>
-        <a href="https://datapad.in/ab-test-calculator">A/B Test</a>
-        <a href="https://datapad.in/pre-post-analyzer">Pre/Post</a>
-        <a href="https://datapad.in/glimpse">Glimpse</a>
+      <div class="footer-bottom">
+        <div class="footer-copy">© <span id="yr">2026</span> <a href="https://datapad.in">Datapad</a> · Made with ❤️ in India</div>
+        <div class="footer-meta">
+          <span><span class="check">✓</span> 100% in-browser</span>
+          <span><span class="check">✓</span> Zero tracking</span>
+          <span><span class="check">✓</span> Open &amp; free</span>
+        </div>
       </div>
     </div>
   </footer>
@@ -884,7 +1192,43 @@
 
     const PLANET_DAYS = { mercury:87.97, venus:224.7, mars:686.97, jupiter:4332.59, saturn:10759.22 };
 
-    const state = { dob:null, target:null, useCustom:false, liveTimer:null };
+    // Cultural milestones — used for "older/younger than" comparisons.
+    // Date = launch / release / first occurrence.
+    const EVENTS = [
+      // tech
+      {name:'iPhone',          emo:'📱', date:'2007-06-29'},
+      {name:'YouTube',         emo:'▶️', date:'2005-02-14'},
+      {name:'Facebook',        emo:'👤', date:'2004-02-04'},
+      {name:'Gmail',           emo:'📧', date:'2004-04-01'},
+      {name:'Wikipedia',       emo:'📚', date:'2001-01-15'},
+      {name:'Google Search',   emo:'🔎', date:'1998-09-04'},
+      {name:'Netflix streaming',emo:'🎬',date:'2007-01-16'},
+      {name:'Instagram',       emo:'📷', date:'2010-10-06'},
+      {name:'WhatsApp',        emo:'💬', date:'2009-01-01'},
+      {name:'Spotify',         emo:'🎵', date:'2008-10-07'},
+      {name:'Uber',            emo:'🚗', date:'2010-07-05'},
+      {name:'Bitcoin',         emo:'₿',  date:'2009-01-03'},
+      {name:'ChatGPT',         emo:'🤖', date:'2022-11-30'},
+      {name:'TikTok',          emo:'🎶', date:'2016-09-26'},
+      {name:'Tesla Model S',   emo:'⚡', date:'2012-06-22'},
+      {name:'SpaceX 1st orbit',emo:'🚀', date:'2008-09-28'},
+      // cultural / historical
+      {name:'Euro currency',   emo:'💶', date:'2002-01-01'},
+      {name:'9/11',            emo:'🕯️', date:'2001-09-11'},
+      {name:'Fall of Berlin Wall',emo:'🧱',date:'1989-11-09'},
+      {name:'Moon landing',    emo:'🌙', date:'1969-07-20'},
+      {name:'World Wide Web',  emo:'🌐', date:'1991-08-06'},
+      {name:'COVID-19 pandemic',emo:'🦠',date:'2020-03-11'},
+      {name:'India\'s independence',emo:'🇮🇳',date:'1947-08-15'},
+      {name:'Apollo 11',       emo:'👨‍🚀',date:'1969-07-16'},
+      // pop culture
+      {name:'Harry Potter book 1',emo:'⚡',date:'1997-06-26'},
+      {name:'first Marvel film',emo:'🦸', date:'2008-05-02'},
+      {name:'Star Wars',       emo:'🌌', date:'1977-05-25'},
+      {name:'Pokémon',         emo:'⚡',  date:'1996-02-27'},
+    ];
+
+    const state = { dob:null, target:null, useCustom:false, liveTimer:null, baseline:80, lastTicks:{}, bdayShown:false };
 
     // ---------- helpers ----------
     function daysInMonth(y, mZero){ return new Date(y, mZero+1, 0).getDate(); }
@@ -897,6 +1241,23 @@
       const s = String(dt.getSeconds()).padStart(2,'0');
       return `${h}:${m}:${s}`;
     }
+    function smoothScrollTo(targetY, duration){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        window.scrollTo(0, targetY); return;
+      }
+      const startY = window.pageYOffset;
+      const dist = targetY - startY;
+      if(Math.abs(dist) < 8) return;
+      const t0 = performance.now();
+      const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; // easeInOutQuad — gentle
+      function step(now){
+        const p = Math.min(1, (now - t0) / duration);
+        window.scrollTo(0, startY + dist * ease(p));
+        if(p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
     function parseTime(v){
       if(!v) return [0,0];
       const m = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/.exec(v.trim());
@@ -952,6 +1313,112 @@
       return ZODIAC[0];
     }
     function getCnZodiac(year){ return { ...CN_ZODIAC[((year - 4) % 12 + 12) % 12], year }; }
+
+    function nthSuffix(n){
+      const v = n % 100;
+      if(v >= 11 && v <= 13) return 'th';
+      switch(n % 10){ case 1:return 'st'; case 2:return 'nd'; case 3:return 'rd'; default:return 'th'; }
+    }
+
+    function isLeap(y){ return (y%4===0 && y%100!==0) || y%400===0; }
+    function countLeapDays(dob, target){
+      let count = 0;
+      for(let y = dob.getFullYear(); y <= target.getFullYear(); y++){
+        if(!isLeap(y)) continue;
+        const feb29 = new Date(y, 1, 29);
+        if(feb29.getTime() >= dob.getTime() && feb29.getTime() <= target.getTime()) count++;
+      }
+      return count;
+    }
+    function countEventEvery(dob, target, anchorYear, intervalYears){
+      // walk back to first occurrence at or before dob, then step forward
+      let y = anchorYear;
+      while(new Date(y,5,1).getTime() > dob.getTime()) y -= intervalYears;
+      while(new Date(y,5,1).getTime() < dob.getTime()) y += intervalYears;
+      let count = 0;
+      while(new Date(y,5,1).getTime() <= target.getTime()){
+        count++;
+        y += intervalYears;
+      }
+      return count;
+    }
+    function countOlympics(dob, target){
+      // Summer (every 4 yrs anchored at 2024) + Winter (every 4 yrs anchored at 2022)
+      // Note: 2020 summer was held 2021; ignore that nuance.
+      const summer = countEventEvery(dob, target, 2024, 4);
+      const winter = countEventEvery(dob, target, 2022, 4);
+      return summer + winter;
+    }
+    function countWorldCups(dob, target){
+      return countEventEvery(dob, target, 2022, 4);
+    }
+    function countNYEs(dob, target){
+      let count = 0;
+      for(let y = dob.getFullYear(); y <= target.getFullYear(); y++){
+        const nye = new Date(y, 11, 31, 23, 59);
+        if(nye.getTime() >= dob.getTime() && nye.getTime() <= target.getTime()) count++;
+      }
+      return count;
+    }
+
+    function renderCompare(dob){
+      const items = EVENTS.map(e => {
+        const d = new Date(e.date + 'T00:00:00');
+        return { ...e, d, diff: d.getTime() - dob.getTime() };
+      });
+      const older = items.filter(i => i.diff > 0).sort((a,b)=>a.diff - b.diff).slice(0, 8);   // things born AFTER user → user is older
+      const younger = items.filter(i => i.diff < 0).sort((a,b)=>b.diff - a.diff).slice(0, 8); // things born BEFORE user → user is younger
+
+      const fmtDelta = ms => {
+        const days = Math.abs(ms)/86400000;
+        const years = days/365.25;
+        if(years >= 1) return `${years.toFixed(years>=10?0:1)} yrs`;
+        if(days >= 30) return `${Math.round(days/30.44)} mo`;
+        return `${Math.round(days)} d`;
+      };
+      const row = i => `<div class="cmp-row"><div class="cmp-name"><span class="emo">${i.emo}</span>${i.name}</div><div class="cmp-when">${fmtDelta(i.diff)}</div></div>`;
+      $('olderList').innerHTML  = older.length  ? older.map(row).join('')   : `<div class="cmp-row"><div class="cmp-name" style="color:var(--t3)">— none yet —</div></div>`;
+      $('youngerList').innerHTML= younger.length? younger.map(row).join(''): `<div class="cmp-row"><div class="cmp-name" style="color:var(--t3)">— none yet —</div></div>`;
+    }
+
+    function setTicking(id, num, formatted){
+      const el = $(id);
+      const prev = state.lastTicks[id];
+      el.textContent = formatted;
+      if(prev !== undefined && num !== prev){
+        el.classList.remove('tick-up');
+        // force reflow to restart animation
+        void el.offsetWidth;
+        el.classList.add('tick-up');
+      }
+      state.lastTicks[id] = num;
+    }
+
+    let confettiHost = null;
+    function fireConfetti(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if(!confettiHost){
+        confettiHost = document.createElement('div');
+        confettiHost.className = 'confetti-host';
+        document.body.appendChild(confettiHost);
+      } else { confettiHost.innerHTML = ''; }
+      const colors = ['#00ff88','#00d4ff','#c084fc','#ff9f43','#ec4899','#fde047'];
+      const N = 90;
+      for(let i = 0; i < N; i++){
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        const left = Math.random()*100;
+        c.style.left = left + '%';
+        c.style.background = colors[i % colors.length];
+        c.style.setProperty('--dx', ((Math.random()-0.5)*220) + 'px');
+        c.style.animationDuration = (2.4 + Math.random()*1.6) + 's';
+        c.style.animationDelay = (Math.random()*0.4) + 's';
+        c.style.width = (6 + Math.random()*6) + 'px';
+        c.style.height = (10 + Math.random()*8) + 'px';
+        confettiHost.appendChild(c);
+      }
+      setTimeout(()=>{ if(confettiHost) confettiHost.innerHTML = ''; }, 4500);
+    }
     function getGeneration(year){
       for(const g of GENERATIONS){ if(year >= g.from && year <= g.to) return g; }
       return { name:'-', from:year, to:year };
@@ -1142,31 +1609,85 @@
       $('generation').textContent = gen.name;
       $('generationRange').textContent = `${gen.from} – ${gen.to === 2099 ? 'present' : gen.to}`;
 
-      // life progress
+      // life progress (with selectable baseline)
+      const base = state.baseline;
       const lifeYears = a.totalMs / (365.25*86400000);
-      const pct = Math.min(100, (lifeYears/80)*100);
+      const pct = Math.min(100, (lifeYears/base)*100);
       $('lifeYears').textContent = fmt1(lifeYears);
+      $('lifeBaseLbl').textContent = String(base);
       $('lifePct').textContent = `${pct.toFixed(1)}%`;
       $('progressFill').style.width = pct + '%';
-      const daysLeft = Math.max(0, Math.floor(80*365.25 - a.totalDays));
-      $('lifeDaysLeft').textContent = `${fmt(daysLeft)} days remaining`;
-      $('lifeRemaining').textContent = pct >= 100 ? 'BEYOND AVERAGE 🌟' : `${(100-pct).toFixed(1)}% LEFT`;
+      $('lifeHeadLbl').textContent = `LIFE PROGRESS · ${base}-YEAR BASELINE`;
+      const daysLeft = Math.max(0, Math.floor(base*365.25 - a.totalDays));
+      $('lifeDaysLeft').textContent = `${fmt(daysLeft)} days left`;
+      $('lifeRemaining').textContent = pct >= 100 ? 'BEYOND BASELINE 🌟' : `${(100-pct).toFixed(1)}% LEFT`;
+      const baseNotes = {
+        55:'Low-income / conflict-affected regions today. Also the global average circa 1950.',
+        60:'Pre-modern medicine baseline. Roughly the world average in the early 1970s.',
+        65:'Standard retirement age in most countries — a useful "active years" reference.',
+        70:'Lower-end global life expectancy (~70 yrs). Common in lower-income regions.',
+        75:'World average life expectancy (~73 yrs, WHO 2023). Rounded to 75.',
+        80:'Global high-income average (~80 yrs, WHO). Varies by country, gender, lifestyle.',
+        85:'Developed-world average (Japan, Switzerland, Singapore cluster).',
+        90:'Long-lived cohorts — non-smokers, blue-zone residents, healthy lifestyle.',
+        100:'Centenarian baseline. ~1 in 5,000 people in developed nations reaches 100.'
+      };
+      $('lifeNote').textContent = baseNotes[base] || baseNotes[80];
 
       const nb = nextBirthday(state.dob, target);
       $('bdayInline').textContent = `${fmtDateLong(nb.date)} (${nb.days}d)`;
 
-      // body / curious
-      const heartbeats = Math.floor(a.totalMin * 80);
-      const breaths = Math.floor(a.totalMin * 16);
-      const wakingMin = Math.floor(a.totalMin * (2/3));
-      const blinks = Math.floor(wakingMin * 15);
-      const sleepDays = Math.floor(a.totalDays / 3);
-      const earthOrbits = (a.totalDays / 365.25);
-      $('heartbeats').textContent = fmt(heartbeats);
-      $('breaths').textContent = fmt(breaths);
-      $('blinks').textContent = fmt(blinks);
+      // BIRTHDAY BANNER — show when next birthday is today
+      const isBday = (target.getMonth() === state.dob.getMonth()
+        && target.getDate() === state.dob.getDate()
+        && !state.useCustom);
+      const banner = $('bdayBanner');
+      if(isBday){
+        banner.style.display = '';
+        $('bdayTitle').textContent = a.years === 0
+          ? `Welcome to Earth! 🌍`
+          : `Happy ${a.years}${nthSuffix(a.years)} birthday!`;
+        $('bdaySub').textContent = a.years === 0
+          ? `Day one of your first orbit around the sun.`
+          : `${a.years} complete orbits around the sun · ${fmt(a.totalDays)} days alive today.`;
+        if(!state.bdayShown){ fireConfetti(); state.bdayShown = true; }
+      } else {
+        banner.style.display = 'none';
+        state.bdayShown = false;
+      }
+
+      // body / curious — with tick animation on jump
+      const heartbeats = Math.floor(a.totalMin * 80) + Math.floor((a.totalSec % 60) * (80/60));
+      const breaths    = Math.floor(a.totalMin * 16) + Math.floor((a.totalSec % 60) * (16/60));
+      const wakingSec  = Math.floor(a.totalSec * (2/3));
+      const blinks     = Math.floor(wakingSec * (15/60));
+      const sleepDays  = Math.floor(a.totalDays / 3);
+      const earthOrbits= a.totalDays / 365.25;
+      setTicking('heartbeats', heartbeats, fmt(heartbeats));
+      setTicking('breaths', breaths, fmt(breaths));
+      setTicking('blinks', blinks, fmt(blinks));
       $('sleepDays').textContent = `${fmt(sleepDays)} days`;
       $('earthOrbits').textContent = fmt1(earthOrbits);
+
+      // WITNESSES
+      const moons = Math.floor(a.totalDays / 29.5306);
+      const leap  = countLeapDays(state.dob, target);
+      const olympics = countOlympics(state.dob, target);
+      const eclipses = Math.floor((a.totalDays/365.25) * 2.4);
+      const worldCups = countWorldCups(state.dob, target);
+      const halley = (a.totalDays/365.25/75).toFixed(2);
+      const seasons = Math.floor(a.totalDays / 91.31);
+      const nyes = countNYEs(state.dob, target);
+      $('witMoons').textContent     = fmt(moons);
+      $('witLeap').textContent      = String(leap);
+      $('witOlympics').textContent  = String(olympics);
+      $('witEclipses').textContent  = `~${fmt(eclipses)}`;
+      $('witWorldCups').textContent = String(worldCups);
+      $('witHalley').innerHTML      = `${halley}<span class="unit">×</span>`;
+      $('witSeasons').textContent   = fmt(seasons);
+      $('witNYE').textContent       = String(nyes);
+
+      renderCompare(state.dob);
 
       // planets
       $('ageMercury').textContent = `${fmt1(a.totalDays / PLANET_DAYS.mercury)} years`;
@@ -1214,6 +1735,7 @@
 
     function reset(){
       state.dob = null; state.target = null;
+      state.lastTicks = {}; state.bdayShown = false;
       $('dobDay').value = ''; $('dobMonth').value = ''; $('dobYear').value = '';
       $('dobTime').value = '00:00';
       $('tgtDay').value = ''; $('tgtMonth').value = ''; $('tgtYear').value = '';
@@ -1221,6 +1743,8 @@
       clearError();
       setEmpty(true);
       if(state.liveTimer){ clearInterval(state.liveTimer); state.liveTimer = null; }
+      const banner = $('bdayBanner'); if(banner) banner.style.display = 'none';
+      if(confettiHost) confettiHost.innerHTML = '';
       history.replaceState(null, '', location.pathname);
       $('dobDay').focus();
     }
@@ -1288,13 +1812,32 @@
       });
       timeEl.addEventListener('blur', ()=>{ if(!timeEl.value) timeEl.value = '00:00'; });
 
-      $('ageForm').addEventListener('submit', (e)=>{ e.preventDefault(); if(compute()){ render(); startLive(); }});
+      $('ageForm').addEventListener('submit', (e)=>{
+        e.preventDefault();
+        if(compute()){
+          render(); startLive();
+          if(window.matchMedia('(max-width: 1024px)').matches){
+            const tgt = $('resultsBox');
+            if(tgt && tgt.style.display !== 'none'){
+              const top = tgt.getBoundingClientRect().top + window.pageYOffset - 72;
+              smoothScrollTo(top, 900);
+            }
+          }
+        }
+      });
       $('customToggle').addEventListener('click', toggleCustom);
       $('customToggle').addEventListener('keydown', (e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggleCustom(); }});
       $('copyBtn').addEventListener('click', copyResult);
       $('copyBtn2').addEventListener('click', copyResult);
       $('shareBtn').addEventListener('click', shareLink);
       $('resetBtn').addEventListener('click', reset);
+
+      $('baselineSel').addEventListener('change', (e)=>{
+        state.baseline = parseInt(e.target.value, 10) || 80;
+        if(state.dob) render();
+      });
+
+      const yr = $('yr'); if(yr) yr.textContent = String(new Date().getFullYear());
 
       tryLoadFromHash();
       if(!state.dob) $('dobDay').focus();
