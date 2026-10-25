@@ -804,6 +804,38 @@
     .same small{display:block;color:var(--t2);font-size:11px;margin-top:6px}
 
 
+    /* ── EXPLAIN PANEL ── */
+    .dc-ex-btn{color:var(--acc);border-color:rgba(var(--acc-rgb),.25)}
+    .dc-ex-btn:hover{background:rgba(var(--acc-rgb),.07);border-color:rgba(var(--acc-rgb),.45);color:var(--acc)}
+    .dc-explain{margin:0 0 12px;border:1px solid rgba(var(--acc-rgb),.22);border-radius:12px;overflow:hidden;
+      background:linear-gradient(145deg,rgba(var(--acc-rgb),.06),rgba(var(--pri-rgb),.03) 60%,transparent);animation:fadeUp .3s var(--ease) both}
+    .dc-explain[hidden]{display:none}
+    .dc-ex-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(var(--acc-rgb),.12)}
+    .dc-ex-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--acc)}
+    .dc-ex-act{display:flex;gap:2px}
+    .dc-ex-act button{font-family:var(--mono);font-size:10px;letter-spacing:.8px;padding:4px 8px;border-radius:6px;border:0;background:none;color:var(--t2);cursor:pointer}
+    .dc-ex-act button:hover{color:var(--acc);background:rgba(var(--acc-rgb),.08)}
+    .dc-ex-act button[disabled]{opacity:.4;pointer-events:none}
+    .dc-ex-body{padding:14px 16px;max-height:240px;overflow:auto;font-size:14px;line-height:1.7;color:var(--t1);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+    .dc-ex-foot{padding:6px 14px 8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.3px;color:var(--t3)}
+    .dc-ex-body code{font-family:var(--code);font-size:12px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--t0)}
+    .dc-ex-body .hl{font-size:15px;font-weight:600;color:var(--t0);margin-bottom:8px}
+    .dc-ex-body ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+    .dc-ex-body li{display:flex;gap:9px;align-items:baseline;opacity:0;transform:translateY(4px);animation:fadeUp .35s var(--ease) forwards}
+    .dc-ex-body li::before{content:'';flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--acc);transform:translateY(-2px)}
+    .dc-ex-body .more{color:var(--t2);font-size:13px}
+    .xref{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:5px;font-family:var(--mono);font-size:10px;font-weight:700;background:rgba(var(--acc-rgb),.16);color:var(--acc);border:0;cursor:pointer;vertical-align:baseline}
+    .xref:hover{background:var(--acc);color:var(--bg0)}
+    .caret{display:inline-block;width:7px;height:15px;margin-left:2px;vertical-align:text-bottom;background:var(--acc);animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:0}}
+    .ex-load{display:flex;flex-direction:column;gap:10px}
+    .ex-status{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;color:var(--acc);letter-spacing:.3px}
+    .ex-spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(var(--acc-rgb),.25);border-top-color:var(--acc);animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ex-skel{height:11px;border-radius:6px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(var(--acc-rgb),.14) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    @media (prefers-reduced-motion:reduce){.ex-spin,.ex-skel,.caret{animation:none}.dc-ex-body li{opacity:1;transform:none;animation:none}}
+
     /* ── NESTED TABLE VIEW ── */
     .ntbl{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:12px;width:100%;
       border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden;background:var(--bg2)}
@@ -1103,6 +1135,7 @@
           <button class="btn b-sec only-edit" onclick="dcSample()">Sample</button>
           <button class="btn b-sec only-diff" id="prev-btn" onclick="dcGoto(-1)" title="Previous change">↑</button>
           <button class="btn b-sec only-diff" id="next-btn" onclick="dcGoto(1)" title="Next change">↓</button>
+          <button class="btn b-sec only-diff dc-ex-btn" id="dc-ex-btn" onclick="dcExplain()" title="Summarize what changed in plain English"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9.9-2.6z"/></svg> Explain</button>
           <span class="dc-status only-diff" id="dc-status"></span>
           <button class="btn b-del tb-push" onclick="dcClearAll()">Clear</button>
         </div>
@@ -1112,6 +1145,19 @@
           <label title="When both sides are valid JSON, pretty-print with sorted keys first"><input type="checkbox" id="o-json" onchange="dcOpt()"> Format JSON</label>
           <label><input type="checkbox" id="o-wrap" checked onchange="dcOpt()"> Wrap lines</label>
           <label><input type="checkbox" id="o-hide" onchange="dcOpt()"> Hide unchanged</label>
+        </div>
+        <div class="dc-explain" id="dc-explain" hidden>
+          <div class="sr-only" id="dc-ex-sr" role="status" aria-live="polite"></div>
+          <div class="dc-ex-head">
+            <div class="dc-ex-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9.9-2.6z"/></svg> Explain</div>
+            <div class="dc-ex-act">
+              <button id="dc-ex-regen" onclick="dcExplain()" title="Run again">↻ Regenerate</button>
+              <button id="dc-ex-copy" onclick="dcExplainCopy()">Copy</button>
+              <button onclick="dcExplainClose()" aria-label="Close explanation">✕</button>
+            </div>
+          </div>
+          <div class="dc-ex-body" id="dc-ex-body"></div>
+          <div class="dc-ex-foot">Summary built in your browser from the diff - no AI service, nothing leaves this page.</div>
         </div>
         <div class="panes dc-panes" id="dc-panes">
           <div class="pane" id="pane-l">
@@ -2248,6 +2294,7 @@ function compare(){
   var o=opts(),l=$('in-l').value,r=$('in-r').value;
   if(!l&&!r){toast('Paste something to compare');return}
   if(o.js&&l&&r){var p=maybeJson(l,r);l=p[0];r=p[1]}
+  exClose();
   state.L=lines(l);state.R=lines(r);
   if(state.L.length+state.R.length>60000)toast('Large input - this may take a moment');
   state.rows=buildRows(state.L,state.R,o);
@@ -2257,15 +2304,16 @@ function compare(){
   save();
 }
 function showEdit(){
+  exClose();
   state.mode='edit';$('tool-diff').classList.remove('mode-diff');fit();save();
 }
 function optChanged(){
   if(state.mode==='diff')compare();else save();
 }
-function gotoChange(dir){
+function gotoChange(dir,idx){
   var b=state.blocks;if(!b.length)return;
   if(state.cur>=0)b[state.cur].classList.remove('cur');
-  state.cur=(state.cur+dir+b.length)%b.length;
+  state.cur=typeof idx==='number'?Math.min(idx,b.length-1):(state.cur+dir+b.length)%b.length;
   var el=b[state.cur];el.classList.add('cur');
   var sc=$('dscroll');sc.scrollTo({top:el.offsetTop-sc.offsetTop-40,behavior:'smooth'});
 }
@@ -2348,7 +2396,245 @@ document.addEventListener('keydown',function(e){
   }
 });
 window.addEventListener('resize',fit);
+/* ── Explain: rule-based plain-English summary (no AI service, runs locally) ── */
+var exTimers=[],exPlain='';
+function exCode(x){return '<code>'+esc(x)+'</code>'}
+function exPlural(n,w){return n+' '+w+(n===1?'':'s')}
+function exType(v){return v===null?'null':Array.isArray(v)?'array':typeof v}
+function exHas(o,k){return Object.prototype.hasOwnProperty.call(o,k)}
+function exEq(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+function exLev(a,b){
+  var m=a.length,n=b.length,d=[],i,j;
+  for(i=0;i<=m;i++){d[i]=[i]}
+  for(j=1;j<=n;j++)d[0][j]=j;
+  for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[m][n];
+}
+function exSim(a,b){var mx=Math.max(a.length,b.length)||1;return 1-exLev(a.toLowerCase(),b.toLowerCase())/mx}
+function exVal(v){
+  var t=exType(v);
+  if(t==='string')return '"'+(v.length>42?v.slice(0,40)+'…':v)+'"';
+  if(t==='object')return 'an object with '+exPlural(Object.keys(v).length,'key');
+  if(t==='array')return 'an array of '+exPlural(v.length,'item');
+  return String(v);
+}
+function exWalk(a,b,path,out){
+  var ta=exType(a),tb=exType(b);
+  if(ta!==tb){out.push({k:'type',path:path,a:a,b:b});return}
+  if(ta==='object'){
+    var rem=Object.keys(a).filter(function(k){return !exHas(b,k)});
+    var add=Object.keys(b).filter(function(k){return !exHas(a,k)});
+    var sub=function(k){return path?path+'.'+k:k};
+    if(rem.length*add.length<=2500)rem.slice().forEach(function(r){
+      var best=-1,bs=0;
+      add.forEach(function(ad,j){
+        var same=exEq(a[r],b[ad]),sm=exSim(r,ad),prim=exType(a[r])!=='object'&&exType(a[r])!=='array';
+        var score=same?(prim?(sm>=.5?1+sm:0):1+sm):(sm>=.6&&exType(a[r])===exType(b[ad])?sm:0);
+        if(score>bs){bs=score;best=j}
+      });
+      if(best>-1){
+        var to=add[best];
+        out.push({k:'rename',path:path,from:r,to:to,same:exEq(a[r],b[to])});
+        if(!exEq(a[r],b[to]))exWalk(a[r],b[to],sub(to),out);
+        rem.splice(rem.indexOf(r),1);add.splice(best,1);
+      }
+    });
+    rem.forEach(function(k){out.push({k:'remove',path:sub(k),v:a[k]})});
+    add.forEach(function(k){out.push({k:'add',path:sub(k),v:b[k]})});
+    Object.keys(a).forEach(function(k){if(exHas(b,k))exWalk(a[k],b[k],sub(k),out)});
+  }else if(ta==='array'){
+    if(a.length!==b.length)out.push({k:'len',path:path,from:a.length,to:b.length});
+    for(var i=0;i<Math.min(a.length,b.length);i++)exWalk(a[i],b[i],path+'['+i+']',out);
+  }else if(a!==b)out.push({k:'change',path:path,a:a,b:b});
+}
+/* line ranges of every JSON path in a text, so a change can be linked to the diff block that contains it */
+function exScan(t){
+  var map={},i=0,n=t.length,starts=[0],q;
+  for(q=0;q<n;q++)if(t.charCodeAt(q)===10)starts.push(q+1);
+  function ln(pos){var lo=0,hi=starts.length-1;while(lo<hi){var mid=(lo+hi+1)>>1;if(starts[mid]<=pos)lo=mid;else hi=mid-1}return lo}
+  function ws(){while(i<n&&t.charCodeAt(i)<=32)i++}
+  function str(){var s0=i;i++;while(i<n&&t[i]!=='"'){if(t[i]==='\\')i++;i++}i++;return t.slice(s0,i)}
+  function val(path){
+    ws();var start=ln(i),c=t[i];
+    if(c==='{'){
+      i++;ws();
+      if(t[i]==='}')i++;
+      else for(;;){ws();var k=JSON.parse(str());ws();i++;val(path?path+'.'+k:k);ws();if(t[i]===','){i++;continue}i++;break}
+    }else if(c==='['){
+      i++;ws();
+      if(t[i]===']')i++;
+      else{var idx=0;for(;;){val(path+'['+(idx++)+']');ws();if(t[i]===','){i++;continue}i++;break}}
+    }else if(c==='"')str();
+    else while(i<n&&!/[,\]}\s]/.test(t[i]))i++;
+    map[path]=[start,ln(Math.max(i-1,0))];
+  }
+  try{val('')}catch(e){/* partial map is fine */}
+  return map;
+}
+function exRef(e,mA,mB,groups){
+  var dot=function(p,k){return p?p+'.'+k:k};
+  var pl=e.k==='rename'?dot(e.path,e.from):e.path,pr=e.k==='rename'?dot(e.path,e.to):e.path;
+  var rl=e.k==='add'?null:mA[pl],rr=e.k==='remove'?null:mB[pr];
+  if(e.k==='rename'){rl=rl&&[rl[0],rl[0]];rr=rr&&[rr[0],rr[0]]}
+  for(var i=0;i<groups.length;i++)for(var j=0;j<groups[i].length;j++){
+    var r=groups[i][j];
+    if((rl&&r.l>=rl[0]&&r.l<=rl[1])||(rr&&r.r>=rr[0]&&r.r<=rr[1]))return i;
+  }
+  return -1;
+}
+function exGroups(){
+  var g=[],cur=null;
+  state.rows.forEach(function(r){
+    if(r.k==='eq'){cur=null;return}
+    if(!cur){cur=[];g.push(cur)}
+    cur.push(r);
+  });
+  return g;
+}
+function exJson(a,b,mA,mB){
+  var out=[];exWalk(a,b,'',out);
+  var groups=exGroups(),bullets=[];
+  var P=function(p){return p?exCode(p):'the root value'};
+  var order={rename:0,change:1,type:2,add:3,remove:4,len:5};
+  out.sort(function(x,y){return order[x.k]-order[y.k]});
+  out.forEach(function(e){
+    var h;
+    if(e.k==='rename'){
+      h='The '+exCode(e.from)+' field'+(e.path?' in '+exCode(e.path):'')+' was renamed to '+exCode(e.to)+(e.same?'.':', and its value changed too.');
+    }else if(e.k==='change'){
+      h=P(e.path)+' changed from '+exCode(exVal(e.a))+' to '+exCode(exVal(e.b))+'.';
+    }else if(e.k==='type'){
+      h=P(e.path)+' changed type, from '+exType(e.a)+' ('+exCode(exVal(e.a))+') to '+exType(e.b)+' ('+exCode(exVal(e.b))+').';
+    }else if(e.k==='add'){
+      h='A new field '+exCode(e.path)+' was added with the value '+exCode(exVal(e.v))+'.';
+    }else if(e.k==='remove'){
+      h='The field '+exCode(e.path)+' (was '+exCode(exVal(e.v))+') was removed.';
+    }else{
+      h='The list '+P(e.path)+' went from '+exPlural(e.from,'item')+' to '+exPlural(e.to,'item')+'.';
+    }
+    bullets.push({html:h,ref:exRef(e,mA,mB,groups)});
+  });
+  var c={};out.forEach(function(e){c[e.k]=(c[e.k]||0)+1});
+  var parts=[];
+  if(c.rename)parts.push(exPlural(c.rename,'rename'));
+  var ch=(c.change||0)+(c.type||0);if(ch)parts.push(exPlural(ch,'changed value'));
+  if(c.add)parts.push(exPlural(c.add,'added field'));
+  if(c.remove)parts.push(exPlural(c.remove,'removed field'));
+  if(c.len)parts.push(exPlural(c.len,'list length change'));
+  return {head:'Both sides are valid JSON. '+(out.length?'Structurally: '+parts.join(', ')+'.':'They are structurally identical - only formatting or key order differs.'),bullets:bullets};
+}
+function exText(){
+  var groups=exGroups(),bullets=[],rem=0,add=0;
+  state.rows.forEach(function(r){if(r.l>=0&&r.k!=='eq')rem++;if(r.r>=0&&r.k!=='eq')add++});
+  var eq=state.rows.filter(function(r){return r.k==='eq'}).length;
+  var norm=function(t){return t.replace(/\s+/g,' ').trim()};
+  var remMap={},addMap={},moved=0;
+  state.rows.forEach(function(r){
+    if(r.k==='eq')return;
+    if(r.k==='chg'&&norm(state.L[r.l])===norm(state.R[r.r]))return; // same line, only re-indented
+    if(r.l>=0){var k1=norm(state.L[r.l]);if(k1.length>3)remMap[k1]=(remMap[k1]||0)+1}
+    if(r.r>=0){var k2=norm(state.R[r.r]);if(k2.length>3)addMap[k2]=(addMap[k2]||0)+1}
+  });
+  Object.keys(remMap).forEach(function(k){if(addMap[k])moved+=Math.min(remMap[k],addMap[k])});
+  groups.forEach(function(g,i){
+    var dels=g.filter(function(r){return r.l>=0}),ins=g.filter(function(r){return r.r>=0});
+    var first=dels[0]?dels[0].l+1:ins[0].r+1;
+    var h;
+    var prev=function(t){t=t.trim();return exCode(t.length>48?t.slice(0,46)+'…':t)};
+    if(!dels.length){
+      h=exPlural(ins.length,'line')+' added '+(ins[0].r===0?'at the top':'after line '+ins[0].r)+': '+prev(state.R[ins[0].r])+(ins.length>1?' …':'')+'.';
+    }else if(!ins.length){
+      var a=dels[0].l+1,b=dels[dels.length-1].l+1;
+      h=exPlural(dels.length,'line')+' removed ('+(a===b?'line '+a:'lines '+a+'–'+b)+'): '+prev(state.L[dels[0].l])+(dels.length>1?' …':'')+'.';
+    }else{
+      var pairs=g.filter(function(r){return r.k==='chg'});
+      var ws=pairs.length&&pairs.every(function(r){return norm(state.L[r.l])===norm(state.R[r.r])});
+      var cs=pairs.length&&pairs.every(function(r){return state.L[r.l].toLowerCase()===state.R[r.r].toLowerCase()});
+      if(ws&&dels.length===ins.length)h=exPlural(pairs.length,'line')+' around line '+first+' differ only in whitespace or indentation.';
+      else if(cs&&dels.length===ins.length)h=exPlural(pairs.length,'line')+' around line '+first+' differ only in letter case.';
+      else if(dels.length===1&&ins.length===1){
+        var L1=state.L[dels[0].l],R1=state.R[ins[0].r],p=intra(L1,R1);
+        if(p){
+          var rm=p.a.filter(function(x){return x.h}).map(function(x){return x.t}).join('').trim();
+          var ad=p.b.filter(function(x){return x.h}).map(function(x){return x.t}).join('').trim();
+          if(rm&&ad)h='Line '+first+': '+exCode(rm)+' was replaced with '+exCode(ad)+'.';
+          else if(ad)h='Line '+first+': '+exCode(ad)+' was inserted.';
+          else h='Line '+first+': '+exCode(rm)+' was deleted.';
+        }else h='Line '+first+': '+prev(L1)+' was replaced with '+prev(R1)+'.';
+      }else{
+        h=exPlural(dels.length,'line')+' (from line '+first+') were replaced by '+exPlural(ins.length,'new line')+'.';
+      }
+    }
+    bullets.push({html:h,ref:i});
+  });
+  var pct=Math.round(eq/Math.max(state.rows.length,1)*100);
+  var head=(rem?exPlural(rem,'line')+' removed':'')+(rem&&add?' and ':'')+(add?exPlural(add,'line')+' added':'')+' across '+exPlural(groups.length,'change')+'; '+pct+'% of the lines are unchanged.';
+  if(moved>1)bullets.push({html:'About '+exPlural(moved,'line')+' look like they were moved rather than rewritten.',ref:-1});
+  return {head:head.charAt(0).toUpperCase()+head.slice(1),bullets:bullets};
+}
+function exBuild(){
+  if(!state.rows.some(function(r){return r.k!=='eq'}))return {head:'The two texts are identical - there is nothing to explain.',bullets:[]};
+  var o=opts(),a,b;
+  // structural JSON explanation only when it matches what the diff shows (no ignore-case / ignore-whitespace)
+  if(!o.ws&&!o.cs&&state.L.length&&state.R.length){
+    var tl=state.L.join('\n'),tr=state.R.join('\n');
+    try{a=JSON.parse(tl);b=JSON.parse(tr)}catch(e){a=b=undefined}
+    if(a!==undefined&&((a!==null&&typeof a==='object')||(b!==null&&typeof b==='object')))return exJson(a,b,exScan(tl),exScan(tr));
+  }
+  return exText();
+}
+function exClear(){exTimers.forEach(clearTimeout);exTimers=[]}
+function exLater(fn,ms){exTimers.push(setTimeout(fn,ms))}
+function exRun(){
+  if(state.mode!=='diff')return;
+  exClear();
+  var panel=$('dc-explain'),body=$('dc-ex-body'),reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  panel.hidden=false;
+  $('dc-ex-sr').textContent='';
+  $('dc-ex-regen').disabled=$('dc-ex-copy').disabled=true;
+  var steps=['Reading both versions…','Comparing structure…','Finding what changed…','Writing the summary…'];
+  body.innerHTML='<div class="ex-load"><div class="ex-status"><span class="ex-spin"></span><span id="ex-step">'+steps[0]+'</span></div><div class="ex-skel" style="width:92%"></div><div class="ex-skel" style="width:78%"></div><div class="ex-skel" style="width:60%"></div></div>';
+  fit();
+  var res;
+  try{res=exBuild()}catch(e){res={head:'Could not summarize this diff.',bullets:[]}}
+  var total=reduce?0:1500;
+  steps.forEach(function(t,i){if(i)exLater(function(){var el=$('ex-step');if(el)el.textContent=t},total*i/steps.length)});
+  exLater(function(){exShow(res,reduce)},total);
+}
+function exShow(res,reduce){
+  var body=$('dc-ex-body');
+  body.innerHTML='<div class="hl" id="ex-hl"></div><ul id="ex-ul"></ul>';
+  var hl=$('ex-hl'),ul=$('ex-ul');
+  var maxB=8,shown=res.bullets.slice(0,maxB),extra=res.bullets.length-shown.length;
+  var lis=shown.map(function(b){
+    return '<li style="animation-delay:%Dms"><span class="lt">'+b.html+'</span>'+(b.ref>=0?'<button class="xref" onclick="dcGoto(0,'+b.ref+')" title="Jump to this change">'+(b.ref+1)+'</button>':'')+'</li>';
+  });
+  function finish(){
+    hl.textContent=res.head;
+    ul.innerHTML=lis.map(function(l,i){return l.replace('%D',reduce?0:i*130)}).join('')+(extra>0?'<li class="more" style="animation-delay:'+(reduce?0:shown.length*130)+'ms">…and '+exPlural(extra,'more change')+'. Use the ↑ ↓ buttons to step through them.</li>':'');
+    $('dc-ex-regen').disabled=$('dc-ex-copy').disabled=false;
+    $('dc-ex-sr').textContent=res.head+' '+shown.map(function(b){var d=document.createElement('div');d.innerHTML=b.html;return d.textContent}).join(' ');
+    exPlain=res.head+'\n'+shown.map(function(b){var d=document.createElement('div');d.innerHTML=b.html;return '- '+d.textContent}).join('\n')+(extra>0?'\n- …and '+extra+' more':'');
+    fit();
+  }
+  if(reduce){finish();return}
+  // stream the headline word by word, then reveal the bullets
+  var words=res.head.split(' '),i=0;
+  hl.innerHTML='<span id="ex-typed"></span><span class="caret"></span>';
+  (function tick(){
+    $('ex-typed').textContent=words.slice(0,++i).join(' ');
+    fit();
+    if(i<words.length)exLater(tick,28+Math.random()*30);
+    else exLater(function(){hl.querySelector('.caret')&&hl.querySelector('.caret').remove();finish()},120);
+  })();
+}
+function exClose(){exClear();$('dc-explain').hidden=true;fit()}
+function exCopy(){
+  if(!exPlain)return;
+  navigator.clipboard.writeText(exPlain).then(function(){toast('Summary copied')},function(){toast('Copy failed - allow clipboard access')});
+}
 window.dcFit=fit;
+window.dcExplain=exRun;window.dcExplainClose=exClose;window.dcExplainCopy=exCopy;
 window.dcCompare=compare;window.dcShowEdit=showEdit;window.dcOpt=optChanged;window.dcGoto=gotoChange;
 window.dcSwap=swapSides;window.dcClearSide=clearSide;window.dcClearAll=clearAll;window.dcCopy=copySide;window.dcSample=loadSample;
 window.dcPick=pickFile;
